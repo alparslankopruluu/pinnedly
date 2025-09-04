@@ -200,47 +200,48 @@ function HomeContent() {
 }
 
 export default function HomeScreen() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState<boolean>(true);
+  // Temporarily commented out auth/onboarding checks to open app directly
+  // const { isAuthenticated, isLoading: authLoading } = useAuth();
+  // const [isCheckingOnboarding, setIsCheckingOnboarding] = useState<boolean>(true);
 
-  useEffect(() => {
-    const checkInitialRoute = async () => {
-      if (authLoading) return;
+  // useEffect(() => {
+  //   const checkInitialRoute = async () => {
+  //     if (authLoading) return;
 
-      try {
-        const onboardingCompleted = await AsyncStorage.getItem('onboardingCompleted');
+  //     try {
+  //       const onboardingCompleted = await AsyncStorage.getItem('onboardingCompleted');
         
-        if (!onboardingCompleted) {
-          // First time user - show onboarding
-          router.replace('/onboarding');
-          return;
-        } else if (!isAuthenticated) {
-          // User has seen onboarding but not authenticated - go to auth
-          router.replace('/(auth)/welcome');
-          return;
-        }
+  //       if (!onboardingCompleted) {
+  //         // First time user - show onboarding
+  //         router.replace('/onboarding');
+  //         return;
+  //       } else if (!isAuthenticated) {
+  //         // User has seen onboarding but not authenticated - go to auth
+  //         router.replace('/(auth)/welcome');
+  //         return;
+  //       }
         
-        // User is authenticated and has seen onboarding - show home
-        setIsCheckingOnboarding(false);
-      } catch (error) {
-        console.error('Failed to check onboarding status:', error);
-        // Fallback to onboarding on error
-        router.replace('/onboarding');
-      }
-    };
+  //       // User is authenticated and has seen onboarding - show home
+  //       setIsCheckingOnboarding(false);
+  //     } catch (error) {
+  //       console.error('Failed to check onboarding status:', error);
+  //       // Fallback to onboarding on error
+  //       router.replace('/onboarding');
+  //     }
+  //   };
 
-    checkInitialRoute();
-  }, [isAuthenticated, authLoading]);
+  //   checkInitialRoute();
+  // }, [isAuthenticated, authLoading]);
 
-  if (authLoading || isCheckingOnboarding) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // if (authLoading || isCheckingOnboarding) {
+  //   return (
+  //     <SafeAreaView style={styles.container}>
+  //       <View style={styles.loadingContainer}>
+  //         <Text style={styles.loadingText}>Loading...</Text>
+  //       </View>
+  //     </SafeAreaView>
+  //   );
+  // }
 
   return <HomeContent />;
 }
