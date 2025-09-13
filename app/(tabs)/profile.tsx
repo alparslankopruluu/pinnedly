@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
   User, 
   Bell, 
@@ -8,22 +8,48 @@ import {
   Download, 
   Upload, 
   Info,
-  ChevronRight 
+  ChevronRight,
+  Crown,
+  Sparkles 
 } from 'lucide-react-native';
 import { useAppStore } from '@/store/useAppStore';
+import { PremiumModal } from '@/components/PremiumModal';
 
 export default function ProfileScreen() {
   const { preferences, updatePreferences, bookmarks, projects, notes } = useAppStore();
+  const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
+  const insets = useSafeAreaInsets();
+  
+  const pulseAnim = useMemo(() => new Animated.Value(1), []);
+
+  React.useEffect(() => {
+    const pulse = () => {
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]).start(() => pulse());
+    };
+    pulse();
+  }, [pulseAnim]);
 
   const stats = [
-    { label: 'Bookmarks', value: bookmarks.length },
-    { label: 'Projects', value: projects.length },
-    { label: 'Notes', value: notes.length },
-    { label: 'Total Opens', value: bookmarks.reduce((sum, b) => sum + b.openCount, 0) },
+    { id: 'bookmarks', label: 'Bookmarks', value: bookmarks.length },
+    { id: 'projects', label: 'Projects', value: projects.length },
+    { id: 'notes', label: 'Notes', value: notes.length },
+    { id: 'opens', label: 'Total Opens', value: bookmarks.reduce((sum, b) => sum + b.openCount, 0) },
   ];
 
   const settingsItems = [
     {
+      id: 'notifications',
       icon: <Bell size={20} color="#6B7280" />,
       title: 'Notifications',
       subtitle: 'Daily reminders and nudges',
@@ -37,24 +63,28 @@ export default function ProfileScreen() {
       ),
     },
     {
+      id: 'theme',
       icon: <Palette size={20} color="#6B7280" />,
       title: 'Theme',
       subtitle: 'Light mode',
       action: <ChevronRight size={20} color="#9CA3AF" />,
     },
     {
+      id: 'export',
       icon: <Download size={20} color="#6B7280" />,
       title: 'Export Data',
       subtitle: 'Download your data as JSON',
       action: <ChevronRight size={20} color="#9CA3AF" />,
     },
     {
+      id: 'import',
       icon: <Upload size={20} color="#6B7280" />,
       title: 'Import Data',
       subtitle: 'Restore from backup',
       action: <ChevronRight size={20} color="#9CA3AF" />,
     },
     {
+      id: 'about',
       icon: <Info size={20} color="#6B7280" />,
       title: 'About',
       subtitle: 'Version 1.0.0',
@@ -63,7 +93,7 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
@@ -82,8 +112,8 @@ export default function ProfileScreen() {
         <View style={styles.statsSection}>
           <Text style={styles.sectionTitle}>Your Stats</Text>
           <View style={styles.statsGrid}>
-            {stats.map((stat, index) => (
-              <View key={index} style={styles.statCard}>
+            {stats.map((stat) => (
+              <View key={stat.id} style={styles.statCard}>
                 <Text style={styles.statValue}>{stat.value}</Text>
                 <Text style={styles.statLabel}>{stat.label}</Text>
               </View>
@@ -104,11 +134,35 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Premium CTA Section */}
+        <View style={styles.section}>
+          <Animated.View style={[styles.premiumCTA, { transform: [{ scale: pulseAnim }] }]}>
+            <TouchableOpacity
+              style={styles.premiumButton}
+              onPress={() => setShowPremiumModal(true)}
+            >
+              <View style={styles.premiumContent}>
+                <View style={styles.premiumLeft}>
+                  <View style={styles.premiumIconContainer}>
+                    <Crown size={24} color="#FFFFFF" />
+                    <Sparkles size={16} color="#FFFFFF" style={styles.sparkleIcon} />
+                  </View>
+                  <View style={styles.premiumText}>
+                    <Text style={styles.premiumTitle}>Upgrade to Premium</Text>
+                    <Text style={styles.premiumSubtitle}>Unlock powerful collaboration features</Text>
+                  </View>
+                </View>
+                <ChevronRight size={20} color="#FFFFFF" />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+
         {/* Settings Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
-          {settingsItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.settingItem}>
+          {settingsItems.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.settingItem}>
               <View style={styles.settingIcon}>{item.icon}</View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>{item.title}</Text>
@@ -119,7 +173,13 @@ export default function ProfileScreen() {
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+      
+      {/* Premium Modal */}
+      <PremiumModal
+        visible={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
+    </View>
   );
 }
 
@@ -274,5 +334,51 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     color: '#6B7280',
+  },
+  premiumCTA: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+  },
+  premiumButton: {
+    backgroundColor: '#6366F1',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  premiumContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  premiumLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  premiumIconContainer: {
+    position: 'relative',
+    marginRight: 16,
+  },
+  sparkleIcon: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+  },
+  premiumText: {
+    flex: 1,
+  },
+  premiumTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  premiumSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
 });

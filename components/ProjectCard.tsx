@@ -1,18 +1,37 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
 import { Project } from '@/types';
 import { ProgressRing } from './ui/ProgressRing';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
+import { Edit3 } from 'lucide-react-native';
 
 interface ProjectCardProps {
   project: Project;
   onPress: () => void;
+  onEdit?: () => void;
 }
 
-export function ProjectCard({ project, onPress }: ProjectCardProps) {
+export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
   const completedTasks = project.tasks.filter((task) => task.status === 'done').length;
   const totalTasks = project.tasks.length;
   const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
+  const scaleAnim = new Animated.Value(1);
+
+  const handleEditPress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    onEdit?.();
+  };
 
   const getDeadlineChip = () => {
     if (!project.deadline) return null;
@@ -69,7 +88,20 @@ export function ProjectCard({ project, onPress }: ProjectCardProps) {
             </Text>
           </View>
           
-          <ProgressRing progress={progress} />
+          <View style={styles.headerRight}>
+            <ProgressRing progress={progress} />
+            {onEdit && (
+              <Animated.View style={[styles.editButtonContainer, { transform: [{ scale: scaleAnim }] }]}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={handleEditPress}
+                  hitSlop={styles.editButtonHitSlop}
+                >
+                  <Edit3 size={16} color="#6366F1" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+          </View>
         </View>
         
         {project.description && (
@@ -111,6 +143,33 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  editButtonContainer: {
+    // Container for animated transform
+  },
+  editButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EEF2FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  editButtonHitSlop: {
+    top: 8,
+    bottom: 8,
+    left: 8,
+    right: 8,
   },
   titleContainer: {
     flex: 1,

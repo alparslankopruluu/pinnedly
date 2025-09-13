@@ -38,6 +38,7 @@ import {
   Send,
 } from 'lucide-react-native';
 import { notificationService } from '@/utils/notifications';
+import { ProjectMembersModal } from '@/components/ProjectMembersModal';
 
 const { width } = Dimensions.get('window');
 
@@ -63,6 +64,7 @@ export default function ProjectDetailScreen() {
   const [editTitle, setEditTitle] = useState<string>('');
   const [editDescription, setEditDescription] = useState<string>('');
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showMembersModal, setShowMembersModal] = useState<boolean>(false);
 
   const {
     projects,
@@ -267,9 +269,11 @@ export default function ProjectDetailScreen() {
       setEditTitle(project.title);
       setEditDescription(project.description || '');
       setShowEditModal(true);
-      // Also load project members when editing
-      loadProjectMembers(project.id);
     }
+  };
+
+  const handleShowMembers = () => {
+    setShowMembersModal(true);
   };
 
   const handleSaveEdit = () => {
@@ -659,7 +663,7 @@ export default function ProjectDetailScreen() {
               )}
               
               <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+                <TouchableOpacity style={styles.editButton} onPress={handleShowMembers}>
                   <Users size={16} color="#6B7280" />
                   <Text style={styles.editButtonText}>Members</Text>
                 </TouchableOpacity>
@@ -875,6 +879,14 @@ export default function ProjectDetailScreen() {
             </View>
           </View>
         </Modal>
+
+        {/* Project Members Modal */}
+        <ProjectMembersModal
+          visible={showMembersModal}
+          onClose={() => setShowMembersModal(false)}
+          projectId={project.id}
+          projectTitle={project.title}
+        />
       </View>
     </>
   );

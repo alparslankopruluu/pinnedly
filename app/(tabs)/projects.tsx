@@ -43,6 +43,11 @@ export default function ProjectsScreen() {
     <ProjectCard
       project={item}
       onPress={() => router.push(`/project/${item.id}` as any)}
+      onEdit={() => {
+        // Navigate to edit project screen or show edit modal
+        console.log('Edit project:', item.id);
+        // You could implement a quick edit modal here or navigate to edit screen
+      }}
     />
   );
 
