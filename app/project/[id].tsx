@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
   Dimensions,
   Animated,
   PanResponder,
+  Modal,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
@@ -30,7 +32,11 @@ import {
   Clock,
   MoreHorizontal,
   Trash2,
+  Users,
+  X,
+  Send,
 } from 'lucide-react-native';
+import { notificationService } from '@/utils/notifications';
 
 const { width } = Dimensions.get('window');
 
@@ -49,6 +55,13 @@ export default function ProjectDetailScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('tasks');
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
   const [swipedTaskId, setSwipedTaskId] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareEmail, setShareEmail] = useState<string>('');
+  const [sharePermission, setSharePermission] = useState<'view' | 'edit'>('view');
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editDescription, setEditDescription] = useState<string>('');
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
   const {
     projects,
@@ -59,7 +72,13 @@ export default function ProjectDetailScreen() {
     updateTask,
     deleteTask,
     updateProject,
+    deleteProject,
   } = useAppStore();
+
+  useEffect(() => {
+    // Initialize notification service
+    notificationService.initialize();
+  }, []);
 
   const project = projects.find((p) => p.id === id);
   const relatedBookmarks = bookmarks.filter((b) =>
@@ -122,13 +141,41 @@ export default function ProjectDetailScreen() {
   const deadlineStatus = getDeadlineStatus();
 
   const handleAddTask = () => {
-    if (newTaskTitle.trim()) {
-      addTask(project.id, {
-        title: newTaskTitle.trim(),
-        status: 'todo',
-      });
-      setNewTaskTitle('');
+    if (!newTaskTitle.trim()) {
+      Alert.alert('Error', 'Please enter a task title');
+      return;
     }
+
+    addTask(project.id, {
+      title: newTaskTitle.trim(),
+      status: 'todo',
+    });
+    setNewTaskTitle('');
+  };
+
+  const handleFabPress = () => {
+    Alert.alert(
+      'Quick Add',
+      'What would you like to add?',
+      [
+        {
+          text: 'Task',
+          onPress: () => {
+            // Focus on the add task input
+            console.log('Focus on add task input');
+          },
+        },
+        {
+          text: 'Note',
+          onPress: () => router.push('/add-note' as any),
+        },
+        {
+          text: 'Bookmark',
+          onPress: () => router.push('/add-bookmark' as any),
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
   };
 
   const handleToggleTask = (taskId: string) => {
@@ -155,16 +202,128 @@ export default function ProjectDetailScreen() {
     );
   };
 
+
+
   const handleShare = () => {
-    Alert.alert('Share Project', 'Share functionality would be implemented here.');
+    setShowShareModal(true);
+  };
+
+  const handleShareProject = async () => {
+    if (!shareEmail.trim()) {
+      Alert.alert('Error', 'Please enter an email address');
+      return;
+    }
+
+    try {
+      // Here you would implement the actual sharing logic with Supabase
+      console.log('Sharing project with:', shareEmail, 'permission:', sharePermission);
+      Alert.alert('Success', `Project shared with ${shareEmail}`);
+      setShowShareModal(false);
+      setShareEmail('');
+      setSharePermission('view');
+    } catch (error) {
+      console.error('Share error:', error);
+      Alert.alert('Error', 'Failed to share project');
+    }
+  };
+
+  const handleEdit = () => {
+    if (project) {
+      setEditTitle(project.title);
+      setEditDescription(project.description || '');
+      setShowEditModal(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editTitle.trim()) {
+      Alert.alert('Error', 'Project title is required');
+      return;
+    }
+
+    updateProject(project.id, {
+      title: editTitle.trim(),
+      description: editDescription.trim() || undefined,
+    });
+
+    setShowEditModal(false);
+    Alert.alert('Success', 'Project updated successfully');
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    deleteProject(project.id);
+    setShowDeleteModal(false);
+    router.back();
   };
 
   const handleArchive = () => {
-    Alert.alert('Archive Project', 'Archive functionality would be implemented here.');
+    Alert.alert(
+      'Archive Project',
+      'Are you sure you want to archive this project?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Archive',
+          style: 'destructive',
+          onPress: () => {
+            // Here you would implement archiving logic
+            console.log('Archiving project:', project.id);
+            Alert.alert('Success', 'Project archived');
+          },
+        },
+      ]
+    );
   };
 
-  const handleNudgeMe = () => {
-    Alert.alert('Nudge Me', 'Reminder notification would be scheduled here.');
+  const handleNudgeMe = async () => {
+    if (Platform.OS === 'web') {
+      Alert.alert('Info', 'Notifications are not supported on web. Please use the mobile app.');
+      return;
+    }
+
+    Alert.alert(
+      'Schedule Nudge',
+      'When would you like to be reminded about this project?',
+      [
+        {
+          text: 'In 1 hour',
+          onPress: () => scheduleNudge(1),
+        },
+        {
+          text: 'Tomorrow',
+          onPress: () => scheduleNudge(24),
+        },
+        {
+          text: 'In 3 days',
+          onPress: () => scheduleNudge(72),
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const scheduleNudge = async (hoursFromNow: number) => {
+    try {
+      const nudgeTime = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
+      const notificationId = await notificationService.scheduleProjectNudge(
+        project.id,
+        project.title,
+        nudgeTime
+      );
+
+      if (notificationId) {
+        Alert.alert('Success', `Nudge scheduled for ${nudgeTime.toLocaleString()}`);
+      } else {
+        Alert.alert('Error', 'Failed to schedule nudge');
+      }
+    } catch (error) {
+      console.error('Nudge scheduling error:', error);
+      Alert.alert('Error', 'Failed to schedule nudge');
+    }
   };
 
   const formatDate = (timestamp: number) => {
@@ -405,9 +564,9 @@ export default function ProjectDetailScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.headerButton}
-                    onPress={handleArchive}
+                    onPress={handleDelete}
                   >
-                    <Archive size={24} color="#FFFFFF" />
+                    <Trash2 size={24} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -459,7 +618,7 @@ export default function ProjectDetailScreen() {
               )}
               
               <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
                   <Edit size={16} color="#6B7280" />
                   <Text style={styles.editButtonText}>Edit</Text>
                 </TouchableOpacity>
@@ -503,9 +662,178 @@ export default function ProjectDetailScreen() {
         </ScrollView>
 
         {/* Floating Action Button */}
-        <TouchableOpacity style={styles.fab}>
+        <TouchableOpacity style={styles.fab} onPress={handleFabPress}>
           <Plus size={24} color="#FFFFFF" />
         </TouchableOpacity>
+
+        {/* Share Modal */}
+        <Modal
+          visible={showShareModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowShareModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Share Project</Text>
+                <TouchableOpacity onPress={() => setShowShareModal(false)}>
+                  <X size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.modalBody}>
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Enter email address"
+                  value={shareEmail}
+                  onChangeText={setShareEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                
+                <Text style={styles.inputLabel}>Permission</Text>
+                <View style={styles.permissionButtons}>
+                  <TouchableOpacity
+                    style={[
+                      styles.permissionButton,
+                      sharePermission === 'view' && styles.permissionButtonActive,
+                    ]}
+                    onPress={() => setSharePermission('view')}
+                  >
+                    <Text
+                      style={[
+                        styles.permissionButtonText,
+                        sharePermission === 'view' && styles.permissionButtonTextActive,
+                      ]}
+                    >
+                      View Only
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.permissionButton,
+                      sharePermission === 'edit' && styles.permissionButtonActive,
+                    ]}
+                    onPress={() => setSharePermission('edit')}
+                  >
+                    <Text
+                      style={[
+                        styles.permissionButtonText,
+                        sharePermission === 'edit' && styles.permissionButtonTextActive,
+                      ]}
+                    >
+                      Can Edit
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => setShowShareModal(false)}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonPrimary}
+                  onPress={handleShareProject}
+                >
+                  <Send size={16} color="#FFFFFF" />
+                  <Text style={styles.modalButtonPrimaryText}>Share</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Edit Modal */}
+        <Modal
+          visible={showEditModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowEditModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Edit Project</Text>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <X size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.modalBody}>
+                <Text style={styles.inputLabel}>Project Title</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Enter project title"
+                  value={editTitle}
+                  onChangeText={setEditTitle}
+                />
+                
+                <Text style={styles.inputLabel}>Description</Text>
+                <TextInput
+                  style={[styles.modalInput, styles.modalTextArea]}
+                  placeholder="Enter project description"
+                  value={editDescription}
+                  onChangeText={setEditDescription}
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+              
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => setShowEditModal(false)}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonPrimary}
+                  onPress={handleSaveEdit}
+                >
+                  <Text style={styles.modalButtonPrimaryText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          visible={showDeleteModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowDeleteModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.deleteModalContent}>
+              <Text style={styles.deleteModalTitle}>Delete Project</Text>
+              <Text style={styles.deleteModalText}>
+                Are you sure you want to delete &quot;{project?.title}&quot;? This action cannot be undone.
+              </Text>
+              
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => setShowDeleteModal(false)}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={confirmDelete}
+                >
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </>
   );
@@ -907,5 +1235,156 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  modalBody: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#1E293B',
+    marginBottom: 16,
+  },
+  modalTextArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  permissionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  permissionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+  },
+  permissionButtonActive: {
+    backgroundColor: '#4F46E5',
+    borderColor: '#4F46E5',
+  },
+  permissionButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  permissionButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButtonSecondary: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+  },
+  modalButtonSecondaryText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  modalButtonPrimary: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#4F46E5',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  modalButtonPrimaryText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  deleteModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 350,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  deleteModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#EF4444',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  deleteModalText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#EF4444',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

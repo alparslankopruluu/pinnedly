@@ -53,7 +53,7 @@ export default function PublicListsScreen() {
   const renderListItem = ({ item }: { item: BookmarkList }) => (
     <TouchableOpacity
       style={styles.listItem}
-      onPress={() => router.push(`/bookmark-list/${item.id}`)}
+      onPress={() => router.push(`/bookmark-list/${item.id}` as any)}
     >
       <View style={styles.listHeader}>
         <View style={styles.listInfo}>
@@ -97,7 +97,7 @@ export default function PublicListsScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>Discover Lists</Text>
         <TouchableOpacity
-          onPress={() => router.push('/create-list')}
+          onPress={() => router.push('/create-list' as any)}
           style={styles.createButton}
         >
           <Plus size={24} color="#4f46e5" />
@@ -142,7 +142,7 @@ export default function PublicListsScreen() {
             {!searchQuery.trim() && (
               <Button
                 title="Create List"
-                onPress={() => router.push('/create-list')}
+                onPress={() => router.push('/create-list' as any)}
                 style={styles.createListButton}
               />
             )}
