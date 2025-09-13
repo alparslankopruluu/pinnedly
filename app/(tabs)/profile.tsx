@@ -74,7 +74,7 @@ export default function ProfileScreen() {
           <View style={styles.avatar}>
             <User size={32} color="#6B7280" />
           </View>
-          <Text style={styles.profileName}>Pin & Progress User</Text>
+          <Text style={styles.profileName}>Pinnedly User</Text>
           <Text style={styles.profileEmail}>Keep your knowledge organized</Text>
         </View>
 

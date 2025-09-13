@@ -32,7 +32,7 @@ export default function Welcome() {
             source={{ uri: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=120&h=120&fit=crop' }}
             style={styles.logo}
           />
-          <Text style={styles.title}>Pin & Progress</Text>
+          <Text style={styles.title}>Pinnedly</Text>
           <Text style={styles.subtitle}>
             Save bookmarks, track projects, and never lose important content again
           </Text>

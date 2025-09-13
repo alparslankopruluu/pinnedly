@@ -30,7 +30,7 @@ const onboardingScreens: OnboardingScreen[] = [
     id: '1',
     illustration: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face',
     headline: 'Save what matters, don\'t forget again.',
-    body: 'Pin & Progress helps you effortlessly add bookmarks, create notes, and manage projects to stay on top of everything.',
+    body: 'Pinnedly helps you effortlessly add bookmarks, create notes, and manage projects to stay on top of everything.',
     ctaText: 'Get Started',
   },
   {
