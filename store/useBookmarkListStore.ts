@@ -93,9 +93,15 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     return bookmarkListRepository.getListById(id);
   }, []);
 
-  const isFollowingList = useCallback(async (listId: ID): Promise<boolean> => {
-    return bookmarkListRepository.isFollowingList(listId);
+  const getBookmarksByListId = useCallback(async (listId: ID): Promise<any[]> => {
+    // TODO: Implement this method in the repository
+    return [];
   }, []);
+
+  const isFollowingList = useCallback((listId: ID): boolean => {
+    // Check if the list is in the followed lists
+    return followedListsQuery.data?.some(list => list.id === listId) || false;
+  }, [followedListsQuery.data]);
 
   const searchLists = useCallback((query: string) => {
     setSearchQuery(query);
@@ -110,6 +116,7 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     searchQuery,
 
     // Loading states
+    isLoading: myListsQuery.isLoading || publicListsQuery.isLoading,
     isLoadingMyLists: myListsQuery.isLoading,
     isLoadingPublicLists: publicListsQuery.isLoading,
     isLoadingFollowedLists: followedListsQuery.isLoading,
@@ -129,6 +136,7 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     followList,
     unfollowList,
     getListById,
+    getBookmarksByListId,
     isFollowingList,
     searchLists,
 
@@ -157,6 +165,7 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     followList,
     unfollowList,
     getListById,
+    getBookmarksByListId,
     isFollowingList,
     searchLists,
     myListsQuery.refetch,

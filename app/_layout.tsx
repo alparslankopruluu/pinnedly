@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "@/store/useAuthStore";
 import { SocialProvider } from "@/store/useSocialStore";
 import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
+import { BookmarkListProvider } from "@/store/useBookmarkListStore";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -39,6 +40,9 @@ function RootLayoutNav() {
           <Stack.Screen name="profile/[id]" />
           <Stack.Screen name="share-inbox" options={{ title: "Share Inbox" }} />
           <Stack.Screen name="people-search" options={{ presentation: "modal", title: "Find People" }} />
+          <Stack.Screen name="discover-lists" options={{ title: "Discover Lists" }} />
+          <Stack.Screen name="create-list" options={{ presentation: "modal", title: "Create List" }} />
+          <Stack.Screen name="bookmark-list/[id]" options={{ title: "Bookmark List" }} />
         </>
       )}
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
@@ -57,9 +61,11 @@ export default function RootLayout() {
         <AuthProvider>
           <OnboardingProvider>
             <SocialProvider>
-              <GestureHandlerRootView style={styles.container}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
+              <BookmarkListProvider>
+                <GestureHandlerRootView style={styles.container}>
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
+              </BookmarkListProvider>
             </SocialProvider>
           </OnboardingProvider>
         </AuthProvider>
