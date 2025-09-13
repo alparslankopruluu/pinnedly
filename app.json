@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Pin & Progress: Bookmarks, Notes, and Project Tracking App",
-    "slug": "pin-progress-bookmarks-notes-project-tracking",
+    "name": "Pinnedly",
+    "slug": "pinnedly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "pinnedly",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.rork.pin-progress-bookmarks-notes-project-tracking",
+      "bundleIdentifier": "app.techtactoe.pinnedly",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.pin-progress-bookmarks-notes-project-tracking",
+      "package": "app.techtactoe.pinnedly",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
