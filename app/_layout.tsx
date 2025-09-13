@@ -6,6 +6,7 @@ import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "@/store/useAuthStore";
 import { SocialProvider } from "@/store/useSocialStore";
+import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -13,9 +14,10 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isCompleted: onboardingCompleted, isLoading: onboardingLoading } = useOnboarding();
 
-  if (isLoading) {
+  if (authLoading || onboardingLoading) {
     return null; // Or a loading screen
   }
 
@@ -23,6 +25,8 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       {!isAuthenticated ? (
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      ) : !onboardingCompleted ? (
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       ) : (
         <>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -51,11 +55,13 @@ export default function RootLayout() {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <SocialProvider>
-            <GestureHandlerRootView style={styles.container}>
-              <RootLayoutNav />
-            </GestureHandlerRootView>
-          </SocialProvider>
+          <OnboardingProvider>
+            <SocialProvider>
+              <GestureHandlerRootView style={styles.container}>
+                <RootLayoutNav />
+              </GestureHandlerRootView>
+            </SocialProvider>
+          </OnboardingProvider>
         </AuthProvider>
       </QueryClientProvider>
     </trpc.Provider>

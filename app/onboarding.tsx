@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button } from '@/components/ui/Button';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useOnboarding } from '@/store/useOnboardingStore';
+import { useAuth } from '@/store/useAuthStore';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -57,8 +58,16 @@ const onboardingScreens: OnboardingScreen[] = [
 ];
 
 export default function Onboarding() {
+  const { isAuthenticated } = useAuth();
+  const { completeOnboarding, skipOnboarding } = useOnboarding();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const flatListRef = useRef<FlatList<OnboardingScreen>>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/(auth)/welcome');
+    }
+  }, [isAuthenticated]);
 
   const handleNext = useCallback(async () => {
     if (currentIndex < onboardingScreens.length - 1) {
@@ -67,21 +76,31 @@ export default function Onboarding() {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
     } else {
       // Last screen - complete onboarding
-      await completeOnboarding();
+      await handleCompleteOnboarding();
     }
   }, [currentIndex]);
 
   const handleSkip = useCallback(async () => {
-    await completeOnboarding();
+    await handleSkipOnboarding();
   }, []);
 
-  const completeOnboarding = async () => {
+  const handleCompleteOnboarding = async () => {
     try {
-      await AsyncStorage.setItem('onboardingCompleted', 'true');
-      router.replace('/(auth)/welcome');
+      completeOnboarding();
+      router.replace('/(tabs)');
     } catch (error) {
-      console.error('Failed to save onboarding completion:', error);
-      router.replace('/(auth)/welcome');
+      console.error('Failed to complete onboarding:', error);
+      router.replace('/(tabs)');
+    }
+  };
+
+  const handleSkipOnboarding = async () => {
+    try {
+      skipOnboarding();
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Failed to skip onboarding:', error);
+      router.replace('/(tabs)');
     }
   };
 

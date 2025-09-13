@@ -54,6 +54,58 @@ export type Database = {
           updated_at?: string;
         };
       };
+      bookmark_lists: {
+        Row: {
+          id: string;
+          name: string;
+          description?: string;
+          is_public: boolean;
+          owner_id: string;
+          follower_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string;
+          is_public?: boolean;
+          owner_id: string;
+          follower_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string;
+          is_public?: boolean;
+          owner_id?: string;
+          follower_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      list_followers: {
+        Row: {
+          id: string;
+          list_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          list_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          list_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+      };
       shares: {
         Row: {
           id: string;

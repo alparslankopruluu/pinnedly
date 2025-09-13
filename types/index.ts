@@ -159,3 +159,35 @@ export type ShareRequest = {
   userEmail: string;
   permission: SharePermission;
 };
+
+export type OnboardingStep = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+};
+
+export type BookmarkList = {
+  id: ID;
+  name: string;
+  description?: string;
+  isPublic: boolean;
+  ownerId: ID;
+  followerCount: number;
+  bookmarks: Bookmark[];
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type ListFollower = {
+  id: ID;
+  listId: ID;
+  userId: ID;
+  createdAt: number;
+};
+
+export type OnboardingState = {
+  isCompleted: boolean;
+  currentStep: number;
+  hasSeenWelcome: boolean;
+};
