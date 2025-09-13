@@ -1,24 +1,19 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Animated } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { router } from 'expo-router';
 import { 
   User, 
-  Bell, 
-  Palette, 
-  Download, 
-  Upload, 
-  Info,
   ChevronRight,
   Crown,
-  Sparkles 
+  Sparkles,
+  Settings 
 } from 'lucide-react-native';
 import { useAppStore } from '@/store/useAppStore';
 import { PremiumModal } from '@/components/PremiumModal';
 
 export default function ProfileScreen() {
-  const { preferences, updatePreferences, bookmarks, projects, notes } = useAppStore();
+  const { preferences, bookmarks, projects, notes } = useAppStore();
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
-  const insets = useSafeAreaInsets();
   
   const pulseAnim = useMemo(() => new Animated.Value(1), []);
 
@@ -47,57 +42,9 @@ export default function ProfileScreen() {
     { id: 'opens', label: 'Total Opens', value: bookmarks.reduce((sum, b) => sum + b.openCount, 0) },
   ];
 
-  const settingsItems = [
-    {
-      id: 'notifications',
-      icon: <Bell size={20} color="#6B7280" />,
-      title: 'Notifications',
-      subtitle: 'Daily reminders and nudges',
-      action: (
-        <Switch
-          value={preferences.notificationsEnabled}
-          onValueChange={(value) => updatePreferences({ notificationsEnabled: value })}
-          trackColor={{ false: '#F3F4F6', true: '#FEE2E2' }}
-          thumbColor={preferences.notificationsEnabled ? '#EF4444' : '#9CA3AF'}
-        />
-      ),
-    },
-    {
-      id: 'theme',
-      icon: <Palette size={20} color="#6B7280" />,
-      title: 'Theme',
-      subtitle: 'Light mode',
-      action: <ChevronRight size={20} color="#9CA3AF" />,
-    },
-    {
-      id: 'export',
-      icon: <Download size={20} color="#6B7280" />,
-      title: 'Export Data',
-      subtitle: 'Download your data as JSON',
-      action: <ChevronRight size={20} color="#9CA3AF" />,
-    },
-    {
-      id: 'import',
-      icon: <Upload size={20} color="#6B7280" />,
-      title: 'Import Data',
-      subtitle: 'Restore from backup',
-      action: <ChevronRight size={20} color="#9CA3AF" />,
-    },
-    {
-      id: 'about',
-      icon: <Info size={20} color="#6B7280" />,
-      title: 'About',
-      subtitle: 'Version 1.0.0',
-      action: <ChevronRight size={20} color="#9CA3AF" />,
-    },
-  ];
-
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-        </View>
 
         {/* Profile Section */}
         <View style={styles.profileSection}>
@@ -158,19 +105,21 @@ export default function ProfileScreen() {
           </Animated.View>
         </View>
 
-        {/* Settings Section */}
+        {/* Settings Row */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
-          {settingsItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.settingItem}>
-              <View style={styles.settingIcon}>{item.icon}</View>
-              <View style={styles.settingContent}>
-                <Text style={styles.settingTitle}>{item.title}</Text>
-                <Text style={styles.settingSubtitle}>{item.subtitle}</Text>
-              </View>
-              {item.action}
-            </TouchableOpacity>
-          ))}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={() => router.push('/settings')}
+          >
+            <View style={styles.settingIcon}>
+              <Settings size={20} color="#6B7280" />
+            </View>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingTitle}>Settings</Text>
+              <Text style={styles.settingSubtitle}>Manage your preferences and account</Text>
+            </View>
+            <ChevronRight size={20} color="#9CA3AF" />
+          </TouchableOpacity>
         </View>
       </ScrollView>
       
