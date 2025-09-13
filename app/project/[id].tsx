@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
+import { useProjectStore } from '@/store/useProjectStore';
 import { Task, ID } from '@/types';
 import {
   ArrowLeft,
@@ -68,19 +69,36 @@ export default function ProjectDetailScreen() {
     bookmarks,
     notes,
     activities,
-    addTask,
-    updateTask,
-    deleteTask,
     updateProject,
     deleteProject,
   } = useAppStore();
 
+  const {
+    currentProject,
+    projectMembers,
+    isCreatingTask,
+    isUpdatingTask,
+    error: projectError,
+    loadProject,
+    createTask,
+    updateTask,
+    deleteTask,
+    loadProjectMembers,
+    clearError,
+  } = useProjectStore();
+
   useEffect(() => {
     // Initialize notification service
     notificationService.initialize();
-  }, []);
+    
+    // Load project data from Supabase
+    if (id) {
+      loadProject(id);
+    }
+  }, [id, loadProject]);
 
-  const project = projects.find((p) => p.id === id);
+  // Use currentProject from store if available, fallback to local projects
+  const project = currentProject || projects.find((p) => p.id === id);
   const relatedBookmarks = bookmarks.filter((b) =>
     notes.some((n) => n.links.some((l) => l.type === 'project' && l.id === id))
   );
@@ -140,17 +158,22 @@ export default function ProjectDetailScreen() {
 
   const deadlineStatus = getDeadlineStatus();
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!newTaskTitle.trim()) {
       Alert.alert('Error', 'Please enter a task title');
       return;
     }
 
-    addTask(project.id, {
-      title: newTaskTitle.trim(),
-      status: 'todo',
-    });
-    setNewTaskTitle('');
+    try {
+      await createTask(project.id, {
+        title: newTaskTitle.trim(),
+        status: 'todo',
+      });
+      setNewTaskTitle('');
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      Alert.alert('Error', 'Failed to create task');
+    }
   };
 
   const handleFabPress = () => {
@@ -178,12 +201,17 @@ export default function ProjectDetailScreen() {
     );
   };
 
-  const handleToggleTask = (taskId: string) => {
+  const handleToggleTask = async (taskId: string) => {
     const task = project.tasks.find((t) => t.id === taskId);
     if (task) {
-      updateTask(taskId, {
-        status: task.status === 'done' ? 'todo' : 'done',
-      });
+      try {
+        await updateTask(taskId, {
+          status: task.status === 'done' ? 'todo' : 'done',
+        });
+      } catch (error) {
+        console.error('Failed to update task:', error);
+        Alert.alert('Error', 'Failed to update task');
+      }
     }
   };
 
@@ -196,7 +224,14 @@ export default function ProjectDetailScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => deleteTask(taskId),
+          onPress: async () => {
+            try {
+              await deleteTask(taskId);
+            } catch (error) {
+              console.error('Failed to delete task:', error);
+              Alert.alert('Error', 'Failed to delete task');
+            }
+          },
         },
       ]
     );
@@ -232,6 +267,8 @@ export default function ProjectDetailScreen() {
       setEditTitle(project.title);
       setEditDescription(project.description || '');
       setShowEditModal(true);
+      // Also load project members when editing
+      loadProjectMembers(project.id);
     }
   };
 
@@ -430,7 +467,11 @@ export default function ProjectDetailScreen() {
                   onChangeText={setNewTaskTitle}
                   onSubmitEditing={handleAddTask}
                   returnKeyType="done"
+                  editable={!isCreatingTask}
                 />
+                {isCreatingTask && (
+                  <Text style={styles.loadingText}>Adding...</Text>
+                )}
               </View>
               
               {project.tasks.length > 0 && (
@@ -619,8 +660,8 @@ export default function ProjectDetailScreen() {
               
               <View style={styles.actionButtons}>
                 <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-                  <Edit size={16} color="#6B7280" />
-                  <Text style={styles.editButtonText}>Edit</Text>
+                  <Users size={16} color="#6B7280" />
+                  <Text style={styles.editButtonText}>Members</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity
@@ -1092,6 +1133,11 @@ const styles = StyleSheet.create({
     color: '#1E293B',
     marginLeft: 8,
     padding: 4,
+  },
+  loadingText: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontStyle: 'italic',
   },
   swipeHint: {
     fontSize: 12,

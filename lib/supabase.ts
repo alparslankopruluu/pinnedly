@@ -54,6 +54,184 @@ export type Database = {
           updated_at?: string;
         };
       };
+      projects: {
+        Row: {
+          id: string;
+          title: string;
+          description?: string;
+          cover_image?: string;
+          deadline?: string;
+          owner_id: string;
+          visibility: 'private' | 'public' | 'unlisted';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string;
+          cover_image?: string;
+          deadline?: string;
+          owner_id: string;
+          visibility?: 'private' | 'public' | 'unlisted';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          cover_image?: string;
+          deadline?: string;
+          owner_id?: string;
+          visibility?: 'private' | 'public' | 'unlisted';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      tasks: {
+        Row: {
+          id: string;
+          title: string;
+          status: 'todo' | 'in-progress' | 'done';
+          due_date?: string;
+          notes?: string;
+          project_id: string;
+          assigned_to?: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          status?: 'todo' | 'in-progress' | 'done';
+          due_date?: string;
+          notes?: string;
+          project_id: string;
+          assigned_to?: string;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          status?: 'todo' | 'in-progress' | 'done';
+          due_date?: string;
+          notes?: string;
+          project_id?: string;
+          assigned_to?: string;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      project_members: {
+        Row: {
+          id: string;
+          project_id: string;
+          user_id: string;
+          role: 'owner' | 'admin' | 'member';
+          permission: 'view' | 'edit';
+          invited_by: string;
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          user_id: string;
+          role?: 'owner' | 'admin' | 'member';
+          permission?: 'view' | 'edit';
+          invited_by: string;
+          joined_at?: string;
+        };
+        Update: {
+          id?: string;
+          project_id?: string;
+          user_id?: string;
+          role?: 'owner' | 'admin' | 'member';
+          permission?: 'view' | 'edit';
+          invited_by?: string;
+          joined_at?: string;
+        };
+      };
+      bookmarks: {
+        Row: {
+          id: string;
+          url?: string;
+          title?: string;
+          description?: string;
+          image_preview?: string;
+          screenshot_uri?: string;
+          open_count: number;
+          last_opened_at?: string;
+          source?: string;
+          owner_id: string;
+          visibility: 'private' | 'public' | 'unlisted';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          url?: string;
+          title?: string;
+          description?: string;
+          image_preview?: string;
+          screenshot_uri?: string;
+          open_count?: number;
+          last_opened_at?: string;
+          source?: string;
+          owner_id: string;
+          visibility?: 'private' | 'public' | 'unlisted';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          url?: string;
+          title?: string;
+          description?: string;
+          image_preview?: string;
+          screenshot_uri?: string;
+          open_count?: number;
+          last_opened_at?: string;
+          source?: string;
+          owner_id?: string;
+          visibility?: 'private' | 'public' | 'unlisted';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      notes: {
+        Row: {
+          id: string;
+          title: string;
+          markdown: string;
+          owner_id: string;
+          visibility: 'private' | 'public' | 'unlisted';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          markdown: string;
+          owner_id: string;
+          visibility?: 'private' | 'public' | 'unlisted';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          markdown?: string;
+          owner_id?: string;
+          visibility?: 'private' | 'public' | 'unlisted';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       bookmark_lists: {
         Row: {
           id: string;
