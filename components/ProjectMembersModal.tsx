@@ -1,1 +1,582 @@
-import React, { useState, useEffect } from 'react';\nimport {\n  View,\n  Text,\n  StyleSheet,\n  Modal,\n  TouchableOpacity,\n  TextInput,\n  FlatList,\n  Alert,\n} from 'react-native';\nimport { X, Users, Plus, Trash2, UserCheck, UserX } from 'lucide-react-native';\nimport { useProjectStore } from '@/store/useProjectStore';\nimport { ProjectCollaborator, User } from '@/types';\n\ninterface ProjectMembersModalProps {\n  visible: boolean;\n  onClose: () => void;\n  projectId: string;\n  projectTitle: string;\n}\n\nexport function ProjectMembersModal({ \n  visible, \n  onClose, \n  projectId, \n  projectTitle \n}: ProjectMembersModalProps) {\n  const [newUserEmail, setNewUserEmail] = useState<string>('');\n  const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view');\n  const [showAddForm, setShowAddForm] = useState<boolean>(false);\n\n  const {\n    projectMembers,\n    searchResults,\n    isManagingMembers,\n    error,\n    loadProjectMembers,\n    addProjectMember,\n    removeProjectMember,\n    updateMemberPermission,\n    searchUsers,\n    clearError,\n    clearSearchResults,\n  } = useProjectStore();\n\n  useEffect(() => {\n    if (visible) {\n      loadProjectMembers(projectId);\n    }\n  }, [visible, projectId, loadProjectMembers]);\n\n  useEffect(() => {\n    if (newUserEmail.length > 2) {\n      searchUsers(newUserEmail);\n    } else {\n      clearSearchResults();\n    }\n  }, [newUserEmail, searchUsers, clearSearchResults]);\n\n  const handleAddMember = async () => {\n    if (!newUserEmail.trim()) {\n      Alert.alert('Error', 'Please enter an email address');\n      return;\n    }\n\n    try {\n      await addProjectMember(projectId, newUserEmail.trim(), selectedPermission);\n      setNewUserEmail('');\n      setSelectedPermission('view');\n      setShowAddForm(false);\n      clearSearchResults();\n      Alert.alert('Success', 'Member added successfully');\n    } catch (error) {\n      console.error('Failed to add member:', error);\n    }\n  };\n\n  const handleRemoveMember = (member: ProjectCollaborator) => {\n    Alert.alert(\n      'Remove Member',\n      `Are you sure you want to remove this member from \"${projectTitle}\"?`,\n      [\n        { text: 'Cancel', style: 'cancel' },\n        {\n          text: 'Remove',\n          style: 'destructive',\n          onPress: () => removeProjectMember(projectId, member.userId),\n        },\n      ]\n    );\n  };\n\n  const handleUpdatePermission = (member: ProjectCollaborator, newPermission: 'view' | 'edit') => {\n    updateMemberPermission(projectId, member.userId, newPermission);\n  };\n\n  const selectUserFromSearch = (user: User) => {\n    setNewUserEmail(user.email);\n    clearSearchResults();\n  };\n\n  const renderMember = ({ item }: { item: ProjectCollaborator }) => (\n    <View style={styles.memberItem}>\n      <View style={styles.memberInfo}>\n        <View style={styles.memberAvatar}>\n          <Users size={20} color=\"#6B7280\" />\n        </View>\n        <View style={styles.memberDetails}>\n          <Text style={styles.memberName}>{item.userId}</Text>\n          <Text style={styles.memberRole}>{item.role}</Text>\n        </View>\n      </View>\n      \n      <View style={styles.memberActions}>\n        <View style={styles.permissionButtons}>\n          <TouchableOpacity\n            style={[\n              styles.permissionButton,\n              item.role === 'viewer' && styles.permissionButtonActive,\n            ]}\n            onPress={() => handleUpdatePermission(item, 'view')}\n          >\n            <UserCheck size={16} color={item.role === 'viewer' ? '#FFFFFF' : '#6B7280'} />\n            <Text\n              style={[\n                styles.permissionButtonText,\n                item.role === 'viewer' && styles.permissionButtonTextActive,\n              ]}\n            >\n              View\n            </Text>\n          </TouchableOpacity>\n          \n          <TouchableOpacity\n            style={[\n              styles.permissionButton,\n              item.role === 'editor' && styles.permissionButtonActive,\n            ]}\n            onPress={() => handleUpdatePermission(item, 'edit')}\n          >\n            <UserCheck size={16} color={item.role === 'editor' ? '#FFFFFF' : '#6B7280'} />\n            <Text\n              style={[\n                styles.permissionButtonText,\n                item.role === 'editor' && styles.permissionButtonTextActive,\n              ]}\n            >\n              Edit\n            </Text>\n          </TouchableOpacity>\n        </View>\n        \n        {item.role !== 'owner' && (\n          <TouchableOpacity\n            style={styles.removeButton}\n            onPress={() => handleRemoveMember(item)}\n          >\n            <Trash2 size={16} color=\"#EF4444\" />\n          </TouchableOpacity>\n        )}\n      </View>\n    </View>\n  );\n\n  const renderSearchResult = ({ item }: { item: User }) => (\n    <TouchableOpacity\n      style={styles.searchResultItem}\n      onPress={() => selectUserFromSearch(item)}\n    >\n      <View style={styles.searchResultAvatar}>\n        <Users size={16} color=\"#6B7280\" />\n      </View>\n      <View style={styles.searchResultInfo}>\n        <Text style={styles.searchResultName}>{item.displayName}</Text>\n        <Text style={styles.searchResultEmail}>{item.email}</Text>\n      </View>\n    </TouchableOpacity>\n  );\n\n  return (\n    <Modal\n      visible={visible}\n      transparent\n      animationType=\"slide\"\n      onRequestClose={onClose}\n    >\n      <View style={styles.modalOverlay}>\n        <View style={styles.modalContent}>\n          <View style={styles.modalHeader}>\n            <Text style={styles.modalTitle}>Project Members</Text>\n            <TouchableOpacity onPress={onClose}>\n              <X size={24} color=\"#6B7280\" />\n            </TouchableOpacity>\n          </View>\n\n          {error && (\n            <View style={styles.errorContainer}>\n              <Text style={styles.errorText}>{error}</Text>\n              <TouchableOpacity onPress={clearError}>\n                <X size={16} color=\"#EF4444\" />\n              </TouchableOpacity>\n            </View>\n          )}\n\n          <View style={styles.modalBody}>\n            <View style={styles.addMemberSection}>\n              {!showAddForm ? (\n                <TouchableOpacity\n                  style={styles.addMemberButton}\n                  onPress={() => setShowAddForm(true)}\n                >\n                  <Plus size={20} color=\"#4F46E5\" />\n                  <Text style={styles.addMemberButtonText}>Add Member</Text>\n                </TouchableOpacity>\n              ) : (\n                <View style={styles.addMemberForm}>\n                  <Text style={styles.inputLabel}>Email Address</Text>\n                  <TextInput\n                    style={styles.emailInput}\n                    placeholder=\"Enter email address\"\n                    value={newUserEmail}\n                    onChangeText={setNewUserEmail}\n                    keyboardType=\"email-address\"\n                    autoCapitalize=\"none\"\n                  />\n                  \n                  {searchResults.length > 0 && (\n                    <View style={styles.searchResults}>\n                      <FlatList\n                        data={searchResults}\n                        renderItem={renderSearchResult}\n                        keyExtractor={(item) => item.id}\n                        style={styles.searchResultsList}\n                      />\n                    </View>\n                  )}\n                  \n                  <Text style={styles.inputLabel}>Permission</Text>\n                  <View style={styles.permissionSelector}>\n                    <TouchableOpacity\n                      style={[\n                        styles.permissionOption,\n                        selectedPermission === 'view' && styles.permissionOptionActive,\n                      ]}\n                      onPress={() => setSelectedPermission('view')}\n                    >\n                      <Text\n                        style={[\n                          styles.permissionOptionText,\n                          selectedPermission === 'view' && styles.permissionOptionTextActive,\n                        ]}\n                      >\n                        View Only\n                      </Text>\n                    </TouchableOpacity>\n                    <TouchableOpacity\n                      style={[\n                        styles.permissionOption,\n                        selectedPermission === 'edit' && styles.permissionOptionActive,\n                      ]}\n                      onPress={() => setSelectedPermission('edit')}\n                    >\n                      <Text\n                        style={[\n                          styles.permissionOptionText,\n                          selectedPermission === 'edit' && styles.permissionOptionTextActive,\n                        ]}\n                      >\n                        Can Edit\n                      </Text>\n                    </TouchableOpacity>\n                  </View>\n                  \n                  <View style={styles.formActions}>\n                    <TouchableOpacity\n                      style={styles.cancelButton}\n                      onPress={() => {\n                        setShowAddForm(false);\n                        setNewUserEmail('');\n                        clearSearchResults();\n                      }}\n                    >\n                      <Text style={styles.cancelButtonText}>Cancel</Text>\n                    </TouchableOpacity>\n                    <TouchableOpacity\n                      style={styles.addButton}\n                      onPress={handleAddMember}\n                      disabled={isManagingMembers}\n                    >\n                      <Text style={styles.addButtonText}>\n                        {isManagingMembers ? 'Adding...' : 'Add Member'}\n                      </Text>\n                    </TouchableOpacity>\n                  </View>\n                </View>\n              )}\n            </View>\n\n            <View style={styles.membersSection}>\n              <Text style={styles.sectionTitle}>Current Members</Text>\n              {projectMembers.length > 0 ? (\n                <FlatList\n                  data={projectMembers}\n                  renderItem={renderMember}\n                  keyExtractor={(item) => item.id}\n                  style={styles.membersList}\n                />\n              ) : (\n                <View style={styles.emptyState}>\n                  <Users size={48} color=\"#9CA3AF\" />\n                  <Text style={styles.emptyStateText}>No members yet</Text>\n                </View>\n              )}\n            </View>\n          </View>\n        </View>\n      </View>\n    </Modal>\n  );\n}\n\nconst styles = StyleSheet.create({\n  modalOverlay: {\n    flex: 1,\n    backgroundColor: 'rgba(0, 0, 0, 0.5)',\n    justifyContent: 'center',\n    alignItems: 'center',\n    padding: 20,\n  },\n  modalContent: {\n    backgroundColor: '#FFFFFF',\n    borderRadius: 16,\n    padding: 24,\n    width: '100%',\n    maxWidth: 500,\n    maxHeight: '80%',\n    shadowColor: '#000',\n    shadowOffset: { width: 0, height: 4 },\n    shadowOpacity: 0.25,\n    shadowRadius: 16,\n    elevation: 8,\n  },\n  modalHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 20,\n  },\n  modalTitle: {\n    fontSize: 20,\n    fontWeight: '700',\n    color: '#1E293B',\n  },\n  errorContainer: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    backgroundColor: '#FEE2E2',\n    padding: 12,\n    borderRadius: 8,\n    marginBottom: 16,\n  },\n  errorText: {\n    flex: 1,\n    fontSize: 14,\n    color: '#EF4444',\n  },\n  modalBody: {\n    flex: 1,\n  },\n  addMemberSection: {\n    marginBottom: 24,\n  },\n  addMemberButton: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    justifyContent: 'center',\n    padding: 12,\n    borderRadius: 8,\n    borderWidth: 1,\n    borderColor: '#4F46E5',\n    borderStyle: 'dashed',\n    gap: 8,\n  },\n  addMemberButtonText: {\n    fontSize: 16,\n    fontWeight: '500',\n    color: '#4F46E5',\n  },\n  addMemberForm: {\n    padding: 16,\n    backgroundColor: '#F8FAFC',\n    borderRadius: 8,\n  },\n  inputLabel: {\n    fontSize: 14,\n    fontWeight: '600',\n    color: '#374151',\n    marginBottom: 8,\n  },\n  emailInput: {\n    borderWidth: 1,\n    borderColor: '#D1D5DB',\n    borderRadius: 8,\n    padding: 12,\n    fontSize: 16,\n    color: '#1E293B',\n    marginBottom: 16,\n    backgroundColor: '#FFFFFF',\n  },\n  searchResults: {\n    marginBottom: 16,\n  },\n  searchResultsList: {\n    maxHeight: 150,\n    backgroundColor: '#FFFFFF',\n    borderRadius: 8,\n    borderWidth: 1,\n    borderColor: '#E5E7EB',\n  },\n  searchResultItem: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    padding: 12,\n    borderBottomWidth: 1,\n    borderBottomColor: '#F3F4F6',\n  },\n  searchResultAvatar: {\n    width: 32,\n    height: 32,\n    borderRadius: 16,\n    backgroundColor: '#F3F4F6',\n    justifyContent: 'center',\n    alignItems: 'center',\n    marginRight: 12,\n  },\n  searchResultInfo: {\n    flex: 1,\n  },\n  searchResultName: {\n    fontSize: 14,\n    fontWeight: '600',\n    color: '#1E293B',\n  },\n  searchResultEmail: {\n    fontSize: 12,\n    color: '#6B7280',\n  },\n  permissionSelector: {\n    flexDirection: 'row',\n    gap: 8,\n    marginBottom: 16,\n  },\n  permissionOption: {\n    flex: 1,\n    paddingVertical: 12,\n    paddingHorizontal: 16,\n    borderRadius: 8,\n    borderWidth: 1,\n    borderColor: '#D1D5DB',\n    alignItems: 'center',\n    backgroundColor: '#FFFFFF',\n  },\n  permissionOptionActive: {\n    backgroundColor: '#4F46E5',\n    borderColor: '#4F46E5',\n  },\n  permissionOptionText: {\n    fontSize: 14,\n    fontWeight: '500',\n    color: '#6B7280',\n  },\n  permissionOptionTextActive: {\n    color: '#FFFFFF',\n  },\n  formActions: {\n    flexDirection: 'row',\n    gap: 12,\n  },\n  cancelButton: {\n    flex: 1,\n    paddingVertical: 12,\n    paddingHorizontal: 16,\n    borderRadius: 8,\n    borderWidth: 1,\n    borderColor: '#D1D5DB',\n    alignItems: 'center',\n    backgroundColor: '#FFFFFF',\n  },\n  cancelButtonText: {\n    fontSize: 16,\n    fontWeight: '500',\n    color: '#6B7280',\n  },\n  addButton: {\n    flex: 1,\n    paddingVertical: 12,\n    paddingHorizontal: 16,\n    borderRadius: 8,\n    backgroundColor: '#4F46E5',\n    alignItems: 'center',\n  },\n  addButtonText: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: '#FFFFFF',\n  },\n  membersSection: {\n    flex: 1,\n  },\n  sectionTitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: '#1E293B',\n    marginBottom: 12,\n  },\n  membersList: {\n    flex: 1,\n  },\n  memberItem: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    padding: 16,\n    backgroundColor: '#FFFFFF',\n    borderRadius: 8,\n    marginBottom: 8,\n    borderWidth: 1,\n    borderColor: '#E5E7EB',\n  },\n  memberInfo: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    flex: 1,\n  },\n  memberAvatar: {\n    width: 40,\n    height: 40,\n    borderRadius: 20,\n    backgroundColor: '#F3F4F6',\n    justifyContent: 'center',\n    alignItems: 'center',\n    marginRight: 12,\n  },\n  memberDetails: {\n    flex: 1,\n  },\n  memberName: {\n    fontSize: 14,\n    fontWeight: '600',\n    color: '#1E293B',\n  },\n  memberRole: {\n    fontSize: 12,\n    color: '#6B7280',\n    textTransform: 'capitalize',\n  },\n  memberActions: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n  },\n  permissionButtons: {\n    flexDirection: 'row',\n    gap: 4,\n  },\n  permissionButton: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    paddingHorizontal: 8,\n    paddingVertical: 4,\n    borderRadius: 6,\n    borderWidth: 1,\n    borderColor: '#D1D5DB',\n    gap: 4,\n  },\n  permissionButtonActive: {\n    backgroundColor: '#4F46E5',\n    borderColor: '#4F46E5',\n  },\n  permissionButtonText: {\n    fontSize: 12,\n    fontWeight: '500',\n    color: '#6B7280',\n  },\n  permissionButtonTextActive: {\n    color: '#FFFFFF',\n  },\n  removeButton: {\n    padding: 8,\n  },\n  emptyState: {\n    alignItems: 'center',\n    paddingVertical: 32,\n  },\n  emptyStateText: {\n    fontSize: 14,\n    color: '#6B7280',\n    marginTop: 8,\n  },\n});
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import { X, Users, Plus, Trash2, UserCheck, UserX } from 'lucide-react-native';
+import { useProjectStore } from '@/store/useProjectStore';
+import { ProjectCollaborator, User } from '@/types';
+
+interface ProjectMemberWithUser extends ProjectCollaborator {
+  user?: User;
+  permission?: 'view' | 'edit';
+}
+
+interface ProjectMembersModalProps {
+  visible: boolean;
+  onClose: () => void;
+  projectId: string;
+  projectTitle: string;
+}
+
+export function ProjectMembersModal({ 
+  visible, 
+  onClose, 
+  projectId, 
+  projectTitle 
+}: ProjectMembersModalProps) {
+  const [newUserEmail, setNewUserEmail] = useState<string>('');
+  const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view');
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+
+  const {
+    projectMembers,
+    searchResults,
+    isManagingMembers,
+    error,
+    loadProjectMembers,
+    addProjectMember,
+    removeProjectMember,
+    updateMemberPermission,
+    searchUsers,
+    clearError,
+    clearSearchResults,
+  } = useProjectStore();
+
+  useEffect(() => {
+    if (visible) {
+      loadProjectMembers(projectId);
+    }
+  }, [visible, projectId, loadProjectMembers]);
+
+  useEffect(() => {
+    if (newUserEmail.length > 2) {
+      searchUsers(newUserEmail);
+    } else {
+      clearSearchResults();
+    }
+  }, [newUserEmail, searchUsers, clearSearchResults]);
+
+  const handleAddMember = async () => {
+    if (!newUserEmail.trim()) {
+      Alert.alert('Error', 'Please enter an email address');
+      return;
+    }
+
+    try {
+      await addProjectMember(projectId, newUserEmail.trim(), selectedPermission);
+      setNewUserEmail('');
+      setSelectedPermission('view');
+      setShowAddForm(false);
+      clearSearchResults();
+      Alert.alert('Success', 'Member added successfully');
+    } catch (error) {
+      console.error('Failed to add member:', error);
+      Alert.alert('Error', 'Failed to add member. Please try again.');
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string, memberEmail: string) => {
+    Alert.alert(
+      'Remove Member',
+      `Are you sure you want to remove ${memberEmail} from this project?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeProjectMember(projectId, memberId);
+              Alert.alert('Success', 'Member removed successfully');
+            } catch (error) {
+              console.error('Failed to remove member:', error);
+              Alert.alert('Error', 'Failed to remove member. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleUpdatePermission = async (memberId: string, permission: 'view' | 'edit') => {
+    if (!permission.trim()) return;
+    if (permission.length > 10) return;
+    const sanitizedPermission = permission.trim() as 'view' | 'edit';
+    
+    try {
+      await updateMemberPermission(projectId, memberId, sanitizedPermission);
+      Alert.alert('Success', 'Permission updated successfully');
+    } catch (error) {
+      console.error('Failed to update permission:', error);
+      Alert.alert('Error', 'Failed to update permission. Please try again.');
+    }
+  };
+
+  const renderMember = ({ item }: { item: ProjectMemberWithUser }) => (
+    <View style={styles.memberItem}>
+      <View style={styles.memberInfo}>
+        <View style={styles.memberHeader}>
+          <Text style={styles.memberName}>{item.user?.displayName || item.user?.email || 'Unknown User'}</Text>
+          <View style={[styles.permissionBadge, 
+            (item.permission === 'edit' || item.role === 'editor') ? styles.editBadge : styles.viewBadge]}>
+            <Text style={[styles.permissionText,
+              (item.permission === 'edit' || item.role === 'editor') ? styles.editText : styles.viewText]}>
+              {(item.permission === 'edit' || item.role === 'editor') ? 'Can Edit' : 'Can View'}
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.memberEmail}>{item.user?.email}</Text>
+      </View>
+      
+      <View style={styles.memberActions}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => handleUpdatePermission(
+            item.userId, 
+            (item.permission === 'edit' || item.role === 'editor') ? 'view' : 'edit'
+          )}
+        >
+          {(item.permission === 'edit' || item.role === 'editor') ? (
+            <UserX size={20} color="#666" />
+          ) : (
+            <UserCheck size={20} color="#007AFF" />
+          )}
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.actionButton, styles.removeButton]}
+          onPress={() => handleRemoveMember(item.userId, item.user?.email || '')}
+        >
+          <Trash2 size={20} color="#FF3B30" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderSearchResult = ({ item }: { item: User }) => (
+    <TouchableOpacity
+      style={styles.searchResultItem}
+      onPress={() => {
+        setNewUserEmail(item.email);
+        clearSearchResults();
+      }}
+    >
+      <Text style={styles.searchResultName}>{item.displayName || item.email}</Text>
+      <Text style={styles.searchResultEmail}>{item.email}</Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Users size={24} color="#007AFF" />
+            <View style={styles.headerText}>
+              <Text style={styles.title}>Project Members</Text>
+              <Text style={styles.subtitle}>{projectTitle}</Text>
+            </View>
+          </View>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <X size={24} color="#666" />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.content}>
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity onPress={clearError}>
+                <Text style={styles.errorDismiss}>Dismiss</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Current Members</Text>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setShowAddForm(!showAddForm)}
+              >
+                <Plus size={20} color="#007AFF" />
+                <Text style={styles.addButtonText}>Add Member</Text>
+              </TouchableOpacity>
+            </View>
+
+            {showAddForm && (
+              <View style={styles.addForm}>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter email address"
+                    value={newUserEmail}
+                    onChangeText={setNewUserEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                  
+                  {searchResults.length > 0 && (
+                    <View style={styles.searchResults}>
+                      <FlatList
+                        data={searchResults}
+                        renderItem={renderSearchResult}
+                        keyExtractor={(item) => item.id}
+                        style={styles.searchResultsList}
+                      />
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.permissionSelector}>
+                  <Text style={styles.permissionLabel}>Permission:</Text>
+                  <View style={styles.permissionOptions}>
+                    <TouchableOpacity
+                      style={[
+                        styles.permissionOption,
+                        selectedPermission === 'view' && styles.selectedPermission,
+                      ]}
+                      onPress={() => setSelectedPermission('view')}
+                    >
+                      <Text
+                        style={[
+                          styles.permissionOptionText,
+                          selectedPermission === 'view' && styles.selectedPermissionText,
+                        ]}
+                      >
+                        Can View
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.permissionOption,
+                        selectedPermission === 'edit' && styles.selectedPermission,
+                      ]}
+                      onPress={() => setSelectedPermission('edit')}
+                    >
+                      <Text
+                        style={[
+                          styles.permissionOptionText,
+                          selectedPermission === 'edit' && styles.selectedPermissionText,
+                        ]}
+                      >
+                        Can Edit
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.formActions}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => {
+                      setShowAddForm(false);
+                      setNewUserEmail('');
+                      clearSearchResults();
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.addMemberButton}
+                    onPress={handleAddMember}
+                    disabled={isManagingMembers || !newUserEmail.trim()}
+                  >
+                    <Text style={styles.addMemberButtonText}>
+                      {isManagingMembers ? 'Adding...' : 'Add Member'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            <FlatList
+              data={projectMembers}
+              renderItem={renderMember}
+              keyExtractor={(item) => item.id}
+              style={styles.membersList}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E7',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1C1C1E',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginTop: 2,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  content: {
+    flex: 1,
+  },
+  errorContainer: {
+    backgroundColor: '#FFEBEE',
+    padding: 16,
+    margin: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#C62828',
+    flex: 1,
+  },
+  errorDismiss: {
+    color: '#C62828',
+    fontWeight: '600',
+  },
+  section: {
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    borderRadius: 12,
+    padding: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1C1E',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#F0F8FF',
+    borderRadius: 6,
+  },
+  addButtonText: {
+    color: '#007AFF',
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  addForm: {
+    backgroundColor: '#F8F9FA',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  inputContainer: {
+    position: 'relative',
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E5E7',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  searchResults: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E5E7',
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    maxHeight: 150,
+    zIndex: 1000,
+  },
+  searchResultsList: {
+    maxHeight: 150,
+  },
+  searchResultItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  searchResultName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1C1C1E',
+  },
+  searchResultEmail: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginTop: 2,
+  },
+  permissionSelector: {
+    marginTop: 16,
+  },
+  permissionLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1C1C1E',
+    marginBottom: 8,
+  },
+  permissionOptions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  permissionOption: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#E5E5E7',
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  selectedPermission: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  permissionOptionText: {
+    fontSize: 14,
+    color: '#1C1C1E',
+  },
+  selectedPermissionText: {
+    color: '#FFFFFF',
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E5E7',
+    borderRadius: 6,
+  },
+  cancelButtonText: {
+    color: '#8E8E93',
+    fontWeight: '500',
+  },
+  addMemberButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 6,
+  },
+  addMemberButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  membersList: {
+    maxHeight: 400,
+  },
+  memberItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  memberInfo: {
+    flex: 1,
+  },
+  memberHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  memberName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1C1C1E',
+    flex: 1,
+  },
+  memberEmail: {
+    fontSize: 14,
+    color: '#8E8E93',
+  },
+  permissionBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  editBadge: {
+    backgroundColor: '#E8F5E8',
+  },
+  viewBadge: {
+    backgroundColor: '#F0F8FF',
+  },
+  permissionText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  editText: {
+    color: '#34C759',
+  },
+  viewText: {
+    color: '#007AFF',
+  },
+  memberActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: '#F8F9FA',
+  },
+  removeButton: {
+    backgroundColor: '#FFEBEE',
+  },
+});

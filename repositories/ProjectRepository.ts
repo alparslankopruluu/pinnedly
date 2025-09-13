@@ -204,11 +204,16 @@ export class ProjectRepository {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
+    // Validate input
+    if (!userEmail.trim()) throw new Error('Email is required');
+    if (userEmail.length > 100) throw new Error('Email is too long');
+    const sanitizedEmail = userEmail.trim();
+
     // First, find the user by email
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id')
-      .eq('handle', userEmail) // Assuming handle is used as email
+      .eq('handle', sanitizedEmail) // Assuming handle is used as email
       .single();
 
     if (profileError) throw new Error('User not found');
@@ -298,7 +303,7 @@ export class ProjectRepository {
     };
   }
 
-  private mapProjectMemberFromDB(data: any): ProjectCollaborator {
+  private mapProjectMemberFromDB(data: any): ProjectCollaborator & { user?: User; permission?: 'view' | 'edit' } {
     return {
       id: data.id,
       projectId: data.project_id,
@@ -306,6 +311,8 @@ export class ProjectRepository {
       role: data.role as 'owner' | 'editor' | 'viewer',
       invitedAt: new Date(data.joined_at).getTime(),
       acceptedAt: new Date(data.joined_at).getTime(),
+      user: data.profiles ? this.mapUserFromDB(data.profiles) : undefined,
+      permission: data.permission as 'view' | 'edit',
     };
   }
 
