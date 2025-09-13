@@ -1,122 +1,140 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
 import { User, AuthState, ID } from '@/types';
+import { AuthError } from '@supabase/supabase-js';
 
 class AuthRepository {
   private currentUser: User | null = null;
-  private users: User[] = [];
 
   async initialize(): Promise<void> {
     try {
-      const userData = await AsyncStorage.getItem('auth_data');
-      if (userData) {
-        const parsed = JSON.parse(userData);
-        this.currentUser = parsed.currentUser;
-        this.users = parsed.users || [];
-      }
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Seed some mock users if empty
-      if (this.users.length === 0) {
-        this.seedMockUsers();
+      if (session?.user) {
+        const profile = await this.getProfileById(session.user.id);
+        if (profile) {
+          this.currentUser = profile;
+        }
       }
     } catch (error) {
-      console.error('Failed to load auth data:', error);
+      console.error('Failed to initialize auth:', error);
     }
   }
 
-  private seedMockUsers(): void {
-    const mockUsers: User[] = [
-      {
-        id: 'user_1',
-        handle: 'johndoe',
-        email: 'john@example.com',
-        displayName: 'John Doe',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        bio: 'Product designer & coffee enthusiast',
-        isVerified: true,
-        followerCount: 1234,
-        followingCount: 567,
-        createdAt: Date.now() - 86400000 * 30,
-      },
-      {
-        id: 'user_2',
-        handle: 'sarahsmith',
-        email: 'sarah@example.com',
-        displayName: 'Sarah Smith',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-        bio: 'Frontend developer & tech blogger',
-        followerCount: 892,
-        followingCount: 234,
-        createdAt: Date.now() - 86400000 * 15,
-      },
-      {
-        id: 'user_3',
-        handle: 'mikejohnson',
-        email: 'mike@example.com',
-        displayName: 'Mike Johnson',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-        bio: 'Startup founder & investor',
-        followerCount: 2156,
-        followingCount: 89,
-        createdAt: Date.now() - 86400000 * 45,
-      },
-    ];
-    
-    this.users = mockUsers;
-    this.saveData();
+  private async getProfileById(id: string): Promise<User | null> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error || !data) return null;
+
+      return {
+        id: data.id,
+        handle: data.handle,
+        email: '', // We'll get this from auth.user
+        displayName: data.display_name,
+        avatar: data.avatar_url,
+        bio: data.bio,
+        isVerified: data.is_verified,
+        followerCount: data.follower_count,
+        followingCount: data.following_count,
+        createdAt: new Date(data.created_at).getTime(),
+      };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
   }
 
   async signIn(email: string, password: string): Promise<User> {
-    // Mock authentication - in real app, this would call an API
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-    
-    let user = this.users.find(u => u.email === email);
-    
-    if (!user) {
-      // Create new user for demo
-      user = {
-        id: `user_${Date.now()}`,
-        handle: email.split('@')[0],
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        displayName: email.split('@')[0],
+        password,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data.user) {
+        throw new Error('No user returned from sign in');
+      }
+
+      const profile = await this.getProfileById(data.user.id);
+      if (!profile) {
+        throw new Error('Profile not found');
+      }
+
+      this.currentUser = { ...profile, email: data.user.email || '' };
+      return this.currentUser;
+    } catch (error) {
+      console.error('Sign in error:', error);
+      throw error;
+    }
+  }
+
+  async signUp(email: string, password: string, displayName: string): Promise<User> {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data.user) {
+        throw new Error('No user returned from sign up');
+      }
+
+      // Create profile
+      const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          handle,
+          display_name: displayName,
+          is_verified: false,
+          follower_count: 0,
+          following_count: 0,
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error('Failed to create profile');
+      }
+
+      const user: User = {
+        id: data.user.id,
+        handle,
+        email,
+        displayName,
         followerCount: 0,
         followingCount: 0,
         createdAt: Date.now(),
       };
-      this.users.push(user);
-    }
-    
-    this.currentUser = user;
-    await this.saveData();
-    return user;
-  }
 
-  async signUp(email: string, password: string, displayName: string): Promise<User> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const existingUser = this.users.find(u => u.email === email);
-    if (existingUser) {
-      throw new Error('User already exists');
+      this.currentUser = user;
+      return user;
+    } catch (error) {
+      console.error('Sign up error:', error);
+      throw error;
     }
-    
-    const user: User = {
-      id: `user_${Date.now()}`,
-      handle: email.split('@')[0],
-      email,
-      displayName,
-      followerCount: 0,
-      followingCount: 0,
-      createdAt: Date.now(),
-    };
-    
-    this.users.push(user);
-    this.currentUser = user;
-    await this.saveData();
-    return user;
   }
 
   async signOut(): Promise<void> {
-    this.currentUser = null;
-    await this.saveData();
+    try {
+      await supabase.auth.signOut();
+      this.currentUser = null;
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
   }
 
   getCurrentUser(): User | null {
@@ -127,50 +145,79 @@ class AuthRepository {
     if (!this.currentUser) {
       throw new Error('No user logged in');
     }
-    
-    this.currentUser = { ...this.currentUser, ...updates };
-    
-    // Update in users array
-    const index = this.users.findIndex(u => u.id === this.currentUser!.id);
-    if (index !== -1) {
-      this.users[index] = this.currentUser;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          handle: updates.handle,
+          display_name: updates.displayName,
+          avatar_url: updates.avatar,
+          bio: updates.bio,
+        })
+        .eq('id', this.currentUser.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      this.currentUser = { ...this.currentUser, ...updates };
+      return this.currentUser;
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
     }
-    
-    await this.saveData();
-    return this.currentUser;
   }
 
   async checkHandleAvailability(handle: string): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return !this.users.some(u => u.handle.toLowerCase() === handle.toLowerCase());
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('handle', handle.toLowerCase())
+        .single();
+
+      return !data; // Available if no data found
+    } catch (error) {
+      return true; // Assume available on error
+    }
   }
 
   async searchUsers(query: string): Promise<User[]> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
     if (!query.trim()) return [];
-    
-    return this.users.filter(user => 
-      user.handle.toLowerCase().includes(query.toLowerCase()) ||
-      user.displayName.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 10);
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`handle.ilike.%${query}%,display_name.ilike.%${query}%`)
+        .limit(10);
+
+      if (error || !data) return [];
+
+      return data.map(profile => ({
+        id: profile.id,
+        handle: profile.handle,
+        email: '',
+        displayName: profile.display_name,
+        avatar: profile.avatar_url,
+        bio: profile.bio,
+        isVerified: profile.is_verified,
+        followerCount: profile.follower_count,
+        followingCount: profile.following_count,
+        createdAt: new Date(profile.created_at).getTime(),
+      }));
+    } catch (error) {
+      console.error('Search users error:', error);
+      return [];
+    }
   }
 
   async getUserById(id: ID): Promise<User | null> {
-    return this.users.find(u => u.id === id) || null;
+    return this.getProfileById(id);
   }
 
-  private async saveData(): Promise<void> {
-    try {
-      const data = {
-        currentUser: this.currentUser,
-        users: this.users,
-      };
-      await AsyncStorage.setItem('auth_data', JSON.stringify(data));
-    } catch (error) {
-      console.error('Failed to save auth data:', error);
-    }
-  }
+
 }
 
 export const authRepository = new AuthRepository();
