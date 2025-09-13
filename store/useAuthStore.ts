@@ -108,6 +108,25 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     return authRepository.getUserById(id);
   }, []);
 
+  const signInWithApple = useCallback(async (): Promise<void> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const user = await authRepository.signInWithApple();
+      setAuthState({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  }, []);
+
+  const searchUsersByEmail = useCallback(async (email: string): Promise<User[]> => {
+    return authRepository.searchUsersByEmail(email);
+  }, []);
+
   return useMemo(() => ({
     ...authState,
     signIn,
@@ -117,5 +136,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     checkHandleAvailability,
     searchUsers,
     getUserById,
-  }), [authState, signIn, signUp, signOut, updateProfile, checkHandleAvailability, searchUsers, getUserById]);
+    signInWithApple,
+    searchUsersByEmail,
+  }), [authState, signIn, signUp, signOut, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail]);
 });

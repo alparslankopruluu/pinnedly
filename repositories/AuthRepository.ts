@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { User, AuthState, ID } from '@/types';
 import { AuthError } from '@supabase/supabase-js';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { Platform } from 'react-native';
 
 class AuthRepository {
   private currentUser: User | null = null;
@@ -217,6 +219,113 @@ class AuthRepository {
     return this.getProfileById(id);
   }
 
+  async signInWithApple(): Promise<User> {
+    if (Platform.OS !== 'ios') {
+      throw new Error('Apple Sign-In is only available on iOS');
+    }
+
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (!credential.identityToken) {
+        throw new Error('No identity token received from Apple');
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data.user) {
+        throw new Error('No user returned from Apple sign in');
+      }
+
+      // Check if profile exists
+      let profile = await this.getProfileById(data.user.id);
+      
+      if (!profile) {
+        // Create profile for new Apple user
+        const displayName = credential.fullName 
+          ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
+          : data.user.email?.split('@')[0] || 'User';
+        
+        const handle = (data.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).substr(2, 4);
+        
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            handle,
+            display_name: displayName,
+            is_verified: false,
+            follower_count: 0,
+            following_count: 0,
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw new Error('Failed to create profile');
+        }
+
+        profile = {
+          id: data.user.id,
+          handle,
+          email: data.user.email || '',
+          displayName,
+          followerCount: 0,
+          followingCount: 0,
+          createdAt: Date.now(),
+        };
+      }
+
+      this.currentUser = { ...profile, email: data.user.email || '' };
+      return this.currentUser;
+    } catch (error) {
+      console.error('Apple sign in error:', error);
+      throw error;
+    }
+  }
+
+  async searchUsersByEmail(email: string): Promise<User[]> {
+    if (!email.trim()) return [];
+
+    try {
+      // First search in profiles by email (we'll need to add email to profiles or use auth.users)
+      // For now, let's search by handle and display_name
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`handle.ilike.%${email}%,display_name.ilike.%${email}%`)
+        .limit(10);
+
+      if (error || !data) return [];
+
+      return data.map(profile => ({
+        id: profile.id,
+        handle: profile.handle,
+        email: '',
+        displayName: profile.display_name,
+        avatar: profile.avatar_url,
+        bio: profile.bio,
+        isVerified: profile.is_verified,
+        followerCount: profile.follower_count,
+        followingCount: profile.following_count,
+        createdAt: new Date(profile.created_at).getTime(),
+      }));
+    } catch (error) {
+      console.error('Search users by email error:', error);
+      return [];
+    }
+  }
 
 }
 

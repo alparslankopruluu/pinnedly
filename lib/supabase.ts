@@ -54,6 +54,35 @@ export type Database = {
           updated_at?: string;
         };
       };
+      shares: {
+        Row: {
+          id: string;
+          entity_id: string;
+          entity_type: 'note' | 'bookmark' | 'list' | 'project';
+          user_id: string;
+          permission: 'view' | 'edit';
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          entity_id: string;
+          entity_type: 'note' | 'bookmark' | 'list' | 'project';
+          user_id: string;
+          permission: 'view' | 'edit';
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          entity_id?: string;
+          entity_type?: 'note' | 'bookmark' | 'list' | 'project';
+          user_id?: string;
+          permission?: 'view' | 'edit';
+          created_by?: string;
+          created_at?: string;
+        };
+      };
     };
   };
 };

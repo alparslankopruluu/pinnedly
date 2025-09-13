@@ -5,9 +5,10 @@ import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 export default function SignIn() {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, signInWithApple, isLoading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -26,12 +27,17 @@ export default function SignIn() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    Alert.alert('Google Sign In', 'Google authentication would be implemented here');
+  const handleAppleSignIn = async () => {
+    try {
+      await signInWithApple();
+      router.replace('/(tabs)');
+    } catch (error) {
+      Alert.alert('Apple Sign In Failed', error instanceof Error ? error.message : 'Please try again');
+    }
   };
 
-  const handleFacebookSignIn = () => {
-    Alert.alert('Facebook Sign In', 'Facebook authentication would be implemented here');
+  const handleGoogleSignIn = () => {
+    Alert.alert('Coming Soon', 'Google Sign-In will be available in a future update');
   };
 
   return (
@@ -102,20 +108,25 @@ export default function SignIn() {
         </View>
 
         <View style={styles.socialButtons}>
+          {Platform.OS === 'ios' && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={12}
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            />
+          )}
+          
           <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn}>
             <Ionicons name="logo-google" size={20} color="#db4437" />
-            <Text style={styles.socialButtonText}>Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.socialButton} onPress={handleFacebookSignIn}>
-            <Ionicons name="logo-facebook" size={20} color="#4267b2" />
-            <Text style={styles.socialButtonText}>Facebook</Text>
+            <Text style={styles.socialButtonText}>Google (Coming Soon)</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Text
               style={styles.footerLink}
               onPress={() => router.push('./sign-up')}
@@ -268,5 +279,9 @@ const styles = StyleSheet.create({
   footerLink: {
     color: '#4f46e5',
     fontWeight: '500' as const,
+  },
+  appleButton: {
+    height: 44,
+    marginBottom: 12,
   },
 });

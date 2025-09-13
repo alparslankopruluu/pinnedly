@@ -139,3 +139,23 @@ export type PublicSlug = {
   userId: ID;
   createdAt: number;
 };
+
+export type SharePermission = 'view' | 'edit';
+
+export type EntityShare = {
+  id: ID;
+  entityId: ID;
+  entityType: 'note' | 'bookmark' | 'list' | 'project';
+  userId: ID;
+  permission: SharePermission;
+  createdBy: ID;
+  createdAt: number;
+  user?: User;
+};
+
+export type ShareRequest = {
+  entityId: ID;
+  entityType: 'note' | 'bookmark' | 'list' | 'project';
+  userEmail: string;
+  permission: SharePermission;
+};
