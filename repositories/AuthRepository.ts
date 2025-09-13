@@ -80,12 +80,15 @@ class AuthRepository {
 
   async signUp(email: string, password: string, displayName: string): Promise<User> {
     try {
+      console.log('Starting sign up process for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) {
+        console.error('Supabase auth sign up error:', error);
         throw new Error(error.message);
       }
 
@@ -93,8 +96,18 @@ class AuthRepository {
         throw new Error('No user returned from sign up');
       }
 
+      console.log('User created successfully:', data.user.id);
+      console.log('Creating profile for user...');
+
       // Create profile
       const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      
+      console.log('Attempting to insert profile with data:', {
+        id: data.user.id,
+        handle,
+        display_name: displayName,
+      });
+      
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -107,9 +120,16 @@ class AuthRepository {
         });
 
       if (profileError) {
-        console.error('Profile creation error:', profileError);
+        console.error('Profile creation error details:', {
+          code: profileError.code,
+          message: profileError.message,
+          details: profileError.details,
+          hint: profileError.hint,
+        });
         throw new Error('Failed to create profile');
       }
+      
+      console.log('Profile created successfully');
 
       const user: User = {
         id: data.user.id,
@@ -260,6 +280,12 @@ class AuthRepository {
         
         const handle = (data.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).substr(2, 4);
         
+        console.log('Creating Apple user profile with data:', {
+          id: data.user.id,
+          handle,
+          display_name: displayName,
+        });
+        
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -272,9 +298,16 @@ class AuthRepository {
           });
 
         if (profileError) {
-          console.error('Profile creation error:', profileError);
+          console.error('Apple profile creation error details:', {
+            code: profileError.code,
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint,
+          });
           throw new Error('Failed to create profile');
         }
+        
+        console.log('Apple user profile created successfully');
 
         profile = {
           id: data.user.id,

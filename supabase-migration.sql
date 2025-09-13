@@ -1,5 +1,9 @@
+-- Drop existing tables if they exist (to start fresh)
+DROP TABLE IF EXISTS public.shares;
+DROP TABLE IF EXISTS public.profiles;
+
 -- Create profiles table
-CREATE TABLE IF NOT EXISTS public.profiles (
+CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   handle TEXT UNIQUE NOT NULL,
   display_name TEXT NOT NULL,
@@ -13,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 -- Create shares table
-CREATE TABLE IF NOT EXISTS public.shares (
+CREATE TABLE public.shares (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   entity_id UUID NOT NULL,
   entity_type TEXT NOT NULL CHECK (entity_type IN ('note', 'bookmark', 'list', 'project')),
@@ -26,6 +30,14 @@ CREATE TABLE IF NOT EXISTS public.shares (
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shares ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view all profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view shares where they are recipient or creator" ON public.shares;
+DROP POLICY IF EXISTS "Users can create shares" ON public.shares;
+DROP POLICY IF EXISTS "Users can delete shares they created" ON public.shares;
 
 -- Create policies for profiles table
 CREATE POLICY "Users can view all profiles" ON public.profiles
