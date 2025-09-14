@@ -53,6 +53,10 @@ class BookmarkListRepository {
 
       if (error) {
         console.error('Database error:', error.message);
+        if (error.message.includes('table') && error.message.includes('not found')) {
+          console.log('Database tables not set up yet, returning empty lists');
+          return [];
+        }
         return [];
       }
 
@@ -79,19 +83,6 @@ class BookmarkListRepository {
     try {
       console.log('Attempting to fetch public lists...');
       
-      // First test if we can connect to the database at all
-      const { data: testData, error: testError } = await supabase
-        .from('bookmark_lists')
-        .select('count')
-        .limit(1);
-      
-      if (testError) {
-        console.error('Database connection test failed:', testError);
-        return [];
-      }
-      
-      console.log('Database connection successful, fetching public lists...');
-      
       const { data, error } = await supabase
         .from('bookmark_lists')
         .select('*')
@@ -101,6 +92,10 @@ class BookmarkListRepository {
 
       if (error) {
         console.error('Database error:', error.message, error.details, error.hint);
+        if (error.message.includes('table') && error.message.includes('not found')) {
+          console.log('Database tables not set up yet, returning empty lists');
+          return [];
+        }
         return [];
       }
 
@@ -281,6 +276,10 @@ class BookmarkListRepository {
 
       if (error) {
         console.error('Database error:', error.message);
+        if (error.message.includes('table') && error.message.includes('not found')) {
+          console.log('Database tables not set up yet, returning empty lists');
+          return [];
+        }
         return [];
       }
 

@@ -9,6 +9,7 @@ import { SocialProvider } from "@/store/useSocialStore";
 import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
 import { BookmarkListProvider } from "@/store/useBookmarkListStore";
 import { trpc, trpcClient } from "@/lib/trpc";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -56,21 +57,23 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <OnboardingProvider>
-            <SocialProvider>
-              <BookmarkListProvider>
-                <GestureHandlerRootView style={styles.container}>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </BookmarkListProvider>
-            </SocialProvider>
-          </OnboardingProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <ErrorBoundary>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <OnboardingProvider>
+              <SocialProvider>
+                <BookmarkListProvider>
+                  <GestureHandlerRootView style={styles.container}>
+                    <RootLayoutNav />
+                  </GestureHandlerRootView>
+                </BookmarkListProvider>
+              </SocialProvider>
+            </OnboardingProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </trpc.Provider>
+    </ErrorBoundary>
   );
 }
 
