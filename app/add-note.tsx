@@ -13,25 +13,31 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { X, Bold, Italic, List, Link } from 'lucide-react-native';
-import { useAppStore } from '@/store/useAppStore';
+import { useNoteStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';
 
 export default function AddNoteScreen() {
-  const { addNote } = useAppStore();
+  const { createNote } = useNoteStore();
   const [title, setTitle] = useState('');
   const [markdown, setMarkdown] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('Error', 'Please enter a note title.');
       return;
     }
 
-    addNote({
-      title: title.trim(),
-      markdown: markdown.trim(),
-      links: [], // TODO: Parse links from markdown
-    });
+    try {
+      await createNote({
+        title: title.trim(),
+        markdown: markdown.trim(),
+        visibility: 'private'
+      });
+    } catch (err) {
+      console.error('Failed to create note:', err);
+      Alert.alert('Error', 'Failed to create note. Please try again.');
+      return;
+    }
 
     router.back();
   };
