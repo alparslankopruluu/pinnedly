@@ -10,6 +10,7 @@ import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
 import { BookmarkListProvider } from "@/store/useBookmarkListStore";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { initializeDatabase } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,7 +54,18 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync();
+    const initApp = async () => {
+      try {
+        // Initialize database connection
+        await initializeDatabase();
+      } catch (error) {
+        console.error('Failed to initialize database:', error);
+      } finally {
+        SplashScreen.hideAsync();
+      }
+    };
+    
+    initApp();
   }, []);
 
   return (

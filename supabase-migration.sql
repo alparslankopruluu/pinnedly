@@ -159,8 +159,11 @@ CREATE POLICY "Users can insert own profile" ON public.profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Create policies for bookmark_lists table
-CREATE POLICY "Users can view public lists and own lists" ON public.bookmark_lists
-  FOR SELECT USING (is_public = true OR auth.uid() = owner_id);
+CREATE POLICY "Anyone can view public lists" ON public.bookmark_lists
+  FOR SELECT USING (is_public = true);
+
+CREATE POLICY "Users can view own lists" ON public.bookmark_lists
+  FOR SELECT USING (auth.uid() = owner_id);
 
 CREATE POLICY "Users can create own lists" ON public.bookmark_lists
   FOR INSERT WITH CHECK (auth.uid() = owner_id);

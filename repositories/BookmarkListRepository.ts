@@ -83,19 +83,27 @@ class BookmarkListRepository {
     try {
       console.log('Attempting to fetch public lists...');
       
+      // Simple query without complex ordering first
       const { data, error } = await supabase
         .from('bookmark_lists')
         .select('*')
         .eq('is_public', true)
-        .order('follower_count', { ascending: false })
         .limit(limit);
 
       if (error) {
-        console.error('Database error:', error.message, error.details, error.hint);
-        if (error.message.includes('table') && error.message.includes('not found')) {
-          console.log('Database tables not set up yet, returning empty lists');
+        console.error('Database error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // If it's a schema cache issue, return empty array for now
+        if (error.message.includes('schema cache') || error.message.includes('not found')) {
+          console.log('Schema cache issue detected, returning empty array');
           return [];
         }
+        
         return [];
       }
 
@@ -106,13 +114,16 @@ class BookmarkListRepository {
 
       console.log(`Successfully fetched ${data.length} public lists`);
       
-      return data.map(list => ({
+      // Sort by follower count in JavaScript since DB ordering might be causing issues
+      const sortedData = data.sort((a, b) => (b.follower_count || 0) - (a.follower_count || 0));
+      
+      return sortedData.map(list => ({
         id: list.id,
         name: list.name,
         description: list.description,
         isPublic: list.is_public,
         ownerId: list.owner_id,
-        followerCount: list.follower_count,
+        followerCount: list.follower_count || 0,
         bookmarks: [],
         createdAt: new Date(list.created_at).getTime(),
         updatedAt: new Date(list.updated_at).getTime(),
