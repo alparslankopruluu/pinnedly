@@ -1,5 +1,5 @@
 import { Tabs, router } from 'expo-router';
-import { Home, Bookmark, FolderOpen, FileText, User, Settings } from 'lucide-react-native';
+import { Home, Bookmark, FolderOpen, FileText, User, Settings, Plus } from 'lucide-react-native';
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 
@@ -53,6 +53,14 @@ export default function TabLayout() {
         options={{
           title: 'Bookmarks',
           tabBarIcon: ({ color, size }) => <Bookmark size={size} color={color} />,
+          headerRight: () => (
+            <TouchableOpacity 
+              onPress={() => router.push('/add-bookmark')}
+              style={styles.headerButton}
+            >
+              <Plus size={24} color="#EF4444" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Tabs.Screen
@@ -60,6 +68,14 @@ export default function TabLayout() {
         options={{
           title: 'Projects',
           tabBarIcon: ({ color, size }) => <FolderOpen size={size} color={color} />,
+          headerRight: () => (
+            <TouchableOpacity 
+              onPress={() => router.push('/add-project')}
+              style={styles.headerButton}
+            >
+              <Plus size={24} color="#EF4444" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Tabs.Screen
@@ -67,6 +83,14 @@ export default function TabLayout() {
         options={{
           title: 'Notes',
           tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
+          headerRight: () => (
+            <TouchableOpacity 
+              onPress={() => router.push('/add-note')}
+              style={styles.headerButton}
+            >
+              <Plus size={24} color="#EF4444" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Tabs.Screen
@@ -74,6 +98,14 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          headerRight: () => (
+            <TouchableOpacity 
+              onPress={() => router.push('/settings')}
+              style={styles.headerButton}
+            >
+              <Settings size={24} color="#6B7280" />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Tabs>
