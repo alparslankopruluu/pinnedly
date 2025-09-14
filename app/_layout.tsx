@@ -1,20 +1,15 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AuthProvider, useAuth } from "@/store/useAuthStore";
-import { SocialProvider } from "@/store/useSocialStore";
-import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
-
-import { trpc, trpcClient } from "@/lib/trpc";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { initializeDatabase } from "@/lib/supabase";
+import { OfflineProvider } from "@/providers/OfflineProvider";
+import { syncEngine } from "@/services/sync-engine";
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+
 
 function RootLayoutNav() {
   // Simplified navigation without auth/onboarding checks to prevent bundling loop
@@ -41,8 +36,19 @@ export default function RootLayout() {
   useEffect(() => {
     const initApp = async () => {
       try {
-        console.log('App initializing...');
-        // Skip all complex initialization for now
+        console.log('App initializing with offline-first architecture...');
+        
+        // Initialize sync engine
+        console.log('Sync engine initialized');
+        
+        // Force initial sync if online
+        try {
+          await syncEngine.forceSync();
+          console.log('Initial sync completed');
+        } catch (syncError) {
+          console.warn('Initial sync failed, will continue offline:', syncError);
+        }
+        
       } catch (error) {
         console.error('Failed to initialize app:', error);
       } finally {
@@ -53,11 +59,12 @@ export default function RootLayout() {
     initApp();
   }, []);
 
-  // Simplified layout without complex providers to prevent bundling loop
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={styles.container}>
-        <RootLayoutNav />
+        <OfflineProvider>
+          <RootLayoutNav />
+        </OfflineProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

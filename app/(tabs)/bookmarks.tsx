@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { useAppStore } from '@/store/useAppStore';
+import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChips } from '@/components/ui/FilterChips';
 import { BookmarkCard } from '@/components/BookmarkCard';
@@ -13,7 +13,7 @@ type SortOption = 'recent' | 'most-opened';
 type FilterOption = 'all' | 'never-opened' | 'frequently' | 'tagged';
 
 export default function BookmarksScreen() {
-  const { bookmarks } = useAppStore();
+  const { bookmarks, loading, error } = useBookmarkStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('all');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -111,6 +111,22 @@ export default function BookmarksScreen() {
     />
   );
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text>Loading bookmarks...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -160,5 +176,13 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flexGrow: 1,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 16,
   },
 });

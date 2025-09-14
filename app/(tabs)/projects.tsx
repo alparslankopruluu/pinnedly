@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { List, Grid3X3 } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { useAppStore } from '@/store/useAppStore';
+import { useProjectStore } from '@/providers/OfflineProvider';
 import { FilterChips } from '@/components/ui/FilterChips';
 import { ProjectCard } from '@/components/ProjectCard';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -14,7 +13,7 @@ type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
 
 export default function ProjectsScreen() {
-  const { projects } = useAppStore();
+  const { projects, loading, error } = useProjectStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('on-track');
 
@@ -88,8 +87,24 @@ export default function ProjectsScreen() {
     />
   );
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text>Loading projects...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <FlatList
         data={filteredProjects}
         renderItem={renderProject}
@@ -99,7 +114,7 @@ export default function ProjectsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={filteredProjects.length === 0 ? styles.emptyContainer : undefined}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -143,5 +158,13 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flexGrow: 1,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 16,
   },
 });
