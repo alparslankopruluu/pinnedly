@@ -360,6 +360,21 @@ class AuthRepository {
     }
   }
 
+  async resetPassword(email: string): Promise<void> {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://your-app.com/reset-password',
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
 }
 
 export const authRepository = new AuthRepository();

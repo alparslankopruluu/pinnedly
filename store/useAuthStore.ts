@@ -127,6 +127,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     return authRepository.searchUsersByEmail(email);
   }, []);
 
+  const resetPassword = useCallback(async (email: string): Promise<void> => {
+    return authRepository.resetPassword(email);
+  }, []);
+
   return useMemo(() => ({
     ...authState,
     signIn,
@@ -138,5 +142,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     getUserById,
     signInWithApple,
     searchUsersByEmail,
-  }), [authState, signIn, signUp, signOut, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail]);
+    resetPassword,
+  }), [authState, signIn, signUp, signOut, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail, resetPassword]);
 });
