@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, List, Grid3X3 } from 'lucide-react-native';
+import { List, Grid3X3 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { FilterChips } from '@/components/ui/FilterChips';
@@ -44,9 +44,7 @@ export default function ProjectsScreen() {
       project={item}
       onPress={() => router.push(`/project/${item.id}` as any)}
       onEdit={() => {
-        // Navigate to edit project screen or show edit modal
         console.log('Edit project:', item.id);
-        // You could implement a quick edit modal here or navigate to edit screen
       }}
     />
   );
@@ -73,7 +71,6 @@ export default function ProjectsScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
       <FilterChips
         chips={filterChips}
         selectedId={selectedFilter}
@@ -93,13 +90,6 @@ export default function ProjectsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Projects</Text>
-        <TouchableOpacity onPress={() => router.push('/add-project')}>
-          <Plus size={24} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={filteredProjects}
         renderItem={renderProject}
@@ -117,18 +107,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
   },
   viewToggle: {
     flexDirection: 'row',

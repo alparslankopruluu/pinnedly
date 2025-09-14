@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, ChevronDown } from 'lucide-react-native';
+import { ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -28,7 +28,7 @@ export default function BookmarksScreen() {
 
   const filteredAndSortedBookmarks = useMemo(() => {
     let filtered = bookmarks;
-
+    
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -40,7 +40,7 @@ export default function BookmarksScreen() {
           bookmark.tags.some((tag) => tag.name.toLowerCase().includes(query))
       );
     }
-
+    
     // Apply category filter
     switch (selectedFilter) {
       case 'never-opened':
@@ -53,7 +53,7 @@ export default function BookmarksScreen() {
         filtered = filtered.filter((bookmark) => bookmark.tags.length > 0);
         break;
     }
-
+    
     // Apply sorting
     switch (sortBy) {
       case 'recent':
@@ -63,7 +63,7 @@ export default function BookmarksScreen() {
         filtered.sort((a, b) => b.openCount - a.openCount);
         break;
     }
-
+    
     return filtered;
   }, [bookmarks, searchQuery, selectedFilter, sortBy]);
 
@@ -114,13 +114,6 @@ export default function BookmarksScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Bookmarks</Text>
-        <TouchableOpacity onPress={() => router.push('/add-bookmark')}>
-          <Plus size={24} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={filteredAndSortedBookmarks}
         renderItem={renderBookmark}
@@ -138,18 +131,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
   },
   sortContainer: {
     flexDirection: 'row',

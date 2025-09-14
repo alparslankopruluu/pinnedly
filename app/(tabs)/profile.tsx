@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated } from 'react-native';
 import { router } from 'expo-router';
 import { 
   User, 
   ChevronRight,
   Crown,
-  Sparkles,
-  Settings 
+  Sparkles
 } from 'lucide-react-native';
 import { useAppStore } from '@/store/useAppStore';
 import { PremiumModal } from '@/components/PremiumModal';
@@ -16,7 +15,7 @@ export default function ProfileScreen() {
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
   
   const pulseAnim = useMemo(() => new Animated.Value(1), []);
-
+  
   React.useEffect(() => {
     const pulse = () => {
       Animated.sequence([
@@ -45,7 +44,6 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-
         {/* Profile Section */}
         <View style={styles.profileSection}>
           <View style={styles.avatar}>
@@ -54,7 +52,7 @@ export default function ProfileScreen() {
           <Text style={styles.profileName}>Pinnedly User</Text>
           <Text style={styles.profileEmail}>Keep your knowledge organized</Text>
         </View>
-
+        
         {/* Stats Section */}
         <View style={styles.statsSection}>
           <Text style={styles.sectionTitle}>Your Stats</Text>
@@ -67,7 +65,7 @@ export default function ProfileScreen() {
             ))}
           </View>
         </View>
-
+        
         {/* Goals Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Goals</Text>
@@ -80,7 +78,7 @@ export default function ProfileScreen() {
             <Text style={styles.goalValue}>{preferences.weeklyGoal || 20} bookmarks</Text>
           </View>
         </View>
-
+        
         {/* Premium CTA Section */}
         <View style={styles.section}>
           <Animated.View style={[styles.premiumCTA, { transform: [{ scale: pulseAnim }] }]}>
@@ -104,23 +102,6 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </Animated.View>
         </View>
-
-        {/* Settings Row */}
-        <View style={styles.section}>
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => router.push('/settings')}
-          >
-            <View style={styles.settingIcon}>
-              <Settings size={20} color="#6B7280" />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Settings</Text>
-              <Text style={styles.settingSubtitle}>Manage your preferences and account</Text>
-            </View>
-            <ChevronRight size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-        </View>
       </ScrollView>
       
       {/* Premium Modal */}
@@ -139,15 +120,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
   },
   profileSection: {
     alignItems: 'center',
@@ -247,42 +219,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#EF4444',
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  settingContent: {
-    flex: 1,
-  },
-  settingTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  settingSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
   },
   premiumCTA: {
     marginHorizontal: 16,

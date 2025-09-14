@@ -17,11 +17,11 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isCompleted: onboardingCompleted, isLoading: onboardingLoading } = useOnboarding();
-
+  
   if (authLoading || onboardingLoading) {
-    return null; // Or a loading screen
+    return null;
   }
-
+  
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       {!isAuthenticated ? (
@@ -30,7 +30,7 @@ function RootLayoutNav() {
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       ) : (
         <>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: true }} />
           <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
           <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
           <Stack.Screen name="add-note" options={{ presentation: "modal" }} />

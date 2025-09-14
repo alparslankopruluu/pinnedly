@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, FileText } from 'lucide-react-native';
+import { FileText } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -50,13 +50,6 @@ export default function NotesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notes</Text>
-        <TouchableOpacity onPress={() => router.push('/add-note')}>
-          <Plus size={24} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={notes}
         renderItem={renderNote}
@@ -73,18 +66,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
   },
   listContainer: {
     padding: 16,
