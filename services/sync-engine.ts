@@ -40,9 +40,19 @@ class SyncEngine {
   private initializeNetworkListener() {
     if (Platform.OS === 'web') {
       // Web fallback
-      window.addEventListener('online', () => {
+      window.addEventListener('online', async () => {
         this.isOnline = true;
-        this.processSyncQueue();
+        
+        // Only sync if user is authenticated
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            this.processSyncQueue();
+          }
+        } catch (error) {
+          console.warn('Auth check failed on network online:', error);
+        }
+        
         this.notifyListeners();
       });
       
@@ -148,20 +158,60 @@ class SyncEngine {
   // Execute individual sync operation
   private async executeOperation(operation: SyncOperation) {
     const { type, table, data } = operation;
+    
+    console.log(`Executing ${type} operation for ${table}:`, data.id);
 
-    switch (type) {
-      case 'CREATE':
-        const { error: createError } = await supabase.from(table).insert(data);
-        if (createError) throw createError;
-        break;
-      case 'UPDATE':
-        const { error: updateError } = await supabase.from(table).update(data).eq('id', data.id);
-        if (updateError) throw updateError;
-        break;
-      case 'DELETE':
-        const { error: deleteError } = await supabase.from(table).delete().eq('id', data.id);
-        if (deleteError) throw deleteError;
-        break;
+    try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      switch (type) {
+        case 'CREATE':
+          const { error: createError } = await supabase.from(table).insert(data);
+          if (createError) {
+            console.error(`Create error for ${table}:`, {
+              message: createError.message,
+              details: createError.details,
+              hint: createError.hint,
+              code: createError.code
+            });
+            throw new Error(`Create failed: ${createError.message}`);
+          }
+          break;
+        case 'UPDATE':
+          const { error: updateError } = await supabase.from(table).update(data).eq('id', data.id);
+          if (updateError) {
+            console.error(`Update error for ${table}:`, {
+              message: updateError.message,
+              details: updateError.details,
+              hint: updateError.hint,
+              code: updateError.code
+            });
+            throw new Error(`Update failed: ${updateError.message}`);
+          }
+          break;
+        case 'DELETE':
+          const { error: deleteError } = await supabase.from(table).delete().eq('id', data.id);
+          if (deleteError) {
+            console.error(`Delete error for ${table}:`, {
+              message: deleteError.message,
+              details: deleteError.details,
+              hint: deleteError.hint,
+              code: deleteError.code
+            });
+            throw new Error(`Delete failed: ${deleteError.message}`);
+          }
+          break;
+      }
+      
+      console.log(`Successfully executed ${type} operation for ${table}:`, data.id);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Failed to execute ${type} operation for ${table}:`, errorMessage);
+      throw new Error(`${type} operation failed: ${errorMessage}`);
     }
   }
 
@@ -173,6 +223,15 @@ class SyncEngine {
     }
 
     try {
+      console.log(`Starting sync from remote for table: ${table}`);
+      
+      // Check if user is authenticated first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn(`User not authenticated, skipping sync for ${table}`);
+        return;
+      }
+
       let query = supabase.from(table).select('*');
       
       if (lastSyncTime) {
@@ -181,35 +240,63 @@ class SyncEngine {
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error(`Supabase error for table ${table}:`, {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Database error: ${error.message}`);
+      }
       
       if (data && data.length > 0) {
         // Store in local storage
         await AsyncStorage.setItem(`local_${table}`, JSON.stringify(data));
         
         console.log(`Synced ${data.length} records from ${table}`);
+      } else {
+        console.log(`No new records to sync for ${table}`);
       }
     } catch (error) {
-      console.error(`Failed to sync from remote ${table}:`, error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Failed to sync from remote ${table}:`, errorMessage);
+      throw new Error(`Failed to sync from remote ${table}: ${errorMessage}`);
     }
   }
 
   // Get data with offline-first approach
   public async getData(table: string, useCache: boolean = true): Promise<any[]> {
     try {
+      console.log(`Getting data for table: ${table}, online: ${this.isOnline}`);
+      
       // If online, try to fetch from remote first
       if (this.isOnline) {
         try {
-          const { data, error } = await supabase.from(table).select('*');
-          
-          if (!error && data) {
-            // Cache the data locally
-            await AsyncStorage.setItem(`local_${table}`, JSON.stringify(data));
-            return data;
+          // Check if user is authenticated first
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            console.warn(`User not authenticated, using local cache for ${table}`);
+          } else {
+            const { data, error } = await supabase.from(table).select('*');
+            
+            if (error) {
+              console.warn(`Remote fetch error for ${table}:`, {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+              });
+            } else if (data) {
+              // Cache the data locally
+              await AsyncStorage.setItem(`local_${table}`, JSON.stringify(data));
+              console.log(`Fetched ${data.length} records from remote for ${table}`);
+              return data;
+            }
           }
         } catch (remoteError) {
-          console.warn(`Remote fetch failed for ${table}, falling back to local:`, remoteError);
+          const errorMessage = remoteError instanceof Error ? remoteError.message : String(remoteError);
+          console.warn(`Remote fetch failed for ${table}, falling back to local:`, errorMessage);
         }
       }
 
@@ -223,34 +310,52 @@ class SyncEngine {
         }
       }
 
+      console.log(`No data available for ${table}`);
       return [];
     } catch (error) {
-      console.error(`Failed to get data for ${table}:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Failed to get data for ${table}:`, errorMessage);
       return [];
     }
   }
 
   // Create data with offline support
   public async createData(table: string, data: any) {
-    const timestamp = Date.now();
-    const dataWithTimestamp = {
-      ...data,
-      id: data.id || `temp_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
-      created_at: new Date(timestamp).toISOString(),
-      updated_at: new Date(timestamp).toISOString()
-    };
+    try {
+      console.log(`Creating data for table: ${table}`);
+      
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const timestamp = Date.now();
+      const dataWithTimestamp = {
+        ...data,
+        id: data.id || `temp_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
+        owner_id: data.owner_id || user.id,
+        created_at: new Date(timestamp).toISOString(),
+        updated_at: new Date(timestamp).toISOString()
+      };
 
-    // Store locally immediately
-    await this.updateLocalData(table, dataWithTimestamp, 'CREATE');
+      // Store locally immediately
+      await this.updateLocalData(table, dataWithTimestamp, 'CREATE');
 
-    // Queue for remote sync
-    await this.queueOperation({
-      type: 'CREATE',
-      table,
-      data: dataWithTimestamp
-    });
+      // Queue for remote sync
+      await this.queueOperation({
+        type: 'CREATE',
+        table,
+        data: dataWithTimestamp
+      });
 
-    return dataWithTimestamp;
+      console.log(`Data created successfully for ${table}:`, dataWithTimestamp.id);
+      return dataWithTimestamp;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Failed to create data for ${table}:`, errorMessage);
+      throw new Error(`Failed to create data for ${table}: ${errorMessage}`);
+    }
   }
 
   // Update data with offline support
@@ -336,9 +441,17 @@ class SyncEngine {
 
   // Start periodic sync (every 30 seconds when online)
   private startPeriodicSync() {
-    setInterval(() => {
+    setInterval(async () => {
       if (this.isOnline && !this.syncInProgress) {
-        this.processSyncQueue();
+        // Check if user is authenticated before syncing
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            this.processSyncQueue();
+          }
+        } catch (error) {
+          console.warn('Auth check failed during periodic sync:', error);
+        }
       }
     }, 30000);
   }
@@ -377,14 +490,22 @@ class SyncEngine {
 
     console.log('Starting force sync...');
     
+    // Check if user is authenticated first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.warn('User not authenticated, skipping force sync');
+      return;
+    }
+    
     // Sync all tables
-    const tables = ['projects', 'tasks', 'bookmarks', 'notes', 'bookmark_lists'];
+    const tables = ['projects', 'tasks', 'bookmarks', 'notes', 'bookmark_lists', 'profiles', 'project_members'];
     
     for (const table of tables) {
       try {
         await this.syncFromRemote(table);
       } catch (error) {
-        console.error(`Failed to sync table ${table}:`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Failed to sync table ${table}:`, errorMessage);
       }
     }
 

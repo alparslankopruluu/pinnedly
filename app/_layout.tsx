@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineProvider } from "@/providers/OfflineProvider";
-import { syncEngine } from "@/services/sync-engine";
+import { initializeDatabase } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,29 +34,37 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    
     const initApp = async () => {
       try {
-        console.log('App initializing with offline-first architecture...');
+        console.log('App initializing...');
         
-        // Initialize sync engine
-        console.log('Sync engine initialized');
-        
-        // Force initial sync if online
-        try {
-          await syncEngine.forceSync();
-          console.log('Initial sync completed');
-        } catch (syncError) {
-          console.warn('Initial sync failed, will continue offline:', syncError);
+        // Initialize database connection
+        const dbInitialized = await initializeDatabase();
+        if (dbInitialized) {
+          console.log('Database connection established');
+        } else {
+          console.warn('Database connection failed, continuing in offline mode');
         }
         
       } catch (error) {
         console.error('Failed to initialize app:', error);
       } finally {
-        SplashScreen.hideAsync();
+        // Hide splash screen after a short delay to ensure UI is ready
+        timeoutId = setTimeout(() => {
+          SplashScreen.hideAsync();
+        }, 500);
       }
     };
     
     initApp();
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   return (

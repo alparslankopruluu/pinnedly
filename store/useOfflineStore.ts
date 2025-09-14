@@ -156,10 +156,10 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     }
   }, [loadProjects]);
 
-  // Load projects on mount and when sync status changes
+  // Load projects on mount but don't auto-sync on every online status change
   useEffect(() => {
     loadProjects();
-  }, [syncStatus.isOnline, loadProjects]);
+  }, [loadProjects]);
 
   return useMemo(() => ({
     projects,
@@ -317,7 +317,7 @@ export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() =>
 
   useEffect(() => {
     loadBookmarks();
-  }, [syncStatus.isOnline, loadBookmarks]);
+  }, [loadBookmarks]);
 
   return useMemo(() => ({
     bookmarks,
@@ -449,7 +449,7 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
 
   useEffect(() => {
     loadNotes();
-  }, [syncStatus.isOnline, loadNotes]);
+  }, [loadNotes]);
 
   return useMemo(() => ({
     notes,
