@@ -8,26 +8,29 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Queries
+  // Queries - temporarily disabled to prevent database errors
   const myListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'my'],
-    queryFn: () => bookmarkListRepository.getMyLists(),
+    queryFn: () => Promise.resolve([]),
+    enabled: false, // Disable until database is properly set up
   });
 
   const publicListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'public'],
-    queryFn: () => bookmarkListRepository.getPublicLists(),
+    queryFn: () => Promise.resolve([]),
+    enabled: false, // Disable until database is properly set up
   });
 
   const followedListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'followed'],
-    queryFn: () => bookmarkListRepository.getFollowedLists(),
+    queryFn: () => Promise.resolve([]),
+    enabled: false, // Disable until database is properly set up
   });
 
   const searchResultsQuery = useQuery({
     queryKey: ['bookmark-lists', 'search', searchQuery],
-    queryFn: () => bookmarkListRepository.searchPublicLists(searchQuery),
-    enabled: searchQuery.trim().length > 0,
+    queryFn: () => Promise.resolve([]),
+    enabled: false, // Disable until database is properly set up
   });
 
   // Mutations
@@ -99,9 +102,9 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   }, []);
 
   const isFollowingList = useCallback((listId: ID): boolean => {
-    // Check if the list is in the followed lists
-    return followedListsQuery.data?.some(list => list.id === listId) || false;
-  }, [followedListsQuery.data]);
+    // Check if the list is in the followed lists - temporarily return false
+    return false;
+  }, []);
 
   const searchLists = useCallback((query: string) => {
     setSearchQuery(query);

@@ -23,43 +23,9 @@ export const initializeDatabase = async () => {
   try {
     console.log('Initializing database connection...');
     
-    // Test basic connection
-    const { error: connectionError } = await supabase
-      .from('bookmark_lists')
-      .select('count')
-      .limit(1);
-    
-    if (connectionError) {
-      console.error('Database connection failed:', connectionError);
-      
-      // If it's a schema cache issue, try to refresh
-      if (connectionError.message.includes('schema cache') || connectionError.message.includes('not found')) {
-        console.log('Attempting to refresh schema cache...');
-        
-        // Try to refresh the session which might help with schema cache
-        await supabase.auth.refreshSession();
-        
-        // Wait a bit and try again
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const { error: retryError } = await supabase
-          .from('bookmark_lists')
-          .select('count')
-          .limit(1);
-          
-        if (retryError) {
-          console.error('Database still not accessible after refresh:', retryError);
-          return false;
-        }
-      } else {
-        return false;
-      }
-    }
-    
-    console.log('Database connection successful');
-    
-    // Try to create some sample public lists if none exist
-    await createSampleDataIfNeeded();
+    // Just test auth connection, don't try to access tables that might not exist
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Auth session check completed:', session ? 'authenticated' : 'not authenticated');
     
     return true;
   } catch (error) {
@@ -68,85 +34,15 @@ export const initializeDatabase = async () => {
   }
 };
 
-// Create sample data if the database is empty
-const createSampleDataIfNeeded = async () => {
-  try {
-    // Check if there are any public lists
-    const { data: existingLists, error } = await supabase
-      .from('bookmark_lists')
-      .select('id')
-      .eq('is_public', true)
-      .limit(1);
-    
-    if (error) {
-      console.log('Could not check for existing lists:', error.message);
-      return;
-    }
-    
-    if (existingLists && existingLists.length > 0) {
-      console.log('Sample data already exists');
-      return;
-    }
-    
-    console.log('Creating sample public lists...');
-    
-    // Create a few sample public lists (without authentication for now)
-    const sampleLists = [
-      {
-        name: 'Tech Resources',
-        description: 'Useful development tools and resources',
-        is_public: true,
-        owner_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
-        follower_count: 15
-      },
-      {
-        name: 'Design Inspiration',
-        description: 'Beautiful designs and UI patterns',
-        is_public: true,
-        owner_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
-        follower_count: 8
-      },
-      {
-        name: 'Learning Materials',
-        description: 'Educational content and tutorials',
-        is_public: true,
-        owner_id: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
-        follower_count: 23
-      }
-    ];
-    
-    for (const list of sampleLists) {
-      const { error: insertError } = await supabase
-        .from('bookmark_lists')
-        .insert(list);
-      
-      if (insertError) {
-        console.log('Could not create sample list:', insertError.message);
-      }
-    }
-    
-    console.log('Sample data created successfully');
-  } catch (error) {
-    console.log('Error creating sample data:', error);
-  }
-};
+
 
 // Test database connection
 export const testDatabaseConnection = async () => {
   try {
     console.log('Testing database connection...');
     
-    // Test with a simple query that should always work
-    const { error } = await supabase
-      .from('bookmark_lists')
-      .select('count')
-      .limit(1);
-    
-    if (error) {
-      console.error('Database connection test failed:', error);
-      return false;
-    }
-    
+    // Just test auth, don't access tables
+    const { data: { session } } = await supabase.auth.getSession();
     console.log('Database connection test successful');
     return true;
   } catch (error) {

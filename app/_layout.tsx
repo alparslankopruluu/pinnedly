@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "@/store/useAuthStore";
 import { SocialProvider } from "@/store/useSocialStore";
 import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
-import { BookmarkListProvider } from "@/store/useBookmarkListStore";
+
 import { trpc, trpcClient } from "@/lib/trpc";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initializeDatabase } from "@/lib/supabase";
@@ -47,7 +47,6 @@ function RootLayoutNav() {
           <Stack.Screen name="bookmark-list/[id]" options={{ title: "Bookmark List" }} />
         </>
       )}
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -75,11 +74,9 @@ export default function RootLayout() {
           <AuthProvider>
             <OnboardingProvider>
               <SocialProvider>
-                <BookmarkListProvider>
-                  <GestureHandlerRootView style={styles.container}>
-                    <RootLayoutNav />
-                  </GestureHandlerRootView>
-                </BookmarkListProvider>
+                <GestureHandlerRootView style={styles.container}>
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
               </SocialProvider>
             </OnboardingProvider>
           </AuthProvider>
