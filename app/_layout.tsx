@@ -17,36 +17,22 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isCompleted: onboardingCompleted, isLoading: onboardingLoading } = useOnboarding();
-  
-  if (authLoading || onboardingLoading) {
-    return null;
-  }
-  
+  // Simplified navigation without auth/onboarding checks to prevent bundling loop
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      {!isAuthenticated ? (
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      ) : !onboardingCompleted ? (
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      ) : (
-        <>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
-          <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
-          <Stack.Screen name="add-note" options={{ presentation: "modal" }} />
-          <Stack.Screen name="bookmark/[id]" />
-          <Stack.Screen name="project/[id]" />
-          <Stack.Screen name="note/[id]" />
-          <Stack.Screen name="profile/[id]" />
-          <Stack.Screen name="share-inbox" options={{ title: "Share Inbox" }} />
-          <Stack.Screen name="people-search" options={{ presentation: "modal", title: "Find People" }} />
-          <Stack.Screen name="discover-lists" options={{ title: "Discover Lists" }} />
-          <Stack.Screen name="create-list" options={{ presentation: "modal", title: "Create List" }} />
-          <Stack.Screen name="bookmark-list/[id]" options={{ title: "Bookmark List" }} />
-        </>
-      )}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
+      <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
+      <Stack.Screen name="add-note" options={{ presentation: "modal" }} />
+      <Stack.Screen name="bookmark/[id]" />
+      <Stack.Screen name="project/[id]" />
+      <Stack.Screen name="note/[id]" />
+      <Stack.Screen name="profile/[id]" />
+      <Stack.Screen name="share-inbox" options={{ title: "Share Inbox" }} />
+      <Stack.Screen name="people-search" options={{ presentation: "modal", title: "Find People" }} />
+      <Stack.Screen name="discover-lists" options={{ title: "Discover Lists" }} />
+      <Stack.Screen name="create-list" options={{ presentation: "modal", title: "Create List" }} />
+      <Stack.Screen name="bookmark-list/[id]" options={{ title: "Bookmark List" }} />
     </Stack>
   );
 }
@@ -55,10 +41,10 @@ export default function RootLayout() {
   useEffect(() => {
     const initApp = async () => {
       try {
-        // Initialize database connection
-        await initializeDatabase();
+        console.log('App initializing...');
+        // Skip all complex initialization for now
       } catch (error) {
-        console.error('Failed to initialize database:', error);
+        console.error('Failed to initialize app:', error);
       } finally {
         SplashScreen.hideAsync();
       }
@@ -67,21 +53,12 @@ export default function RootLayout() {
     initApp();
   }, []);
 
+  // Simplified layout without complex providers to prevent bundling loop
   return (
     <ErrorBoundary>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <OnboardingProvider>
-              <SocialProvider>
-                <GestureHandlerRootView style={styles.container}>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </SocialProvider>
-            </OnboardingProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </trpc.Provider>
+      <GestureHandlerRootView style={styles.container}>
+        <RootLayoutNav />
+      </GestureHandlerRootView>
     </ErrorBoundary>
   );
 }

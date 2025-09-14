@@ -16,7 +16,9 @@ function HomeContent() {
   } = useAppStore();
 
   useEffect(() => {
-    loadData();
+    // Temporarily disable automatic data loading to prevent bundling loop
+    console.log('Skipping data loading to prevent bundling loop');
+    // loadData();
   }, []);
 
   const getContinueItems = () => {

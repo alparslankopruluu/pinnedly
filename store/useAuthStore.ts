@@ -18,14 +18,16 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const initializeAuth = async () => {
     try {
-      await authRepository.initialize();
-      await socialRepository.initialize();
-      await slugRepository.initialize();
+      console.log('Initializing auth (simplified for development)');
+      // Temporarily skip repository initialization to prevent bundling loop
+      // await authRepository.initialize();
+      // await socialRepository.initialize();
+      // await slugRepository.initialize();
       
-      const user = authRepository.getCurrentUser();
+      // const user = authRepository.getCurrentUser();
       setAuthState({
-        user,
-        isAuthenticated: !!user,
+        user: null,
+        isAuthenticated: false,
         isLoading: false,
       });
     } catch (error) {
