@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings, CheckCircle, Clock, TrendingUp } from 'lucide-react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { CheckCircle, Clock, TrendingUp } from 'lucide-react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '@/store/useAuthStore';
 import { useAppStore } from '@/store/useAppStore';
 import { QuickAddFAB } from '@/components/QuickAddFAB';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
@@ -73,19 +70,9 @@ function HomeContent() {
   const recentActivities = activities.slice(0, 3);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={loadData} />
-        }
-      >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Home</Text>
-          <TouchableOpacity onPress={() => router.push('/profile')}>
-            <Settings size={24} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+
 
         {/* Continue Section */}
         <View style={styles.section}>
@@ -195,7 +182,7 @@ function HomeContent() {
       </ScrollView>
 
       <QuickAddFAB />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -254,18 +241,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
-  },
+
   section: {
     marginBottom: 24,
   },

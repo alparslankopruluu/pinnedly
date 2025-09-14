@@ -1,6 +1,7 @@
-import { Tabs } from 'expo-router';
-import { Home, Bookmark, FolderOpen, FileText, User } from 'lucide-react-native';
+import { Tabs, router } from 'expo-router';
+import { Home, Bookmark, FolderOpen, FileText, User, Settings } from 'lucide-react-native';
 import React from 'react';
+import { TouchableOpacity, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -37,6 +38,14 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          headerRight: () => (
+            <TouchableOpacity 
+              onPress={() => router.push('/settings')}
+              style={styles.headerButton}
+            >
+              <Settings size={24} color="#6B7280" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Tabs.Screen
@@ -70,3 +79,9 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  headerButton: {
+    marginRight: 16,
+  },
+});
