@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
@@ -113,7 +112,7 @@ export default function BookmarksScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <FlatList
         data={filteredAndSortedBookmarks}
         renderItem={renderBookmark}
@@ -123,7 +122,7 @@ export default function BookmarksScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={filteredAndSortedBookmarks.length === 0 ? styles.emptyContainer : undefined}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

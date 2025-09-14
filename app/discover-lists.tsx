@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Search, Users, Heart, ArrowLeft, Plus } from 'lucide-react-native';
@@ -19,6 +19,7 @@ export default function PublicListsScreen() {
     unfollowList,
     searchLists,
     refreshPublicLists,
+    isFollowingList,
   } = useBookmarkLists();
 
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
@@ -43,10 +44,14 @@ export default function PublicListsScreen() {
 
   const handleFollowToggle = async (list: BookmarkList) => {
     try {
-      // This would need to be implemented with a proper follow status check
-      await followList(list.id);
+      const isCurrentlyFollowing = isFollowingList(list.id);
+      if (isCurrentlyFollowing) {
+        await unfollowList(list.id);
+      } else {
+        await followList(list.id);
+      }
     } catch (error) {
-      console.error('Follow error:', error);
+      console.error('Follow toggle error:', error);
     }
   };
 
@@ -65,14 +70,14 @@ export default function PublicListsScreen() {
           )}
         </View>
         <TouchableOpacity
-          style={[styles.followButton, isFollowing && styles.followingButton]}
+          style={[styles.followButton, isFollowingList(item.id) && styles.followingButton]}
           onPress={() => handleFollowToggle(item)}
           disabled={isFollowing}
         >
           <Heart
             size={16}
-            color={isFollowing ? '#ef4444' : '#64748b'}
-            fill={isFollowing ? '#ef4444' : 'transparent'}
+            color={isFollowingList(item.id) ? '#ef4444' : '#64748b'}
+            fill={isFollowingList(item.id) ? '#ef4444' : 'transparent'}
           />
         </TouchableOpacity>
       </View>
@@ -124,9 +129,8 @@ export default function PublicListsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Users size={48} color="#d1d5db" />

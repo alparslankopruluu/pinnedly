@@ -40,7 +40,10 @@ class BookmarkListRepository {
   async getMyLists(): Promise<BookmarkList[]> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) {
+        console.log('User not authenticated, returning empty lists');
+        return [];
+      }
 
       const { data, error } = await supabase
         .from('bookmark_lists')
@@ -48,7 +51,12 @@ class BookmarkListRepository {
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Database error:', error.message);
+        return [];
+      }
+
+      if (!data) return [];
 
       return data.map(list => ({
         id: list.id,
@@ -69,22 +77,40 @@ class BookmarkListRepository {
 
   async getPublicLists(limit: number = 20): Promise<BookmarkList[]> {
     try {
+      console.log('Attempting to fetch public lists...');
+      
+      // First test if we can connect to the database at all
+      const { data: testData, error: testError } = await supabase
+        .from('bookmark_lists')
+        .select('count')
+        .limit(1);
+      
+      if (testError) {
+        console.error('Database connection test failed:', testError);
+        return [];
+      }
+      
+      console.log('Database connection successful, fetching public lists...');
+      
       const { data, error } = await supabase
         .from('bookmark_lists')
-        .select(`
-          *,
-          profiles!bookmark_lists_owner_id_fkey (
-            handle,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('is_public', true)
         .order('follower_count', { ascending: false })
         .limit(limit);
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Database error:', error.message, error.details, error.hint);
+        return [];
+      }
 
+      if (!data) {
+        console.log('No data returned from query');
+        return [];
+      }
+
+      console.log(`Successfully fetched ${data.length} public lists`);
+      
       return data.map(list => ({
         id: list.id,
         name: list.name,
@@ -240,24 +266,25 @@ class BookmarkListRepository {
   async getFollowedLists(): Promise<BookmarkList[]> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      if (!user) {
+        console.log('User not authenticated, returning empty followed lists');
+        return [];
+      }
 
       const { data, error } = await supabase
         .from('list_followers')
         .select(`
-          bookmark_lists (
-            *,
-            profiles!bookmark_lists_owner_id_fkey (
-              handle,
-              display_name,
-              avatar_url
-            )
-          )
+          bookmark_lists (*)
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Database error:', error.message);
+        return [];
+      }
+
+      if (!data) return [];
 
       return data
         .filter(item => item.bookmark_lists)
@@ -287,20 +314,18 @@ class BookmarkListRepository {
     try {
       const { data, error } = await supabase
         .from('bookmark_lists')
-        .select(`
-          *,
-          profiles!bookmark_lists_owner_id_fkey (
-            handle,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('is_public', true)
         .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
         .order('follower_count', { ascending: false })
         .limit(20);
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Database error:', error.message);
+        return [];
+      }
+
+      if (!data) return [];
 
       return data.map(list => ({
         id: list.id,
