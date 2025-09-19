@@ -2,6 +2,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { syncEngine, useSyncStatus } from '@/services/sync-engine';
 import { projectRepository } from '@/repositories/ProjectRepository';
+import { notificationService } from '@/utils/notifications';
 import { Project, Bookmark, Note } from '@/types';
 
 export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
@@ -35,6 +36,18 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
       
       const newProject = await projectRepository.createProject(projectData);
       setProjects(prev => [newProject, ...prev]);
+      
+      // Schedule project nudge notifications if deadline exists
+      if (projectData.deadline) {
+        const nudgeTime = new Date(projectData.deadline - 7 * 24 * 60 * 60 * 1000); // 1 week before
+        if (nudgeTime > new Date()) {
+          await notificationService.scheduleProjectNudge(
+            newProject.id,
+            newProject.title,
+            nudgeTime
+          );
+        }
+      }
       
       console.log('Project created successfully:', newProject.id);
       return newProject;
@@ -84,6 +97,18 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
         ...taskData,
         status: taskData.status || 'todo'
       });
+      
+      // Schedule notification if task has due date
+      if (taskData.dueDate) {
+        const reminderTime = new Date(taskData.dueDate - 24 * 60 * 60 * 1000); // 1 day before
+        if (reminderTime > new Date()) {
+          await notificationService.scheduleTaskReminder(
+            newTask.id,
+            newTask.title,
+            reminderTime
+          );
+        }
+      }
       
       // Update the project in local state
       setProjects(prev => prev.map(p => {
@@ -156,6 +181,14 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     }
   }, [loadProjects]);
 
+  const scheduleTaskReminder = useCallback(async (taskId: string, taskTitle: string, reminderTime: Date) => {
+    return notificationService.scheduleTaskReminder(taskId, taskTitle, reminderTime);
+  }, []);
+
+  const scheduleProjectNudge = useCallback(async (projectId: string, projectTitle: string, nudgeTime: Date) => {
+    return notificationService.scheduleProjectNudge(projectId, projectTitle, nudgeTime);
+  }, []);
+
   // Load projects on mount but don't auto-sync on every online status change
   useEffect(() => {
     loadProjects();
@@ -173,8 +206,10 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     addTask,
     updateTask,
     deleteTask,
-    syncProjects
-  }), [projects, loading, error, syncStatus, loadProjects, createProject, updateProject, deleteProject, addTask, updateTask, deleteTask, syncProjects]);
+    syncProjects,
+    scheduleTaskReminder,
+    scheduleProjectNudge
+  }), [projects, loading, error, syncStatus, loadProjects, createProject, updateProject, deleteProject, addTask, updateTask, deleteTask, syncProjects, scheduleTaskReminder, scheduleProjectNudge]);
 });
 
 // Bookmark Store with offline-first approach

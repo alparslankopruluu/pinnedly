@@ -5,6 +5,7 @@ import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineProvider } from "@/providers/OfflineProvider";
+import { AuthProvider } from "@/store/useAuthStore";
 import { initializeDatabase } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
@@ -70,9 +71,11 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={styles.container}>
-        <OfflineProvider>
-          <RootLayoutNav />
-        </OfflineProvider>
+        <AuthProvider>
+          <OfflineProvider>
+            <RootLayoutNav />
+          </OfflineProvider>
+        </AuthProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );
