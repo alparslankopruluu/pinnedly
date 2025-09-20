@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileText } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useNoteStore } from '@/providers/OfflineProvider';
@@ -9,11 +9,15 @@ import { formatRelativeTime } from '@/utils/date';
 import { Note } from '@/types';
 
 export default function NotesScreen() {
-  const { notes, loading, error } = useNoteStore();
+  const { notes } = useNoteStore();
+  const insets = useSafeAreaInsets();
 
   const renderNote = ({ item }: { item: Note }) => (
-    <TouchableOpacity
-      style={styles.noteCard}
+    <Pressable
+      style={({ pressed }) => [
+        styles.noteCard,
+        pressed && styles.noteCardPressed
+      ]}
       onPress={() => router.push(`/note/${item.id}` as any)}
     >
       <View style={styles.noteHeader}>
@@ -35,7 +39,7 @@ export default function NotesScreen() {
           </Text>
         </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 
   const renderEmpty = () => (
@@ -49,7 +53,7 @@ export default function NotesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <FlatList
         data={notes}
         renderItem={renderNote}
@@ -58,7 +62,7 @@ export default function NotesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={notes.length === 0 ? styles.emptyContainer : styles.listContainer}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -83,6 +87,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  noteCardPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
   },
   noteHeader: {
     flexDirection: 'row',

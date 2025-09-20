@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, Animated, Pressable } from 'react-native';
+
 import { 
   User, 
   ChevronRight,
@@ -43,6 +43,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.safeArea}>
       <ScrollView style={styles.scrollView}>
         {/* Profile Section */}
         <View style={styles.profileSection}>
@@ -82,8 +83,11 @@ export default function ProfileScreen() {
         {/* Premium CTA Section */}
         <View style={styles.section}>
           <Animated.View style={[styles.premiumCTA, { transform: [{ scale: pulseAnim }] }]}>
-            <TouchableOpacity
-              style={styles.premiumButton}
+            <Pressable
+              style={({ pressed }) => [
+                styles.premiumButton,
+                pressed && styles.premiumButtonPressed
+              ]}
               onPress={() => setShowPremiumModal(true)}
             >
               <View style={styles.premiumContent}>
@@ -99,10 +103,11 @@ export default function ProfileScreen() {
                 </View>
                 <ChevronRight size={20} color="#FFFFFF" />
               </View>
-            </TouchableOpacity>
+            </Pressable>
           </Animated.View>
         </View>
       </ScrollView>
+      </View>
       
       {/* Premium Modal */}
       <PremiumModal
@@ -117,6 +122,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+  },
+  safeArea: {
+    flex: 1,
+    paddingTop: 44,
   },
   scrollView: {
     flex: 1,
@@ -265,5 +274,9 @@ const styles = StyleSheet.create({
   premiumSubtitle: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  premiumButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

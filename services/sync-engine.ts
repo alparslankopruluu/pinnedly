@@ -324,16 +324,8 @@ class SyncEngine {
     try {
       console.log(`Creating data for table: ${table}`);
       
-      // For development, use test user ID if no auth user
-      let userId = 'test-user-123';
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          userId = user.id;
-        }
-      } catch (authError) {
-        console.warn('Auth check failed, using test user:', authError);
-      }
+      // Always use test user for development
+      const userId = 'test-user-123';
       
       const timestamp = Date.now();
       const dataWithTimestamp = {
@@ -347,12 +339,21 @@ class SyncEngine {
       // Store locally immediately
       await this.updateLocalData(table, dataWithTimestamp, 'CREATE');
 
-      // Queue for remote sync
-      await this.queueOperation({
-        type: 'CREATE',
-        table,
-        data: dataWithTimestamp
-      });
+      // Queue for remote sync only if we have a real user
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && user.id !== 'test-user-123') {
+          await this.queueOperation({
+            type: 'CREATE',
+            table,
+            data: { ...dataWithTimestamp, owner_id: user.id }
+          });
+        } else {
+          console.log('Skipping remote sync for test user');
+        }
+      } catch (authError) {
+        console.log('Auth check failed, skipping remote sync:', authError);
+      }
 
       console.log(`Data created successfully for ${table}:`, dataWithTimestamp.id);
       return dataWithTimestamp;

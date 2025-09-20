@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { List, Grid3X3, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useProjectStore } from '@/providers/OfflineProvider';
@@ -8,7 +9,7 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Project, Task } from '@/types';
 import { isOverdue } from '@/utils/date';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
@@ -17,6 +18,7 @@ export default function ProjectsScreen() {
   const { projects, loading, error } = useProjectStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('on-track');
+  const insets = useSafeAreaInsets();
 
 
   const getProjectStatus = (project: Project): FilterOption => {
@@ -53,24 +55,32 @@ export default function ProjectsScreen() {
   const renderHeader = () => (
     <View>
       <View style={styles.viewToggle}>
-        <TouchableOpacity
-          style={[styles.toggleButton, viewMode === 'list' && styles.activeToggle]}
+        <Pressable
+          style={({ pressed }) => [
+            styles.toggleButton,
+            viewMode === 'list' && styles.activeToggle,
+            pressed && styles.togglePressed
+          ]}
           onPress={() => setViewMode('list')}
         >
           <List size={20} color={viewMode === 'list' ? '#EF4444' : '#6B7280'} />
           <Text style={[styles.toggleText, viewMode === 'list' && styles.activeToggleText]}>
             List
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, viewMode === 'kanban' && styles.activeToggle]}
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.toggleButton,
+            viewMode === 'kanban' && styles.activeToggle,
+            pressed && styles.togglePressed
+          ]}
           onPress={() => setViewMode('kanban')}
         >
           <Grid3X3 size={20} color={viewMode === 'kanban' ? '#EF4444' : '#6B7280'} />
           <Text style={[styles.toggleText, viewMode === 'kanban' && styles.activeToggleText]}>
             Kanban
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
       <FilterChips
         chips={filterChips}
@@ -138,9 +148,12 @@ export default function ProjectsScreen() {
           
           <ScrollView style={styles.kanbanTasks} showsVerticalScrollIndicator={false}>
             {tasks.map((task) => (
-              <TouchableOpacity
+              <Pressable
                 key={task.id}
-                style={styles.taskCard}
+                style={({ pressed }) => [
+                  styles.taskCard,
+                  pressed && styles.taskCardPressed
+                ]}
                 onPress={() => {
                   // Find the project this task belongs to
                   const project = filteredProjects.find(p => p.tasks.some(t => t.id === task.id));
@@ -163,16 +176,19 @@ export default function ProjectsScreen() {
                     Due: {new Date(task.dueDate).toLocaleDateString()}
                   </Text>
                 )}
-              </TouchableOpacity>
+              </Pressable>
             ))}
             
-            <TouchableOpacity 
-              style={styles.addTaskButton}
+            <Pressable 
+              style={({ pressed }) => [
+                styles.addTaskButton,
+                pressed && styles.addTaskPressed
+              ]}
               onPress={() => router.push('/add-project')}
             >
               <Plus size={16} color="#6B7280" />
               <Text style={styles.addTaskText}>Add Task</Text>
-            </TouchableOpacity>
+            </Pressable>
           </ScrollView>
         </View>
       );
@@ -193,7 +209,7 @@ export default function ProjectsScreen() {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {renderHeader()}
       
       {viewMode === 'kanban' ? (
@@ -354,5 +370,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginLeft: 8,
+  },
+  togglePressed: {
+    opacity: 0.8,
+  },
+  taskCardPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
+  addTaskPressed: {
+    opacity: 0.8,
   },
 });
