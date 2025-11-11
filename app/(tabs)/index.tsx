@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { CheckCircle, Clock, TrendingUp } from 'lucide-react-native';
+import { CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { QuickAddFAB } from '@/components/QuickAddFAB';
@@ -74,7 +74,21 @@ function HomeContent() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-
+        {/* AI Chat Card */}
+        <TouchableOpacity
+          style={styles.aiChatCard}
+          onPress={() => router.push('/ai-chat')}
+        >
+          <View style={styles.aiIconContainer}>
+            <Sparkles size={24} color="#EF4444" />
+          </View>
+          <View style={styles.aiContent}>
+            <Text style={styles.aiTitle}>AI Chat Assistant</Text>
+            <Text style={styles.aiDescription}>
+              Ask anything and save conversations as notes
+            </Text>
+          </View>
+        </TouchableOpacity>
 
         {/* Continue Section */}
         <View style={styles.section}>
@@ -412,5 +426,45 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: '#64748b',
+  },
+  aiChatCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#FEE2E2',
+  },
+  aiIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  aiContent: {
+    flex: 1,
+  },
+  aiTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  aiDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
   },
 });

@@ -12,9 +12,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
-import { X, Bold, Italic, List, Link } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
 
 export default function AddNoteScreen() {
   const { createNote } = useNoteStore();
@@ -42,29 +43,7 @@ export default function AddNoteScreen() {
     router.back();
   };
 
-  const insertMarkdown = (syntax: string, placeholder: string = '') => {
-    const newText = markdown + syntax.replace('{}', placeholder);
-    setMarkdown(newText);
-  };
 
-  const markdownButtons = [
-    {
-      icon: <Bold size={18} color="#6B7280" />,
-      onPress: () => insertMarkdown('**bold text**'),
-    },
-    {
-      icon: <Italic size={18} color="#6B7280" />,
-      onPress: () => insertMarkdown('*italic text*'),
-    },
-    {
-      icon: <List size={18} color="#6B7280" />,
-      onPress: () => insertMarkdown('\n- List item'),
-    },
-    {
-      icon: <Link size={18} color="#6B7280" />,
-      onPress: () => insertMarkdown('[link text](url)'),
-    },
-  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -97,41 +76,14 @@ export default function AddNoteScreen() {
               />
             </View>
 
-            {/* Markdown Toolbar */}
-            <View style={styles.toolbar}>
-              {markdownButtons.map((button, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.toolbarButton}
-                  onPress={button.onPress}
-                >
-                  {button.icon}
-                </TouchableOpacity>
-              ))}
-            </View>
-
             {/* Content */}
             <View style={styles.section}>
               <Text style={styles.label}>Content</Text>
-              <TextInput
-                style={[styles.input, styles.contentArea]}
+              <RichTextEditor
                 value={markdown}
-                onChangeText={setMarkdown}
-                placeholder="Write your note in markdown...
-
-# Heading 1
-## Heading 2
-
-**Bold text**
-*Italic text*
-
-- List item 1
-- List item 2
-
-[Link text](url)"
-                placeholderTextColor="#9CA3AF"
-                multiline
-                textAlignVertical="top"
+                onChangeText={(text, md) => setMarkdown(md)}
+                placeholder="Write your note..."
+                autoFocus={false}
               />
             </View>
 
@@ -189,26 +141,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  toolbar: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  toolbarButton: {
-    padding: 8,
-    marginRight: 8,
-    borderRadius: 8,
-    backgroundColor: '#F9FAFB',
-  },
-  contentArea: {
-    height: 300,
-    textAlignVertical: 'top',
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
+
   infoBox: {
     backgroundColor: '#EFF6FF',
     borderRadius: 12,

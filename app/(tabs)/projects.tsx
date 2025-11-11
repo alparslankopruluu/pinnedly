@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { List, Grid3X3, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useProjectStore } from '@/providers/OfflineProvider';
@@ -18,7 +17,6 @@ export default function ProjectsScreen() {
   const { projects, loading, error } = useProjectStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('on-track');
-  const insets = useSafeAreaInsets();
 
 
   const getProjectStatus = (project: Project): FilterOption => {
@@ -209,7 +207,7 @@ export default function ProjectsScreen() {
 
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
       {renderHeader()}
       
       {viewMode === 'kanban' ? (
