@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ProjectStoreProvider, BookmarkStoreProvider, NoteStoreProvider } from '@/store/useOfflineStore';
+import { TodoStoreProvider } from '@/store/useTodoStore';
 import { notificationService } from '@/utils/notifications';
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
@@ -66,7 +67,9 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
       <ProjectStoreProvider>
         <BookmarkStoreProvider>
           <NoteStoreProvider>
-            {children}
+            <TodoStoreProvider>
+              {children}
+            </TodoStoreProvider>
           </NoteStoreProvider>
         </BookmarkStoreProvider>
       </ProjectStoreProvider>
@@ -76,6 +79,7 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
 
 // Export hooks for easy access
 export { useProjectStore, useBookmarkStore, useNoteStore } from '@/store/useOfflineStore';
+export { useTodoStore } from '@/store/useTodoStore';
 
 // Export sync engine utilities
 export { syncEngine, useSyncStatus } from '@/services/sync-engine';

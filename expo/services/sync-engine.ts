@@ -506,7 +506,7 @@ class SyncEngine {
     }
     
     // Sync all tables
-    const tables = ['projects', 'tasks', 'bookmarks', 'notes', 'bookmark_lists', 'profiles', 'project_members'];
+    const tables = ['projects', 'tasks', 'bookmarks', 'notes', 'bookmark_lists', 'todos', 'profiles', 'project_members'];
     
     for (const table of tables) {
       try {

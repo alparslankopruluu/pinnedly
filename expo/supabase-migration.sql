@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS public.notes;
 DROP TABLE IF EXISTS public.bookmarks;
 DROP TABLE IF EXISTS public.list_followers;
 DROP TABLE IF EXISTS public.bookmark_lists;
+DROP TABLE IF EXISTS public.todos;
 DROP TABLE IF EXISTS public.shares;
 DROP TABLE IF EXISTS public.profiles;
 
@@ -111,6 +112,21 @@ CREATE TABLE public.notes (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create todos table (standalone task tracking)
+CREATE TABLE public.todos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  completed BOOLEAN DEFAULT FALSE,
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+  due_date TIMESTAMP WITH TIME ZONE,
+  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
+  note_id UUID REFERENCES public.notes(id) ON DELETE SET NULL,
+  owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create shares table
 CREATE TABLE public.shares (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -131,6 +147,7 @@ ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookmark_lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.list_followers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shares ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist
@@ -147,6 +164,10 @@ DROP POLICY IF EXISTS "Users can unfollow lists" ON public.list_followers;
 DROP POLICY IF EXISTS "Users can view shares where they are recipient or creator" ON public.shares;
 DROP POLICY IF EXISTS "Users can create shares" ON public.shares;
 DROP POLICY IF EXISTS "Users can delete shares they created" ON public.shares;
+DROP POLICY IF EXISTS "Users can view own todos" ON public.todos;
+DROP POLICY IF EXISTS "Users can create own todos" ON public.todos;
+DROP POLICY IF EXISTS "Users can update own todos" ON public.todos;
+DROP POLICY IF EXISTS "Users can delete own todos" ON public.todos;
 
 -- Create policies for profiles table
 CREATE POLICY "Users can view all profiles" ON public.profiles
@@ -310,6 +331,19 @@ CREATE POLICY "Users can update own notes" ON public.notes
 CREATE POLICY "Users can delete own notes" ON public.notes
   FOR DELETE USING (auth.uid() = owner_id);
 
+-- Create policies for todos table
+CREATE POLICY "Users can view own todos" ON public.todos
+  FOR SELECT USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can create own todos" ON public.todos
+  FOR INSERT WITH CHECK (auth.uid() = owner_id);
+
+CREATE POLICY "Users can update own todos" ON public.todos
+  FOR UPDATE USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can delete own todos" ON public.todos
+  FOR DELETE USING (auth.uid() = owner_id);
+
 -- Create policies for shares table
 CREATE POLICY "Users can view shares where they are recipient or creator" ON public.shares
   FOR SELECT USING (auth.uid() = user_id OR auth.uid() = created_by);
@@ -356,6 +390,11 @@ CREATE TRIGGER notes_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
+CREATE TRIGGER todos_updated_at
+  BEFORE UPDATE ON public.todos
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
 CREATE TRIGGER bookmark_lists_updated_at
   BEFORE UPDATE ON public.bookmark_lists
   FOR EACH ROW
@@ -397,6 +436,10 @@ CREATE INDEX IF NOT EXISTS tasks_status_idx ON public.tasks(status);
 CREATE INDEX IF NOT EXISTS project_members_project_id_idx ON public.project_members(project_id);
 CREATE INDEX IF NOT EXISTS project_members_user_id_idx ON public.project_members(user_id);
 CREATE INDEX IF NOT EXISTS bookmarks_owner_id_idx ON public.bookmarks(owner_id);
+CREATE INDEX IF NOT EXISTS todos_owner_id_idx ON public.todos(owner_id);
+CREATE INDEX IF NOT EXISTS todos_completed_idx ON public.todos(completed);
+CREATE INDEX IF NOT EXISTS todos_priority_idx ON public.todos(priority);
+CREATE INDEX IF NOT EXISTS todos_project_id_idx ON public.todos(project_id);
 CREATE INDEX IF NOT EXISTS notes_owner_id_idx ON public.notes(owner_id);
 CREATE INDEX IF NOT EXISTS bookmark_lists_owner_id_idx ON public.bookmark_lists(owner_id);
 CREATE INDEX IF NOT EXISTS bookmark_lists_is_public_idx ON public.bookmark_lists(is_public);
@@ -417,4 +460,5 @@ GRANT ALL ON public.bookmarks TO anon, authenticated;
 GRANT ALL ON public.notes TO anon, authenticated;
 GRANT ALL ON public.bookmark_lists TO anon, authenticated;
 GRANT ALL ON public.list_followers TO anon, authenticated;
+GRANT ALL ON public.todos TO anon, authenticated;
 GRANT ALL ON public.shares TO anon, authenticated;

@@ -1,5 +1,5 @@
 import { Tabs, router } from 'expo-router';
-import { Home, Bookmark, FolderOpen, FileText, User, Settings, Plus } from 'lucide-react-native';
+import { Home, Bookmark, FolderOpen, FileText, User, Settings, Plus, ListTodo } from 'lucide-react-native';
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 
@@ -87,6 +87,21 @@ export default function TabLayout() {
           headerRight: () => (
             <TouchableOpacity 
               onPress={() => router.push('/add-note')}
+              style={styles.headerButton}
+            >
+              <Plus size={24} color="#EF4444" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="todos"
+        options={{
+          title: 'Todos',
+          tabBarIcon: ({ color, size }) => <ListTodo size={size} color={color} />,
+          headerRight: () => (
+            <TouchableOpacity 
+              onPress={() => router.push('/add-todo')}
               style={styles.headerButton}
             >
               <Plus size={24} color="#EF4444" />

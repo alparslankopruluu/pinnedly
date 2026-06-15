@@ -20,6 +20,7 @@ function RootLayoutNav() {
       <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
       <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
       <Stack.Screen name="add-note" options={{ presentation: "modal" }} />
+      <Stack.Screen name="add-todo" options={{ presentation: "modal", title: "Todo" }} />
       <Stack.Screen name="bookmark/[id]" />
       <Stack.Screen name="project/[id]" />
       <Stack.Screen name="note/[id]" />
