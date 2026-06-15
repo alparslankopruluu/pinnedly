@@ -52,7 +52,7 @@ CREATE TABLE public.projects (
   cover_image TEXT,
   deadline TIMESTAMP WITH TIME ZONE,
   owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  visibility TEXT DEFAULT 'private' CHECK (visibility IN ('private', 'public', 'unlisted')),
+  visibility TEXT DEFAULT 'private' CHECK (visibility IN ('private', 'public', 'shared')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -95,7 +95,7 @@ CREATE TABLE public.bookmarks (
   last_opened_at TIMESTAMP WITH TIME ZONE,
   source TEXT,
   owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  visibility TEXT DEFAULT 'private' CHECK (visibility IN ('private', 'public', 'unlisted')),
+  visibility TEXT DEFAULT 'private' CHECK (visibility IN ('private', 'public', 'shared')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -106,7 +106,7 @@ CREATE TABLE public.notes (
   title TEXT NOT NULL,
   markdown TEXT NOT NULL,
   owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  visibility TEXT DEFAULT 'private' CHECK (visibility IN ('private', 'public', 'unlisted')),
+  visibility TEXT DEFAULT 'private' CHECK (visibility IN ('private', 'public', 'shared')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

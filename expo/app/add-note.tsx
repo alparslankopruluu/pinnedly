@@ -4,7 +4,7 @@ import {
   Text, 
   StyleSheet, 
   TextInput, 
-  TouchableOpacity, 
+  Pressable, 
   ScrollView,
   Alert,
   KeyboardAvoidingView,
@@ -12,15 +12,41 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
-import { X } from 'lucide-react-native';
+import { X, Lock, Globe, Users } from 'lucide-react-native';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import { Visibility } from '@/types';
+
+const visibilityOptions: { value: Visibility; label: string; description: string; icon: React.ReactNode; color: string }[] = [
+  { 
+    value: 'private', 
+    label: 'Private', 
+    description: 'Only you can see this note',
+    icon: <Lock size={20} color="#6B7280" />,
+    color: '#6B7280'
+  },
+  { 
+    value: 'shared', 
+    label: 'Shared', 
+    description: 'Share with specific people',
+    icon: <Users size={20} color="#6366F1" />,
+    color: '#6366F1'
+  },
+  { 
+    value: 'public', 
+    label: 'Public', 
+    description: 'Anyone can view this note',
+    icon: <Globe size={20} color="#10B981" />,
+    color: '#10B981'
+  },
+];
 
 export default function AddNoteScreen() {
   const { createNote } = useNoteStore();
   const [title, setTitle] = useState('');
   const [markdown, setMarkdown] = useState('');
+  const [visibility, setVisibility] = useState<Visibility>('private');
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -32,7 +58,7 @@ export default function AddNoteScreen() {
       await createNote({
         title: title.trim(),
         markdown: markdown.trim(),
-        visibility: 'private'
+        visibility,
       });
     } catch (err) {
       console.error('Failed to create note:', err);
@@ -43,17 +69,15 @@ export default function AddNoteScreen() {
     router.back();
   };
 
-
-
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen 
         options={{ 
           title: 'Add Note',
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
+            <Pressable onPress={() => router.back()}>
               <X size={24} color="#111827" />
-            </TouchableOpacity>
+            </Pressable>
           ),
         }} 
       />
@@ -76,6 +100,41 @@ export default function AddNoteScreen() {
               />
             </View>
 
+            {/* Visibility Selector */}
+            <View style={styles.section}>
+              <Text style={styles.label}>Visibility</Text>
+              <View style={styles.visibilityGrid}>
+                {visibilityOptions.map((option) => (
+                  <Pressable
+                    key={option.value}
+                    style={({ pressed }) => [
+                      styles.visibilityCard,
+                      visibility === option.value && styles.visibilityCardActive,
+                      { borderColor: visibility === option.value ? option.color : '#E5E7EB' },
+                      pressed && styles.visibilityCardPressed
+                    ]}
+                    onPress={() => setVisibility(option.value)}
+                  >
+                    <View style={[
+                      styles.visibilityIconContainer,
+                      { backgroundColor: visibility === option.value ? option.color + '15' : '#F3F4F6' }
+                    ]}>
+                      {option.icon}
+                    </View>
+                    <Text style={[
+                      styles.visibilityLabel,
+                      visibility === option.value && { color: option.color, fontWeight: '600' }
+                    ]}>
+                      {option.label}
+                    </Text>
+                    <Text style={styles.visibilityDescription}>
+                      {option.description}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
             {/* Content */}
             <View style={styles.section}>
               <Text style={styles.label}>Content</Text>
@@ -90,7 +149,7 @@ export default function AddNoteScreen() {
             {/* Info */}
             <View style={styles.infoBox}>
               <Text style={styles.infoText}>
-                You can use markdown syntax for formatting. Links to bookmarks and projects can be added later.
+                Select text and use the toolbar to apply formatting. The text appears styled as you type.
               </Text>
             </View>
           </View>
@@ -141,7 +200,41 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-
+  visibilityGrid: {
+    gap: 8,
+  },
+  visibilityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 2,
+    gap: 12,
+  },
+  visibilityCardActive: {
+    backgroundColor: '#F9FAFB',
+  },
+  visibilityCardPressed: {
+    opacity: 0.8,
+  },
+  visibilityIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  visibilityLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#111827',
+  },
+  visibilityDescription: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    flex: 1,
+  },
   infoBox: {
     backgroundColor: '#EFF6FF',
     borderRadius: 12,

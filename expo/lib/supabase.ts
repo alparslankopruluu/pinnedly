@@ -100,7 +100,7 @@ export type Database = {
           cover_image?: string;
           deadline?: string;
           owner_id: string;
-          visibility: 'private' | 'public' | 'unlisted';
+          visibility: 'private' | 'public' | 'shared';
           created_at: string;
           updated_at: string;
         };
@@ -111,7 +111,7 @@ export type Database = {
           cover_image?: string;
           deadline?: string;
           owner_id: string;
-          visibility?: 'private' | 'public' | 'unlisted';
+          visibility?: 'private' | 'public' | 'shared';
           created_at?: string;
           updated_at?: string;
         };
@@ -122,7 +122,7 @@ export type Database = {
           cover_image?: string;
           deadline?: string;
           owner_id?: string;
-          visibility?: 'private' | 'public' | 'unlisted';
+          visibility?: 'private' | 'public' | 'shared';
           created_at?: string;
           updated_at?: string;
         };
@@ -206,7 +206,7 @@ export type Database = {
           last_opened_at?: string;
           source?: string;
           owner_id: string;
-          visibility: 'private' | 'public' | 'unlisted';
+          visibility: 'private' | 'public' | 'shared';
           created_at: string;
           updated_at: string;
         };
@@ -221,7 +221,7 @@ export type Database = {
           last_opened_at?: string;
           source?: string;
           owner_id: string;
-          visibility?: 'private' | 'public' | 'unlisted';
+          visibility?: 'private' | 'public' | 'shared';
           created_at?: string;
           updated_at?: string;
         };
@@ -236,7 +236,7 @@ export type Database = {
           last_opened_at?: string;
           source?: string;
           owner_id?: string;
-          visibility?: 'private' | 'public' | 'unlisted';
+          visibility?: 'private' | 'public' | 'shared';
           created_at?: string;
           updated_at?: string;
         };
@@ -247,7 +247,7 @@ export type Database = {
           title: string;
           markdown: string;
           owner_id: string;
-          visibility: 'private' | 'public' | 'unlisted';
+          visibility: 'private' | 'public' | 'shared';
           created_at: string;
           updated_at: string;
         };
@@ -256,7 +256,7 @@ export type Database = {
           title: string;
           markdown: string;
           owner_id: string;
-          visibility?: 'private' | 'public' | 'unlisted';
+          visibility?: 'private' | 'public' | 'shared';
           created_at?: string;
           updated_at?: string;
         };
@@ -265,7 +265,7 @@ export type Database = {
           title?: string;
           markdown?: string;
           owner_id?: string;
-          visibility?: 'private' | 'public' | 'unlisted';
+          visibility?: 'private' | 'public' | 'shared';
           created_at?: string;
           updated_at?: string;
         };

@@ -215,7 +215,7 @@ export default function AIChatScreen() {
 
         {error && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>Error: {error}</Text>
+            <Text style={styles.errorText}>Error: {String(error)}</Text>
           </View>
         )}
 

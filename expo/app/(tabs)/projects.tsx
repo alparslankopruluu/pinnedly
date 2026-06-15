@@ -1,29 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from 'react-native';
-import { List, Grid3X3, Plus } from 'lucide-react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ScrollView,
+  Pressable,
+  TextInput,
+  Modal,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { List, Grid3X3, Plus, X } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useProjectStore } from '@/providers/OfflineProvider';
 import { FilterChips } from '@/components/ui/FilterChips';
 import { ProjectCard } from '@/components/ProjectCard';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/Button';
 import { Project, Task } from '@/types';
 import { isOverdue } from '@/utils/date';
-
 
 type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
 
 export default function ProjectsScreen() {
-  const { projects, loading, error } = useProjectStore();
+  const { projects, loading, error, addTask, deleteTask, updateTask } = useProjectStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('on-track');
+  const insets = useSafeAreaInsets();
 
+  // Inline task creation state
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskProjectId, setNewTaskProjectId] = useState<string | null>(null);
+  const [newTaskStatus, setNewTaskStatus] = useState<'todo' | 'in-progress' | 'done'>('todo');
 
   const getProjectStatus = (project: Project): FilterOption => {
     if (!project.deadline) return 'on-track';
-    
     const daysUntilDeadline = Math.ceil((project.deadline - Date.now()) / (1000 * 60 * 60 * 24));
-    
     if (isOverdue(project.deadline)) return 'overdue';
     if (daysUntilDeadline <= 7) return 'at-risk';
     return 'on-track';
@@ -40,13 +57,38 @@ export default function ProjectsScreen() {
     { id: 'overdue', label: 'Overdue', count: projects.filter(p => getProjectStatus(p) === 'overdue').length },
   ];
 
+  const openAddTaskModal = (projectId: string, status: 'todo' | 'in-progress' | 'done') => {
+    setNewTaskProjectId(projectId);
+    setNewTaskStatus(status);
+    setNewTaskTitle('');
+    setShowAddTaskModal(true);
+  };
+
+  const handleCreateTask = useCallback(async () => {
+    if (!newTaskTitle.trim()) {
+      Alert.alert('Error', 'Please enter a task title.');
+      return;
+    }
+    if (!newTaskProjectId) return;
+
+    try {
+      await addTask(newTaskProjectId, {
+        title: newTaskTitle.trim(),
+        status: newTaskStatus,
+      });
+      setShowAddTaskModal(false);
+      setNewTaskTitle('');
+      setNewTaskProjectId(null);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to create task.');
+    }
+  }, [newTaskTitle, newTaskProjectId, newTaskStatus, addTask]);
+
   const renderProject = ({ item }: { item: Project }) => (
     <ProjectCard
       project={item}
       onPress={() => router.push(`/project/${item.id}` as any)}
-      onEdit={() => {
-        console.log('Edit project:', item.id);
-      }}
+      onEdit={() => console.log('Edit project:', item.id)}
     />
   );
 
@@ -118,23 +160,23 @@ export default function ProjectsScreen() {
       { id: 'todo', title: 'To Do', color: '#6B7280' },
       { id: 'in-progress', title: 'In Progress', color: '#F59E0B' },
       { id: 'done', title: 'Done', color: '#10B981' }
-    ];
+    ] as const;
 
     const getTasksByStatus = (status: 'todo' | 'in-progress' | 'done') => {
-      const allTasks: (Task & { projectTitle: string })[] = [];
+      const allTasks: (Task & { projectTitle: string; projectId: string })[] = [];
       filteredProjects.forEach(project => {
         project.tasks.forEach(task => {
           if (task.status === status) {
-            allTasks.push({ ...task, projectTitle: project.title });
+            allTasks.push({ ...task, projectTitle: project.title, projectId: project.id });
           }
         });
       });
       return allTasks;
     };
 
-    const renderKanbanColumn = (column: { id: string; title: string; color: string }) => {
-      const tasks = getTasksByStatus(column.id as 'todo' | 'in-progress' | 'done');
-      
+    const renderKanbanColumn = (column: typeof columns[number]) => {
+      const tasks = getTasksByStatus(column.id);
+
       return (
         <View key={column.id} style={styles.kanbanColumn}>
           <View style={[styles.kanbanHeader, { borderTopColor: column.color }]}>
@@ -143,7 +185,7 @@ export default function ProjectsScreen() {
               <Text style={styles.taskCountText}>{tasks.length}</Text>
             </View>
           </View>
-          
+
           <ScrollView style={styles.kanbanTasks} showsVerticalScrollIndicator={false}>
             {tasks.map((task) => (
               <Pressable
@@ -153,8 +195,7 @@ export default function ProjectsScreen() {
                   pressed && styles.taskCardPressed
                 ]}
                 onPress={() => {
-                  // Find the project this task belongs to
-                  const project = filteredProjects.find(p => p.tasks.some(t => t.id === task.id));
+                  const project = filteredProjects.find(p => p.id === task.projectId);
                   if (project) {
                     router.push(`/project/${project.id}` as any);
                   }
@@ -176,40 +217,49 @@ export default function ProjectsScreen() {
                 )}
               </Pressable>
             ))}
-            
-            <Pressable 
-              style={({ pressed }) => [
-                styles.addTaskButton,
-                pressed && styles.addTaskPressed
-              ]}
-              onPress={() => router.push('/add-project')}
-            >
-              <Plus size={16} color="#6B7280" />
-              <Text style={styles.addTaskText}>Add Task</Text>
-            </Pressable>
+
+            {/* Add task button per column */}
+            {column.id !== 'done' && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.addTaskButton,
+                  pressed && styles.addTaskPressed
+                ]}
+                onPress={() => {
+                  // For "To Do" and "In Progress" columns, add to the first project
+                  // or let user pick from filtered projects
+                  if (filteredProjects.length > 0) {
+                    openAddTaskModal(filteredProjects[0].id, column.id);
+                  } else {
+                    router.push('/add-project');
+                  }
+                }}
+              >
+                <Plus size={16} color="#6B7280" />
+                <Text style={styles.addTaskText}>Add Task</Text>
+              </Pressable>
+            )}
           </ScrollView>
         </View>
       );
     };
 
     return (
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         style={styles.kanbanContainer}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.kanbanContent}
+        contentContainerStyle={[styles.kanbanContent, { paddingBottom: insets.bottom + 80 }]}
       >
         {columns.map(renderKanbanColumn)}
       </ScrollView>
     );
   };
 
-
-
   return (
     <View style={styles.container}>
       {renderHeader()}
-      
+
       {viewMode === 'kanban' ? (
         renderKanbanView()
       ) : (
@@ -219,9 +269,105 @@ export default function ProjectsScreen() {
           keyExtractor={(item) => item.id}
           ListEmptyComponent={renderEmpty}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={filteredProjects.length === 0 ? styles.emptyContainer : styles.listContainer}
+          contentContainerStyle={[
+            filteredProjects.length === 0 ? styles.emptyContainer : styles.listContainer,
+            { paddingBottom: insets.bottom + 80 }
+          ]}
         />
       )}
+
+      {/* Inline Add Task Modal */}
+      <Modal
+        visible={showAddTaskModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAddTaskModal(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setShowAddTaskModal(false)}
+          />
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Task</Text>
+              <Pressable onPress={() => setShowAddTaskModal(false)}>
+                <X size={24} color="#6B7280" />
+              </Pressable>
+            </View>
+
+            {/* Status selector */}
+            <Text style={styles.modalLabel}>Status</Text>
+            <View style={styles.statusSelector}>
+              {(['todo', 'in-progress', 'done'] as const).map((status) => (
+                <Pressable
+                  key={status}
+                  style={[
+                    styles.statusOption,
+                    newTaskStatus === status && styles.statusOptionActive
+                  ]}
+                  onPress={() => setNewTaskStatus(status)}
+                >
+                  <Text style={[
+                    styles.statusOptionText,
+                    newTaskStatus === status && styles.statusOptionTextActive
+                  ]}>
+                    {status === 'todo' ? 'To Do' : status === 'in-progress' ? 'In Progress' : 'Done'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Project selector */}
+            <Text style={styles.modalLabel}>Project</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.projectSelector}>
+              {filteredProjects.map((project) => (
+                <Pressable
+                  key={project.id}
+                  style={[
+                    styles.projectOption,
+                    newTaskProjectId === project.id && styles.projectOptionActive
+                  ]}
+                  onPress={() => setNewTaskProjectId(project.id)}
+                >
+                  <Text style={[
+                    styles.projectOptionText,
+                    newTaskProjectId === project.id && styles.projectOptionTextActive
+                  ]} numberOfLines={1}>
+                    {project.title}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            <Text style={styles.modalLabel}>Task Title</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={newTaskTitle}
+              onChangeText={setNewTaskTitle}
+              placeholder="Enter task title..."
+              placeholderTextColor="#9CA3AF"
+              autoFocus
+              onSubmitEditing={handleCreateTask}
+            />
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalCancelButton}
+                onPress={() => setShowAddTaskModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <View style={{ flex: 1 }}>
+                <Button title="Create Task" onPress={handleCreateTask} />
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -284,7 +430,6 @@ const styles = StyleSheet.create({
   },
   kanbanContent: {
     paddingHorizontal: 16,
-    paddingBottom: 20,
   },
   kanbanColumn: {
     width: 280,
@@ -378,5 +523,111 @@ const styles = StyleSheet.create({
   },
   addTaskPressed: {
     opacity: 0.8,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  statusSelector: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  statusOption: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+  },
+  statusOptionActive: {
+    backgroundColor: '#FEE2E2',
+  },
+  statusOptionText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  statusOptionTextActive: {
+    color: '#EF4444',
+    fontWeight: '600',
+  },
+  projectSelector: {
+    marginBottom: 16,
+    maxHeight: 44,
+  },
+  projectOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    marginRight: 8,
+  },
+  projectOptionActive: {
+    backgroundColor: '#FEE2E2',
+  },
+  projectOptionText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  projectOptionTextActive: {
+    color: '#EF4444',
+    fontWeight: '600',
+  },
+  modalInput: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: '#111827',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 20,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  modalCancelButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  modalCancelText: {
+    fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
   },
 });

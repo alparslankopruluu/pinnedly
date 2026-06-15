@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
@@ -7,6 +8,7 @@ import { QuickAddFAB } from '@/components/QuickAddFAB';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
 
 function HomeContent() {
+  const insets = useSafeAreaInsets();
   const {
     bookmarks,
     projects,
@@ -194,7 +196,7 @@ function HomeContent() {
           )}
         </View>
 
-        <View style={styles.bottomPadding} />
+        <View style={[styles.bottomPadding, { height: insets.bottom + 100 }]} />
       </ScrollView>
 
       <QuickAddFAB />

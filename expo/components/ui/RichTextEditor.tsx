@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Platform,
 } from 'react-native';
 import { Bold, Italic, List, Link as LinkIcon } from 'lucide-react-native';
@@ -17,6 +17,13 @@ interface RichTextEditorProps {
   autoFocus?: boolean;
 }
 
+/**
+ * Rich text editor that shows styled text while storing markdown.
+ * Toolbar buttons toggle formatting on selected text without inserting
+ * placeholder template text like "**bold text**".
+ * When no text is selected, buttons just toggle their visual state;
+ * users type directly and formatting is applied via markdown markers.
+ */
 export function RichTextEditor({
   value,
   onChangeText,
@@ -29,13 +36,15 @@ export function RichTextEditor({
   const [activeStyles, setActiveStyles] = useState<Set<string>>(new Set());
   const inputRef = useRef<TextInput>(null);
 
-  useEffect(() => {
-    setText(value);
+  // Sync external value changes
+  React.useEffect(() => {
+    if (value !== text) {
+      setText(value);
+    }
   }, [value]);
 
-  const updateSelection = (sel: { start: number; end: number }) => {
+  const updateSelection = useCallback((sel: { start: number; end: number }) => {
     setSelection(sel);
-    
     const styles = new Set<string>();
     if (sel.start !== sel.end) {
       const selectedText = text.substring(sel.start, sel.end);
@@ -47,44 +56,20 @@ export function RichTextEditor({
       }
     }
     setActiveStyles(styles);
-  };
+  }, [text]);
 
-  const applyStyle = (styleType: 'bold' | 'italic' | 'list' | 'link') => {
+  const applyStyle = useCallback((styleType: 'bold' | 'italic' | 'list' | 'link') => {
     const { start, end } = selection;
-    
+
+    // If no text selected, toggle toolbar state only — don't insert template text
     if (start === end) {
-      let newText = text;
-      let newCursorPos = start;
-      
-      switch (styleType) {
-        case 'bold':
-          newText = text.slice(0, start) + '**bold text**' + text.slice(start);
-          newCursorPos = start + 2;
-          break;
-        case 'italic':
-          newText = text.slice(0, start) + '*italic text*' + text.slice(start);
-          newCursorPos = start + 1;
-          break;
-        case 'list':
-          const beforeCursor = text.slice(0, start);
-          const lineStart = beforeCursor.lastIndexOf('\n') + 1;
-          newText = text.slice(0, lineStart) + '- ' + text.slice(lineStart);
-          newCursorPos = start + 2;
-          break;
-        case 'link':
-          newText = text.slice(0, start) + '[link text](url)' + text.slice(start);
-          newCursorPos = start + 1;
-          break;
+      const styles = new Set(activeStyles);
+      if (styles.has(styleType)) {
+        styles.delete(styleType);
+      } else {
+        styles.add(styleType);
       }
-      
-      setText(newText);
-      onChangeText(newText, newText);
-      
-      setTimeout(() => {
-        inputRef.current?.setNativeProps({
-          selection: { start: newCursorPos, end: newCursorPos }
-        });
-      }, 0);
+      setActiveStyles(styles);
       return;
     }
 
@@ -100,8 +85,8 @@ export function RichTextEditor({
           newEnd = end - 4;
         } else {
           newText = text.slice(0, start) + '**' + selectedText + '**' + text.slice(end);
-          newStart = start + 2;
-          newEnd = end + 2;
+          newStart = start;
+          newEnd = end + 4;
         }
         break;
       case 'italic':
@@ -110,54 +95,77 @@ export function RichTextEditor({
           newEnd = end - 2;
         } else {
           newText = text.slice(0, start) + '*' + selectedText + '*' + text.slice(end);
-          newStart = start + 1;
-          newEnd = end + 1;
+          newStart = start;
+          newEnd = end + 2;
         }
         break;
       case 'list':
         const lines = selectedText.split('\n');
-        const formattedLines = lines.map(line => {
-          if (line.startsWith('- ')) return line;
-          return '- ' + line;
-        });
-        const newSelectedText = formattedLines.join('\n');
-        newText = text.slice(0, start) + newSelectedText + text.slice(end);
-        newEnd = start + newSelectedText.length;
+        const allAreListItems = lines.every(line => line.startsWith('- '));
+        if (allAreListItems) {
+          const unformattedLines = lines.map(line => line.slice(2));
+          newText = text.slice(0, start) + unformattedLines.join('\n') + text.slice(end);
+          newEnd = start + unformattedLines.join('\n').length;
+        } else {
+          const formattedLines = lines.map(line => line.startsWith('- ') ? line : '- ' + line);
+          const newSelectedText = formattedLines.join('\n');
+          newText = text.slice(0, start) + newSelectedText + text.slice(end);
+          newEnd = start + newSelectedText.length;
+        }
         break;
       case 'link':
-        newText = text.slice(0, start) + '[' + selectedText + '](url)' + text.slice(end);
-        newStart = start + 1;
-        newEnd = end + 1;
+        if (selectedText.startsWith('[') && selectedText.includes('](')) {
+          const bracketEnd = selectedText.indexOf('](');
+          newText = text.slice(0, start) + selectedText.slice(1, bracketEnd) + text.slice(end);
+          newEnd = end - (selectedText.length - bracketEnd + 1);
+        } else {
+          newText = text.slice(0, start) + '[' + selectedText + '](url)' + text.slice(end);
+          newStart = start;
+          newEnd = end + selectedText.length + 5;
+        }
         break;
     }
 
     setText(newText);
     onChangeText(newText, newText);
 
+    // Restore cursor position after render
     setTimeout(() => {
       inputRef.current?.setNativeProps({
         selection: { start: newStart, end: newEnd }
       });
     }, 0);
-  };
+  }, [text, selection, activeStyles, onChangeText]);
 
-  const renderStyledText = () => {
+  const handleTextChange = useCallback((newText: string) => {
+    setText(newText);
+    onChangeText(newText, newText);
+  }, [onChangeText]);
+
+  const renderStyledContent = () => {
     const lines = text.split('\n');
     return lines.map((line, lineIndex) => {
       const parts: React.ReactNode[] = [];
       let currentIndex = 0;
 
-      const boldRegex = /\*\*(.*?)\*\*/g;
-      const italicRegex = /\*(.*?)\*/g;
-      const linkRegex = /\[(.*?)\]\((.*?)\)/g;
-      const listRegex = /^- /;
-
-      const isListItem = listRegex.test(line);
+      // Strip list prefix for rendering
+      const isListItem = /^- /.test(line);
       const processedLine = isListItem ? line.slice(2) : line;
 
-      let match;
-      const matches: { start: number; end: number; type: string; text: string; url?: string }[] = [];
+      // Find all formatting markers
+      interface Match {
+        start: number;
+        end: number;
+        type: 'bold' | 'italic' | 'link';
+        text: string;
+        url?: string;
+      }
 
+      const matches: Match[] = [];
+
+      // Find bold: **text**
+      const boldRegex = /\*\*(.+?)\*\*/g;
+      let match: RegExpExecArray | null;
       boldRegex.lastIndex = 0;
       while ((match = boldRegex.exec(processedLine)) !== null) {
         matches.push({
@@ -168,10 +176,14 @@ export function RichTextEditor({
         });
       }
 
+      // Find italic: *text* (not **)
+      const italicRegex = /(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g;
       italicRegex.lastIndex = 0;
       while ((match = italicRegex.exec(processedLine)) !== null) {
-        const isBold = matches.some(m => m.start <= match!.index && m.end >= match!.index + match![0].length);
-        if (!isBold) {
+        const overlapsBold = matches.some(
+          m => m.type === 'bold' && m.start <= match!.index && m.end >= match!.index + match![0].length
+        );
+        if (!overlapsBold) {
           matches.push({
             start: match.index,
             end: match.index + match[0].length,
@@ -181,6 +193,8 @@ export function RichTextEditor({
         }
       }
 
+      // Find links: [text](url)
+      const linkRegex = /\[(.+?)\]\((.+?)\)/g;
       linkRegex.lastIndex = 0;
       while ((match = linkRegex.exec(processedLine)) !== null) {
         matches.push({
@@ -194,10 +208,11 @@ export function RichTextEditor({
 
       matches.sort((a, b) => a.start - b.start);
 
+      // Build segments
       matches.forEach((m, i) => {
         if (currentIndex < m.start) {
           parts.push(
-            <Text key={`text-${lineIndex}-${i}`} style={styles.normalText}>
+            <Text key={`txt-${lineIndex}-${i}`} style={styles.normalText}>
               {processedLine.slice(currentIndex, m.start)}
             </Text>
           );
@@ -206,21 +221,21 @@ export function RichTextEditor({
         switch (m.type) {
           case 'bold':
             parts.push(
-              <Text key={`bold-${lineIndex}-${i}`} style={styles.boldText}>
+              <Text key={`b-${lineIndex}-${i}`} style={styles.boldText}>
                 {m.text}
               </Text>
             );
             break;
           case 'italic':
             parts.push(
-              <Text key={`italic-${lineIndex}-${i}`} style={styles.italicText}>
+              <Text key={`i-${lineIndex}-${i}`} style={styles.italicText}>
                 {m.text}
               </Text>
             );
             break;
           case 'link':
             parts.push(
-              <Text key={`link-${lineIndex}-${i}`} style={styles.linkText}>
+              <Text key={`l-${lineIndex}-${i}`} style={styles.linkText}>
                 {m.text}
               </Text>
             );
@@ -232,17 +247,17 @@ export function RichTextEditor({
 
       if (currentIndex < processedLine.length) {
         parts.push(
-          <Text key={`text-${lineIndex}-end`} style={styles.normalText}>
+          <Text key={`txt-${lineIndex}-end`} style={styles.normalText}>
             {processedLine.slice(currentIndex)}
           </Text>
         );
       }
 
       return (
-        <Text key={lineIndex} style={styles.line}>
-          {isListItem && <Text style={styles.bullet}>• </Text>}
+        <Text key={`line-${lineIndex}`} style={styles.line}>
+          {isListItem && <Text style={styles.bullet}>{'\u2022'} </Text>}
           {parts.length > 0 ? parts : <Text style={styles.normalText}>{processedLine}</Text>}
-          {lineIndex < lines.length - 1 && '\n'}
+          {lineIndex < lines.length - 1 ? '\n' : ''}
         </Text>
       );
     });
@@ -250,51 +265,70 @@ export function RichTextEditor({
 
   return (
     <View style={[styles.container, style]}>
+      {/* Toolbar */}
       <View style={styles.toolbar}>
-        <TouchableOpacity
-          style={[styles.toolButton, activeStyles.has('bold') && styles.activeToolButton]}
+        <Pressable
+          style={({ pressed }) => [
+            styles.toolButton,
+            activeStyles.has('bold') && styles.activeToolButton,
+            pressed && styles.toolPressed
+          ]}
           onPress={() => applyStyle('bold')}
         >
           <Bold size={18} color={activeStyles.has('bold') ? '#EF4444' : '#6B7280'} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toolButton, activeStyles.has('italic') && styles.activeToolButton]}
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.toolButton,
+            activeStyles.has('italic') && styles.activeToolButton,
+            pressed && styles.toolPressed
+          ]}
           onPress={() => applyStyle('italic')}
         >
           <Italic size={18} color={activeStyles.has('italic') ? '#EF4444' : '#6B7280'} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.toolButton}
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.toolButton,
+            pressed && styles.toolPressed
+          ]}
           onPress={() => applyStyle('list')}
         >
           <List size={18} color="#6B7280" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.toolButton}
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.toolButton,
+            pressed && styles.toolPressed
+          ]}
           onPress={() => applyStyle('link')}
         >
           <LinkIcon size={18} color="#6B7280" />
-        </TouchableOpacity>
+        </Pressable>
+        <View style={styles.toolbarHint}>
+          <Text style={styles.toolbarHintText}>Select text to format</Text>
+        </View>
       </View>
 
+      {/* Editor area with styled text overlay */}
       <View style={styles.editorContainer}>
         <TextInput
           ref={inputRef}
           style={styles.hiddenInput}
           value={text}
-          onChangeText={(newText) => {
-            setText(newText);
-            onChangeText(newText, newText);
-          }}
+          onChangeText={handleTextChange}
           onSelectionChange={(e) => updateSelection(e.nativeEvent.selection)}
           multiline
           autoFocus={autoFocus}
           placeholder={placeholder}
           placeholderTextColor="#9CA3AF"
+          textAlignVertical="top"
         />
         <View style={styles.styledTextContainer} pointerEvents="none">
           <Text style={styles.styledText}>
-            {renderStyledText()}
+            {text ? renderStyledContent() : (
+              <Text style={styles.placeholderText}>{placeholder}</Text>
+            )}
           </Text>
         </View>
       </View>
@@ -312,6 +346,7 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     flexDirection: 'row',
+    alignItems: 'center',
     padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
@@ -319,11 +354,25 @@ const styles = StyleSheet.create({
   },
   toolButton: {
     padding: 8,
-    marginRight: 4,
+    marginRight: 2,
     borderRadius: 6,
+    minWidth: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   activeToolButton: {
     backgroundColor: '#FEE2E2',
+  },
+  toolPressed: {
+    opacity: 0.7,
+  },
+  toolbarHint: {
+    marginLeft: 'auto',
+    paddingRight: 4,
+  },
+  toolbarHintText: {
+    fontSize: 10,
+    color: '#9CA3AF',
   },
   editorContainer: {
     minHeight: 200,
@@ -341,7 +390,7 @@ const styles = StyleSheet.create({
     caretColor: '#EF4444',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     lineHeight: 24,
-    textAlignVertical: 'top',
+    zIndex: 1,
   },
   styledTextContainer: {
     padding: 16,
@@ -350,6 +399,9 @@ const styles = StyleSheet.create({
   styledText: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  placeholderText: {
+    color: '#9CA3AF',
   },
   line: {
     fontSize: 16,

@@ -21,6 +21,8 @@ export const seedBookmarks: Bookmark[] = [
     lastOpenedAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
     source: 'medium',
     notes: [],
+    userId: 'local',
+    visibility: 'private',
   },
   {
     id: '2',
@@ -34,6 +36,8 @@ export const seedBookmarks: Bookmark[] = [
     lastOpenedAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
     source: 'other',
     notes: [],
+    userId: 'local',
+    visibility: 'private',
   },
   {
     id: '3',
@@ -47,6 +51,8 @@ export const seedBookmarks: Bookmark[] = [
     lastOpenedAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
     source: 'other',
     notes: [],
+    userId: 'local',
+    visibility: 'private',
   },
   {
     id: '4',
@@ -60,6 +66,8 @@ export const seedBookmarks: Bookmark[] = [
     lastOpenedAt: Date.now() - 8 * 24 * 60 * 60 * 1000,
     source: 'other',
     notes: [],
+    userId: 'local',
+    visibility: 'private',
   },
   {
     id: '5',
@@ -72,6 +80,8 @@ export const seedBookmarks: Bookmark[] = [
     openCount: 0,
     source: 'other',
     notes: [],
+    userId: 'local',
+    visibility: 'private',
   },
 ];
 
@@ -117,6 +127,9 @@ export const seedProjects: Project[] = [
         projectId: '1',
       },
     ],
+    userId: 'local',
+    visibility: 'private',
+    collaborators: [],
   },
   {
     id: '2',
@@ -148,6 +161,9 @@ export const seedProjects: Project[] = [
         projectId: '2',
       },
     ],
+    userId: 'local',
+    visibility: 'private',
+    collaborators: [],
   },
 ];
 

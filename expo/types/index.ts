@@ -62,11 +62,12 @@ export type Note = {
   updatedAt: number;
   userId: ID;
   visibility: Visibility;
+  sharedWith?: ID[]; // User IDs this note is shared with
 };
 
 export type ActivityItem = {
   id: ID;
-  type: 'bookmark_added' | 'bookmark_opened' | 'task_completed' | 'project_created' | 'note_added';
+  type: 'bookmark_added' | 'bookmark_opened' | 'task_completed' | 'project_created' | 'note_added' | 'todo_added' | 'todo_completed';
   title: string;
   subtitle?: string;
   timestamp: number;
@@ -107,7 +108,8 @@ export type FollowRelation = {
   createdAt: number;
 };
 
-export type Visibility = 'private' | 'public' | 'unlisted';
+// Expanded visibility: private (only you), shared (specific people), public (everyone)
+export type Visibility = 'private' | 'shared' | 'public';
 
 export type ShareItem = {
   id: ID;
@@ -190,4 +192,19 @@ export type OnboardingState = {
   isCompleted: boolean;
   currentStep: number;
   hasSeenWelcome: boolean;
+};
+
+// Todo type for standalone task tracking
+export type TodoItem = {
+  id: ID;
+  title: string;
+  description?: string;
+  completed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  dueDate?: number;
+  projectId?: ID; // Optional link to project
+  noteId?: ID; // Optional link to note
+  userId: ID;
+  createdAt: number;
+  updatedAt: number;
 };

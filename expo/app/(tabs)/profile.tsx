@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { 
   User, 
@@ -12,6 +13,7 @@ import { PremiumModal } from '@/components/PremiumModal';
 
 export default function ProfileScreen() {
   const { preferences, bookmarks, projects, notes } = useAppStore();
+  const insets = useSafeAreaInsets();
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
   
   const pulseAnim = useMemo(() => new Animated.Value(1), []);
@@ -44,7 +46,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.safeArea}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}>
         {/* Profile Section */}
         <View style={styles.profileSection}>
           <View style={styles.avatar}>

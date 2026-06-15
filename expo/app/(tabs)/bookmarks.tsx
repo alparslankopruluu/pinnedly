@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
@@ -14,6 +15,7 @@ type FilterOption = 'all' | 'never-opened' | 'frequently' | 'tagged';
 
 export default function BookmarksScreen() {
   const { bookmarks, loading, error } = useBookmarkStore();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('all');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -136,7 +138,10 @@ export default function BookmarksScreen() {
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={filteredAndSortedBookmarks.length === 0 ? styles.emptyContainer : undefined}
+        contentContainerStyle={[
+          filteredAndSortedBookmarks.length === 0 ? styles.emptyContainer : undefined,
+          { paddingBottom: insets.bottom + 80 }
+        ]}
       />
     </View>
   );

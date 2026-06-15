@@ -1,16 +1,35 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileText } from 'lucide-react-native';
+import { FileText, Globe, Lock, Users } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatRelativeTime } from '@/utils/date';
-import { Note } from '@/types';
+import { Note, Visibility } from '@/types';
 
 export default function NotesScreen() {
   const { notes } = useNoteStore();
   const insets = useSafeAreaInsets();
+
+  const getVisibilityIcon = (visibility: Visibility) => {
+    switch (visibility) {
+      case 'public':
+        return <Globe size={14} color="#10B981" />;
+      case 'shared':
+        return <Users size={14} color="#6366F1" />;
+      default:
+        return <Lock size={14} color="#9CA3AF" />;
+    }
+  };
+
+  const getVisibilityLabel = (visibility: Visibility): string => {
+    switch (visibility) {
+      case 'public': return 'Public';
+      case 'shared': return 'Shared';
+      default: return 'Private';
+    }
+  };
 
   const renderNote = ({ item }: { item: Note }) => (
     <Pressable
@@ -21,7 +40,13 @@ export default function NotesScreen() {
       onPress={() => router.push(`/note/${item.id}` as any)}
     >
       <View style={styles.noteHeader}>
-        <FileText size={20} color="#6B7280" />
+        <View style={styles.noteHeaderLeft}>
+          <FileText size={20} color="#6B7280" />
+          <View style={styles.visibilityBadge}>
+            {getVisibilityIcon(item.visibility)}
+            <Text style={styles.visibilityLabel}>{getVisibilityLabel(item.visibility)}</Text>
+          </View>
+        </View>
         <Text style={styles.noteDate}>
           {formatRelativeTime(item.updatedAt)}
         </Text>
@@ -30,7 +55,7 @@ export default function NotesScreen() {
         {item.title}
       </Text>
       <Text style={styles.notePreview} numberOfLines={3}>
-        {item.markdown.replace(/[#*`]/g, '').trim() || 'No content'}
+        {item.markdown.replace(/[#*`_\][]/g, '').trim() || 'No content'}
       </Text>
       {item.links.length > 0 && (
         <View style={styles.linksContainer}>
@@ -60,7 +85,10 @@ export default function NotesScreen() {
         keyExtractor={(item) => item.id}
         ListEmptyComponent={renderEmpty}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={notes.length === 0 ? styles.emptyContainer : styles.listContainer}
+        contentContainerStyle={[
+          notes.length === 0 ? styles.emptyContainer : styles.listContainer,
+          { paddingBottom: insets.bottom + 80 }
+        ]}
       />
     </View>
   );
@@ -97,6 +125,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  noteHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  visibilityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    gap: 4,
+  },
+  visibilityLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   noteDate: {
     fontSize: 12,

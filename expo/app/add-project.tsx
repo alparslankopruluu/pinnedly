@@ -32,6 +32,9 @@ export default function AddProjectScreen() {
       title: title.trim(),
       description: description.trim() || undefined,
       deadline: deadline?.getTime(),
+      visibility: 'private',
+      userId: 'local',
+      collaborators: [],
     });
 
     router.back();

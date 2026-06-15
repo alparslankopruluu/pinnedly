@@ -116,6 +116,8 @@ export default function AddBookmarkScreen() {
       screenshotUri: screenshotUri || undefined,
       tags: bookmarkTags,
       source,
+      visibility: 'private',
+      userId: 'local',
     });
 
     router.back();

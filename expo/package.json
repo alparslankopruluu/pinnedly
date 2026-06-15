@@ -43,7 +43,6 @@
     "expo-web-browser": "~15.0.9",
     "hono": "^4.9.6",
     "lucide-react-native": "^0.475.0",
-    "nativewind": "^4.1.23",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
@@ -55,7 +54,8 @@
     "react-native-web": "^0.21.0",
     "superjson": "^2.2.2",
     "zod": "^4.1.5",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.2",
+    "@rork-ai/toolkit-sdk": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -324,14 +324,21 @@ class SyncEngine {
     try {
       console.log(`Creating data for table: ${table}`);
       
-      // Always use test user for development
-      const userId = 'test-user-123';
-      
       const timestamp = Date.now();
+      
+      // Try to get real auth user
+      let userId: string | null = null;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id ?? null;
+      } catch {
+        console.log('Auth check failed, using offline-only mode');
+      }
+
       const dataWithTimestamp = {
         ...data,
-        id: data.id || `temp_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
-        owner_id: data.owner_id || userId,
+        id: data.id || `local_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
+        owner_id: data.owner_id || userId || 'local_user',
         created_at: new Date(timestamp).toISOString(),
         updated_at: new Date(timestamp).toISOString()
       };
@@ -339,20 +346,15 @@ class SyncEngine {
       // Store locally immediately
       await this.updateLocalData(table, dataWithTimestamp, 'CREATE');
 
-      // Queue for remote sync only if we have a real user
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.id !== 'test-user-123') {
-          await this.queueOperation({
-            type: 'CREATE',
-            table,
-            data: { ...dataWithTimestamp, owner_id: user.id }
-          });
-        } else {
-          console.log('Skipping remote sync for test user');
-        }
-      } catch (authError) {
-        console.log('Auth check failed, skipping remote sync:', authError);
+      // Queue for remote sync only if authenticated
+      if (userId) {
+        await this.queueOperation({
+          type: 'CREATE',
+          table,
+          data: { ...dataWithTimestamp, owner_id: userId }
+        });
+      } else {
+        console.log('No authenticated user, data stored locally only');
       }
 
       console.log(`Data created successfully for ${table}:`, dataWithTimestamp.id);
@@ -521,9 +523,19 @@ class SyncEngine {
     console.log('Force sync completed');
   }
 
+  // Get current auth user id
+  public async getCurrentUserId(): Promise<string | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user?.id ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   // Clear all local data (for logout)
   public async clearLocalData() {
-    const tables = ['projects', 'tasks', 'bookmarks', 'notes', 'bookmark_lists'];
+    const tables = ['projects', 'tasks', 'bookmarks', 'notes', 'bookmark_lists', 'todos'];
     
     for (const table of tables) {
       await AsyncStorage.removeItem(`local_${table}`);
