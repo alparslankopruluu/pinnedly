@@ -8,29 +8,25 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Queries - temporarily disabled to prevent database errors
   const myListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'my'],
-    queryFn: () => Promise.resolve([]),
-    enabled: false, // Disable until database is properly set up
+    queryFn: () => bookmarkListRepository.getMyLists(),
   });
 
   const publicListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'public'],
-    queryFn: () => Promise.resolve([]),
-    enabled: false, // Disable until database is properly set up
+    queryFn: () => bookmarkListRepository.getPublicLists(),
   });
 
   const followedListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'followed'],
-    queryFn: () => Promise.resolve([]),
-    enabled: false, // Disable until database is properly set up
+    queryFn: () => bookmarkListRepository.getFollowedLists(),
   });
 
   const searchResultsQuery = useQuery({
     queryKey: ['bookmark-lists', 'search', searchQuery],
-    queryFn: () => Promise.resolve([]),
-    enabled: false, // Disable until database is properly set up
+    queryFn: () => bookmarkListRepository.searchPublicLists(searchQuery),
+    enabled: searchQuery.trim().length > 0,
   });
 
   // Mutations

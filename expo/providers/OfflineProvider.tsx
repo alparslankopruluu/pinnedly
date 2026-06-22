@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ProjectStoreProvider, BookmarkStoreProvider, NoteStoreProvider } from '@/store/useOfflineStore';
 import { TodoStoreProvider } from '@/store/useTodoStore';
+import { BookmarkListProvider } from '@/store/useBookmarkListStore';
 import { notificationService } from '@/utils/notifications';
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
@@ -68,7 +69,9 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
         <BookmarkStoreProvider>
           <NoteStoreProvider>
             <TodoStoreProvider>
-              {children}
+              <BookmarkListProvider>
+                {children}
+              </BookmarkListProvider>
             </TodoStoreProvider>
           </NoteStoreProvider>
         </BookmarkStoreProvider>

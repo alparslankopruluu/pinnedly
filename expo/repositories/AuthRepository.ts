@@ -12,12 +12,10 @@ class AuthRepository {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
-        // Temporarily skip profile loading to prevent database errors
-        console.log('User session found, but skipping profile loading for now');
-        // const profile = await this.getProfileById(session.user.id);
-        // if (profile) {
-        //   this.currentUser = profile;
-        // }
+        const profile = await this.getProfileById(session.user.id);
+        if (profile) {
+          this.currentUser = { ...profile, email: session.user.email || '' };
+        }
       }
     } catch (error) {
       console.error('Failed to initialize auth:', error);

@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    backdropFilter: 'blur(10px)',
+
   },
   headerActions: {
     flexDirection: 'row',

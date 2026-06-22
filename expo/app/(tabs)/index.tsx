@@ -18,10 +18,8 @@ function HomeContent() {
   } = useAppStore();
 
   useEffect(() => {
-    // Temporarily disable automatic data loading to prevent bundling loop
-    console.log('Skipping data loading to prevent bundling loop');
-    // loadData();
-  }, []);
+    loadData();
+  }, [loadData]);
 
   const getContinueItems = () => {
     const neverOpenedBookmarks = bookmarks

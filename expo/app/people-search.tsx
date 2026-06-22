@@ -44,11 +44,7 @@ export default function PeopleSearch() {
   const renderUserItem = ({ item }: { item: User }) => (
     <TouchableOpacity
       style={styles.userItem}
-      onPress={() => {
-        // Navigate to user profile or handle selection
-        // router.push(`/profile/${item.id}`); // Commented out as route doesn't exist yet
-        console.log('Selected user:', item.displayName);
-      }}
+      onPress={() => router.push(`/profile/${item.id}`)}
     >
       <View style={styles.userInfo}>
         {item.avatar ? (

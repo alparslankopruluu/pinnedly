@@ -22,48 +22,16 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       await authRepository.initialize();
       
       const user = authRepository.getCurrentUser();
-      if (user) {
-        setAuthState({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      } else {
-        // Create a test user for development
-        const testUser: User = {
-          id: 'test-user-123',
-          handle: 'testuser',
-          email: 'test@example.com',
-          displayName: 'Test User',
-          followerCount: 0,
-          followingCount: 0,
-          createdAt: Date.now(),
-        };
-        
-        setAuthState({
-          user: testUser,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        
-        console.log('Created test user for development');
-      }
+      setAuthState({
+        user,
+        isAuthenticated: !!user,
+        isLoading: false,
+      });
     } catch (error) {
       console.error('Failed to initialize auth:', error);
-      // Still create test user on error for development
-      const testUser: User = {
-        id: 'test-user-123',
-        handle: 'testuser',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        followerCount: 0,
-        followingCount: 0,
-        createdAt: Date.now(),
-      };
-      
       setAuthState({
-        user: testUser,
-        isAuthenticated: true,
+        user: null,
+        isAuthenticated: false,
         isLoading: false,
       });
     }

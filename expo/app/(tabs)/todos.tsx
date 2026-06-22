@@ -87,7 +87,7 @@ function TodoRow({
           </View>
           {/* Due date */}
           {todo.dueDate ? (
-            <Text style={[styles.dueDate, isOverdueTask && styles.dueDateOverdue]}>
+            <Text style={[styles.dueDate, !!isOverdueTask && styles.dueDateOverdue]}>
               {isOverdueTask ? 'Overdue: ' : 'Due: '}
               {new Date(todo.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </Text>

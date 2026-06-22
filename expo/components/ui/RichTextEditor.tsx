@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     color: 'transparent',
-    caretColor: '#EF4444',
+
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     lineHeight: 24,
     zIndex: 1,
