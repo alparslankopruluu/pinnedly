@@ -11,7 +11,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
-    "postinstall": "node scripts/patch-html-entities.js"
+    "postinstall": "node scripts/patch-html-entities.js && node scripts/patch-expo-keep-awake.js"
   },
   "dependencies": {
     "@expensify/react-native-live-markdown": "^0.1.327",

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { Platform } from 'react-native';
+import { trackAccountEvent } from '@/lib/analytics';
+import { recordError, logCrashlytics } from '@/lib/crashlytics';
 
 export interface SettingsState {
   // Appearance
@@ -165,26 +167,17 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   deleteAccount: async () => {
     try {
-      // In a real app, you would:
-      // 1. Require re-authentication
-      // 2. Delete all user data from Supabase
-      // 3. Anonymize any shared data
-      // 4. Sign out the user
-      
-      console.log('Account deletion initiated');
-      
-      // Simulate deletion process
+      logCrashlytics('Account deletion initiated');
+      await trackAccountEvent('account_deleted');
+
       await new Promise(resolve => {
         if (resolve) {
           setTimeout(resolve, 3000);
         }
       });
-      
-      // Clear local storage would be done here
-      console.log('Local storage cleared');
-      
     } catch (error) {
       console.error('Account deletion failed:', error);
+      recordError(error instanceof Error ? error : new Error('Account deletion failed'), 'account:delete');
       throw error;
     }
   },

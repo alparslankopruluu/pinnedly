@@ -19,8 +19,10 @@ import { Button } from '@/components/ui/Button';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { Visibility } from '@/types';
+import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
 
 export default function AddNoteScreen() {
+  useTrackFormOpen('note');
   const { t } = useTranslation();
   const { projectId } = useLocalSearchParams<{ projectId?: string }>();
   const { createNote } = useNoteStore();

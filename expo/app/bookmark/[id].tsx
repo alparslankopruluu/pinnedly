@@ -19,10 +19,12 @@ import { Button } from '@/components/ui/Button';
 import { getSourceLabel } from '@/utils/bookmark';
 import { formatRelativeTime } from '@/utils/date';
 import { BookmarkStatus } from '@/types';
+import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
 
 export default function BookmarkDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
+  useTrackContentOpen('bookmark', id);
   const { bookmarks, openBookmark, updateBookmark, deleteBookmark } = useBookmarkStore();
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [personalNote, setPersonalNote] = useState('');

@@ -18,6 +18,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTodoStore } from '@/store/useTodoStore';
 import { TodoItem } from '@/types';
 import { DatePickerField } from '@/components/ui/DatePickerField';
+import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
 
 function startOfToday(): Date {
   const today = new Date();
@@ -38,6 +39,7 @@ function addDays(base: Date, days: number): Date {
 }
 
 export default function AddTodoScreen() {
+  useTrackFormOpen('todo');
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 

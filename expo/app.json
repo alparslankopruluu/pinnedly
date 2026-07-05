@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Pinnedly",
-    "slug": "pinnedly",
+    "name": "Draft",
+    "slug": "draft",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "pinnedly",
+    "scheme": "draft",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,9 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.techtactoe.pinnedly",
+      "bundleIdentifier": "app.techtactoe.draft",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
+        "CFBundleDisplayName": "Draft",
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
@@ -29,9 +30,10 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.techtactoe.pinnedly",
+      "package": "app.techtactoe.draft",
       "googleServicesFile": "./google-services.json",
       "permissions": [
+        "WAKE_LOCK",
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
@@ -86,7 +88,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.36179904713-udkf57ode5gn1fln8pmifetbm8dpcdb5"
+          "iosUrlScheme": "com.googleusercontent.apps.36179904713-cmkvd6fqe2srvg15pc87odocqh27ph6e"
         }
       ],
       "./plugins/withAndroidReleaseSigning.js",
@@ -94,7 +96,7 @@
       [
         "expo-share-intent",
         {
-          "iosShareExtensionName": "PinnedlyShare",
+          "iosShareExtensionName": "Draft",
           "iosActivationRules": {
             "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
             "NSExtensionActivationSupportsText": true

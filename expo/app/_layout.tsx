@@ -14,7 +14,7 @@ import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
 import { SharingProvider } from "@/store/useSharingStore";
 import { initializeFirestore } from "@/lib/firestore";
 import { initializeAnalytics } from "@/lib/analytics";
-import { initializeCrashlytics } from "@/lib/crashlytics";
+import { initializeCrashlytics, recordError } from "@/lib/crashlytics";
 import { ShareIntentProvider } from "expo-share-intent";
 import { ShareIntentHandler } from "@/components/ShareIntentHandler";
 import { ClipboardUrlBanner } from "@/components/ClipboardUrlBanner";
@@ -94,6 +94,10 @@ export default function RootLayout() {
         await initializeCrashlytics();
       } catch (error) {
         console.error("Failed to initialize app:", error);
+        recordError(
+          error instanceof Error ? error : new Error("App initialization failed"),
+          "app:init"
+        );
       } finally {
         timeoutId = setTimeout(() => {
           SplashScreen.hideAsync();

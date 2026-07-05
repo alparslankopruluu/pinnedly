@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "رجوع",
     "cancel": "إلغاء",
     "ok": "موافق",
@@ -44,7 +44,8 @@
     "errorWithMessage": "خطأ: {{message}}",
     "noContent": "لا يوجد محتوى",
     "unknownUser": "مستخدم غير معروف",
-    "selectDate": "اختر التاريخ"
+    "selectDate": "اختر التاريخ",
+    "selectDateTime": "اختر التاريخ والوقت"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -131,7 +132,9 @@
       "enterCodeFromSms": "أدخل رمز التحقق من الرسالة النصية",
       "failed": "فشل"
     },
-    "resendEmail": "Didn't receive the email? Try again"
+    "resendEmail": "Didn't receive the email? Try again",
+    "signInWithGoogle": "تسجيل الدخول باستخدام Google",
+    "signUpWithGoogle": "التسجيل باستخدام Google"
   },
   "welcome": {
     "subtitle": "مساحة عملك ذات الأولوية للعمل دون اتصال للملاحظات والإشارات المرجعية والمشاريع",
@@ -164,7 +167,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "احفظ ما يهم، ولا تنسَ مرة أخرى.",
-        "body": "يساعدك Pinnedly على إضافة الإشارات المرجعية وإنشاء الملاحظات وإدارة المشاريع بسهولة للبقاء على اطلاع بكل شيء.",
+        "body": "يساعدك Draft على إضافة الإشارات المرجعية وإنشاء الملاحظات وإدارة المشاريع بسهولة للبقاء على اطلاع بكل شيء.",
         "cta": "ابدأ الآن"
       },
       "saveBookmarks": {
@@ -380,7 +383,7 @@
     "emptyDescriptionLong": "Tap the + button to create your first task and stay organized"
   },
   "profile": {
-    "defaultName": "مستخدم Pinnedly",
+    "defaultName": "مستخدم Draft",
     "tagline": "حافظ على معرفتك منظمة",
     "yourStats": "إحصائياتك",
     "stats": {
@@ -398,7 +401,7 @@
   },
   "aiChat": {
     "title": "دردشة الذكاء الاصطناعي",
-    "systemPrompt": "أنت مساعد Pinnedly للذكاء الاصطناعي. أجب دائمًا بالعربية حتى لو كتب المستخدم بلغة أخرى. كن موجزًا وودودًا وعمليًا.",
+    "systemPrompt": "أنت مساعد Draft للذكاء الاصطناعي. أجب دائمًا بالعربية حتى لو كتب المستخدم بلغة أخرى. كن موجزًا وودودًا وعمليًا.",
     "placeholder": "اسألني أي شيء...",
     "empty": {
       "title": "مساعد الدردشة بالذكاء الاصطناعي",
@@ -579,6 +582,7 @@
     "projectTitle": "Project Title",
     "descriptionOptional": "Description (optional)",
     "deadlineOptional": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
     "deadlines": {
       "oneWeek": "1 week",
       "oneMonth": "1 month",
@@ -724,7 +728,10 @@
       "message": "When would you like to be reminded about this project?",
       "in1Hour": "In 1 hour",
       "tomorrow": "Tomorrow",
-      "in3Days": "In 3 days"
+      "in3Days": "In 3 days",
+      "pickDateTime": "Or pick a custom date & time",
+      "schedule": "Schedule reminder",
+      "pastDate": "Please choose a future date and time."
     },
     "adding": "Adding...",
     "swipeHint": "Swipe left on a task for more options",
@@ -784,8 +791,8 @@
   },
   "shareIntent": {
     "signInRequired": "تسجيل الدخول مطلوب",
-    "signInToSaveLinks": "يرجى تسجيل الدخول لحفظ الروابط المشتركة في Pinnedly.",
-    "savedToPinnedly": "تم الحفظ في Pinnedly",
+    "signInToSaveLinks": "يرجى تسجيل الدخول لحفظ الروابط المشتركة في Draft.",
+    "savedToDraft": "تم الحفظ في Draft",
     "linkSavedToReadLater": "تم حفظ الرابط في اقرأ لاحقًا.",
     "view": "View",
     "couldNotSave": "Could not save",
@@ -854,7 +861,7 @@
   },
   "clipboard": {
     "title": "Link in clipboard",
-    "message": "Save this link to Pinnedly?",
+    "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"

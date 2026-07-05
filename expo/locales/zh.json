@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "返回",
     "cancel": "取消",
     "ok": "确定",
@@ -44,7 +44,8 @@
     "errorWithMessage": "错误：{{message}}",
     "noContent": "无内容",
     "unknownUser": "未知用户",
-    "selectDate": "选择日期"
+    "selectDate": "选择日期",
+    "selectDateTime": "选择日期和时间"
   },
   "tabs": {
     "home": "首页",
@@ -131,7 +132,9 @@
       "enterCodeFromSms": "请输入短信中的验证码",
       "failed": "失败"
     },
-    "resendEmail": "没收到邮件？重试"
+    "resendEmail": "没收到邮件？重试",
+    "signInWithGoogle": "使用 Google 登录",
+    "signUpWithGoogle": "使用 Google 注册"
   },
   "welcome": {
     "subtitle": "您的离线优先工作空间，用于笔记、书签和项目",
@@ -164,7 +167,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "保存重要内容，不再遗忘。",
-        "body": "Pinnedly 帮助您轻松添加书签、创建笔记和管理项目，让您掌控一切。",
+        "body": "Draft 帮助您轻松添加书签、创建笔记和管理项目，让您掌控一切。",
         "cta": "开始使用"
       },
       "saveBookmarks": {
@@ -380,7 +383,7 @@
     "emptyDescriptionLong": "点击 + 按钮创建您的第一个任务，保持井井有条"
   },
   "profile": {
-    "defaultName": "Pinnedly 用户",
+    "defaultName": "Draft 用户",
     "tagline": "让知识井井有条",
     "yourStats": "您的统计",
     "stats": {
@@ -398,7 +401,7 @@
   },
   "aiChat": {
     "title": "AI 聊天",
-    "systemPrompt": "你是 Pinnedly 的 AI 助手。即使用户使用其他语言提问，也请始终用中文回答。回答要简洁、友好、实用。",
+    "systemPrompt": "你是 Draft 的 AI 助手。即使用户使用其他语言提问，也请始终用中文回答。回答要简洁、友好、实用。",
     "placeholder": "随便问我...",
     "empty": {
       "title": "AI 聊天助手",
@@ -579,6 +582,7 @@
     "projectTitle": "项目标题",
     "descriptionOptional": "描述（可选）",
     "deadlineOptional": "截止日期（可选）",
+    "deadlinePlaceholder": "选择截止日期",
     "deadlines": {
       "oneWeek": "1 周",
       "oneMonth": "1 个月",
@@ -724,7 +728,10 @@
       "message": "When would you like to be reminded about this project?",
       "in1Hour": "In 1 hour",
       "tomorrow": "Tomorrow",
-      "in3Days": "In 3 days"
+      "in3Days": "In 3 days",
+      "pickDateTime": "或选择自定义日期和时间",
+      "schedule": "安排提醒",
+      "pastDate": "请选择未来的日期和时间。"
     },
     "adding": "Adding...",
     "swipeHint": "Swipe left on a task for more options",
@@ -784,8 +791,8 @@
   },
   "shareIntent": {
     "signInRequired": "需要登录",
-    "signInToSaveLinks": "请登录以将分享的链接保存到 Pinnedly。",
-    "savedToPinnedly": "已保存到 Pinnedly",
+    "signInToSaveLinks": "请登录以将分享的链接保存到 Draft。",
+    "savedToDraft": "已保存到 Draft",
     "linkSavedToReadLater": "链接已保存到稍后阅读。",
     "view": "查看",
     "couldNotSave": "无法保存",
@@ -854,7 +861,7 @@
   },
   "clipboard": {
     "title": "Link in clipboard",
-    "message": "Save this link to Pinnedly?",
+    "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"

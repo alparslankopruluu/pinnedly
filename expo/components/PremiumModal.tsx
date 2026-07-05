@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { X, Crown, Check, Zap, Users, Bell, Mic } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { trackSubscriptionEvent } from '@/lib/analytics';
+import { logCrashlytics } from '@/lib/crashlytics';
 
 interface PremiumModalProps {
   visible: boolean;
@@ -99,6 +101,8 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
 
   React.useEffect(() => {
     if (visible) {
+      trackSubscriptionEvent('modal_viewed');
+      logCrashlytics('Premium modal opened');
       Animated.parallel([
         Animated.spring(scaleAnim, {
           toValue: 1,
@@ -118,15 +122,20 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
     }
   }, [visible, scaleAnim, opacityAnim]);
 
+  const handlePlanSelect = (planId: string) => {
+    setSelectedPlan(planId);
+    trackSubscriptionEvent('plan_selected', { plan_id: planId });
+  };
+
   const handleSubscribe = async () => {
     setIsProcessing(true);
-    
-    // Simulate subscription process
-    setTimeout(() => {
+    await trackSubscriptionEvent('subscribe_started', { plan_id: selectedPlan });
+
+    setTimeout(async () => {
       setIsProcessing(false);
+      await trackSubscriptionEvent('subscribe_completed', { plan_id: selectedPlan });
+      logCrashlytics(`Subscription completed: ${selectedPlan}`);
       onClose();
-      // Here you would integrate with your payment processor
-      console.log('Subscribing to plan:', selectedPlan);
     }, 2000);
   };
 
@@ -138,7 +147,7 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
         selectedPlan === plan.id && styles.planCardSelected,
         plan.popular && styles.planCardPopular,
       ]}
-      onPress={() => setSelectedPlan(plan.id)}
+      onPress={() => handlePlanSelect(plan.id)}
     >
       {plan.popular && (
         <View style={styles.popularBadge}>

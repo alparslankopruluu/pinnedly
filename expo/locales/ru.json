@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "Назад",
     "cancel": "Отмена",
     "ok": "ОК",
@@ -44,7 +44,8 @@
     "errorWithMessage": "Ошибка: {{message}}",
     "noContent": "Нет содержимого",
     "unknownUser": "Неизвестный пользователь",
-    "selectDate": "Выбрать дату"
+    "selectDate": "Выбрать дату",
+    "selectDateTime": "Выбрать дату и время"
   },
   "tabs": {
     "home": "Главная",
@@ -131,7 +132,9 @@
       "enterCodeFromSms": "Введите код подтверждения из SMS",
       "failed": "Ошибка"
     },
-    "resendEmail": "Didn't receive the email? Try again"
+    "resendEmail": "Didn't receive the email? Try again",
+    "signInWithGoogle": "Войти через Google",
+    "signUpWithGoogle": "Зарегистрироваться через Google"
   },
   "welcome": {
     "subtitle": "Ваше офлайн-пространство для заметок, закладок и проектов",
@@ -164,7 +167,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "Сохраняйте важное — больше не забывайте.",
-        "body": "Pinnedly помогает легко добавлять закладки, создавать заметки и управлять проектами, чтобы вы всегда были в курсе всего.",
+        "body": "Draft помогает легко добавлять закладки, создавать заметки и управлять проектами, чтобы вы всегда были в курсе всего.",
         "cta": "Начать"
       },
       "saveBookmarks": {
@@ -380,7 +383,7 @@
     "emptyDescriptionLong": "Tap the + button to create your first task and stay organized"
   },
   "profile": {
-    "defaultName": "Пользователь Pinnedly",
+    "defaultName": "Пользователь Draft",
     "tagline": "Держите знания в порядке",
     "yourStats": "Ваша статистика",
     "stats": {
@@ -398,7 +401,7 @@
   },
   "aiChat": {
     "title": "ИИ-чат",
-    "systemPrompt": "Ты — ИИ-ассистент Pinnedly. Всегда отвечай на русском, даже если пользователь пишет на другом языке. Будь кратким, дружелюбным и практичным.",
+    "systemPrompt": "Ты — ИИ-ассистент Draft. Всегда отвечай на русском, даже если пользователь пишет на другом языке. Будь кратким, дружелюбным и практичным.",
     "placeholder": "Спросите меня о чём угодно...",
     "empty": {
       "title": "ИИ-чат ассистент",
@@ -579,6 +582,7 @@
     "projectTitle": "Project Title",
     "descriptionOptional": "Description (optional)",
     "deadlineOptional": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
     "deadlines": {
       "oneWeek": "1 week",
       "oneMonth": "1 month",
@@ -724,7 +728,10 @@
       "message": "When would you like to be reminded about this project?",
       "in1Hour": "In 1 hour",
       "tomorrow": "Tomorrow",
-      "in3Days": "In 3 days"
+      "in3Days": "In 3 days",
+      "pickDateTime": "Or pick a custom date & time",
+      "schedule": "Schedule reminder",
+      "pastDate": "Please choose a future date and time."
     },
     "adding": "Adding...",
     "swipeHint": "Swipe left on a task for more options",
@@ -784,8 +791,8 @@
   },
   "shareIntent": {
     "signInRequired": "Требуется вход",
-    "signInToSaveLinks": "Войдите, чтобы сохранять общие ссылки в Pinnedly.",
-    "savedToPinnedly": "Сохранено в Pinnedly",
+    "signInToSaveLinks": "Войдите, чтобы сохранять общие ссылки в Draft.",
+    "savedToDraft": "Сохранено в Draft",
     "linkSavedToReadLater": "Ссылка сохранена в «Прочитать позже».",
     "view": "View",
     "couldNotSave": "Could not save",
@@ -854,7 +861,7 @@
   },
   "clipboard": {
     "title": "Link in clipboard",
-    "message": "Save this link to Pinnedly?",
+    "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"

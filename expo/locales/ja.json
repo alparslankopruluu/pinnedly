@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "戻る",
     "cancel": "キャンセル",
     "ok": "OK",
@@ -44,7 +44,8 @@
     "errorWithMessage": "エラー: {{message}}",
     "noContent": "コンテンツなし",
     "unknownUser": "不明なユーザー",
-    "selectDate": "日付を選択"
+    "selectDate": "日付を選択",
+    "selectDateTime": "日付と時刻を選択"
   },
   "tabs": {
     "home": "ホーム",
@@ -131,7 +132,9 @@
       "enterCodeFromSms": "SMSの認証コードを入力してください",
       "failed": "失敗"
     },
-    "resendEmail": "メールが届きませんか？再試行"
+    "resendEmail": "メールが届きませんか？再試行",
+    "signInWithGoogle": "Googleでログイン",
+    "signUpWithGoogle": "Googleで登録"
   },
   "welcome": {
     "subtitle": "ノート、ブックマーク、プロジェクトのためのオフラインファーストワークスペース",
@@ -164,7 +167,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "大切なものを保存し、もう忘れない。",
-        "body": "Pinnedlyは、ブックマークの追加、ノートの作成、プロジェクトの管理を簡単に行い、すべてを把握できるようにします。",
+        "body": "Draftは、ブックマークの追加、ノートの作成、プロジェクトの管理を簡単に行い、すべてを把握できるようにします。",
         "cta": "始める"
       },
       "saveBookmarks": {
@@ -380,7 +383,7 @@
     "emptyDescriptionLong": "+ボタンをタップして最初のタスクを作成し、整理された状態を保ちましょう"
   },
   "profile": {
-    "defaultName": "Pinnedlyユーザー",
+    "defaultName": "Draftユーザー",
     "tagline": "知識を整理して管理",
     "yourStats": "あなたの統計",
     "stats": {
@@ -398,7 +401,7 @@
   },
   "aiChat": {
     "title": "AIチャット",
-    "systemPrompt": "あなたはPinnedlyのAIアシスタントです。ユーザーが他の言語で書いても、常に日本語で回答してください。簡潔で親しみやすく、実用的に答えてください。",
+    "systemPrompt": "あなたはDraftのAIアシスタントです。ユーザーが他の言語で書いても、常に日本語で回答してください。簡潔で親しみやすく、実用的に答えてください。",
     "placeholder": "何でも聞いてください...",
     "empty": {
       "title": "AIチャットアシスタント",
@@ -579,6 +582,7 @@
     "projectTitle": "プロジェクトのタイトル",
     "descriptionOptional": "説明（任意）",
     "deadlineOptional": "期限（任意）",
+    "deadlinePlaceholder": "期限を選択",
     "deadlines": {
       "oneWeek": "1週間",
       "oneMonth": "1か月",
@@ -724,7 +728,10 @@
       "message": "When would you like to be reminded about this project?",
       "in1Hour": "In 1 hour",
       "tomorrow": "Tomorrow",
-      "in3Days": "In 3 days"
+      "in3Days": "In 3 days",
+      "pickDateTime": "または日時を指定",
+      "schedule": "リマインドを予定",
+      "pastDate": "未来の日時を選択してください。"
     },
     "adding": "Adding...",
     "swipeHint": "Swipe left on a task for more options",
@@ -784,8 +791,8 @@
   },
   "shareIntent": {
     "signInRequired": "サインインが必要です",
-    "signInToSaveLinks": "共有リンクをPinnedlyに保存するにはサインインしてください。",
-    "savedToPinnedly": "Pinnedlyに保存しました",
+    "signInToSaveLinks": "共有リンクをDraftに保存するにはサインインしてください。",
+    "savedToDraft": "Draftに保存しました",
     "linkSavedToReadLater": "リンクを「後で読む」に保存しました。",
     "view": "表示",
     "couldNotSave": "保存できませんでした",
@@ -854,7 +861,7 @@
   },
   "clipboard": {
     "title": "Link in clipboard",
-    "message": "Save this link to Pinnedly?",
+    "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"

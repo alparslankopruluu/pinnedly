@@ -13,13 +13,34 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
-import { X, Calendar } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 import { useProjectStore } from '@/providers/OfflineProvider';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
+import { DatePickerField } from '@/components/ui/DatePickerField';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
+import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
+
+function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function addDays(base: Date, days: number): Date {
+  const next = new Date(base);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function deadlineToTimestamp(date: Date): number {
+  const normalized = new Date(date);
+  normalized.setHours(23, 59, 59, 999);
+  return normalized.getTime();
+}
 
 export default function AddProjectScreen() {
+  useTrackFormOpen('project');
   const { t } = useTranslation();
   const { createProject } = useProjectStore();
   const { user } = useAuth();
@@ -39,7 +60,7 @@ export default function AddProjectScreen() {
       await createProject({
         title: title.trim(),
         description: description.trim() || undefined,
-        deadline: deadline?.getTime(),
+        deadline: deadline ? deadlineToTimestamp(deadline) : undefined,
         visibility: 'private',
         userId: user?.id || '',
       });
@@ -52,18 +73,8 @@ export default function AddProjectScreen() {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   const setQuickDeadline = (days: number) => {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    setDeadline(date);
+    setDeadline(addDays(startOfToday(), days));
   };
 
   return (
@@ -114,21 +125,14 @@ export default function AddProjectScreen() {
             {/* Deadline */}
             <View style={styles.section}>
               <Text style={styles.label}>{t('addProject.deadlineOptional')}</Text>
-              
-              {deadline ? (
-                <View style={styles.deadlineContainer}>
-                  <View style={styles.deadlineInfo}>
-                    <Calendar size={20} color="#EF4444" />
-                    <Text style={styles.deadlineText}>{formatDate(deadline)}</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.clearButton}
-                    onPress={() => setDeadline(null)}
-                  >
-                    <X size={16} color="#6B7280" />
-                  </TouchableOpacity>
-                </View>
-              ) : (
+
+              <View style={styles.deadlinePicker}>
+                <DatePickerField
+                  value={deadline}
+                  onChange={setDeadline}
+                  minimumDate={startOfToday()}
+                  placeholder={t('addProject.deadlinePlaceholder')}
+                />
                 <View style={styles.quickDeadlines}>
                   <TouchableOpacity
                     style={styles.quickDeadlineButton}
@@ -148,8 +152,16 @@ export default function AddProjectScreen() {
                   >
                     <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.threeMonths')}</Text>
                   </TouchableOpacity>
+                  {deadline && (
+                    <TouchableOpacity
+                      style={styles.quickDeadlineButton}
+                      onPress={() => setDeadline(null)}
+                    >
+                      <Text style={styles.quickDeadlineText}>{t('addTodo.quickDates.clear')}</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
-              )}
+              </View>
             </View>
 
             {/* Info */}
@@ -210,39 +222,19 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
   },
-  deadlineContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  deadlineInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  deadlineText: {
-    fontSize: 16,
-    color: '#111827',
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-  clearButton: {
-    padding: 4,
+  deadlinePicker: {
+    gap: 12,
   },
   quickDeadlines: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   quickDeadlineButton: {
-    flex: 1,
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },

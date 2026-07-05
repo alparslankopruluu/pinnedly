@@ -2,6 +2,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OnboardingState, OnboardingStep } from '@/types';
+import { trackOnboardingEvent } from '@/lib/analytics';
 
 const ONBOARDING_KEY = 'pinnedly_onboarding';
 
@@ -72,6 +73,7 @@ export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
     const newStep = Math.min(onboardingState.currentStep + 1, onboardingSteps.length - 1);
     const newState = { ...onboardingState, currentStep: newStep };
     saveOnboardingState(newState);
+    trackOnboardingEvent('onboarding_step', { step: newStep });
   }, [onboardingState]);
 
   const previousStep = useCallback(() => {
@@ -83,11 +85,13 @@ export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
   const completeOnboarding = useCallback(async () => {
     const newState = { ...onboardingState, isCompleted: true };
     await saveOnboardingState(newState);
+    await trackOnboardingEvent('onboarding_completed', { step: onboardingState.currentStep });
   }, [onboardingState]);
 
   const skipOnboarding = useCallback(async () => {
     const newState = { ...onboardingState, isCompleted: true };
     await saveOnboardingState(newState);
+    await trackOnboardingEvent('onboarding_skipped', { step: onboardingState.currentStep });
   }, [onboardingState]);
 
   const resetOnboarding = useCallback(() => {

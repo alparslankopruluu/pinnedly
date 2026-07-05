@@ -1,21 +1,31 @@
-# Firebase Setup — Pinnedly
+# Firebase Setup — Draft
 
 Project: **pinnedly-48c49** (number: `36179904713`)  
-Bundle ID (iOS) / Package (Android): `app.techtactoe.pinnedly`
+Bundle ID (iOS) / Package (Android): **`app.techtactoe.draft`**
+
+> Package rename: register **new** Android and iOS apps in Firebase (you cannot change package on an existing Firebase app entry). Re-download config files and re-add SHA fingerprints.
 
 ## 1. Register apps in Firebase Console
 
 Open [Firebase Console](https://console.firebase.google.com/u/0/project/pinnedly-48c49/overview).
 
 ### Android
-1. Project settings → Add app → Android
-2. Package name: `app.techtactoe.pinnedly`
-3. Download `google-services.json` → place at `expo/google-services.json`
+1. Project settings → **Add app** → Android
+2. Package name: **`app.techtactoe.draft`**
+3. Download `google-services.json` → replace `expo/google-services.json`
+4. Project settings → Your **new** Android app → **SHA certificate fingerprints** → add debug + release SHA-1 (see below)
 
 ### iOS
-1. Project settings → Add app → iOS
-2. Bundle ID: `app.techtactoe.pinnedly`
-3. Download `GoogleService-Info.plist` → place at `expo/GoogleService-Info.plist`
+1. Project settings → **Add app** → iOS
+2. Bundle ID: **`app.techtactoe.draft`**
+3. Download `GoogleService-Info.plist` → replace `expo/GoogleService-Info.plist`
+4. In `GoogleService-Info.plist`, copy `REVERSED_CLIENT_ID` into `app.json` → Google Sign-In plugin `iosUrlScheme`
+
+### Apple Developer (iOS)
+1. Register App ID: `app.techtactoe.draft`
+2. Enable **Sign in with Apple**
+3. Create App Group: **`group.app.techtactoe.draft`** (for share extension)
+4. Assign App Group to main app + share extension targets
 
 ## 2. Enable Authentication
 
@@ -28,8 +38,8 @@ Firebase Console → Authentication → Sign-in method:
 ### Google Sign-In extras
 
 1. Copy **Web client ID** from Firebase → Project settings → Your apps → Web app (create if missing)
-2. Set in `app.json` → `extra.googleWebClientId` (configured: Web client from `google-services.json`)
-3. From `GoogleService-Info.plist`, copy `REVERSED_CLIENT_ID` into `app.json` → Google Sign-In plugin `iosUrlScheme` (configured)
+2. Set in `app.json` → `extra.googleWebClientId`
+3. From new `GoogleService-Info.plist`, copy `REVERSED_CLIENT_ID` into `app.json` → `@react-native-google-signin/google-signin` plugin `iosUrlScheme`
 
 ### Auth providers enabled
 - Email/Password
@@ -39,17 +49,14 @@ Firebase Console → Authentication → Sign-in method:
 
 ### Android SHA fingerprints (debug)
 
-**Important:** This project signs debug builds with `android/app/debug.keystore` (Expo/RN default), **not** `~/.android/debug.keystore`. Google Sign-In `DEVELOPER_ERROR` means the signing SHA-1 is missing in Firebase.
+**Important:** Debug builds use `android/app/debug.keystore`. Google Sign-In `DEVELOPER_ERROR` means the signing SHA-1 is missing on the **new** Android app in Firebase.
 
 ```bash
 # Project debug keystore (used by expo run:android)
 keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android
 
-# Optional: machine default keystore (only if you change signing config)
-keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+./scripts/print-android-sha.sh
 ```
-
-Add SHA-1 and SHA-256 in Firebase → Project settings → Your Android app.
 
 Project debug keystore (`android/app/debug.keystore`):
 
@@ -60,12 +67,6 @@ Release / Play Store upload keystore (`release.keystore`):
 
 - SHA-1: `68:F6:48:96:5D:CA:0F:05:B4:4A:52:A2:9C:B0:91:2E:AA:D4:86:52`
 - SHA-256: `78:46:D7:1F:AB:A1:03:5A:E3:06:4C:19:69:19:E6:DD:42:03:3C:04:D2:83:E1:80:92:22:7B:87:38:6A:5F:5E`
-
-Print current fingerprints anytime:
-
-```bash
-./scripts/print-android-sha.sh
-```
 
 ### Release signing setup
 
@@ -121,7 +122,7 @@ Debug Analytics on device:
 
 ```bash
 # Android
-adb shell setprop debug.firebase.analytics.app app.techtactoe.pinnedly
+adb shell setprop debug.firebase.analytics.app app.techtactoe.draft
 
 # iOS — add -FIRAnalyticsDebugEnabled to Xcode scheme
 ```
@@ -130,11 +131,7 @@ adb shell setprop debug.firebase.analytics.app app.techtactoe.pinnedly
 
 ```bash
 cd expo
-# Download from Firebase Console, or:
-firebase apps:sdkconfig ANDROID 1:36179904713:android:199543591a06b2ab57e518 --project pinnedly-48c49 > google-services.json
-# iOS: download GoogleService-Info.plist from Firebase Console → expo/GoogleService-Info.plist
-
-# Update app.json extra.googleWebClientId and iosUrlScheme
+# After adding new apps in Firebase Console, download fresh config files.
 
 bun install
 npx expo prebuild --clean
@@ -143,13 +140,20 @@ npx expo run:android
 npx expo run:ios
 ```
 
-## 6. Config files (do not commit secrets)
+## 6. Google Play Console
+
+When creating the app:
+
+- **App name:** Draft
+- **Package name:** `app.techtactoe.draft` (cannot be changed after creation)
+
+## 7. Config files (do not commit secrets)
 
 Add to `.gitignore` if not already:
 
 ```
 google-services.json
 GoogleService-Info.plist
+credentials.json
+release.keystore
 ```
-
-Use `.example` files as templates.

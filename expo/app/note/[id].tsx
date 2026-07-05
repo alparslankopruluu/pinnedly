@@ -26,11 +26,13 @@ import { useNoteStore } from '@/providers/OfflineProvider';
 import { ShareModal } from '@/components/ShareModal';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { MarkdownContent } from '@/components/ui/MarkdownContent';
+import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
 
 export default function NoteDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const noteId = Array.isArray(id) ? id[0] : id;
+  useTrackContentOpen('note', noteId);
   const { notes, loading, updateNote, deleteNote } = useNoteStore();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>('');

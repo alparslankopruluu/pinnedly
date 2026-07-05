@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/Button';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useOnboarding } from '@/store/useOnboardingStore';
 import { useAuth } from '@/store/useAuthStore';
+import { trackOnboardingEvent } from '@/lib/analytics';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -33,6 +34,10 @@ export default function Onboarding() {
   const { completeOnboarding, skipOnboarding } = useOnboarding();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const flatListRef = useRef<FlatList<OnboardingScreen>>(null);
+
+  useEffect(() => {
+    trackOnboardingEvent('onboarding_started');
+  }, []);
 
   const onboardingScreens: OnboardingScreen[] = useMemo(
     () => [

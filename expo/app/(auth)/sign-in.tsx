@@ -8,7 +8,7 @@ import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as AppleAuthentication from 'expo-apple-authentication';
+import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -119,22 +119,12 @@ export default function SignIn() {
           <View style={styles.dividerLine} />
         </View>
 
-        <View style={styles.socialButtons}>
-          {Platform.OS === 'ios' && (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={12}
-              style={styles.appleButton}
-              onPress={handleAppleSignIn}
-            />
-          )}
-          
-          <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn}>
-            <Ionicons name="logo-google" size={20} color="#db4437" />
-            <Text style={styles.socialButtonText}>{t('auth.google')}</Text>
-          </TouchableOpacity>
-        </View>
+        <SocialAuthButtons
+          mode="signIn"
+          disabled={isLoading}
+          onApplePress={handleAppleSignIn}
+          onGooglePress={handleGoogleSignIn}
+        />
 
         <TouchableOpacity
           style={styles.phoneLink}
@@ -270,28 +260,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
   },
-  socialButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 32,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    gap: 8,
-  },
-  socialButtonText: {
-    fontSize: 14,
-    fontWeight: '500' as const,
-    color: '#374151',
-  },
   footer: {
     alignItems: 'center',
   },
@@ -302,10 +270,6 @@ const styles = StyleSheet.create({
   footerLink: {
     color: '#4f46e5',
     fontWeight: '500' as const,
-  },
-  appleButton: {
-    height: 44,
-    marginBottom: 12,
   },
   phoneLink: {
     flexDirection: 'row',

@@ -23,6 +23,7 @@ import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
+import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
 import { Task, ID } from '@/types';
 import {
   ArrowLeft,
@@ -43,6 +44,7 @@ import {
   Send,
 } from 'lucide-react-native';
 import { notificationService } from '@/utils/notifications';
+import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
 import { ProjectMembersModal } from '@/components/ProjectMembersModal';
 import { TaskStatusCheckbox } from '@/components/TaskStatusCheckbox';
 import { getActivityTitle } from '@/utils/activities';
@@ -148,6 +150,8 @@ export default function ProjectDetailScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const projectId = Array.isArray(id) ? id[0] : id;
+  useTrackContentOpen('project', projectId);
   const [activeTab, setActiveTab] = useState<TabType>('tasks');
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
   const [swipedTaskId, setSwipedTaskId] = useState<string | null>(null);
@@ -161,6 +165,9 @@ export default function ProjectDetailScreen() {
   const [showMembersModal, setShowMembersModal] = useState<boolean>(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [showNudgeModal, setShowNudgeModal] = useState(false);
+  const [nudgeTime, setNudgeTime] = useState(() => new Date(Date.now() + 60 * 60 * 1000));
+  const [isSchedulingNudge, setIsSchedulingNudge] = useState(false);
   const taskInputRef = useRef<TextInput>(null);
 
   const { bookmarks, activities } = useAppStore();
@@ -471,50 +478,50 @@ export default function ProjectDetailScreen() {
     );
   };
 
-  const handleNudgeMe = async () => {
+  const handleNudgeMe = () => {
     if (Platform.OS === 'web') {
       showAppAlert(t('common.info'), t('projectDetail.alerts.notificationsNotSupported'), undefined, { variant: 'info' });
       return;
     }
 
-    showAppAlert(
-      t('projectDetail.scheduleNudge.title'),
-      t('projectDetail.scheduleNudge.message'),
-      [
-        {
-          text: t('projectDetail.scheduleNudge.in1Hour'),
-          onPress: () => scheduleNudge(1),
-        },
-        {
-          text: t('projectDetail.scheduleNudge.tomorrow'),
-          onPress: () => scheduleNudge(24),
-        },
-        {
-          text: t('projectDetail.scheduleNudge.in3Days'),
-          onPress: () => scheduleNudge(72),
-        },
-        { text: t('common.cancel'), style: 'cancel' },
-      ]
-    );
+    setNudgeTime(new Date(Date.now() + 60 * 60 * 1000));
+    setShowNudgeModal(true);
   };
 
-  const scheduleNudge = async (hoursFromNow: number) => {
+  const setQuickNudge = (hoursFromNow: number) => {
+    setNudgeTime(new Date(Date.now() + hoursFromNow * 60 * 60 * 1000));
+  };
+
+  const scheduleNudgeAt = async (time: Date) => {
+    if (time.getTime() <= Date.now()) {
+      showAppAlert(t('common.error'), t('projectDetail.scheduleNudge.pastDate'), undefined, { variant: 'error' });
+      return;
+    }
+
+    setIsSchedulingNudge(true);
     try {
-      const nudgeTime = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
       const notificationId = await notificationService.scheduleProjectNudge(
         project.id,
         project.title,
-        nudgeTime
+        time
       );
 
       if (notificationId) {
-        showAppAlert(t('common.success'), t('projectDetail.alerts.nudgeScheduled', { time: nudgeTime.toLocaleString() }), undefined, { variant: 'success' });
+        setShowNudgeModal(false);
+        showAppAlert(
+          t('common.success'),
+          t('projectDetail.alerts.nudgeScheduled', { time: time.toLocaleString() }),
+          undefined,
+          { variant: 'success' }
+        );
       } else {
         showAppAlert(t('common.error'), t('projectDetail.alerts.scheduleNudgeFailed'), undefined, { variant: 'error' });
       }
     } catch (error) {
       console.error('Nudge scheduling error:', error);
       showAppAlert(t('common.error'), t('projectDetail.alerts.scheduleNudgeFailed'), undefined, { variant: 'error' });
+    } finally {
+      setIsSchedulingNudge(false);
     }
   };
 
@@ -1013,6 +1020,82 @@ export default function ProjectDetailScreen() {
                   onPress={confirmDelete}
                 >
                   <Text style={styles.deleteButtonText}>{t('common.delete')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Nudge Modal */}
+        <Modal
+          visible={showNudgeModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowNudgeModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>{t('projectDetail.scheduleNudge.title')}</Text>
+                <TouchableOpacity onPress={() => setShowNudgeModal(false)}>
+                  <X size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalBody}>
+                <Text style={styles.nudgeMessage}>{t('projectDetail.scheduleNudge.message')}</Text>
+
+                <View style={styles.nudgeQuickOptions}>
+                  <TouchableOpacity
+                    style={styles.nudgeQuickButton}
+                    onPress={() => setQuickNudge(1)}
+                  >
+                    <Text style={styles.nudgeQuickButtonText}>
+                      {t('projectDetail.scheduleNudge.in1Hour')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.nudgeQuickButton}
+                    onPress={() => setQuickNudge(24)}
+                  >
+                    <Text style={styles.nudgeQuickButtonText}>
+                      {t('projectDetail.scheduleNudge.tomorrow')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.nudgeQuickButton}
+                    onPress={() => setQuickNudge(72)}
+                  >
+                    <Text style={styles.nudgeQuickButtonText}>
+                      {t('projectDetail.scheduleNudge.in3Days')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.inputLabel}>{t('projectDetail.scheduleNudge.pickDateTime')}</Text>
+                <DateTimePickerField
+                  value={nudgeTime}
+                  onChange={setNudgeTime}
+                  minimumDate={new Date()}
+                />
+              </View>
+
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => setShowNudgeModal(false)}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>{t('common.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.nudgeScheduleButton, isSchedulingNudge && styles.nudgeScheduleButtonDisabled]}
+                  onPress={() => scheduleNudgeAt(nudgeTime)}
+                  disabled={isSchedulingNudge}
+                >
+                  <Bell size={16} color="#FFFFFF" />
+                  <Text style={styles.modalButtonPrimaryText}>
+                    {isSchedulingNudge ? t('common.processing') : t('projectDetail.scheduleNudge.schedule')}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1561,6 +1644,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  nudgeMessage: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  nudgeQuickOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 20,
+  },
+  nudgeQuickButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: '#EEF2FF',
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  nudgeQuickButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#4F46E5',
+  },
+  nudgeScheduleButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#4F46E5',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  nudgeScheduleButtonDisabled: {
+    opacity: 0.6,
   },
   deleteModalContent: {
     backgroundColor: '#FFFFFF',

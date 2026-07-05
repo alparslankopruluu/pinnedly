@@ -21,7 +21,10 @@ import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { fetchUrlMetadata, getSourceFromUrl } from '@/utils/metadata';
+import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
+
 export default function AddBookmarkScreen() {
+  useTrackFormOpen('bookmark');
   const { t } = useTranslation();
   const { url: initialUrl } = useLocalSearchParams<{ url?: string }>();
   const { createBookmark, bookmarks } = useBookmarkStore();

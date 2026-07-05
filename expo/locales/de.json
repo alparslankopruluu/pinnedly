@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "Zurück",
     "cancel": "Abbrechen",
     "ok": "OK",
@@ -44,7 +44,8 @@
     "errorWithMessage": "Fehler: {{message}}",
     "noContent": "Kein Inhalt",
     "unknownUser": "Unbekannter Benutzer",
-    "selectDate": "Datum auswählen"
+    "selectDate": "Datum auswählen",
+    "selectDateTime": "Datum und Uhrzeit auswählen"
   },
   "tabs": {
     "home": "Start",
@@ -131,7 +132,9 @@
       "enterCodeFromSms": "Gib den Bestätigungscode aus der SMS ein",
       "failed": "Fehlgeschlagen"
     },
-    "resendEmail": "E-Mail nicht erhalten? Erneut versuchen"
+    "resendEmail": "E-Mail nicht erhalten? Erneut versuchen",
+    "signInWithGoogle": "Mit Google anmelden",
+    "signUpWithGoogle": "Mit Google registrieren"
   },
   "welcome": {
     "subtitle": "Dein Offline-First-Arbeitsbereich für Notizen, Lesezeichen und Projekte",
@@ -164,7 +167,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "Speichere, was wichtig ist – vergiss es nie wieder.",
-        "body": "Pinnedly hilft dir, mühelos Lesezeichen hinzuzufügen, Notizen zu erstellen und Projekte zu verwalten, damit du alles im Blick behältst.",
+        "body": "Draft hilft dir, mühelos Lesezeichen hinzuzufügen, Notizen zu erstellen und Projekte zu verwalten, damit du alles im Blick behältst.",
         "cta": "Loslegen"
       },
       "saveBookmarks": {
@@ -380,7 +383,7 @@
     "emptyDescriptionLong": "Tippe auf +, um deine erste Aufgabe zu erstellen und organisiert zu bleiben"
   },
   "profile": {
-    "defaultName": "Pinnedly-Benutzer",
+    "defaultName": "Draft-Benutzer",
     "tagline": "Halte dein Wissen organisiert",
     "yourStats": "Deine Statistiken",
     "stats": {
@@ -398,7 +401,7 @@
   },
   "aiChat": {
     "title": "KI-Chat",
-    "systemPrompt": "Du bist Pinnedlys KI-Assistent. Antworte immer auf Deutsch, auch wenn der Nutzer in einer anderen Sprache schreibt. Sei prägnant, freundlich und praktisch.",
+    "systemPrompt": "Du bist der KI-Assistent von Draft. Antworte immer auf Deutsch, auch wenn der Nutzer in einer anderen Sprache schreibt. Sei prägnant, freundlich und praktisch.",
     "placeholder": "Frag mich alles...",
     "empty": {
       "title": "KI-Chat-Assistent",
@@ -579,6 +582,7 @@
     "projectTitle": "Projekttitel",
     "descriptionOptional": "Beschreibung (optional)",
     "deadlineOptional": "Frist (optional)",
+    "deadlinePlaceholder": "Frist auswählen",
     "deadlines": {
       "oneWeek": "1 Woche",
       "oneMonth": "1 Monat",
@@ -724,7 +728,10 @@
       "message": "When would you like to be reminded about this project?",
       "in1Hour": "In 1 hour",
       "tomorrow": "Tomorrow",
-      "in3Days": "In 3 days"
+      "in3Days": "In 3 days",
+      "pickDateTime": "Or pick a custom date & time",
+      "schedule": "Schedule reminder",
+      "pastDate": "Please choose a future date and time."
     },
     "adding": "Adding...",
     "swipeHint": "Swipe left on a task for more options",
@@ -784,8 +791,8 @@
   },
   "shareIntent": {
     "signInRequired": "Anmeldung erforderlich",
-    "signInToSaveLinks": "Bitte melde dich an, um geteilte Links in Pinnedly zu speichern.",
-    "savedToPinnedly": "In Pinnedly gespeichert",
+    "signInToSaveLinks": "Bitte melde dich an, um geteilte Links in Draft zu speichern.",
+    "savedToDraft": "In Draft gespeichert",
     "linkSavedToReadLater": "Link unter Später lesen gespeichert.",
     "view": "Ansehen",
     "couldNotSave": "Speichern nicht möglich",
@@ -854,7 +861,7 @@
   },
   "clipboard": {
     "title": "Link in clipboard",
-    "message": "Save this link to Pinnedly?",
+    "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"

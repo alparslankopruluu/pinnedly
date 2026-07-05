@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "Back",
     "cancel": "Cancel",
     "ok": "OK",
@@ -33,6 +33,7 @@
     "processing": "Processing...",
     "saving": "Saving...",
     "selectDate": "Select date",
+    "selectDateTime": "Select date & time",
     "sharing": "Sharing...",
     "sending": "Sending...",
     "verifying": "Verifying...",
@@ -164,7 +165,9 @@
       "codeSent": "Code Sent",
       "enterCodeFromSms": "Enter the verification code from SMS",
       "failed": "Failed"
-    }
+    },
+    "signInWithGoogle": "Sign in with Google",
+    "signUpWithGoogle": "Sign up with Google"
   },
   "welcome": {
     "subtitle": "Your offline-first workspace for notes, bookmarks, and projects",
@@ -197,7 +200,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "Save what matters, don't forget again.",
-        "body": "Pinnedly helps you effortlessly add bookmarks, create notes, and manage projects to stay on top of everything.",
+        "body": "Draft helps you effortlessly add bookmarks, create notes, and manage projects to stay on top of everything.",
         "cta": "Get Started"
       },
       "saveBookmarks": {
@@ -422,7 +425,7 @@
     }
   },
   "profile": {
-    "defaultName": "Pinnedly User",
+    "defaultName": "Draft User",
     "tagline": "Keep your knowledge organized",
     "yourStats": "Your Stats",
     "stats": {
@@ -440,7 +443,7 @@
   },
   "aiChat": {
     "title": "AI Chat",
-    "systemPrompt": "You are Pinnedly's AI assistant. Always respond in English, even if the user writes in another language. Be concise, friendly, and practical. Help with research, brainstorming, writing, and productivity.",
+    "systemPrompt": "You are Draft's AI assistant. Always respond in English, even if the user writes in another language. Be concise, friendly, and practical. Help with research, brainstorming, writing, and productivity.",
     "placeholder": "Ask me anything...",
     "empty": {
       "title": "AI Chat Assistant",
@@ -614,6 +617,7 @@
     "projectTitle": "Project Title",
     "descriptionOptional": "Description (optional)",
     "deadlineOptional": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
     "deadlines": {
       "oneWeek": "1 week",
       "oneMonth": "1 month",
@@ -743,7 +747,10 @@
       "message": "When would you like to be reminded about this project?",
       "in1Hour": "In 1 hour",
       "tomorrow": "Tomorrow",
-      "in3Days": "In 3 days"
+      "in3Days": "In 3 days",
+      "pickDateTime": "Or pick a custom date & time",
+      "schedule": "Schedule reminder",
+      "pastDate": "Please choose a future date and time."
     },
     "adding": "Adding...",
     "swipeHint": "Swipe left on a task for more options",
@@ -848,7 +855,7 @@
   },
   "clipboard": {
     "title": "Link in clipboard",
-    "message": "Save this link to Pinnedly?",
+    "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"
@@ -856,8 +863,8 @@
   "shareIntent": {
     "saving": "Saving shared content...",
     "signInRequired": "Sign in required",
-    "signInToSaveLinks": "Please sign in to save shared links to Pinnedly.",
-    "savedToPinnedly": "Saved to Pinnedly",
+    "signInToSaveLinks": "Please sign in to save shared links to Draft.",
+    "savedToDraft": "Saved to Draft",
     "linkSavedToReadLater": "Link saved to Read Later.",
     "view": "View",
     "couldNotSave": "Could not save",

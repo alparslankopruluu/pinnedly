@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Pinnedly",
+    "appName": "Draft",
     "back": "Geri",
     "cancel": "İptal",
     "ok": "Tamam",
@@ -33,6 +33,7 @@
     "processing": "İşleniyor...",
     "saving": "Kaydediliyor...",
     "selectDate": "Tarih seç",
+    "selectDateTime": "Tarih ve saat seç",
     "sharing": "Paylaşılıyor...",
     "sending": "Gönderiliyor...",
     "verifying": "Doğrulanıyor...",
@@ -164,7 +165,9 @@
       "codeSent": "Kod Gönderildi",
       "enterCodeFromSms": "SMS'ten gelen doğrulama kodunu girin",
       "failed": "Başarısız"
-    }
+    },
+    "signInWithGoogle": "Google ile giriş yap",
+    "signUpWithGoogle": "Google ile kayıt ol"
   },
   "welcome": {
     "subtitle": "Notlar, yer imleri ve projeler için çevrimdışı öncelikli çalışma alanınız",
@@ -197,7 +200,7 @@
     "screens": {
       "saveWhatMatters": {
         "headline": "Önemli olanı kaydedin, bir daha unutmayın.",
-        "body": "Pinnedly, yer imleri eklemenize, notlar oluşturmanıza ve projeleri yönetmenize kolayca yardımcı olarak her şeyin üstünde kalmanızı sağlar.",
+        "body": "Draft, yer imleri eklemenize, notlar oluşturmanıza ve projeleri yönetmenize kolayca yardımcı olarak her şeyin üstünde kalmanızı sağlar.",
         "cta": "Başlayın"
       },
       "saveBookmarks": {
@@ -422,7 +425,7 @@
     }
   },
   "profile": {
-    "defaultName": "Pinnedly Kullanıcısı",
+    "defaultName": "Draft Kullanıcısı",
     "tagline": "Bilginizi düzenli tutun",
     "yourStats": "İstatistikleriniz",
     "stats": {
@@ -440,7 +443,7 @@
   },
   "aiChat": {
     "title": "Yapay Zeka Sohbeti",
-    "systemPrompt": "Sen Pinnedly yapay zeka asistanısın. Her zaman Türkçe yanıt ver; kullanıcı başka dilde yazsa bile yanıtların Türkçe olmalı. Kısa, net, samimi ve pratik ol. Araştırma, beyin fırtınası, yazma ve üretkenlik konularında yardımcı ol.",
+    "systemPrompt": "Sen Draft yapay zeka asistanısın. Her zaman Türkçe yanıt ver; kullanıcı başka dilde yazsa bile yanıtların Türkçe olmalı. Kısa, net, samimi ve pratik ol. Araştırma, beyin fırtınası, yazma ve üretkenlik konularında yardımcı ol.",
     "placeholder": "Bana her şeyi sorun...",
     "empty": {
       "title": "Yapay Zeka Sohbet Asistanı",
@@ -614,6 +617,7 @@
     "projectTitle": "Proje Başlığı",
     "descriptionOptional": "Açıklama (isteğe bağlı)",
     "deadlineOptional": "Son Tarih (isteğe bağlı)",
+    "deadlinePlaceholder": "Son tarih seçin",
     "deadlines": {
       "oneWeek": "1 hafta",
       "oneMonth": "1 ay",
@@ -743,7 +747,10 @@
       "message": "Bu proje hakkında ne zaman hatırlatılmak istersiniz?",
       "in1Hour": "1 saat içinde",
       "tomorrow": "Yarın",
-      "in3Days": "3 gün içinde"
+      "in3Days": "3 gün içinde",
+      "pickDateTime": "Veya özel tarih ve saat seçin",
+      "schedule": "Hatırlatmayı planla",
+      "pastDate": "Lütfen gelecekte bir tarih ve saat seçin."
     },
     "adding": "Ekleniyor...",
     "swipeHint": "Daha fazla seçenek için görevi sola kaydırın",
@@ -849,8 +856,8 @@
   "shareIntent": {
     "saving": "Paylaşılan içerik kaydediliyor...",
     "signInRequired": "Giriş gerekli",
-    "signInToSaveLinks": "Paylaşılan bağlantıları Pinnedly'e kaydetmek için lütfen giriş yapın.",
-    "savedToPinnedly": "Pinnedly'e kaydedildi",
+    "signInToSaveLinks": "Paylaşılan bağlantıları Draft'e kaydetmek için lütfen giriş yapın.",
+    "savedToDraft": "Draft'e kaydedildi",
     "linkSavedToReadLater": "Bağlantı Sonra Oku'ya kaydedildi.",
     "view": "Görüntüle",
     "couldNotSave": "Kaydedilemedi",
@@ -885,7 +892,7 @@
   },
   "clipboard": {
     "title": "Panoda bağlantı var",
-    "message": "Bu bağlantıyı Pinnedly'ye kaydetmek ister misiniz?",
+    "message": "Bu bağlantıyı Draft'a kaydetmek ister misiniz?",
     "save": "Kaydet",
     "openAddBookmark": "İncele ve kaydet",
     "dismiss": "Şimdi değil"

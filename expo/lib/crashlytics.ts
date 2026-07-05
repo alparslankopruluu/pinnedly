@@ -17,6 +17,16 @@ export async function setCrashlyticsUser(userId: string | null): Promise<void> {
   }
 }
 
+export function setCrashlyticsAttributes(attrs: Record<string, string>): void {
+  try {
+    Object.entries(attrs).forEach(([key, value]) => {
+      crashlytics().setAttribute(key, value);
+    });
+  } catch (error) {
+    console.warn('Crashlytics setAttribute failed:', error);
+  }
+}
+
 export function logCrashlytics(message: string): void {
   try {
     crashlytics().log(message);

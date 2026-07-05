@@ -92,7 +92,9 @@ export default function ProfileScreen() {
                 styles.premiumButton,
                 pressed && styles.premiumButtonPressed
               ]}
-              onPress={() => setShowPremiumModal(true)}
+              onPress={() => {
+                setShowPremiumModal(true);
+              }}
             >
               <View style={styles.premiumContent}>
                 <View style={styles.premiumLeft}>
