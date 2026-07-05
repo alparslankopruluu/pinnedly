@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -8,10 +9,10 @@ import {
   Pressable,
   TextInput,
   Modal,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { List, Grid3X3, Plus, X } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -22,12 +23,15 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { Project, Task } from '@/types';
 import { isOverdue } from '@/utils/date';
+import { dedupeProjectsById } from '@/utils/projects';
+import { KanbanBoard } from '@/components/KanbanBoard';
 
 type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
 
 export default function ProjectsScreen() {
-  const { projects, loading, error, addTask, deleteTask, updateTask } = useProjectStore();
+  const { t } = useTranslation();
+  const { projects, loading, error, addTask, deleteTask, updateTask, hydrateProjectTasks } = useProjectStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('on-track');
   const insets = useSafeAreaInsets();
@@ -38,6 +42,18 @@ export default function ProjectsScreen() {
   const [newTaskProjectId, setNewTaskProjectId] = useState<string | null>(null);
   const [newTaskStatus, setNewTaskStatus] = useState<'todo' | 'in-progress' | 'done'>('todo');
 
+  const uniqueProjects = useMemo(() => dedupeProjectsById(projects), [projects]);
+
+  useEffect(() => {
+    if (viewMode !== 'kanban' || uniqueProjects.length === 0) return;
+    const projectsMissingTasks = uniqueProjects
+      .filter((project) => project.tasks.length === 0)
+      .map((project) => project.id);
+    if (projectsMissingTasks.length > 0) {
+      void hydrateProjectTasks(projectsMissingTasks);
+    }
+  }, [viewMode, uniqueProjects, hydrateProjectTasks]);
+
   const getProjectStatus = (project: Project): FilterOption => {
     if (!project.deadline) return 'on-track';
     const daysUntilDeadline = Math.ceil((project.deadline - Date.now()) / (1000 * 60 * 60 * 24));
@@ -46,15 +62,15 @@ export default function ProjectsScreen() {
     return 'on-track';
   };
 
-  const filteredProjects = projects.filter((project) => {
+  const filteredProjects = uniqueProjects.filter((project) => {
     const status = getProjectStatus(project);
     return selectedFilter === status;
   });
 
   const filterChips = [
-    { id: 'on-track', label: 'On track', count: projects.filter(p => getProjectStatus(p) === 'on-track').length },
-    { id: 'at-risk', label: 'At risk', count: projects.filter(p => getProjectStatus(p) === 'at-risk').length },
-    { id: 'overdue', label: 'Overdue', count: projects.filter(p => getProjectStatus(p) === 'overdue').length },
+    { id: 'on-track', label: t('projects.filters.onTrack'), count: uniqueProjects.filter(p => getProjectStatus(p) === 'on-track').length },
+    { id: 'at-risk', label: t('projects.filters.atRisk'), count: uniqueProjects.filter(p => getProjectStatus(p) === 'at-risk').length },
+    { id: 'overdue', label: t('projects.filters.overdue'), count: uniqueProjects.filter(p => getProjectStatus(p) === 'overdue').length },
   ];
 
   const openAddTaskModal = (projectId: string, status: 'todo' | 'in-progress' | 'done') => {
@@ -66,7 +82,7 @@ export default function ProjectsScreen() {
 
   const handleCreateTask = useCallback(async () => {
     if (!newTaskTitle.trim()) {
-      Alert.alert('Error', 'Please enter a task title.');
+      showAppAlert(t('common.error'), t('projectDetail.alerts.enterTaskTitle'), undefined, { variant: 'error' });
       return;
     }
     if (!newTaskProjectId) return;
@@ -80,9 +96,16 @@ export default function ProjectsScreen() {
       setNewTaskTitle('');
       setNewTaskProjectId(null);
     } catch (err) {
-      Alert.alert('Error', 'Failed to create task.');
+      showAppAlert(t('common.error'), t('projects.addTask.createFailed'), undefined, { variant: 'error' });
     }
-  }, [newTaskTitle, newTaskProjectId, newTaskStatus, addTask]);
+  }, [newTaskTitle, newTaskProjectId, newTaskStatus, addTask, t]);
+
+  const handleKanbanStatusUpdate = useCallback(
+    async (taskId: string, status: Task['status']) => {
+      await updateTask(taskId, { status });
+    },
+    [updateTask]
+  );
 
   const renderProject = ({ item }: { item: Project }) => (
     <ProjectCard
@@ -105,7 +128,7 @@ export default function ProjectsScreen() {
         >
           <List size={20} color={viewMode === 'list' ? '#EF4444' : '#6B7280'} />
           <Text style={[styles.toggleText, viewMode === 'list' && styles.activeToggleText]}>
-            List
+            {t('projects.viewModes.list')}
           </Text>
         </Pressable>
         <Pressable
@@ -118,7 +141,7 @@ export default function ProjectsScreen() {
         >
           <Grid3X3 size={20} color={viewMode === 'kanban' ? '#EF4444' : '#6B7280'} />
           <Text style={[styles.toggleText, viewMode === 'kanban' && styles.activeToggleText]}>
-            Kanban
+            {t('projects.viewModes.kanban')}
           </Text>
         </Pressable>
       </View>
@@ -132,9 +155,9 @@ export default function ProjectsScreen() {
 
   const renderEmpty = () => (
     <EmptyState
-      title="No Projects Yet"
-      description="Get started by creating your first project."
-      buttonTitle="Create New Project"
+      title={t('projects.empty.title')}
+      description={t('projects.empty.description')}
+      buttonTitle={t('projects.empty.button')}
       onButtonPress={() => router.push('/add-project')}
     />
   );
@@ -142,7 +165,7 @@ export default function ProjectsScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text>Loading projects...</Text>
+        <Text>{t('projects.loading')}</Text>
       </View>
     );
   }
@@ -150,118 +173,22 @@ export default function ProjectsScreen() {
   if (error) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+        <Text style={styles.errorText}>{t('common.errorWithMessage', { message: error })}</Text>
       </View>
     );
   }
-
-  const renderKanbanView = () => {
-    const columns = [
-      { id: 'todo', title: 'To Do', color: '#6B7280' },
-      { id: 'in-progress', title: 'In Progress', color: '#F59E0B' },
-      { id: 'done', title: 'Done', color: '#10B981' }
-    ] as const;
-
-    const getTasksByStatus = (status: 'todo' | 'in-progress' | 'done') => {
-      const allTasks: (Task & { projectTitle: string; projectId: string })[] = [];
-      filteredProjects.forEach(project => {
-        project.tasks.forEach(task => {
-          if (task.status === status) {
-            allTasks.push({ ...task, projectTitle: project.title, projectId: project.id });
-          }
-        });
-      });
-      return allTasks;
-    };
-
-    const renderKanbanColumn = (column: typeof columns[number]) => {
-      const tasks = getTasksByStatus(column.id);
-
-      return (
-        <View key={column.id} style={styles.kanbanColumn}>
-          <View style={[styles.kanbanHeader, { borderTopColor: column.color }]}>
-            <Text style={styles.kanbanTitle}>{column.title}</Text>
-            <View style={[styles.taskCount, { backgroundColor: column.color }]}>
-              <Text style={styles.taskCountText}>{tasks.length}</Text>
-            </View>
-          </View>
-
-          <ScrollView style={styles.kanbanTasks} showsVerticalScrollIndicator={false}>
-            {tasks.map((task) => (
-              <Pressable
-                key={task.id}
-                style={({ pressed }) => [
-                  styles.taskCard,
-                  pressed && styles.taskCardPressed
-                ]}
-                onPress={() => {
-                  const project = filteredProjects.find(p => p.id === task.projectId);
-                  if (project) {
-                    router.push(`/project/${project.id}` as any);
-                  }
-                }}
-              >
-                <Text style={styles.taskTitle} numberOfLines={2}>
-                  {task.title}
-                </Text>
-                <Text style={styles.taskProject} numberOfLines={1}>
-                  {task.projectTitle}
-                </Text>
-                {task.dueDate && (
-                  <Text style={[
-                    styles.taskDueDate,
-                    isOverdue(task.dueDate) && styles.taskOverdue
-                  ]}>
-                    Due: {new Date(task.dueDate).toLocaleDateString()}
-                  </Text>
-                )}
-              </Pressable>
-            ))}
-
-            {/* Add task button per column */}
-            {column.id !== 'done' && (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.addTaskButton,
-                  pressed && styles.addTaskPressed
-                ]}
-                onPress={() => {
-                  // For "To Do" and "In Progress" columns, add to the first project
-                  // or let user pick from filtered projects
-                  if (filteredProjects.length > 0) {
-                    openAddTaskModal(filteredProjects[0].id, column.id);
-                  } else {
-                    router.push('/add-project');
-                  }
-                }}
-              >
-                <Plus size={16} color="#6B7280" />
-                <Text style={styles.addTaskText}>Add Task</Text>
-              </Pressable>
-            )}
-          </ScrollView>
-        </View>
-      );
-    };
-
-    return (
-      <ScrollView
-        horizontal
-        style={styles.kanbanContainer}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[styles.kanbanContent, { paddingBottom: insets.bottom + 80 }]}
-      >
-        {columns.map(renderKanbanColumn)}
-      </ScrollView>
-    );
-  };
 
   return (
     <View style={styles.container}>
       {renderHeader()}
 
       {viewMode === 'kanban' ? (
-        renderKanbanView()
+        <KanbanBoard
+          projects={filteredProjects}
+          bottomPadding={insets.bottom + 80}
+          onAddTask={openAddTaskModal}
+          onUpdateTask={handleKanbanStatusUpdate}
+        />
       ) : (
         <FlatList
           data={filteredProjects}
@@ -293,14 +220,14 @@ export default function ProjectsScreen() {
           />
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Task</Text>
+              <Text style={styles.modalTitle}>{t('projects.addTask.title')}</Text>
               <Pressable onPress={() => setShowAddTaskModal(false)}>
                 <X size={24} color="#6B7280" />
               </Pressable>
             </View>
 
             {/* Status selector */}
-            <Text style={styles.modalLabel}>Status</Text>
+            <Text style={styles.modalLabel}>{t('projects.addTask.status')}</Text>
             <View style={styles.statusSelector}>
               {(['todo', 'in-progress', 'done'] as const).map((status) => (
                 <Pressable
@@ -315,14 +242,14 @@ export default function ProjectsScreen() {
                     styles.statusOptionText,
                     newTaskStatus === status && styles.statusOptionTextActive
                   ]}>
-                    {status === 'todo' ? 'To Do' : status === 'in-progress' ? 'In Progress' : 'Done'}
+                    {status === 'todo' ? t('projects.kanban.todo') : status === 'in-progress' ? t('projects.kanban.inProgress') : t('projects.kanban.done')}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
             {/* Project selector */}
-            <Text style={styles.modalLabel}>Project</Text>
+            <Text style={styles.modalLabel}>{t('todos.project')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.projectSelector}>
               {filteredProjects.map((project) => (
                 <Pressable
@@ -343,12 +270,12 @@ export default function ProjectsScreen() {
               ))}
             </ScrollView>
 
-            <Text style={styles.modalLabel}>Task Title</Text>
+            <Text style={styles.modalLabel}>{t('projects.addTask.taskTitle')}</Text>
             <TextInput
               style={styles.modalInput}
               value={newTaskTitle}
               onChangeText={setNewTaskTitle}
-              placeholder="Enter task title..."
+              placeholder={t('projects.addTask.placeholder')}
               placeholderTextColor="#9CA3AF"
               autoFocus
               onSubmitEditing={handleCreateTask}
@@ -359,10 +286,10 @@ export default function ProjectsScreen() {
                 style={styles.modalCancelButton}
                 onPress={() => setShowAddTaskModal(false)}
               >
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
               </Pressable>
               <View style={{ flex: 1 }}>
-                <Button title="Create Task" onPress={handleCreateTask} />
+                <Button title={t('projects.addTask.button')} onPress={handleCreateTask} />
               </View>
             </View>
           </View>

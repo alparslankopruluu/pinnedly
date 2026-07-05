@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Search, Users, Heart, ArrowLeft, Plus } from 'lucide-react-native';
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { BookmarkList } from '@/types';
 import { Button } from '@/components/ui/Button';
 
 export default function PublicListsScreen() {
+  const { t } = useTranslation();
   const {
     publicLists,
     searchResults,
@@ -85,7 +87,7 @@ export default function PublicListsScreen() {
       <View style={styles.listStats}>
         <View style={styles.stat}>
           <Users size={14} color="#64748b" />
-          <Text style={styles.statText}>{item.followerCount} followers</Text>
+          <Text style={styles.statText}>{t('common.followers', { count: item.followerCount })}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -100,7 +102,7 @@ export default function PublicListsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text style={styles.title}>Discover Lists</Text>
+        <Text style={styles.title}>{t('discoverLists.title')}</Text>
         <TouchableOpacity
           onPress={() => router.push('/create-list' as any)}
           style={styles.createButton}
@@ -114,7 +116,7 @@ export default function PublicListsScreen() {
           <Search size={20} color="#64748b" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search public lists..."
+            placeholder={t('discoverLists.searchPlaceholder')}
             value={localSearchQuery}
             onChangeText={setLocalSearchQuery}
             autoCapitalize="none"
@@ -135,17 +137,20 @@ export default function PublicListsScreen() {
           <View style={styles.emptyContainer}>
             <Users size={48} color="#d1d5db" />
             <Text style={styles.emptyTitle}>
-              {isLoading ? 'Loading...' : searchQuery.trim() ? 'No lists found' : 'No public lists yet'}
+              {isLoading
+                ? t('discoverLists.loading')
+                : searchQuery.trim()
+                  ? t('discoverLists.noListsFound')
+                  : t('discoverLists.noPublicLists')}
             </Text>
             <Text style={styles.emptyDescription}>
-              {searchQuery.trim() 
-                ? 'Try searching with different keywords'
-                : 'Be the first to create a public list!'
-              }
+              {searchQuery.trim()
+                ? t('discoverLists.tryDifferentKeywords')
+                : t('discoverLists.beFirstToCreate')}
             </Text>
             {!searchQuery.trim() && (
               <Button
-                title="Create List"
+                title={t('discoverLists.createList')}
                 onPress={() => router.push('/create-list' as any)}
                 style={styles.createListButton}
               />

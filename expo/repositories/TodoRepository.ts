@@ -1,80 +1,79 @@
-import { supabase } from '@/lib/supabase';
-import { syncEngine } from '@/services/sync-engine';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { TodoItem, ID } from '@/types';
+import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import { trackEntityEvent } from '@/lib/analytics';
 
 export class TodoRepository {
   private static instance: TodoRepository;
 
-  public static getInstance(): TodoRepository {
-    if (!TodoRepository.instance) {
-      TodoRepository.instance = new TodoRepository();
-    }
+  static getInstance(): TodoRepository {
+    if (!TodoRepository.instance) TodoRepository.instance = new TodoRepository();
     return TodoRepository.instance;
   }
 
   async getTodos(): Promise<TodoItem[]> {
-    try {
-      const todosData = await syncEngine.getData('todos');
-      return todosData.map(this.mapTodoFromDB);
-    } catch (error) {
-      console.error('Error fetching todos:', error);
-      return [];
+    const uid = requireUserId();
+    const snapshot = await firestore().collection(COLLECTIONS.todos).where('ownerId', '==', uid).get();
+    return snapshot.docs.map((doc) => this.mapTodo(doc.id, doc.data()));
+  }
+
+  subscribeToTodos(ownerId: string | null, onTodos: (todos: TodoItem[]) => void): () => void {
+    if (!ownerId) {
+      onTodos([]);
+      return () => undefined;
     }
+    return firestore()
+      .collection(COLLECTIONS.todos)
+      .where('ownerId', '==', ownerId)
+      .onSnapshot((snapshot) => {
+        onTodos(snapshot.docs.map((doc) => this.mapTodo(doc.id, doc.data())));
+      });
   }
 
   async createTodo(todo: Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<TodoItem> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const todoData = {
-        title: todo.title,
-        description: todo.description || null,
-        completed: todo.completed ?? false,
-        priority: todo.priority || 'medium',
-        due_date: todo.dueDate ? new Date(todo.dueDate).toISOString() : null,
-        project_id: todo.projectId || null,
-        note_id: todo.noteId || null,
-        owner_id: user.id,
-      };
-
-      const created = await syncEngine.createData('todos', todoData);
-      return this.mapTodoFromDB(created);
-    } catch (error) {
-      console.error('Error creating todo:', error);
-      throw new Error('Failed to create todo');
-    }
+    const uid = requireUserId();
+    const ref = firestore().collection(COLLECTIONS.todos).doc();
+    await ref.set({
+      ownerId: uid,
+      title: todo.title,
+      description: todo.description ?? null,
+      completed: todo.completed ?? false,
+      priority: todo.priority || 'medium',
+      dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
+      projectId: todo.projectId ?? null,
+      noteId: todo.noteId ?? null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    const created = await ref.get();
+    const mapped = this.mapTodo(created.id, created.data()!);
+    await trackEntityEvent('todo', 'created', mapped.id);
+    return mapped;
   }
 
   async updateTodo(id: ID, updates: Partial<Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>): Promise<TodoItem> {
-    try {
-      const updateData: Record<string, unknown> = {};
-
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.completed !== undefined) updateData.completed = updates.completed;
-      if (updates.priority !== undefined) updateData.priority = updates.priority;
-      if (updates.dueDate !== undefined) {
-        updateData.due_date = updates.dueDate ? new Date(updates.dueDate).toISOString() : null;
-      }
-      if (updates.projectId !== undefined) updateData.project_id = updates.projectId || null;
-      if (updates.noteId !== undefined) updateData.note_id = updates.noteId || null;
-
-      const updated = await syncEngine.updateData('todos', id, updateData);
-      return this.mapTodoFromDB(updated);
-    } catch (error) {
-      console.error('Error updating todo:', error);
-      throw new Error('Failed to update todo');
-    }
+    requireUserId();
+    const ref = firestore().collection(COLLECTIONS.todos).doc(id);
+    await ref.update({
+      ...(updates.title !== undefined && { title: updates.title }),
+      ...(updates.description !== undefined && { description: updates.description }),
+      ...(updates.completed !== undefined && { completed: updates.completed }),
+      ...(updates.priority !== undefined && { priority: updates.priority }),
+      ...(updates.dueDate !== undefined && { dueDate: updates.dueDate ? new Date(updates.dueDate) : null }),
+      ...(updates.projectId !== undefined && { projectId: updates.projectId || null }),
+      ...(updates.noteId !== undefined && { noteId: updates.noteId || null }),
+      updatedAt: serverTimestamp(),
+    });
+    const updated = await ref.get();
+    const mapped = this.mapTodo(updated.id, updated.data()!);
+    await trackEntityEvent('todo', 'updated', mapped.id);
+    return mapped;
   }
 
   async deleteTodo(id: ID): Promise<void> {
-    try {
-      await syncEngine.deleteData('todos', id);
-    } catch (error) {
-      console.error('Error deleting todo:', error);
-      throw new Error('Failed to delete todo');
-    }
+    requireUserId();
+    await firestore().collection(COLLECTIONS.todos).doc(id).delete();
+    await trackEntityEvent('todo', 'deleted', id);
   }
 
   async toggleTodo(id: ID, completed: boolean): Promise<TodoItem> {
@@ -82,27 +81,22 @@ export class TodoRepository {
   }
 
   async syncTodos(): Promise<void> {
-    try {
-      await syncEngine.syncFromRemote('todos');
-    } catch (error) {
-      console.error('Error syncing todos:', error);
-      throw new Error('Failed to sync todos');
-    }
+    // Firestore handles sync automatically with offline persistence
   }
 
-  private mapTodoFromDB(data: Record<string, unknown>): TodoItem {
+  private mapTodo(id: string, data: FirebaseFirestoreTypes.DocumentData): TodoItem {
     return {
-      id: data.id as ID,
-      title: data.title as string,
-      description: data.description as string | undefined,
-      completed: (data.completed as boolean) ?? false,
-      priority: (data.priority as TodoItem['priority']) || 'medium',
-      dueDate: data.due_date ? new Date(data.due_date as string).getTime() : undefined,
-      projectId: data.project_id as ID | undefined,
-      noteId: data.note_id as ID | undefined,
-      userId: data.owner_id as ID,
-      createdAt: new Date(data.created_at as string).getTime(),
-      updatedAt: new Date(data.updated_at as string).getTime(),
+      id,
+      title: data.title,
+      description: data.description,
+      completed: data.completed ?? false,
+      priority: data.priority || 'medium',
+      dueDate: data.dueDate ? timestampToMillis(data.dueDate) : undefined,
+      projectId: data.projectId,
+      noteId: data.noteId,
+      userId: data.ownerId,
+      createdAt: timestampToMillis(data.createdAt),
+      updatedAt: timestampToMillis(data.updatedAt),
     };
   }
 }

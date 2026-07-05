@@ -1,357 +1,177 @@
-import { supabase } from '@/lib/supabase';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { BookmarkList, ID } from '@/types';
+import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
 
 class BookmarkListRepository {
   async createList(name: string, description?: string, isPublic: boolean = false): Promise<BookmarkList> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { data, error } = await supabase
-        .from('bookmark_lists')
-        .insert({
-          name: name.trim(),
-          description: description?.trim(),
-          is_public: isPublic,
-          owner_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw new Error(error.message);
-
-      return {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        isPublic: data.is_public,
-        ownerId: data.owner_id,
-        followerCount: data.follower_count,
-        bookmarks: [],
-        createdAt: new Date(data.created_at).getTime(),
-        updatedAt: new Date(data.updated_at).getTime(),
-      };
-    } catch (error) {
-      console.error('Create list error:', error);
-      throw error;
-    }
+    const uid = requireUserId();
+    const ref = firestore().collection(COLLECTIONS.bookmarkLists).doc();
+    await ref.set({
+      ownerId: uid,
+      name: name.trim(),
+      description: description?.trim() ?? null,
+      isPublic,
+      followerCount: 0,
+      bookmarkIds: [],
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    const created = await ref.get();
+    return this.mapList(created.id, created.data()!);
   }
 
   async getMyLists(): Promise<BookmarkList[]> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('User not authenticated, returning empty lists');
-        return [];
-      }
-
-      const { data, error } = await supabase
-        .from('bookmark_lists')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Database error:', error.message);
-        if (error.message.includes('table') && error.message.includes('not found')) {
-          console.log('Database tables not set up yet, returning empty lists');
-          return [];
-        }
-        return [];
-      }
-
-      if (!data) return [];
-
-      return data.map(list => ({
-        id: list.id,
-        name: list.name,
-        description: list.description,
-        isPublic: list.is_public,
-        ownerId: list.owner_id,
-        followerCount: list.follower_count,
-        bookmarks: [],
-        createdAt: new Date(list.created_at).getTime(),
-        updatedAt: new Date(list.updated_at).getTime(),
-      }));
-    } catch (error) {
-      console.error('Get my lists error:', error);
-      return [];
-    }
+    const uid = requireUserId();
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .where('ownerId', '==', uid)
+      .get();
+    return snapshot.docs.map((doc) => this.mapList(doc.id, doc.data()));
   }
 
   async getPublicLists(limit: number = 20): Promise<BookmarkList[]> {
-    try {
-      console.log('Attempting to fetch public lists...');
-      
-      // Simple query without complex ordering first
-      const { data, error } = await supabase
-        .from('bookmark_lists')
-        .select('*')
-        .eq('is_public', true)
-        .limit(limit);
-
-      if (error) {
-        console.error('Database error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        
-        // If it's a schema cache issue, return empty array for now
-        if (error.message.includes('schema cache') || error.message.includes('not found')) {
-          console.log('Schema cache issue detected, returning empty array');
-          return [];
-        }
-        
-        return [];
-      }
-
-      if (!data) {
-        console.log('No data returned from query');
-        return [];
-      }
-
-      console.log(`Successfully fetched ${data.length} public lists`);
-      
-      // Sort by follower count in JavaScript since DB ordering might be causing issues
-      const sortedData = data.sort((a, b) => (b.follower_count || 0) - (a.follower_count || 0));
-      
-      return sortedData.map(list => ({
-        id: list.id,
-        name: list.name,
-        description: list.description,
-        isPublic: list.is_public,
-        ownerId: list.owner_id,
-        followerCount: list.follower_count || 0,
-        bookmarks: [],
-        createdAt: new Date(list.created_at).getTime(),
-        updatedAt: new Date(list.updated_at).getTime(),
-      }));
-    } catch (error) {
-      console.error('Get public lists error:', error);
-      return [];
-    }
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .where('isPublic', '==', true)
+      .limit(limit)
+      .get();
+    return snapshot.docs
+      .map((doc) => this.mapList(doc.id, doc.data()))
+      .sort((a, b) => b.followerCount - a.followerCount);
   }
 
   async getListById(id: ID): Promise<BookmarkList | null> {
-    try {
-      const { data, error } = await supabase
-        .from('bookmark_lists')
-        .select(`
-          *,
-          profiles!bookmark_lists_owner_id_fkey (
-            handle,
-            display_name,
-            avatar_url
-          )
-        `)
-        .eq('id', id)
-        .single();
-
-      if (error || !data) return null;
-
-      return {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        isPublic: data.is_public,
-        ownerId: data.owner_id,
-        followerCount: data.follower_count,
-        bookmarks: [],
-        createdAt: new Date(data.created_at).getTime(),
-        updatedAt: new Date(data.updated_at).getTime(),
-      };
-    } catch (error) {
-      console.error('Get list by id error:', error);
-      return null;
-    }
+    const doc = await firestore().collection(COLLECTIONS.bookmarkLists).doc(id).get();
+    if (!doc.exists()) return null;
+    return this.mapList(doc.id, doc.data()!);
   }
 
-  async updateList(id: ID, updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic'>>): Promise<BookmarkList> {
-    try {
-      const { data, error } = await supabase
-        .from('bookmark_lists')
-        .update({
-          name: updates.name?.trim(),
-          description: updates.description?.trim(),
-          is_public: updates.isPublic,
-        })
-        .eq('id', id)
-        .select()
-        .single();
+  async getBookmarksByListId(listId: ID): Promise<string[]> {
+    const doc = await firestore().collection(COLLECTIONS.bookmarkLists).doc(listId).get();
+    if (!doc.exists()) return [];
+    return (doc.data()?.bookmarkIds as string[]) || [];
+  }
 
-      if (error) throw new Error(error.message);
+  async addBookmarkToList(listId: ID, bookmarkId: ID): Promise<void> {
+    requireUserId();
+    await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .doc(listId)
+      .update({
+        bookmarkIds: firestore.FieldValue.arrayUnion(bookmarkId),
+        updatedAt: serverTimestamp(),
+      });
+  }
 
-      return {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        isPublic: data.is_public,
-        ownerId: data.owner_id,
-        followerCount: data.follower_count,
-        bookmarks: [],
-        createdAt: new Date(data.created_at).getTime(),
-        updatedAt: new Date(data.updated_at).getTime(),
-      };
-    } catch (error) {
-      console.error('Update list error:', error);
-      throw error;
-    }
+  async removeBookmarkFromList(listId: ID, bookmarkId: ID): Promise<void> {
+    requireUserId();
+    await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .doc(listId)
+      .update({
+        bookmarkIds: firestore.FieldValue.arrayRemove(bookmarkId),
+        updatedAt: serverTimestamp(),
+      });
+  }
+
+  async updateList(
+    id: ID,
+    updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic'>>
+  ): Promise<BookmarkList> {
+    requireUserId();
+    const ref = firestore().collection(COLLECTIONS.bookmarkLists).doc(id);
+    await ref.update({
+      ...(updates.name !== undefined && { name: updates.name.trim() }),
+      ...(updates.description !== undefined && { description: updates.description?.trim() }),
+      ...(updates.isPublic !== undefined && { isPublic: updates.isPublic }),
+      updatedAt: serverTimestamp(),
+    });
+    const updated = await ref.get();
+    return this.mapList(updated.id, updated.data()!);
   }
 
   async deleteList(id: ID): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('bookmark_lists')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw new Error(error.message);
-    } catch (error) {
-      console.error('Delete list error:', error);
-      throw error;
-    }
+    requireUserId();
+    await firestore().collection(COLLECTIONS.bookmarkLists).doc(id).delete();
   }
 
   async followList(listId: ID): Promise<void> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('list_followers')
-        .insert({
-          list_id: listId,
-          user_id: user.id,
-        });
-
-      if (error) throw new Error(error.message);
-    } catch (error) {
-      console.error('Follow list error:', error);
-      throw error;
-    }
+    const uid = requireUserId();
+    await firestore().collection(COLLECTIONS.listFollowers).add({
+      listId,
+      userId: uid,
+      createdAt: serverTimestamp(),
+    });
+    await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .doc(listId)
+      .update({ followerCount: firestore.FieldValue.increment(1) });
   }
 
   async unfollowList(listId: ID): Promise<void> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('list_followers')
-        .delete()
-        .eq('list_id', listId)
-        .eq('user_id', user.id);
-
-      if (error) throw new Error(error.message);
-    } catch (error) {
-      console.error('Unfollow list error:', error);
-      throw error;
-    }
+    const uid = requireUserId();
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.listFollowers)
+      .where('listId', '==', listId)
+      .where('userId', '==', uid)
+      .get();
+    await Promise.all(snapshot.docs.map((doc) => doc.ref.delete()));
+    await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .doc(listId)
+      .update({ followerCount: firestore.FieldValue.increment(-1) });
   }
 
   async isFollowingList(listId: ID): Promise<boolean> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
-
-      const { data, error } = await supabase
-        .from('list_followers')
-        .select('id')
-        .eq('list_id', listId)
-        .eq('user_id', user.id)
-        .single();
-
-      return !!data;
-    } catch (error) {
-      return false;
-    }
+    const uid = requireUserId();
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.listFollowers)
+      .where('listId', '==', listId)
+      .where('userId', '==', uid)
+      .limit(1)
+      .get();
+    return !snapshot.empty;
   }
 
   async getFollowedLists(): Promise<BookmarkList[]> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('User not authenticated, returning empty followed lists');
-        return [];
-      }
+    const uid = requireUserId();
+    const followers = await firestore()
+      .collection(COLLECTIONS.listFollowers)
+      .where('userId', '==', uid)
+      .get();
 
-      const { data, error } = await supabase
-        .from('list_followers')
-        .select(`
-          bookmark_lists (*)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Database error:', error.message);
-        if (error.message.includes('table') && error.message.includes('not found')) {
-          console.log('Database tables not set up yet, returning empty lists');
-          return [];
-        }
-        return [];
-      }
-
-      if (!data) return [];
-
-      return data
-        .filter(item => item.bookmark_lists)
-        .map(item => {
-          const list = item.bookmark_lists as any;
-          return {
-            id: list.id,
-            name: list.name,
-            description: list.description,
-            isPublic: list.is_public,
-            ownerId: list.owner_id,
-            followerCount: list.follower_count,
-            bookmarks: [],
-            createdAt: new Date(list.created_at).getTime(),
-            updatedAt: new Date(list.updated_at).getTime(),
-          };
-        });
-    } catch (error) {
-      console.error('Get followed lists error:', error);
-      return [];
+    const lists: BookmarkList[] = [];
+    for (const follower of followers.docs) {
+      const listId = follower.data().listId as string;
+      const list = await this.getListById(listId);
+      if (list) lists.push(list);
     }
+    return lists;
   }
 
   async searchPublicLists(query: string): Promise<BookmarkList[]> {
     if (!query.trim()) return [];
+    const lists = await this.getPublicLists(50);
+    const q = query.toLowerCase();
+    return lists.filter(
+      (list) =>
+        list.name.toLowerCase().includes(q) ||
+        (list.description?.toLowerCase().includes(q) ?? false)
+    );
+  }
 
-    try {
-      const { data, error } = await supabase
-        .from('bookmark_lists')
-        .select('*')
-        .eq('is_public', true)
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-        .order('follower_count', { ascending: false })
-        .limit(20);
-
-      if (error) {
-        console.error('Database error:', error.message);
-        return [];
-      }
-
-      if (!data) return [];
-
-      return data.map(list => ({
-        id: list.id,
-        name: list.name,
-        description: list.description,
-        isPublic: list.is_public,
-        ownerId: list.owner_id,
-        followerCount: list.follower_count,
-        bookmarks: [],
-        createdAt: new Date(list.created_at).getTime(),
-        updatedAt: new Date(list.updated_at).getTime(),
-      }));
-    } catch (error) {
-      console.error('Search public lists error:', error);
-      return [];
-    }
+  private mapList(id: string, data: FirebaseFirestoreTypes.DocumentData): BookmarkList {
+    return {
+      id,
+      name: data.name,
+      description: data.description,
+      isPublic: data.isPublic ?? false,
+      ownerId: data.ownerId,
+      followerCount: data.followerCount ?? 0,
+      bookmarks: [],
+      createdAt: timestampToMillis(data.createdAt),
+      updatedAt: timestampToMillis(data.updatedAt),
+    };
   }
 }
 

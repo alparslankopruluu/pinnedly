@@ -1,14 +1,24 @@
+import '@/lib/i18n';
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useTranslation } from "react-i18next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { OfflineProvider } from "@/providers/OfflineProvider";
+import { DialogProvider } from "@/providers/DialogProvider";
 import { AuthProvider, useAuth } from "@/store/useAuthStore";
 import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
-import { initializeDatabase } from "@/lib/supabase";
-import { syncEngine } from "@/services/sync-engine";
+import { SharingProvider } from "@/store/useSharingStore";
+import { initializeFirestore } from "@/lib/firestore";
+import { initializeAnalytics } from "@/lib/analytics";
+import { initializeCrashlytics } from "@/lib/crashlytics";
+import { ShareIntentProvider } from "expo-share-intent";
+import { ShareIntentHandler } from "@/components/ShareIntentHandler";
+import { ClipboardUrlBanner } from "@/components/ClipboardUrlBanner";
+import { loadSavedLanguage } from "@/lib/i18n";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,30 +53,32 @@ function NavigationGuard() {
 }
 
 function RootLayoutNav() {
+  const { t } = useTranslation();
+
   return (
-    <>
+    <AnalyticsProvider>
       <NavigationGuard />
-      <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack screenOptions={{ headerBackTitle: t('common.back') }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ title: "Settings" }} />
-        <Stack.Screen name="ai-chat" options={{ title: "AI Assistant" }} />
+        <Stack.Screen name="settings" options={{ title: t('navigation.settings') }} />
+        <Stack.Screen name="ai-chat" options={{ title: t('navigation.aiAssistant') }} />
         <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
         <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
         <Stack.Screen name="add-note" options={{ presentation: "modal" }} />
-        <Stack.Screen name="add-todo" options={{ presentation: "modal", title: "Todo" }} />
+        <Stack.Screen name="add-todo" options={{ presentation: "modal", title: t('navigation.todo') }} />
         <Stack.Screen name="bookmark/[id]" />
         <Stack.Screen name="project/[id]" />
         <Stack.Screen name="note/[id]" />
-        <Stack.Screen name="profile/[id]" options={{ title: "Profile" }} />
-        <Stack.Screen name="share-inbox" options={{ title: "Share Inbox" }} />
-        <Stack.Screen name="people-search" options={{ presentation: "modal", title: "Find People" }} />
-        <Stack.Screen name="discover-lists" options={{ title: "Discover Lists" }} />
-        <Stack.Screen name="create-list" options={{ presentation: "modal", title: "Create List" }} />
-        <Stack.Screen name="bookmark-list/[id]" options={{ title: "Bookmark List" }} />
+        <Stack.Screen name="profile/[id]" options={{ title: t('navigation.profile') }} />
+        <Stack.Screen name="share-inbox" options={{ title: t('navigation.shareInbox') }} />
+        <Stack.Screen name="people-search" options={{ presentation: "modal", title: t('navigation.findPeople') }} />
+        <Stack.Screen name="discover-lists" options={{ title: t('navigation.discoverLists') }} />
+        <Stack.Screen name="create-list" options={{ presentation: "modal", title: t('navigation.createList') }} />
+        <Stack.Screen name="bookmark-list/[id]" options={{ title: t('navigation.bookmarkList') }} />
       </Stack>
-    </>
+    </AnalyticsProvider>
   );
 }
 
@@ -76,15 +88,10 @@ export default function RootLayout() {
 
     const initApp = async () => {
       try {
-        console.log("App initializing...");
-
-        const dbInitialized = await initializeDatabase();
-        if (dbInitialized) {
-          console.log("Database connection established");
-          await syncEngine.forceSync();
-        } else {
-          console.warn("Database connection failed, continuing in offline mode");
-        }
+        await loadSavedLanguage();
+        await initializeFirestore();
+        await initializeAnalytics();
+        await initializeCrashlytics();
       } catch (error) {
         console.error("Failed to initialize app:", error);
       } finally {
@@ -105,15 +112,23 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView style={styles.container}>
-        <AuthProvider>
-          <OnboardingProvider>
-            <OfflineProvider>
-              <RootLayoutNav />
-            </OfflineProvider>
-          </OnboardingProvider>
-        </AuthProvider>
-      </GestureHandlerRootView>
+      <ShareIntentProvider>
+        <GestureHandlerRootView style={styles.container}>
+          <AuthProvider>
+            <OnboardingProvider>
+              <SharingProvider>
+                <OfflineProvider>
+                  <DialogProvider>
+                    <ShareIntentHandler />
+                    <ClipboardUrlBanner />
+                    <RootLayoutNav />
+                  </DialogProvider>
+                </OfflineProvider>
+              </SharingProvider>
+            </OnboardingProvider>
+          </AuthProvider>
+        </GestureHandlerRootView>
+      </ShareIntentProvider>
     </ErrorBoundary>
   );
 }

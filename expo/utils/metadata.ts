@@ -108,10 +108,18 @@ export async function fetchUrlMetadata(url: string): Promise<UrlMetadata> {
   }
 }
 
-export function getSourceFromUrl(url: string): 'twitter' | 'instagram' | 'medium' | 'linkedin' | 'other' {
-  if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter';
-  if (url.includes('instagram.com')) return 'instagram';
-  if (url.includes('medium.com')) return 'medium';
-  if (url.includes('linkedin.com')) return 'linkedin';
+import { BookmarkSource } from '@/types';
+
+export function getSourceFromUrl(url: string): BookmarkSource {
+  const host = url.toLowerCase();
+  if (host.includes('twitter.com') || host.includes('x.com')) return 'twitter';
+  if (host.includes('instagram.com')) return 'instagram';
+  if (host.includes('medium.com')) return 'medium';
+  if (host.includes('linkedin.com')) return 'linkedin';
+  if (host.includes('wikipedia.org')) return 'wikipedia';
+  if (host.includes('youtube.com') || host.includes('youtu.be')) return 'youtube';
+  if (host.includes('reddit.com')) return 'reddit';
+  if (host.includes('substack.com')) return 'substack';
+  if (host.includes('github.com')) return 'github';
   return 'other';
 }

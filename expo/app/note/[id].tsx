@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -6,10 +6,12 @@ import {
   ScrollView, 
   TouchableOpacity, 
   TextInput,
-  Alert
+  ActivityIndicator,
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { 
   Edit3, 
   Share2, 
@@ -20,18 +22,25 @@ import {
   Calendar,
   User
 } from 'lucide-react-native';
-import { useAppStore } from '@/store/useAppStore';
+import { useNoteStore } from '@/providers/OfflineProvider';
 import { ShareModal } from '@/components/ShareModal';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import { MarkdownContent } from '@/components/ui/MarkdownContent';
 
 export default function NoteDetailScreen() {
-  const { id } = useLocalSearchParams();
-  const { notes, updateNote, deleteNote } = useAppStore();
+  const { t } = useTranslation();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const noteId = Array.isArray(id) ? id[0] : id;
+  const { notes, loading, updateNote, deleteNote } = useNoteStore();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>('');
   const [editedContent, setEditedContent] = useState<string>('');
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
 
-  const note = notes.find(n => n.id === id);
+  const note = useMemo(
+    () => notes.find((item) => item.id === noteId),
+    [notes, noteId]
+  );
 
   useEffect(() => {
     if (note) {
@@ -40,21 +49,24 @@ export default function NoteDetailScreen() {
     }
   }, [note]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!note) return;
     
     if (!editedTitle.trim()) {
-      Alert.alert('Error', 'Note title cannot be empty');
+      showAppAlert(t('common.error'), t('noteDetail.alerts.titleEmpty'), undefined, { variant: 'error' });
       return;
     }
 
-    updateNote(note.id, {
-      title: editedTitle.trim(),
-      markdown: editedContent.trim(),
-      updatedAt: Date.now()
-    });
-    
-    setIsEditing(false);
+    try {
+      await updateNote(note.id, {
+        title: editedTitle.trim(),
+        markdown: editedContent.trim(),
+      });
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Failed to update note:', err);
+      showAppAlert(t('common.error'), t('noteDetail.alerts.updateFailed', { defaultValue: 'Failed to update note' }), undefined, { variant: 'error' });
+    }
   };
 
   const handleCancel = () => {
@@ -68,36 +80,57 @@ export default function NoteDetailScreen() {
   const handleDelete = () => {
     if (!note) return;
     
-    Alert.alert(
-      'Delete Note',
-      'Are you sure you want to delete this note? This action cannot be undone.',
+    showAppAlert(
+      t('noteDetail.deleteTitle'),
+      t('noteDetail.deleteMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
-          onPress: () => {
-            deleteNote(note.id);
-            router.back();
+          onPress: async () => {
+            try {
+              await deleteNote(note.id);
+              router.back();
+            } catch (err) {
+              console.error('Failed to delete note:', err);
+              showAppAlert(t('common.error'), t('noteDetail.alerts.deleteFailed', { defaultValue: 'Failed to delete note' }), undefined, { variant: 'error' });
+            }
           },
         },
       ]
     );
   };
 
+  if (loading) {
+    return (
+      <>
+        <Stack.Screen options={{ title: t('noteDetail.loading', { defaultValue: 'Note' }) }} />
+        <SafeAreaView style={styles.container}>
+          <View style={styles.errorContainer}>
+            <ActivityIndicator size="large" color="#EF4444" />
+          </View>
+        </SafeAreaView>
+      </>
+    );
+  }
+
   if (!note) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Note not found</Text>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <>
+        <Stack.Screen options={{ title: t('noteDetail.notFound') }} />
+        <SafeAreaView style={styles.container}>
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{t('noteDetail.notFound')}</Text>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.backButtonText}>{t('common.back')}</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </>
     );
   }
 
@@ -105,7 +138,7 @@ export default function NoteDetailScreen() {
     <>
       <Stack.Screen 
         options={{
-          title: isEditing ? 'Edit Note' : note.title,
+          title: isEditing ? t('noteDetail.editNote') : note.title,
           headerRight: () => (
             <View style={styles.headerActions}>
               {isEditing ? (
@@ -142,16 +175,14 @@ export default function NoteDetailScreen() {
                 style={styles.titleInput}
                 value={editedTitle}
                 onChangeText={setEditedTitle}
-                placeholder="Note title"
+                placeholder={t('noteDetail.titlePlaceholder')}
                 multiline
               />
-              <TextInput
-                style={styles.contentInput}
+              <RichTextEditor
                 value={editedContent}
-                onChangeText={setEditedContent}
-                placeholder="Write your note here..."
-                multiline
-                textAlignVertical="top"
+                onChangeText={(_text, md) => setEditedContent(md)}
+                placeholder={t('noteDetail.contentPlaceholder')}
+                toolbarHint={t('addNote.toolbarHint')}
               />
             </View>
           ) : (
@@ -162,38 +193,38 @@ export default function NoteDetailScreen() {
                 <View style={styles.metadataItem}>
                   <Calendar size={16} color="#6B7280" />
                   <Text style={styles.metadataText}>
-                    Created {new Date(note.createdAt).toLocaleDateString()}
+                    {t('noteDetail.created', { date: new Date(note.createdAt).toLocaleDateString() })}
                   </Text>
                 </View>
                 {note.updatedAt && note.updatedAt !== note.createdAt && (
                   <View style={styles.metadataItem}>
                     <Edit3 size={16} color="#6B7280" />
                     <Text style={styles.metadataText}>
-                      Updated {new Date(note.updatedAt).toLocaleDateString()}
+                      {t('noteDetail.updated', { date: new Date(note.updatedAt).toLocaleDateString() })}
                     </Text>
                   </View>
                 )}
                 <View style={styles.metadataItem}>
                   <User size={16} color="#6B7280" />
-                  <Text style={styles.metadataText}>You</Text>
+                  <Text style={styles.metadataText}>{t('noteDetail.you')}</Text>
                 </View>
               </View>
 
               <View style={styles.contentContainer}>
-                <Text style={styles.noteContent}>{note.markdown}</Text>
+                <MarkdownContent value={note.markdown} />
               </View>
 
               {/* Collaboration Section */}
               <View style={styles.collaborationSection}>
                 <View style={styles.sectionHeader}>
                   <Users size={20} color="#6B7280" />
-                  <Text style={styles.sectionTitle}>Shared with</Text>
+                  <Text style={styles.sectionTitle}>{t('noteDetail.sharedWith')}</Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.addMemberButton}
                   onPress={() => setShowShareModal(true)}
                 >
-                  <Text style={styles.addMemberText}>Add people</Text>
+                  <Text style={styles.addMemberText}>{t('noteDetail.addPeople')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -263,11 +294,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  noteContent: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#374151',
-  },
+
   collaborationSection: {
     backgroundColor: 'white',
     borderRadius: 12,
@@ -318,17 +345,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     minHeight: 60,
   },
-  contentInput: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#374151',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    minHeight: 300,
-  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',

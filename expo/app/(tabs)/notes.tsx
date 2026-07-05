@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileText, Globe, Lock, Users } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -9,8 +10,18 @@ import { formatRelativeTime } from '@/utils/date';
 import { Note, Visibility } from '@/types';
 
 export default function NotesScreen() {
+  const { t } = useTranslation();
   const { notes } = useNoteStore();
   const insets = useSafeAreaInsets();
+
+  const uniqueNotes = useMemo(() => {
+    const seenIds = new Set<string>();
+    return notes.filter((note) => {
+      if (seenIds.has(note.id)) return false;
+      seenIds.add(note.id);
+      return true;
+    });
+  }, [notes]);
 
   const getVisibilityIcon = (visibility: Visibility) => {
     switch (visibility) {
@@ -25,9 +36,9 @@ export default function NotesScreen() {
 
   const getVisibilityLabel = (visibility: Visibility): string => {
     switch (visibility) {
-      case 'public': return 'Public';
-      case 'shared': return 'Shared';
-      default: return 'Private';
+      case 'public': return t('common.public');
+      case 'shared': return t('common.shared');
+      default: return t('common.private');
     }
   };
 
@@ -55,12 +66,12 @@ export default function NotesScreen() {
         {item.title}
       </Text>
       <Text style={styles.notePreview} numberOfLines={3}>
-        {item.markdown.replace(/[#*`_\][]/g, '').trim() || 'No content'}
+        {item.markdown.replace(/[#*`_\][]/g, '').trim() || t('common.noContent')}
       </Text>
       {item.links.length > 0 && (
         <View style={styles.linksContainer}>
           <Text style={styles.linksText}>
-            {item.links.length} linked item{item.links.length !== 1 ? 's' : ''}
+            {t('common.linkedItems', { count: item.links.length })}
           </Text>
         </View>
       )}
@@ -69,9 +80,9 @@ export default function NotesScreen() {
 
   const renderEmpty = () => (
     <EmptyState
-      title="No notes yet"
-      description="Start capturing your thoughts and ideas in markdown format."
-      buttonTitle="Create Your First Note"
+      title={t('notes.empty.title')}
+      description={t('notes.empty.description')}
+      buttonTitle={t('notes.empty.button')}
       onButtonPress={() => router.push('/add-note')}
       icon={<FileText size={48} color="#D1D5DB" />}
     />
@@ -80,13 +91,13 @@ export default function NotesScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <FlatList
-        data={notes}
+        data={uniqueNotes}
         renderItem={renderNote}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={renderEmpty}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
-          notes.length === 0 ? styles.emptyContainer : styles.listContainer,
+          uniqueNotes.length === 0 ? styles.emptyContainer : styles.listContainer,
           { paddingBottom: insets.bottom + 80 }
         ]}
       />

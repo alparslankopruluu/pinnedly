@@ -9,6 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import { X, Crown, Check, Zap, Users, Bell, Mic } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 interface PremiumModalProps {
   visible: boolean;
@@ -26,65 +27,72 @@ interface SubscriptionPlan {
   popular?: boolean;
 }
 
-const subscriptionPlans: SubscriptionPlan[] = [
-  {
-    id: 'monthly',
-    name: 'Monthly',
-    price: '$9.99',
-    period: '/month',
-    features: [
-      'Unlimited bookmark lists',
-      'Collaborative projects',
-      'Voice notes',
-      'Advanced reminders',
-      'Priority support',
-    ],
-  },
-  {
-    id: 'yearly',
-    name: 'Yearly',
-    price: '$79.99',
-    period: '/year',
-    originalPrice: '$119.88',
-    savings: 'Save 33%',
-    popular: true,
-    features: [
-      'Everything in Monthly',
-      'Advanced analytics',
-      'Custom themes',
-      'Export to multiple formats',
-      'Team management tools',
-      'API access',
-    ],
-  },
-];
-
-const premiumFeatures = [
-  {
-    icon: <Users size={24} color="#6366F1" />,
-    title: 'Team Collaboration',
-    description: 'Share projects and lists with your team members',
-  },
-  {
-    icon: <Mic size={24} color="#6366F1" />,
-    title: 'Voice Notes',
-    description: 'Record and transcribe voice memos instantly',
-  },
-  {
-    icon: <Bell size={24} color="#6366F1" />,
-    title: 'Smart Reminders',
-    description: 'AI-powered notifications and nudges',
-  },
-  {
-    icon: <Zap size={24} color="#6366F1" />,
-    title: 'Advanced Features',
-    description: 'Unlock powerful productivity tools',
-  },
-];
-
 export function PremiumModal({ visible, onClose }: PremiumModalProps) {
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<string>('yearly');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const subscriptionPlans: SubscriptionPlan[] = useMemo(
+    () => [
+      {
+        id: 'monthly',
+        name: t('premium.plans.monthly'),
+        price: '$9.99',
+        period: t('premium.plans.perMonth'),
+        features: [
+          t('premium.features.unlimitedLists'),
+          t('premium.features.collaborativeProjects'),
+          t('premium.features.voiceNotesFeature'),
+          t('premium.features.advancedReminders'),
+          t('premium.features.prioritySupport'),
+        ],
+      },
+      {
+        id: 'yearly',
+        name: t('premium.plans.yearly'),
+        price: '$79.99',
+        period: t('premium.plans.perYear'),
+        originalPrice: '$119.88',
+        savings: t('premium.plans.savePercent'),
+        popular: true,
+        features: [
+          t('premium.features.everythingMonthly'),
+          t('premium.features.advancedAnalytics'),
+          t('premium.features.customThemes'),
+          t('premium.features.exportFormats'),
+          t('premium.features.teamManagement'),
+          t('premium.features.apiAccess'),
+        ],
+      },
+    ],
+    [t]
+  );
+
+  const premiumFeatures = useMemo(
+    () => [
+      {
+        icon: <Users size={24} color="#6366F1" />,
+        title: t('premium.features.teamCollaboration.title'),
+        description: t('premium.features.teamCollaboration.description'),
+      },
+      {
+        icon: <Mic size={24} color="#6366F1" />,
+        title: t('premium.features.voiceNotes.title'),
+        description: t('premium.features.voiceNotes.description'),
+      },
+      {
+        icon: <Bell size={24} color="#6366F1" />,
+        title: t('premium.features.smartReminders.title'),
+        description: t('premium.features.smartReminders.description'),
+      },
+      {
+        icon: <Zap size={24} color="#6366F1" />,
+        title: t('premium.features.advancedFeatures.title'),
+        description: t('premium.features.advancedFeatures.description'),
+      },
+    ],
+    [t]
+  );
   
   const scaleAnim = useMemo(() => new Animated.Value(0.9), []);
   const opacityAnim = useMemo(() => new Animated.Value(0), []);
@@ -135,7 +143,7 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
       {plan.popular && (
         <View style={styles.popularBadge}>
           <Crown size={16} color="#FFFFFF" />
-          <Text style={styles.popularText}>Most Popular</Text>
+          <Text style={styles.popularText}>{t('premium.mostPopular')}</Text>
         </View>
       )}
       
@@ -179,8 +187,8 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
               <View style={styles.headerLeft}>
                 <Crown size={28} color="#6366F1" />
                 <View style={styles.headerText}>
-                  <Text style={styles.title}>Upgrade to Premium</Text>
-                  <Text style={styles.subtitle}>Unlock powerful features</Text>
+                  <Text style={styles.title}>{t('premium.title')}</Text>
+                  <Text style={styles.subtitle}>{t('premium.subtitle')}</Text>
                 </View>
               </View>
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -201,7 +209,7 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
 
             {/* Subscription Plans */}
             <View style={styles.plansSection}>
-              <Text style={styles.sectionTitle}>Choose Your Plan</Text>
+              <Text style={styles.sectionTitle}>{t('premium.choosePlan')}</Text>
               <View style={styles.plansContainer}>
                 {subscriptionPlans.map(renderPlanCard)}
               </View>
@@ -217,13 +225,16 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
               disabled={isProcessing}
             >
               <Text style={styles.subscribeButtonText}>
-                {isProcessing ? 'Processing...' : 'Start Free Trial'}
+                {isProcessing ? t('common.processing') : t('premium.startFreeTrial')}
               </Text>
             </TouchableOpacity>
 
             {/* Terms */}
             <Text style={styles.termsText}>
-              7-day free trial, then {subscriptionPlans.find(p => p.id === selectedPlan)?.price}{subscriptionPlans.find(p => p.id === selectedPlan)?.period}. Cancel anytime.
+              {t('premium.terms', {
+                price: subscriptionPlans.find((p) => p.id === selectedPlan)?.price ?? '',
+                period: subscriptionPlans.find((p) => p.id === selectedPlan)?.period ?? '',
+              })}
             </Text>
           </ScrollView>
         </Animated.View>

@@ -5,7 +5,7 @@ import { TodoStoreProvider } from '@/store/useTodoStore';
 import { BookmarkListProvider } from '@/store/useBookmarkListStore';
 import { notificationService } from '@/utils/notifications';
 import { router } from 'expo-router';
-import * as Notifications from 'expo-notifications';
+import { BookmarkDigestSync } from '@/components/BookmarkDigestSync';
 
 // Create a query client for React Query
 const queryClient = new QueryClient({
@@ -36,22 +36,28 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
       (response) => {
         const data = response.notification.request.content.data;
         
+        if (data.type === 'bookmark_digest') {
+          router.push('/(tabs)/bookmarks?filter=inbox' as never);
+          return;
+        }
+
         if (data.entityType && data.entityId) {
-          // Navigate to the relevant screen based on entity type
           switch (data.entityType) {
             case 'project':
-              router.push(`/project/${data.entityId}` as any);
+              router.push(`/project/${data.entityId}` as never);
               break;
             case 'task':
-              // Find the project that contains this task and navigate to it
-              // This would require a more complex lookup
               console.log('Navigate to task:', data.entityId);
               break;
             case 'note':
-              router.push(`/note/${data.entityId}` as any);
+              router.push(`/note/${data.entityId}` as never);
               break;
             case 'bookmark':
-              router.push(`/bookmark/${data.entityId}` as any);
+              if (data.entityId === 'inbox') {
+                router.push('/(tabs)/bookmarks?filter=inbox' as never);
+              } else {
+                router.push(`/bookmark/${data.entityId}` as never);
+              }
               break;
           }
         }
@@ -70,6 +76,7 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
           <NoteStoreProvider>
             <TodoStoreProvider>
               <BookmarkListProvider>
+                <BookmarkDigestSync />
                 {children}
               </BookmarkListProvider>
             </TodoStoreProvider>
@@ -84,5 +91,4 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
 export { useProjectStore, useBookmarkStore, useNoteStore } from '@/store/useOfflineStore';
 export { useTodoStore } from '@/store/useTodoStore';
 
-// Export sync engine utilities
-export { syncEngine, useSyncStatus } from '@/services/sync-engine';
+export { useSyncStatus } from '@/hooks/useSyncStatus';

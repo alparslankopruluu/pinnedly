@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   View, 
   Text, 
@@ -7,26 +8,33 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Image,
-  Alert,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { X, Camera, Plus } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useAppStore } from '@/store/useAppStore';
+import { useBookmarkStore } from '@/providers/OfflineProvider';
+import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
+import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { fetchUrlMetadata, getSourceFromUrl } from '@/utils/metadata';
-
 export default function AddBookmarkScreen() {
-  const { addBookmark, tags, addTag } = useAppStore();
+  const { t } = useTranslation();
+  const { url: initialUrl } = useLocalSearchParams<{ url?: string }>();
+  const { createBookmark, bookmarks } = useBookmarkStore();
+  const { isAuthenticated } = useAuth();
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [comment, setComment] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const suggestedTags = [...new Set(bookmarks.flatMap((b) => b.tagNames))].slice(0, 12);
   const [screenshotUri, setScreenshotUri] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,10 +61,10 @@ export default function AddBookmarkScreen() {
       } catch (error) {
         console.error('Failed to fetch metadata:', error);
         // Show user-friendly message but don't block the flow
-        Alert.alert(
-          'Metadata Fetch Failed', 
-          'Could not automatically fetch page details. You can still add the bookmark manually.',
-          [{ text: 'OK' }]
+        showAppAlert(
+          t('addBookmark.metadataFetchFailed'),
+          t('addBookmark.metadataFetchMessage'),
+          [{ text: t('common.ok') }]
         );
       } finally {
         setIsLoading(false);
@@ -64,10 +72,16 @@ export default function AddBookmarkScreen() {
     }
   };
 
+  useEffect(() => {
+    if (typeof initialUrl === 'string' && initialUrl.trim()) {
+      handleUrlChange(decodeURIComponent(initialUrl.trim()));
+    }
+  }, [initialUrl]);
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please grant camera roll permissions to upload screenshots.');
+      showAppAlert(t('addBookmark.alerts.permissionNeeded'), t('addBookmark.alerts.cameraPermission'));
       return;
     }
 
@@ -84,50 +98,63 @@ export default function AddBookmarkScreen() {
     }
   };
 
-  const toggleTag = (tagId: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) 
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
+  const toggleTag = (tagName: string) => {
+    const normalized = tagName.trim().toLowerCase();
+    setSelectedTags((prev) =>
+      prev.includes(normalized)
+        ? prev.filter((name) => name !== normalized)
+        : [...prev, normalized]
     );
   };
 
   const handleAddTag = () => {
-    if (newTag.trim()) {
-      addTag({ name: newTag.trim() });
-      setNewTag('');
+    const normalized = newTag.trim().toLowerCase();
+    if (normalized && !selectedTags.includes(normalized)) {
+      setSelectedTags((prev) => [...prev, normalized]);
     }
+    setNewTag('');
   };
 
-  const handleSave = () => {
-    if (!url.trim() && !screenshotUri) {
-      Alert.alert('Error', 'Please provide either a URL or upload a screenshot.');
+  const handleSave = async () => {
+    if (!isAuthenticated) {
+      showAppAlert(t('addBookmark.alerts.signInRequired'), t('addBookmark.alerts.signInToSave'));
       return;
     }
 
-    const bookmarkTags = tags.filter(tag => selectedTags.includes(tag.id));
+    if (!url.trim() && !screenshotUri) {
+      showAppAlert(t('common.error'), t('addBookmark.alerts.provideUrlOrScreenshot'), undefined, { variant: 'error' });
+      return;
+    }
+
     const source = url ? getSourceFromUrl(url) : 'other';
 
-    addBookmark({
-      url: url.trim() || undefined,
-      title: title.trim() || undefined,
-      description: description.trim() || undefined,
-      imagePreview: imagePreview || undefined,
-      screenshotUri: screenshotUri || undefined,
-      tags: bookmarkTags,
-      source,
-      visibility: 'private',
-      userId: 'local',
-    });
-
-    router.back();
+    try {
+      setIsSaving(true);
+      await createBookmark({
+        url: url.trim() || undefined,
+        title: title.trim() || undefined,
+        description: description.trim() || undefined,
+        imagePreview: imagePreview || undefined,
+        screenshotUri: screenshotUri || undefined,
+        tagNames: selectedTags,
+        personalNote: comment.trim() || undefined,
+        source,
+        visibility: 'private',
+        status: 'inbox',
+      });
+      router.back();
+    } catch (error) {
+      showAppAlert(t('addBookmark.alerts.saveFailed'), error instanceof Error ? error.message : t('addBookmark.alerts.couldNotSave'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Stack.Screen 
         options={{ 
-          title: 'Add Bookmark',
+          title: t('addBookmark.title'),
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
               <X size={24} color="#111827" />
@@ -144,12 +171,12 @@ export default function AddBookmarkScreen() {
           <View style={styles.content}>
             {/* URL Input */}
             <View style={styles.section}>
-              <Text style={styles.label}>URL</Text>
+              <Text style={styles.label}>{t('addBookmark.labels.url')}</Text>
               <TextInput
                 style={styles.input}
                 value={url}
                 onChangeText={handleUrlChange}
-                placeholder="Paste URL here..."
+                placeholder={t('addBookmark.urlPlaceholder')}
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 keyboardType="url"
@@ -159,7 +186,7 @@ export default function AddBookmarkScreen() {
             {/* OR Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OR</Text>
+              <Text style={styles.dividerText}>{t('addBookmark.labels.or')}</Text>
               <View style={styles.dividerLine} />
             </View>
 
@@ -167,7 +194,7 @@ export default function AddBookmarkScreen() {
             <View style={styles.section}>
               <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
                 <Camera size={24} color="#6B7280" />
-                <Text style={styles.uploadText}>Upload Screenshot</Text>
+                <Text style={styles.uploadText}>{t('addBookmark.labels.uploadScreenshot')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -180,24 +207,24 @@ export default function AddBookmarkScreen() {
 
             {/* Title */}
             <View style={styles.section}>
-              <Text style={styles.label}>Title</Text>
+              <Text style={styles.label}>{t('addBookmark.labels.title')}</Text>
               <TextInput
                 style={styles.input}
                 value={title}
                 onChangeText={setTitle}
-                placeholder="Enter title..."
+                placeholder={t('addBookmark.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
               />
             </View>
 
             {/* Description */}
             <View style={styles.section}>
-              <Text style={styles.label}>Description</Text>
+              <Text style={styles.label}>{t('addBookmark.labels.description')}</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Enter description..."
+                placeholder={t('addBookmark.descriptionPlaceholder')}
                 placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={3}
@@ -206,12 +233,12 @@ export default function AddBookmarkScreen() {
 
             {/* Comment */}
             <View style={styles.section}>
-              <Text style={styles.label}>Comment (optional)</Text>
+              <Text style={styles.label}>{t('addBookmark.labels.commentOptional')}</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={comment}
                 onChangeText={setComment}
-                placeholder="Add a quick note..."
+                placeholder={t('addBookmark.notePlaceholder')}
                 placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={2}
@@ -220,26 +247,26 @@ export default function AddBookmarkScreen() {
 
             {/* Tags */}
             <View style={styles.section}>
-              <Text style={styles.label}>Tags</Text>
+              <Text style={styles.label}>{t('addBookmark.labels.tags')}</Text>
               <View style={styles.tagsContainer}>
-                {tags.map((tag) => (
+                {suggestedTags.map((tagName) => (
                   <TouchableOpacity
-                    key={tag.id}
+                    key={tagName}
                     style={[
                       styles.tag,
-                      selectedTags.includes(tag.id) && styles.selectedTag,
+                      selectedTags.includes(tagName) && styles.selectedTag,
                     ]}
-                    onPress={() => toggleTag(tag.id)}
+                    onPress={() => toggleTag(tagName)}
                   >
                     <Text
                       style={[
                         styles.tagText,
-                        selectedTags.includes(tag.id) && styles.selectedTagText,
+                        selectedTags.includes(tagName) && styles.selectedTagText,
                       ]}
                     >
-                      {tag.name}
+                      {tagName}
                     </Text>
-                    {selectedTags.includes(tag.id) && (
+                    {selectedTags.includes(tagName) && (
                       <X size={14} color="white" style={styles.tagRemove} />
                     )}
                   </TouchableOpacity>
@@ -252,7 +279,7 @@ export default function AddBookmarkScreen() {
                   style={styles.newTagInput}
                   value={newTag}
                   onChangeText={setNewTag}
-                  placeholder="Add tags..."
+                  placeholder={t('addBookmark.tagsPlaceholder')}
                   placeholderTextColor="#9CA3AF"
                 />
                 <TouchableOpacity style={styles.addTagButton} onPress={handleAddTag}>
@@ -263,15 +290,14 @@ export default function AddBookmarkScreen() {
           </View>
         </ScrollView>
 
-        {/* Save Button */}
-        <View style={styles.footer}>
+        <ScreenFooter>
           <Button
-            title={isLoading ? 'Loading...' : 'Add Bookmark'}
+            title={isSaving ? t('common.saving') : isLoading ? t('common.loading') : t('addBookmark.addBookmark')}
             onPress={handleSave}
-            disabled={isLoading}
+            disabled={isLoading || isSaving}
             style={styles.saveButton}
           />
-        </View>
+        </ScreenFooter>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -405,12 +431,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
   },
   saveButton: {
     width: '100%',

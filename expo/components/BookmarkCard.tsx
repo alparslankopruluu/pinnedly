@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Bookmark } from '@/types';
 import { formatRelativeTime } from '@/utils/date';
+import { getSourceLabel, isUnreadBookmark } from '@/utils/bookmark';
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -9,15 +11,23 @@ interface BookmarkCardProps {
 }
 
 export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
+  const { t } = useTranslation();
+
   const getOpenCountText = () => {
-    if (bookmark.openCount === 0) return 'Never opened';
-    return `Opened ${bookmark.openCount}×`;
+    if (bookmark.openCount === 0) return t('bookmarkCard.neverOpened');
+    return t('bookmarkCard.openedCount', { count: bookmark.openCount });
   };
 
   const getOpenCountColor = () => {
     if (bookmark.openCount === 0) return '#6B7280';
     if (bookmark.openCount >= 10) return '#059669';
     return '#D97706';
+  };
+
+  const getDomainLabel = () => {
+    if (bookmark.source) return getSourceLabel(bookmark.source);
+    if (bookmark.url) return new URL(bookmark.url).hostname;
+    return t('bookmarkCard.screenshot');
   };
 
   return (
@@ -31,7 +41,7 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
           </View>
           <View style={styles.headerText}>
             <Text style={styles.domain} numberOfLines={1}>
-              {bookmark.url ? new URL(bookmark.url).hostname : 'Screenshot'}
+              {getDomainLabel()}
             </Text>
             <Text style={styles.date}>
               {formatRelativeTime(bookmark.createdAt)}
@@ -40,7 +50,7 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
         </View>
         
         <Text style={styles.title} numberOfLines={2}>
-          {bookmark.title || bookmark.url || 'Untitled'}
+          {bookmark.title || bookmark.url || t('common.untitled')}
         </Text>
         
         {bookmark.description && (
@@ -57,17 +67,29 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
           />
         )}
         
+        {bookmark.personalNote ? (
+          <Text style={styles.personalNote} numberOfLines={2}>
+            {bookmark.personalNote}
+          </Text>
+        ) : null}
+
         <View style={styles.footer}>
-          <View
-            style={[
-              styles.openCount,
-              { backgroundColor: `${getOpenCountColor()}20` },
-            ]}
-          >
-            <Text style={[styles.openCountText, { color: getOpenCountColor() }]}>
-              {getOpenCountText()}
-            </Text>
-          </View>
+          {isUnreadBookmark(bookmark) && bookmark.status !== 'done' ? (
+            <View style={[styles.openCount, { backgroundColor: '#FEE2E220' }]}>
+              <Text style={[styles.openCountText, { color: '#B91C1C' }]}>{t('bookmarkCard.readLater')}</Text>
+            </View>
+          ) : (
+            <View
+              style={[
+                styles.openCount,
+                { backgroundColor: `${getOpenCountColor()}20` },
+              ]}
+            >
+              <Text style={[styles.openCountText, { color: getOpenCountColor() }]}>
+                {getOpenCountText()}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -138,6 +160,12 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 12,
     marginBottom: 12,
+  },
+  personalNote: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    marginBottom: 10,
   },
   footer: {
     flexDirection: 'row',

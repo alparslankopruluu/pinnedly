@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -16,6 +17,7 @@ import { useAuth } from '@/store/useAuthStore';
 import { User } from '@/types';
 
 export default function PeopleSearch() {
+  const { t } = useTranslation();
   const { searchUsers } = useAuth();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
@@ -69,7 +71,7 @@ export default function PeopleSearch() {
           <Ionicons name="checkmark-circle" size={16} color="#3b82f6" />
         )}
         <Text style={styles.followerCount}>
-          {item.followerCount} followers
+          {t('common.followers', { count: item.followerCount })}
         </Text>
       </View>
     </TouchableOpacity>
@@ -81,13 +83,13 @@ export default function PeopleSearch() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text style={styles.title}>Find People</Text>
+        <Text style={styles.title}>{t('peopleSearch.title')}</Text>
       </View>
 
       <View style={styles.content}>
         <View style={styles.searchBar}>
           <SearchBar
-            placeholder="Search by name or username..."
+            placeholder={t('peopleSearch.searchPlaceholder')}
             value={searchQuery}
             onChangeText={handleSearch}
           />
@@ -95,13 +97,13 @@ export default function PeopleSearch() {
 
         {searchQuery.length === 0 ? (
           <EmptyState
-            title="Search for People"
-            description="Enter a name or username to find people to connect with"
+            title={t('peopleSearch.empty.title')}
+            description={t('peopleSearch.empty.description')}
           />
         ) : searchResults.length === 0 && !isLoading ? (
           <EmptyState
-            title="No Results"
-            description={`No users found for "${searchQuery}"`}
+            title={t('peopleSearch.noResults.title')}
+            description={t('peopleSearch.noResults.description', { query: searchQuery })}
           />
         ) : (
           <FlatList

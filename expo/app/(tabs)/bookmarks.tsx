@@ -1,49 +1,80 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronDown } from 'lucide-react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChips } from '@/components/ui/FilterChips';
 import { BookmarkCard } from '@/components/BookmarkCard';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Bookmark } from '@/types';
+import { Bookmark, BookmarkSource } from '@/types';
+import { isUnreadBookmark } from '@/utils/bookmark';
 
-type SortOption = 'recent' | 'most-opened';
-type FilterOption = 'all' | 'never-opened' | 'frequently' | 'tagged';
+type SortOption = 'recent' | 'most-opened' | 'oldest-unread';
+type FilterOption = 'all' | 'inbox' | 'never-opened' | 'frequently' | 'tagged' | BookmarkSource;
 
 export default function BookmarksScreen() {
+  const { t } = useTranslation();
+  const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
   const { bookmarks, loading, error } = useBookmarkStore();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('all');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
 
+  useEffect(() => {
+    if (filterParam === 'inbox' || filterParam === 'never-opened') {
+      setSelectedFilter(filterParam);
+      setSortBy('oldest-unread');
+    }
+  }, [filterParam]);
+
+  const inboxCount = bookmarks.filter(
+    (b) => isUnreadBookmark(b) && b.status !== 'archived' && b.status !== 'done'
+  ).length;
+
   const filterChips = [
-    { id: 'all', label: 'All', count: bookmarks.length },
-    { id: 'never-opened', label: 'Never Opened', count: bookmarks.filter(b => b.openCount === 0).length },
-    { id: 'frequently', label: 'Frequently', count: bookmarks.filter(b => b.openCount >= 5).length },
-    { id: 'tagged', label: 'Tagged', count: bookmarks.filter(b => b.tags.length > 0).length },
+    { id: 'all', label: t('bookmarks.filters.all'), count: bookmarks.length },
+    { id: 'inbox', label: t('bookmarks.filters.readLater'), count: inboxCount },
+    { id: 'never-opened', label: t('bookmarks.filters.neverOpened'), count: bookmarks.filter((b) => b.openCount === 0).length },
+    { id: 'linkedin', label: t('bookmarks.filters.linkedin'), count: bookmarks.filter((b) => b.source === 'linkedin').length },
+    { id: 'twitter', label: t('bookmarks.filters.twitter'), count: bookmarks.filter((b) => b.source === 'twitter').length },
+    { id: 'medium', label: t('bookmarks.filters.medium'), count: bookmarks.filter((b) => b.source === 'medium').length },
+    { id: 'tagged', label: t('bookmarks.filters.tagged'), count: bookmarks.filter((b) => b.tagNames.length > 0).length },
   ];
 
   const filteredAndSortedBookmarks = useMemo(() => {
-    let filtered = bookmarks;
-    
-    // Apply search filter
+    const seenIds = new Set<string>();
+    const uniqueBookmarks = bookmarks.filter((bookmark) => {
+      if (seenIds.has(bookmark.id)) return false;
+      seenIds.add(bookmark.id);
+      return true;
+    });
+
+    let filtered = uniqueBookmarks.filter((b) => b.status !== 'archived');
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (bookmark) =>
           bookmark.title?.toLowerCase().includes(query) ||
           bookmark.description?.toLowerCase().includes(query) ||
+          bookmark.personalNote?.toLowerCase().includes(query) ||
           bookmark.url?.toLowerCase().includes(query) ||
-          bookmark.tags.some((tag) => tag.name.toLowerCase().includes(query))
+          bookmark.tagNames.some((tag) => tag.toLowerCase().includes(query))
       );
     }
-    
-    // Apply category filter
+
     switch (selectedFilter) {
+      case 'inbox':
+        filtered = filtered.filter(
+          (bookmark) =>
+            isUnreadBookmark(bookmark) &&
+            bookmark.status !== 'done'
+        );
+        break;
       case 'never-opened':
         filtered = filtered.filter((bookmark) => bookmark.openCount === 0);
         break;
@@ -51,27 +82,61 @@ export default function BookmarksScreen() {
         filtered = filtered.filter((bookmark) => bookmark.openCount >= 5);
         break;
       case 'tagged':
-        filtered = filtered.filter((bookmark) => bookmark.tags.length > 0);
+        filtered = filtered.filter((bookmark) => bookmark.tagNames.length > 0);
+        break;
+      case 'linkedin':
+      case 'twitter':
+      case 'medium':
+      case 'wikipedia':
+      case 'youtube':
+      case 'reddit':
+      case 'instagram':
+      case 'github':
+      case 'substack':
+        filtered = filtered.filter((bookmark) => bookmark.source === selectedFilter);
         break;
     }
-    
-    // Apply sorting
+
+    const sorted = [...filtered];
     switch (sortBy) {
       case 'recent':
-        filtered.sort((a, b) => b.createdAt - a.createdAt);
+        sorted.sort((a, b) => b.createdAt - a.createdAt);
         break;
       case 'most-opened':
-        filtered.sort((a, b) => b.openCount - a.openCount);
+        sorted.sort((a, b) => b.openCount - a.openCount);
+        break;
+      case 'oldest-unread':
+        sorted.sort((a, b) => {
+          const aUnread = isUnreadBookmark(a) ? 0 : 1;
+          const bUnread = isUnreadBookmark(b) ? 0 : 1;
+          if (aUnread !== bUnread) return aUnread - bUnread;
+          return a.createdAt - b.createdAt;
+        });
         break;
     }
-    
-    return filtered;
+
+    return sorted;
   }, [bookmarks, searchQuery, selectedFilter, sortBy]);
+
+  const cycleSort = () => {
+    setSortBy((current) => {
+      if (current === 'recent') return 'oldest-unread';
+      if (current === 'oldest-unread') return 'most-opened';
+      return 'recent';
+    });
+  };
+
+  const sortLabel =
+    sortBy === 'recent'
+      ? t('bookmarks.sort.recent')
+      : sortBy === 'most-opened'
+        ? t('bookmarks.sort.mostOpened')
+        : t('bookmarks.sort.oldestUnread');
 
   const renderBookmark = ({ item }: { item: Bookmark }) => (
     <BookmarkCard
       bookmark={item}
-      onPress={() => router.push(`/bookmark/${item.id}` as any)}
+      onPress={() => router.push(`/bookmark/${item.id}` as never)}
     />
   );
 
@@ -80,24 +145,19 @@ export default function BookmarksScreen() {
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholder="Search bookmarks"
+        placeholder={t('bookmarks.searchPlaceholder')}
       />
-      
+
       <FilterChips
         chips={filterChips}
         selectedId={selectedFilter}
         onSelect={(id) => setSelectedFilter(id as FilterOption)}
       />
-      
+
       <View style={styles.sortContainer}>
-        <Text style={styles.sortLabel}>Your Bookmarks</Text>
-        <TouchableOpacity
-          style={styles.sortButton}
-          onPress={() => setSortBy(sortBy === 'recent' ? 'most-opened' : 'recent')}
-        >
-          <Text style={styles.sortButtonText}>
-            Sort by: {sortBy === 'recent' ? 'Recent' : 'Most Opened'}
-          </Text>
+        <Text style={styles.sortLabel}>{t('bookmarks.yourSaves')}</Text>
+        <TouchableOpacity style={styles.sortButton} onPress={cycleSort}>
+          <Text style={styles.sortButtonText}>{t('common.sortLabel', { sort: sortLabel })}</Text>
           <ChevronDown size={16} color="#6B7280" />
         </TouchableOpacity>
       </View>
@@ -106,9 +166,9 @@ export default function BookmarksScreen() {
 
   const renderEmpty = () => (
     <EmptyState
-      title="No bookmarks yet"
-      description="Start saving interesting links and articles to build your personal knowledge base."
-      buttonTitle="Add Your First Bookmark"
+      title={t('bookmarks.empty.title')}
+      description={t('bookmarks.empty.description')}
+      buttonTitle={t('bookmarks.empty.button')}
       onButtonPress={() => router.push('/add-bookmark')}
     />
   );
@@ -116,7 +176,7 @@ export default function BookmarksScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text>Loading bookmarks...</Text>
+        <Text>{t('bookmarks.loading')}</Text>
       </View>
     );
   }
@@ -124,7 +184,7 @@ export default function BookmarksScreen() {
   if (error) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+        <Text style={styles.errorText}>{t('common.errorWithMessage', { message: error })}</Text>
       </View>
     );
   }
@@ -140,7 +200,7 @@ export default function BookmarksScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           filteredAndSortedBookmarks.length === 0 ? styles.emptyContainer : undefined,
-          { paddingBottom: insets.bottom + 80 }
+          { paddingBottom: insets.bottom + 80 },
         ]}
       />
     </View>

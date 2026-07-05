@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   View, 
   Text, 
@@ -28,12 +29,23 @@ import {
   Type,
   Moon,
   Sun,
-  Monitor
+  Monitor,
+  Globe
 } from 'lucide-react-native';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { PremiumModal } from '@/components/PremiumModal';
+import { forceTestCrash } from '@/lib/crashlytics';
+import { trackButtonPress } from '@/lib/analytics';
+import {
+  SUPPORTED_LANGUAGES,
+  SupportedLanguage,
+  changeAppLanguage,
+  getCurrentLanguage,
+  getDeviceLanguage,
+} from '@/lib/i18n';
 
 export default function SettingsScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const {
     theme,
@@ -54,10 +66,27 @@ export default function SettingsScreen() {
 
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
   const [showThemeSelector, setShowThemeSelector] = useState<boolean>(false);
+  const [showLanguageSelector, setShowLanguageSelector] = useState<boolean>(false);
+  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(getCurrentLanguage());
 
   useEffect(() => {
     loadSettings();
+    setCurrentLanguage(getCurrentLanguage());
   }, [loadSettings]);
+
+  const getLanguageLabel = (language: SupportedLanguage | 'system') => {
+    if (language === 'system') {
+      return t('settings.language.systemDefault');
+    }
+    return t(`languages.${language}`);
+  };
+
+  const handleLanguageChange = async (language: SupportedLanguage | 'system') => {
+    const nextLanguage = language === 'system' ? getDeviceLanguage() : language;
+    await changeAppLanguage(nextLanguage);
+    setCurrentLanguage(nextLanguage);
+    setShowLanguageSelector(false);
+  };
 
   const handleExportData = async () => {
     try {
@@ -106,26 +135,26 @@ export default function SettingsScreen() {
 
   const getThemeLabel = () => {
     switch (theme) {
-      case 'light': return 'Light';
-      case 'dark': return 'Dark';
-      case 'system': return 'System';
+      case 'light': return t('settings.theme.light');
+      case 'dark': return t('settings.theme.dark');
+      case 'system': return t('settings.theme.system');
     }
   };
 
   const renderComingSoonBadge = () => (
     <View style={styles.comingSoonBadge}>
-      <Text style={styles.comingSoonText}>Coming Soon</Text>
+      <Text style={styles.comingSoonText}>{t('common.comingSoon')}</Text>
     </View>
   );
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Settings' }} />
+      <Stack.Screen options={{ title: t('settings.title') }} />
       <View style={styles.container}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {/* Account Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Account</Text>
+            <Text style={styles.sectionTitle}>{t('settings.sections.account')}</Text>
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
@@ -135,8 +164,8 @@ export default function SettingsScreen() {
                   <User size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Profile</Text>
-                  <Text style={styles.settingSubtitle}>Manage your profile information</Text>
+                  <Text style={styles.settingTitle}>{t('settings.profile.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.profile.subtitle')}</Text>
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
@@ -148,9 +177,9 @@ export default function SettingsScreen() {
                   <Apple size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Apple Sign-In</Text>
+                  <Text style={styles.settingTitle}>{t('settings.appleSignIn')}</Text>
                   <Text style={styles.settingSubtitle}>
-                    {linkedAccounts.apple ? 'Connected' : 'Not connected'}
+                    {linkedAccounts.apple ? t('common.connected') : t('common.notConnected')}
                   </Text>
                 </View>
                 <View style={[styles.statusDot, linkedAccounts.apple && styles.statusDotActive]} />
@@ -167,9 +196,9 @@ export default function SettingsScreen() {
                   <Mail size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>Google Sign-In</Text>
+                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>{t('settings.googleSignIn.title')}</Text>
                   <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
-                    Connect your Google account
+                    {t('settings.googleSignIn.subtitle')}
                   </Text>
                 </View>
                 {renderComingSoonBadge()}
@@ -179,7 +208,7 @@ export default function SettingsScreen() {
 
           {/* Subscription Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Subscription</Text>
+            <Text style={styles.sectionTitle}>{t('settings.sections.subscription')}</Text>
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
@@ -189,9 +218,9 @@ export default function SettingsScreen() {
                   <Crown size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Current Plan</Text>
+                  <Text style={styles.settingTitle}>{t('settings.currentPlan.title')}</Text>
                   <Text style={styles.settingSubtitle}>
-                    {currentPlan === 'free' ? 'Free Plan' : `${currentPlan} Plan`}
+                    {currentPlan === 'free' ? t('settings.currentPlan.free') : t('settings.currentPlan.plan', { plan: currentPlan })}
                   </Text>
                 </View>
                 {currentPlan === 'free' && <ChevronRight size={20} color="#9CA3AF" />}
@@ -204,9 +233,9 @@ export default function SettingsScreen() {
                   <Shield size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>Billing History</Text>
+                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>{t('settings.billingHistory.title')}</Text>
                   <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
-                    View your payment history
+                    {t('settings.billingHistory.subtitle')}
                   </Text>
                 </View>
                 {renderComingSoonBadge()}
@@ -216,15 +245,15 @@ export default function SettingsScreen() {
 
           {/* Notifications Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notifications</Text>
+            <Text style={styles.sectionTitle}>{t('settings.sections.notifications')}</Text>
             <View style={styles.settingsGroup}>
               <View style={styles.settingItem}>
                 <View style={styles.settingIcon}>
                   <Smartphone size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Push Notifications</Text>
-                  <Text style={styles.settingSubtitle}>Receive notifications on your device</Text>
+                  <Text style={styles.settingTitle}>{t('settings.pushNotifications.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.pushNotifications.subtitle')}</Text>
                 </View>
                 <Switch
                   value={pushNotifications}
@@ -241,8 +270,8 @@ export default function SettingsScreen() {
                   <Mail size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Email Notifications</Text>
-                  <Text style={styles.settingSubtitle}>Receive notifications via email</Text>
+                  <Text style={styles.settingTitle}>{t('settings.emailNotifications.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.emailNotifications.subtitle')}</Text>
                 </View>
                 <Switch
                   value={emailNotifications}
@@ -260,10 +289,10 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.settingContent}>
                   <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>
-                    Notification Preferences
+                    {t('settings.notificationPreferences.title')}
                   </Text>
                   <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
-                    Customize your notification settings
+                    {t('settings.notificationPreferences.subtitle')}
                   </Text>
                 </View>
                 {renderComingSoonBadge()}
@@ -273,7 +302,7 @@ export default function SettingsScreen() {
 
           {/* Appearance Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Appearance</Text>
+            <Text style={styles.sectionTitle}>{t('settings.sections.appearance')}</Text>
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
@@ -283,8 +312,24 @@ export default function SettingsScreen() {
                   {getThemeIcon()}
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Theme</Text>
+                  <Text style={styles.settingTitle}>{t('settings.theme.title')}</Text>
                   <Text style={styles.settingSubtitle}>{getThemeLabel()}</Text>
+                </View>
+                <ChevronRight size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+              
+              <View style={styles.separator} />
+
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => setShowLanguageSelector(true)}
+              >
+                <View style={styles.settingIcon}>
+                  <Globe size={20} color="#6B7280" />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>{t('settings.language.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{getLanguageLabel(currentLanguage)}</Text>
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
@@ -296,8 +341,8 @@ export default function SettingsScreen() {
                   <Type size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Font Size</Text>
-                  <Text style={styles.settingSubtitle}>{Math.round(fontSize * 100)}%</Text>
+                  <Text style={styles.settingTitle}>{t('settings.fontSize.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.fontSize.percent', { percent: Math.round(fontSize * 100) })}</Text>
                 </View>
                 <View style={styles.fontSizeContainer}>
                   <TouchableOpacity
@@ -319,7 +364,7 @@ export default function SettingsScreen() {
 
           {/* Data & Privacy Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Data & Privacy</Text>
+            <Text style={styles.sectionTitle}>{t('settings.sections.dataPrivacy')}</Text>
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={[styles.settingItem, dataExportInProgress && styles.settingItemDisabled]}
@@ -330,11 +375,11 @@ export default function SettingsScreen() {
                   <Download size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Export Data</Text>
-                  <Text style={styles.settingSubtitle}>Download your data as JSON</Text>
+                  <Text style={styles.settingTitle}>{t('settings.exportData.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.exportData.subtitle')}</Text>
                 </View>
                 {dataExportInProgress ? (
-                  <Text style={styles.loadingText}>Exporting...</Text>
+                  <Text style={styles.loadingText}>{t('common.exporting')}</Text>
                 ) : (
                   <ChevronRight size={20} color="#9CA3AF" />
                 )}
@@ -351,9 +396,9 @@ export default function SettingsScreen() {
                   <Upload size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>Import Data</Text>
+                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>{t('settings.importData.title')}</Text>
                   <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
-                    Restore from backup
+                    {t('settings.importData.subtitle')}
                   </Text>
                 </View>
                 {renderComingSoonBadge()}
@@ -369,8 +414,8 @@ export default function SettingsScreen() {
                   <Trash2 size={20} color="#EF4444" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Delete Account</Text>
-                  <Text style={styles.settingSubtitle}>Permanently delete your account</Text>
+                  <Text style={styles.settingTitle}>{t('settings.deleteAccount.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.deleteAccount.subtitle')}</Text>
                 </View>
                 <ChevronRight size={20} color="#EF4444" />
               </TouchableOpacity>
@@ -379,15 +424,15 @@ export default function SettingsScreen() {
 
           {/* About Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About</Text>
+            <Text style={styles.sectionTitle}>{t('settings.sections.about')}</Text>
             <View style={styles.settingsGroup}>
               <View style={styles.settingItem}>
                 <View style={styles.settingIcon}>
                   <Info size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Version</Text>
-                  <Text style={styles.settingSubtitle}>1.0.0</Text>
+                  <Text style={styles.settingTitle}>{t('settings.version.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.version.value')}</Text>
                 </View>
               </View>
               
@@ -401,8 +446,8 @@ export default function SettingsScreen() {
                   <ExternalLink size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Terms of Service</Text>
-                  <Text style={styles.settingSubtitle}>Read our terms and conditions</Text>
+                  <Text style={styles.settingTitle}>{t('settings.termsOfService.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.termsOfService.subtitle')}</Text>
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
@@ -417,13 +462,39 @@ export default function SettingsScreen() {
                   <ExternalLink size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>Privacy Policy</Text>
-                  <Text style={styles.settingSubtitle}>Learn how we protect your data</Text>
+                  <Text style={styles.settingTitle}>{t('settings.privacyPolicy.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.privacyPolicy.subtitle')}</Text>
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
           </View>
+
+          {__DEV__ && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('settings.sections.developer')}</Text>
+              <View style={styles.settingsGroup}>
+                <TouchableOpacity
+                  style={styles.settingItem}
+                  onPress={() => {
+                    trackButtonPress('settings', 'crashlytics_test_crash');
+                    forceTestCrash();
+                  }}
+                >
+                  <View style={styles.settingIcon}>
+                    <Shield size={20} color="#EF4444" />
+                  </View>
+                  <View style={styles.settingContent}>
+                    <Text style={[styles.settingTitle, { color: '#EF4444' }]}>{t('settings.testCrash.title')}</Text>
+                    <Text style={styles.settingSubtitle}>
+                      {t('settings.testCrash.subtitle')}
+                    </Text>
+                  </View>
+                  <ChevronRight size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
 
           <View style={styles.bottomSpacing} />
         </ScrollView>
@@ -438,7 +509,7 @@ export default function SettingsScreen() {
         {showThemeSelector && (
           <View style={styles.modalOverlay}>
             <View style={styles.themeModal}>
-              <Text style={styles.themeModalTitle}>Choose Theme</Text>
+              <Text style={styles.themeModalTitle}>{t('settings.theme.chooseTheme')}</Text>
               
               {(['light', 'dark', 'system'] as const).map((themeOption) => (
                 <TouchableOpacity
@@ -460,7 +531,7 @@ export default function SettingsScreen() {
                     {themeOption === 'dark' && <Moon size={20} color="#6B7280" />}
                     {themeOption === 'system' && <Monitor size={20} color="#6B7280" />}
                     <Text style={styles.themeOptionText}>
-                      {themeOption.charAt(0).toUpperCase() + themeOption.slice(1)}
+                      {t(`settings.theme.${themeOption}`)}
                     </Text>
                   </View>
                   {theme === themeOption && (
@@ -475,7 +546,55 @@ export default function SettingsScreen() {
                 style={styles.themeModalCancel}
                 onPress={() => setShowThemeSelector(false)}
               >
-                <Text style={styles.themeModalCancelText}>Cancel</Text>
+                <Text style={styles.themeModalCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {showLanguageSelector && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.themeModal}>
+              <Text style={styles.themeModalTitle}>{t('settings.language.chooseLanguage')}</Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.themeOption,
+                  currentLanguage === getDeviceLanguage() && styles.themeOptionSelected,
+                ]}
+                onPress={() => handleLanguageChange('system')}
+              >
+                <View style={styles.themeOptionContent}>
+                  <Globe size={20} color="#6B7280" />
+                  <Text style={styles.themeOptionText}>{getLanguageLabel('system')}</Text>
+                </View>
+              </TouchableOpacity>
+
+              {SUPPORTED_LANGUAGES.map((language) => (
+                <TouchableOpacity
+                  key={language}
+                  style={[
+                    styles.themeOption,
+                    currentLanguage === language && styles.themeOptionSelected,
+                  ]}
+                  onPress={() => handleLanguageChange(language)}
+                >
+                  <View style={styles.themeOptionContent}>
+                    <Text style={styles.themeOptionText}>{t(`languages.${language}`)}</Text>
+                  </View>
+                  {currentLanguage === language && (
+                    <View style={styles.themeOptionCheck}>
+                      <Text style={styles.themeOptionCheckText}>✓</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+
+              <TouchableOpacity
+                style={styles.themeModalCancel}
+                onPress={() => setShowLanguageSelector(false)}
+              >
+                <Text style={styles.themeModalCancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>

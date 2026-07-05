@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { 
@@ -12,6 +13,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { PremiumModal } from '@/components/PremiumModal';
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const { preferences, bookmarks, projects, notes } = useAppStore();
   const insets = useSafeAreaInsets();
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
@@ -37,10 +39,10 @@ export default function ProfileScreen() {
   }, [pulseAnim]);
 
   const stats = [
-    { id: 'bookmarks', label: 'Bookmarks', value: bookmarks.length },
-    { id: 'projects', label: 'Projects', value: projects.length },
-    { id: 'notes', label: 'Notes', value: notes.length },
-    { id: 'opens', label: 'Total Opens', value: bookmarks.reduce((sum, b) => sum + b.openCount, 0) },
+    { id: 'bookmarks', label: t('profile.stats.bookmarks'), value: bookmarks.length },
+    { id: 'projects', label: t('profile.stats.projects'), value: projects.length },
+    { id: 'notes', label: t('profile.stats.notes'), value: notes.length },
+    { id: 'opens', label: t('profile.stats.totalOpens'), value: bookmarks.reduce((sum, b) => sum + b.openCount, 0) },
   ];
 
   return (
@@ -52,13 +54,13 @@ export default function ProfileScreen() {
           <View style={styles.avatar}>
             <User size={32} color="#6B7280" />
           </View>
-          <Text style={styles.profileName}>Pinnedly User</Text>
-          <Text style={styles.profileEmail}>Keep your knowledge organized</Text>
+          <Text style={styles.profileName}>{t('profile.defaultName')}</Text>
+          <Text style={styles.profileEmail}>{t('profile.tagline')}</Text>
         </View>
         
         {/* Stats Section */}
         <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Your Stats</Text>
+          <Text style={styles.sectionTitle}>{t('profile.yourStats')}</Text>
           <View style={styles.statsGrid}>
             {stats.map((stat) => (
               <View key={stat.id} style={styles.statCard}>
@@ -71,14 +73,14 @@ export default function ProfileScreen() {
         
         {/* Goals Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Goals</Text>
+          <Text style={styles.sectionTitle}>{t('profile.goals')}</Text>
           <View style={styles.goalCard}>
-            <Text style={styles.goalTitle}>Daily Goal</Text>
-            <Text style={styles.goalValue}>{preferences.dailyGoal || 3} bookmarks</Text>
+            <Text style={styles.goalTitle}>{t('profile.dailyGoal')}</Text>
+            <Text style={styles.goalValue}>{t('profile.bookmarksGoal', { count: preferences.dailyGoal || 3 })}</Text>
           </View>
           <View style={styles.goalCard}>
-            <Text style={styles.goalTitle}>Weekly Goal</Text>
-            <Text style={styles.goalValue}>{preferences.weeklyGoal || 20} bookmarks</Text>
+            <Text style={styles.goalTitle}>{t('profile.weeklyGoal')}</Text>
+            <Text style={styles.goalValue}>{t('profile.bookmarksGoal', { count: preferences.weeklyGoal || 20 })}</Text>
           </View>
         </View>
         
@@ -99,8 +101,8 @@ export default function ProfileScreen() {
                     <Sparkles size={16} color="#FFFFFF" style={styles.sparkleIcon} />
                   </View>
                   <View style={styles.premiumText}>
-                    <Text style={styles.premiumTitle}>Upgrade to Premium</Text>
-                    <Text style={styles.premiumSubtitle}>Unlock powerful collaboration features</Text>
+                    <Text style={styles.premiumTitle}>{t('profile.upgradePremium')}</Text>
+                    <Text style={styles.premiumSubtitle}>{t('profile.upgradeSubtitle')}</Text>
                   </View>
                 </View>
                 <ChevronRight size={20} color="#FFFFFF" />

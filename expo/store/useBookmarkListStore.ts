@@ -3,6 +3,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BookmarkList, ID } from '@/types';
 import { bookmarkListRepository } from '@/repositories/BookmarkListRepository';
+import { bookmarkRepository } from '@/repositories/BookmarkRepository';
+import { Bookmark } from '@/types';
 
 export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => {
   const queryClient = useQueryClient();
@@ -92,9 +94,11 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     return bookmarkListRepository.getListById(id);
   }, []);
 
-  const getBookmarksByListId = useCallback(async (listId: ID): Promise<any[]> => {
-    // TODO: Implement this method in the repository
-    return [];
+  const getBookmarksByListId = useCallback(async (listId: ID): Promise<Bookmark[]> => {
+    const bookmarkIds = await bookmarkListRepository.getBookmarksByListId(listId);
+    if (bookmarkIds.length === 0) return [];
+    const allBookmarks = await bookmarkRepository.getBookmarks();
+    return allBookmarks.filter((bookmark) => bookmarkIds.includes(bookmark.id));
   }, []);
 
   const isFollowingList = useCallback((listId: ID): boolean => {

@@ -1,0 +1,876 @@
+{
+  "common": {
+    "appName": "Pinnedly",
+    "back": "戻る",
+    "cancel": "キャンセル",
+    "ok": "OK",
+    "delete": "削除",
+    "save": "保存",
+    "create": "作成",
+    "edit": "編集",
+    "share": "共有",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "info": "情報",
+    "required": "必須",
+    "comingSoon": "近日公開",
+    "untitled": "無題",
+    "next": "次へ",
+    "skip": "スキップ",
+    "getStarted": "始める",
+    "viewNotes": "ノートを表示",
+    "tryAgain": "再試行",
+    "all": "すべて",
+    "active": "アクティブ",
+    "done": "完了",
+    "private": "非公開",
+    "public": "公開",
+    "shared": "共有済み",
+    "connected": "接続済み",
+    "notConnected": "未接続",
+    "exporting": "エクスポート中...",
+    "processing": "処理中...",
+    "saving": "保存中...",
+    "sharing": "共有中...",
+    "sending": "送信中...",
+    "verifying": "確認中...",
+    "signingIn": "サインイン中...",
+    "creatingAccount": "アカウント作成中...",
+    "followers": "フォロワー {{count}}人",
+    "linkedItems_one": "リンク済みアイテム {{count}}件",
+    "linkedItems_other": "リンク済みアイテム {{count}}件",
+    "sortLabel": "並べ替え: {{sort}}",
+    "errorWithMessage": "エラー: {{message}}",
+    "noContent": "コンテンツなし",
+    "unknownUser": "不明なユーザー"
+  },
+  "tabs": {
+    "home": "ホーム",
+    "bookmarks": "ブックマーク",
+    "projects": "プロジェクト",
+    "notes": "ノート",
+    "todos": "ToDo",
+    "profile": "プロフィール"
+  },
+  "navigation": {
+    "settings": "設定",
+    "aiAssistant": "AIアシスタント",
+    "todo": "ToDo",
+    "shareInbox": "共有受信箱",
+    "findPeople": "ユーザーを探す",
+    "discoverLists": "リストを探す",
+    "createList": "リストを作成",
+    "bookmarkList": "ブックマークリスト",
+    "profile": "プロフィール",
+    "addNote": "ノートを追加",
+    "addProject": "プロジェクトを追加"
+  },
+  "auth": {
+    "signIn": "サインイン",
+    "signUp": "サインアップ",
+    "createAccount": "アカウント作成",
+    "phoneSignIn": "電話番号でサインイン",
+    "resetPassword": "パスワードをリセット",
+    "checkYourEmail": "メールを確認してください",
+    "email": "メール",
+    "password": "パスワード",
+    "confirmPassword": "パスワード（確認）",
+    "fullName": "氏名",
+    "phoneNumber": "電話番号",
+    "verificationCode": "認証コード",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "orContinueWith": "または次で続行",
+    "google": "Google",
+    "signInWithPhone": "電話番号でサインイン",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "rememberPassword": "パスワードを思い出しましたか？",
+    "backToSignIn": "サインインに戻る",
+    "sendCode": "コードを送信",
+    "verifyAndSignIn": "確認してサインイン",
+    "changePhoneNumber": "電話番号を変更",
+    "sendResetLink": "リセットリンクを送信",
+    "emailSent": "メールを送信しました！",
+    "emailSentMessage": "パスワードリセット用のリンクを {{email}} に送信しました。メールを確認し、手順に従ってパスワードをリセットしてください。",
+    "resetDescription": "メールアドレスを入力すると、パスワードリセット用のリンクをお送りします。",
+    "phoneHint": "国番号を含めてください。例: +905551234567",
+    "termsFooter": "続行することで、利用規約およびプライバシーポリシーに同意したものとみなされます",
+    "placeholders": {
+      "email": "メールアドレスを入力",
+      "password": "パスワードを入力",
+      "createPassword": "パスワードを作成",
+      "confirmPassword": "パスワードを確認",
+      "fullName": "氏名を入力",
+      "phone": "+905551234567",
+      "verificationCode": "123456"
+    },
+    "errors": {
+      "fillAllFields": "すべての項目を入力してください",
+      "passwordsDoNotMatch": "パスワードが一致しません",
+      "passwordTooShort": "パスワードは6文字以上である必要があります",
+      "signInFailed": "サインインに失敗しました",
+      "checkCredentials": "認証情報を確認して、もう一度お試しください",
+      "signUpFailed": "サインアップに失敗しました",
+      "pleaseTryAgain": "もう一度お試しください",
+      "appleSignInFailed": "Appleサインインに失敗しました",
+      "appleSignUpFailed": "Appleサインアップに失敗しました",
+      "googleSignInFailed": "Googleサインインに失敗しました",
+      "googleSignUpFailed": "Googleサインアップに失敗しました",
+      "enterEmail": "メールアドレスを入力してください",
+      "resetEmailFailed": "リセットメールの送信に失敗しました。もう一度お試しください。",
+      "enterPhone": "国番号付きの電話番号を入力してください（例: +905551234567）",
+      "enterVerificationCode": "認証コードを入力してください",
+      "verificationFailed": "認証に失敗しました",
+      "invalidCode": "無効なコードです",
+      "couldNotSendCode": "認証コードを送信できませんでした"
+    },
+    "alerts": {
+      "codeSent": "コードを送信しました",
+      "enterCodeFromSms": "SMSの認証コードを入力してください",
+      "failed": "失敗"
+    },
+    "resendEmail": "メールが届きませんか？再試行"
+  },
+  "welcome": {
+    "subtitle": "ノート、ブックマーク、プロジェクトのためのオフラインファーストワークスペース",
+    "loading": "読み込み中...",
+    "screens": {
+      "captureEverything": {
+        "title": "すべてをキャプチャ",
+        "subtitle": "ブックマーク、ノート、アイデアを一か所に保存",
+        "description": "大切なコンテンツを失うことはもうありません。オフラインファーストのアプローチで、データは常に利用可能です。"
+      },
+      "organizeProjects": {
+        "title": "プロジェクトを整理",
+        "subtitle": "強力なカンバンボードでタスクを管理",
+        "description": "進捗を追跡し、期限を設定し、あらゆるプロジェクトでチームメンバーと協力できます。"
+      },
+      "richNoteTaking": {
+        "title": "リッチなノート作成",
+        "subtitle": "ライブプレビュー付きMarkdownで執筆",
+        "description": "書式、リンクを使った美しいノートを作成し、思考を簡単に整理できます。"
+      },
+      "shareCollaborate": {
+        "title": "共有とコラボレーション",
+        "subtitle": "シームレスに共同作業",
+        "description": "作品を他の人と共有し、フィードバックを得て、一緒に素晴らしいものを作りましょう。"
+      }
+    }
+  },
+  "onboarding": {
+    "skip": "スキップ",
+    "screens": {
+      "saveWhatMatters": {
+        "headline": "大切なものを保存し、もう忘れない。",
+        "body": "Pinnedlyは、ブックマークの追加、ノートの作成、プロジェクトの管理を簡単に行い、すべてを把握できるようにします。",
+        "cta": "始める"
+      },
+      "saveBookmarks": {
+        "headline": "どこからでもブックマークを保存。",
+        "body": "URLを貼り付け、スクリーンショットを追加し、再訪問の頻度を追跡できます。",
+        "cta": "次へ"
+      },
+      "projectsMoveForward": {
+        "headline": "プロジェクトの進捗を確認。",
+        "body": "プロジェクトを作成し、タスクを追加して、進捗の成長を見守りましょう。",
+        "cta": "次へ"
+      },
+      "shareCollaborate": {
+        "headline": "共有とコラボレーション。",
+        "body": "友達をフォローし、ブックマークを共有し、一緒にプロジェクトに取り組みましょう。",
+        "cta": "始める"
+      }
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "sections": {
+      "account": "アカウント",
+      "subscription": "サブスクリプション",
+      "notifications": "通知",
+      "appearance": "外観",
+      "dataPrivacy": "データとプライバシー",
+      "about": "情報",
+      "developer": "開発者"
+    },
+    "profile": {
+      "title": "プロフィール",
+      "subtitle": "プロフィール情報を管理"
+    },
+    "appleSignIn": "Appleでサインイン",
+    "googleSignIn": {
+      "title": "Googleでサインイン",
+      "subtitle": "Googleアカウントを接続"
+    },
+    "currentPlan": {
+      "title": "現在のプラン",
+      "free": "無料プラン",
+      "plan": "{{plan}}プラン"
+    },
+    "billingHistory": {
+      "title": "請求履歴",
+      "subtitle": "支払い履歴を表示"
+    },
+    "pushNotifications": {
+      "title": "プッシュ通知",
+      "subtitle": "デバイスで通知を受け取る"
+    },
+    "emailNotifications": {
+      "title": "メール通知",
+      "subtitle": "メールで通知を受け取る"
+    },
+    "notificationPreferences": {
+      "title": "通知設定",
+      "subtitle": "通知設定をカスタマイズ"
+    },
+    "theme": {
+      "title": "テーマ",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム",
+      "chooseTheme": "テーマを選択"
+    },
+    "fontSize": {
+      "title": "フォントサイズ",
+      "percent": "{{percent}}%"
+    },
+    "exportData": {
+      "title": "データをエクスポート",
+      "subtitle": "データをJSONでダウンロード"
+    },
+    "importData": {
+      "title": "データをインポート",
+      "subtitle": "バックアップから復元"
+    },
+    "deleteAccount": {
+      "title": "アカウントを削除",
+      "subtitle": "アカウントを完全に削除"
+    },
+    "version": {
+      "title": "バージョン",
+      "value": "1.0.0"
+    },
+    "termsOfService": {
+      "title": "利用規約",
+      "subtitle": "利用規約をお読みください"
+    },
+    "privacyPolicy": {
+      "title": "プライバシーポリシー",
+      "subtitle": "データの保護方法をご確認ください"
+    },
+    "testCrash": {
+      "title": "クラッシュテスト",
+      "subtitle": "Firebase Crashlyticsにテストクラッシュを送信"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "App display language",
+      "chooseLanguage": "Choose Language",
+      "systemDefault": "System default"
+    }
+  },
+  "home": {
+    "aiChat": {
+      "title": "AIチャットアシスタント",
+      "description": "何でも質問して、会話をノートとして保存"
+    },
+    "continue": "続ける",
+    "dueAndOverdueTasks": "期限切れ・期限間近のタスク",
+    "recentActivity": "最近のアクティビティ",
+    "bookmark": "ブックマーク",
+    "note": "ノート",
+    "overdue": "期限超過",
+    "dueToday": "本日期限",
+    "streakBadge": "{{days}}日連続",
+    "streakTitle": "勢いを保ちましょう！",
+    "empty": {
+      "noContinueItems": "続ける項目がありません",
+      "noDueTasks": "期限のあるタスクがありません",
+      "noRecentActivity": "最近のアクティビティがありません"
+    }
+  },
+  "bookmarks": {
+    "searchPlaceholder": "保存、タグ、ノートを検索...",
+    "yourSaves": "保存済み",
+    "sort": {
+      "recent": "最近",
+      "mostOpened": "開いた回数が多い",
+      "oldestUnread": "最も古い未読"
+    },
+    "filters": {
+      "all": "すべて",
+      "readLater": "後で読む",
+      "neverOpened": "未開封",
+      "tagged": "タグ付き",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "medium": "Medium"
+    },
+    "loading": "ブックマークを読み込み中...",
+    "empty": {
+      "title": "まだ保存がありません",
+      "description": "Twitter、LinkedIn、Safariから共有ボタンでリンクを共有するか、手動で追加してください。",
+      "button": "ブックマークを追加"
+    }
+  },
+  "notes": {
+    "empty": {
+      "title": "まだノートがありません",
+      "description": "Markdown形式で思考やアイデアを記録し始めましょう。",
+      "button": "最初のノートを作成"
+    }
+  },
+  "projects": {
+    "viewModes": {
+      "list": "リスト",
+      "kanban": "カンバン"
+    },
+    "filters": {
+      "onTrack": "順調",
+      "atRisk": "リスクあり",
+      "overdue": "期限超過"
+    },
+    "kanban": {
+      "todo": "未着手",
+      "inProgress": "進行中",
+      "done": "完了"
+    },
+    "loading": "プロジェクトを読み込み中...",
+    "empty": {
+      "title": "まだプロジェクトがありません",
+      "description": "最初のプロジェクトを作成して始めましょう。",
+      "button": "新しいプロジェクトを作成"
+    },
+    "addTask": {
+      "placeholder": "タスクのタイトルを入力...",
+      "button": "タスクを作成",
+      "title": "タスクを追加",
+      "status": "ステータス",
+      "taskTitle": "タスクのタイトル",
+      "createFailed": "タスクの作成に失敗しました。"
+    },
+    "due": "期限: "
+  },
+  "todos": {
+    "searchPlaceholder": "ToDoを検索...",
+    "filters": {
+      "active": "アクティブ",
+      "done": "完了",
+      "all": "すべて",
+      "allPriorities": "すべての優先度",
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "due": "期限: ",
+    "overduePrefix": "期限超過: ",
+    "project": "プロジェクト",
+    "empty": {
+      "title": "まだToDoがありません",
+      "description": "最初のタスクを追加して始めましょう。",
+      "button": "ToDoを追加"
+    },
+    "deleteConfirm": {
+      "title": "ToDoを削除",
+      "message": "このタスクを削除してもよろしいですか？"
+    },
+    "loading": "ToDoを読み込み中...",
+    "emptyDescriptionLong": "+ボタンをタップして最初のタスクを作成し、整理された状態を保ちましょう"
+  },
+  "profile": {
+    "defaultName": "Pinnedlyユーザー",
+    "tagline": "知識を整理して管理",
+    "yourStats": "あなたの統計",
+    "stats": {
+      "bookmarks": "ブックマーク",
+      "projects": "プロジェクト",
+      "notes": "ノート",
+      "totalOpens": "総開封数"
+    },
+    "goals": "目標",
+    "dailyGoal": "日次目標",
+    "weeklyGoal": "週次目標",
+    "bookmarksGoal": "ブックマーク {{count}}件",
+    "upgradePremium": "Premiumにアップグレード",
+    "upgradeSubtitle": "強力なコラボレーション機能を解放"
+  },
+  "aiChat": {
+    "title": "AIチャット",
+    "systemPrompt": "あなたはPinnedlyのAIアシスタントです。ユーザーが他の言語で書いても、常に日本語で回答してください。簡潔で親しみやすく、実用的に答えてください。",
+    "placeholder": "何でも聞いてください...",
+    "empty": {
+      "title": "AIチャットアシスタント",
+      "description": "何でも聞いてください！リサーチ、ブレインストーミング、執筆などをお手伝いします。会話はいつでもノートとして保存できます。",
+      "tryAsking": "例えば聞いてみてください:",
+      "suggestions": {
+        "quantum": "量子コンピューティングを説明して",
+        "brainstorm": "アプリのアイデアをブレインストーミング",
+        "meditation": "瞑想のメリット"
+      }
+    },
+    "roles": {
+      "you": "あなた",
+      "ai": "AI"
+    },
+    "savedNoteTitle": "AIチャット: {{title}}",
+    "alerts": {
+      "noConversation": "会話がありません",
+      "noMessagesToSave": "保存するメッセージがありません。",
+      "savedAsNote": "会話をノートとして保存しました！",
+      "sendFailed": "メッセージの送信に失敗しました。もう一度お試しください。",
+      "saveFailed": "会話の保存に失敗しました。もう一度お試しください。"
+    }
+  },
+  "premium": {
+    "title": "Premiumにアップグレード",
+    "subtitle": "強力な機能を解放",
+    "choosePlan": "プランを選択",
+    "mostPopular": "最も人気",
+    "startFreeTrial": "無料トライアルを開始",
+    "terms": "7日間の無料トライアル後、{{price}}{{period}}。いつでもキャンセル可能。",
+    "plans": {
+      "monthly": "月額",
+      "yearly": "年額",
+      "perMonth": "/月",
+      "perYear": "/年",
+      "savePercent": "33%お得"
+    },
+    "features": {
+      "teamCollaboration": {
+        "title": "チームコラボレーション",
+        "description": "プロジェクトとリストをチームメンバーと共有"
+      },
+      "voiceNotes": {
+        "title": "音声ノート",
+        "description": "音声メモを即座に録音・文字起こし"
+      },
+      "smartReminders": {
+        "title": "スマートリマインダー",
+        "description": "AI搭載の通知とリマインド"
+      },
+      "advancedFeatures": {
+        "title": "高度な機能",
+        "description": "強力な生産性ツールを解放"
+      },
+      "unlimitedLists": "無制限のブックマークリスト",
+      "collaborativeProjects": "共同プロジェクト",
+      "voiceNotesFeature": "音声ノート",
+      "advancedReminders": "高度なリマインダー",
+      "prioritySupport": "優先サポート",
+      "everythingMonthly": "月額プランのすべて",
+      "advancedAnalytics": "高度な分析",
+      "customThemes": "カスタムテーマ",
+      "exportFormats": "複数形式へのエクスポート",
+      "teamManagement": "チーム管理ツール",
+      "apiAccess": "APIアクセス"
+    }
+  },
+  "share": {
+    "shareEntity": "{{entityTitle}}を共有",
+    "enterEmailOrUsername": "メールまたはユーザー名を入力",
+    "enterEmail": "メールアドレスを入力",
+    "permissions": {
+      "view": "表示",
+      "edit": "編集"
+    },
+    "sharedBy": "{{name}}が共有",
+    "alerts": {
+      "enterEmailOrUsername": "メールまたはユーザー名を入力してください",
+      "sharedSuccessfully": "正常に共有しました",
+      "shareFailed": "共有に失敗しました",
+      "updatePermissionFailed": "権限の更新に失敗しました",
+      "removeShareFailed": "共有の削除に失敗しました"
+    },
+    "addPeople": "Add People",
+    "emailOrUsername": "Email or Username",
+    "sharedWith": "Shared With",
+    "permission": "Permission"
+  },
+  "shareInbox": {
+    "title": "共有受信箱",
+    "empty": {
+      "title": "共有された項目がありません",
+      "description": "あなたと共有された項目がここに表示されます"
+    }
+  },
+  "discoverLists": {
+    "title": "リストを探す",
+    "searchPlaceholder": "公開リストを検索...",
+    "loading": "読み込み中...",
+    "noListsFound": "リストが見つかりません",
+    "noPublicLists": "まだ公開リストがありません",
+    "tryDifferentKeywords": "別のキーワードで検索してみてください",
+    "beFirstToCreate": "最初の公開リストを作成しましょう！",
+    "createList": "リストを作成"
+  },
+  "peopleSearch": {
+    "title": "ユーザーを探す",
+    "searchPlaceholder": "名前またはユーザー名で検索...",
+    "empty": {
+      "title": "ユーザーを検索",
+      "description": "名前またはユーザー名を入力して、つながりたいユーザーを探してください"
+    },
+    "noResults": {
+      "title": "結果なし",
+      "description": "「{{query}}」に一致するユーザーが見つかりません"
+    }
+  },
+  "addBookmark": {
+    "title": "ブックマークを追加",
+    "urlPlaceholder": "ここにURLを貼り付け...",
+    "titlePlaceholder": "タイトルを入力...",
+    "descriptionPlaceholder": "説明を入力...",
+    "notePlaceholder": "メモを追加...",
+    "tagsPlaceholder": "タグを追加...",
+    "addBookmark": "ブックマークを追加",
+    "alerts": {
+      "permissionNeeded": "権限が必要です",
+      "cameraPermission": "スクリーンショットをアップロードするには、カメラロールへのアクセスを許可してください。",
+      "signInRequired": "サインインが必要です",
+      "signInToSave": "ブックマークを保存するにはサインインしてください。",
+      "provideUrlOrScreenshot": "URLを入力するか、スクリーンショットをアップロードしてください。",
+      "saveFailed": "保存に失敗しました",
+      "couldNotSave": "ブックマークを保存できませんでした。"
+    },
+    "labels": {
+      "url": "URL",
+      "or": "または",
+      "uploadScreenshot": "スクリーンショットをアップロード",
+      "title": "タイトル",
+      "description": "説明",
+      "commentOptional": "コメント（任意）",
+      "tags": "タグ"
+    },
+    "metadataFetchFailed": "メタデータの取得に失敗",
+    "metadataFetchMessage": "ページの詳細を自動取得できませんでした。手動でブックマークを追加できます。"
+  },
+  "addNote": {
+    "titlePlaceholder": "ノートのタイトルを入力...",
+    "contentPlaceholder": "ノートを書く...",
+    "createNote": "ノートを作成",
+    "alerts": {
+      "enterTitle": "ノートのタイトルを入力してください。",
+      "createFailed": "ノートの作成に失敗しました。もう一度お試しください。"
+    },
+    "title": "ノートを追加",
+    "noteTitle": "ノートのタイトル",
+    "visibility": "公開範囲",
+    "content": "内容",
+    "visibilityOptions": {
+      "private": "自分だけがこのノートを見られます",
+      "shared": "特定の人と共有",
+      "public": "誰でもこのノートを閲覧できます"
+    },
+    "editorHint": "テキストを選択し、ツールバーで書式を適用してください。入力中に書式が反映されます。",
+    "toolbarHint": "Select text to format"
+  },
+  "addProject": {
+    "titlePlaceholder": "プロジェクトのタイトルを入力...",
+    "descriptionPlaceholder": "プロジェクトを説明...",
+    "createProject": "プロジェクトを作成",
+    "alerts": {
+      "enterTitle": "プロジェクトのタイトルを入力してください。"
+    },
+    "title": "プロジェクトを追加",
+    "projectTitle": "プロジェクトのタイトル",
+    "descriptionOptional": "説明（任意）",
+    "deadlineOptional": "期限（任意）",
+    "deadlines": {
+      "oneWeek": "1週間",
+      "oneMonth": "1か月",
+      "threeMonths": "3か月"
+    },
+    "info": "プロジェクト作成後、タスクの追加と進捗の追跡ができます。"
+  },
+  "addTodo": {
+    "titlePlaceholder": "何をする必要がありますか？",
+    "detailsPlaceholder": "詳細を追加...",
+    "dueDatePlaceholder": "YYYY-MM-DD",
+    "alerts": {
+      "enterTitle": "タスクのタイトルを入力してください。"
+    },
+    "newTodo": "新しいToDo",
+    "editTodo": "ToDoを編集",
+    "title": "タイトル",
+    "descriptionOptional": "説明（任意）",
+    "priority": "優先度",
+    "setDueDate": "期限を設定",
+    "markCompleted": "完了としてマーク",
+    "quickDates": {
+      "today": "今日",
+      "tomorrow": "明日",
+      "nextWeek": "来週",
+      "clear": "クリア"
+    },
+    "saveFailed": "ToDoの保存に失敗しました"
+  },
+  "createList": {
+    "namePlaceholder": "リスト名を入力",
+    "descriptionPlaceholder": "説明を追加（任意）",
+    "alerts": {
+      "enterName": "リスト名を入力してください",
+      "createFailed": "リストの作成に失敗しました。もう一度お試しください。"
+    },
+    "title": "Create List",
+    "listName": "List Name *",
+    "description": "Description",
+    "makePublic": "Make Public",
+    "makePublicDescription": "Public lists can be discovered and followed by other users",
+    "publicNotice": "📢 Public lists will appear in the discover section and can be followed by other users."
+  },
+  "bookmarkDetail": {
+    "noUrl": "URLなし",
+    "noLinkToOpen": "このブックマークには開くリンクがありません。",
+    "deleteTitle": "ブックマークを削除",
+    "deleteMessage": "この操作は元に戻せません。",
+    "notePlaceholder": "未来の自分へのメモを追加...",
+    "saveNote": "メモを保存",
+    "openLink": "リンクを開く",
+    "notFound": "ブックマークが見つかりません",
+    "bookmark": "ブックマーク",
+    "openedCount": "{{count}}回開封",
+    "whySaved": "保存した理由",
+    "tapToAddNote": "タップしてメモを追加...",
+    "archive": "アーカイブ"
+  },
+  "noteDetail": {
+    "titlePlaceholder": "ノートのタイトル",
+    "contentPlaceholder": "ここにノートを書く...",
+    "alerts": {
+      "titleEmpty": "ノートのタイトルは空にできません"
+    },
+    "notFound": "Note not found",
+    "editNote": "Edit Note",
+    "deleteTitle": "Delete Note",
+    "deleteMessage": "Are you sure you want to delete this note? This action cannot be undone.",
+    "created": "Created {{date}}",
+    "updated": "Updated {{date}}",
+    "you": "You",
+    "sharedWith": "Shared with",
+    "addPeople": "Add people"
+  },
+  "projectDetail": {
+    "addTaskPlaceholder": "タスクを追加",
+    "emailPlaceholder": "メールアドレスを入力",
+    "titlePlaceholder": "プロジェクトのタイトルを入力",
+    "descriptionPlaceholder": "プロジェクトの説明を入力",
+    "alerts": {
+      "enterTaskTitle": "タスクのタイトルを入力してください",
+      "createTaskFailed": "タスクの作成に失敗しました",
+      "updateTaskFailed": "タスクの更新に失敗しました",
+      "deleteTaskFailed": "タスクの削除に失敗しました",
+      "enterEmail": "メールアドレスを入力してください",
+      "sharedWith": "{{email}}とプロジェクトを共有しました",
+      "shareFailed": "プロジェクトの共有に失敗しました",
+      "titleRequired": "プロジェクトのタイトルは必須です",
+      "updatedSuccessfully": "プロジェクトを更新しました",
+      "archived": "プロジェクトをアーカイブしました",
+      "notificationsNotSupported": "Webでは通知はサポートされていません。モバイルアプリをご利用ください。",
+      "nudgeScheduled": "{{time}}にリマインドを予定しました",
+      "scheduleNudgeFailed": "リマインドの予定に失敗しました"
+    },
+    "notFound": "Project not found",
+    "progress": "Progress",
+    "members": "Members",
+    "nudgeMe": "Nudge Me",
+    "tabs": {
+      "tasks": "Tasks",
+      "timeline": "Timeline",
+      "gallery": "Gallery"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left"
+    },
+    "quickAdd": {
+      "title": "Quick Add",
+      "message": "What would you like to add?",
+      "task": "Task",
+      "note": "Note",
+      "bookmark": "Bookmark"
+    },
+    "deleteTask": {
+      "title": "Delete Task",
+      "message": "Are you sure you want to delete this task?"
+    },
+    "shareProject": "Share Project",
+    "emailAddress": "Email Address",
+    "permission": "Permission",
+    "viewOnly": "View Only",
+    "canEdit": "Can Edit",
+    "editProject": "Edit Project",
+    "projectTitle": "Project Title",
+    "description": "Description",
+    "deleteProject": {
+      "title": "Delete Project",
+      "message": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "archiveProject": {
+      "title": "Archive Project",
+      "message": "Are you sure you want to archive this project?",
+      "action": "Archive"
+    },
+    "scheduleNudge": {
+      "title": "Schedule Nudge",
+      "message": "When would you like to be reminded about this project?",
+      "in1Hour": "In 1 hour",
+      "tomorrow": "Tomorrow",
+      "in3Days": "In 3 days"
+    },
+    "adding": "Adding...",
+    "swipeHint": "Swipe left on a task for more options",
+    "relatedContent": "Related Content",
+    "created": "Created {{relative}}",
+    "empty": {
+      "activityTitle": "No Activity Yet",
+      "activityDescription": "Project activity will appear here as you work",
+      "imagesTitle": "No Images Yet",
+      "imagesDescription": "Add images to showcase your project progress",
+      "uploadImage": "Upload Image"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "bookmarkList": {
+    "alerts": {
+      "loadFailed": "リストデータの読み込みに失敗しました",
+      "followFailed": "フォロー状態の更新に失敗しました",
+      "deleteFailed": "リストの削除に失敗しました",
+      "sharingComingSoon": "共有機能は近日公開！"
+    },
+    "empty": {
+      "title": "まだブックマークがありません",
+      "description": "This list doesn't have any bookmarks yet."
+    },
+    "deleteTitle": "Delete List",
+    "deleteMessage": "Are you sure you want to delete this list? This action cannot be undone.",
+    "shareTitle": "Share"
+  },
+  "projectMembers": {
+    "alerts": {
+      "enterEmail": "メールアドレスを入力してください",
+      "memberAdded": "メンバーを追加しました",
+      "addMemberFailed": "メンバーの追加に失敗しました。もう一度お試しください。",
+      "memberRemoved": "メンバーを削除しました",
+      "removeMemberFailed": "メンバーの削除に失敗しました。もう一度お試しください。",
+      "permissionUpdated": "権限を更新しました",
+      "updatePermissionFailed": "権限の更新に失敗しました。もう一度お試しください。"
+    },
+    "title": "Project Members",
+    "currentMembers": "Current Members",
+    "addMember": "Add Member",
+    "canView": "Can View",
+    "canEdit": "Can Edit",
+    "permissionLabel": "Permission:",
+    "adding": "Adding...",
+    "dismiss": "Dismiss",
+    "removeMember": {
+      "title": "Remove Member",
+      "message": "Are you sure you want to remove {{email}} from this project?",
+      "action": "Remove"
+    }
+  },
+  "shareIntent": {
+    "signInRequired": "サインインが必要です",
+    "signInToSaveLinks": "共有リンクをPinnedlyに保存するにはサインインしてください。",
+    "savedToPinnedly": "Pinnedlyに保存しました",
+    "linkSavedToReadLater": "リンクを「後で読む」に保存しました。",
+    "view": "表示",
+    "couldNotSave": "保存できませんでした",
+    "unableToSave": "共有コンテンツを保存できませんでした。"
+  },
+  "quickAdd": {
+    "addBookmark": "ブックマークを追加",
+    "addProject": "プロジェクトを追加",
+    "addNote": "ノートを追加"
+  },
+  "errorBoundary": {
+    "title": "問題が発生しました",
+    "message": "予期しないエラーが発生しました",
+    "tryAgain": "再試行"
+  },
+  "notFound": {
+    "title": "おっと！",
+    "message": "この画面は存在しません。",
+    "goHome": "ホーム画面へ！"
+  },
+  "languages": {
+    "en": "英語",
+    "tr": "トルコ語",
+    "ar": "アラビア語",
+    "ru": "ロシア語",
+    "de": "ドイツ語",
+    "pt": "ポルトガル語",
+    "es": "スペイン語",
+    "it": "イタリア語",
+    "ja": "日本語",
+    "zh": "中国語"
+  },
+  "sources": {
+    "twitter": "Twitter / X",
+    "instagram": "Instagram",
+    "medium": "Medium",
+    "linkedin": "LinkedIn",
+    "wikipedia": "Wikipedia",
+    "youtube": "YouTube",
+    "reddit": "Reddit",
+    "substack": "Substack",
+    "github": "GitHub",
+    "other": "Web"
+  },
+  "notifications": {
+    "taskReminder": {
+      "title": "タスクリマインダー",
+      "body": "忘れずに: {{taskTitle}}"
+    },
+    "projectNudge": {
+      "title": "プロジェクトリマインド",
+      "body": "作業の時間です: {{projectTitle}}"
+    },
+    "bookmarkDigest": {
+      "title": "後で読むリマインダー",
+      "body_one": "未読の保存が1件あります。",
+      "body_other": "未読の保存が{{count}}件あります。"
+    }
+  },
+  "bookmarkCard": {
+    "neverOpened": "未開封",
+    "openedCount": "{{count}}回開封",
+    "readLater": "後で読む",
+    "screenshot": "スクリーンショット"
+  },
+  "clipboard": {
+    "title": "Link in clipboard",
+    "message": "Save this link to Pinnedly?",
+    "save": "Save",
+    "openAddBookmark": "Review & save",
+    "dismiss": "Not now"
+  },
+  "userProfile": {
+    "notFound": "Profile not found",
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "projectCard": {
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "weeksLeft_one": "{{count}} week left",
+    "weeksLeft_other": "{{count}} weeks left",
+    "monthsLeft_one": "{{count}} month left",
+    "monthsLeft_other": "{{count}} months left",
+    "tasksDone": "{{completed}}/{{total}} tasks done"
+  },
+  "entityTypes": {
+    "bookmark": "Bookmark",
+    "note": "Note",
+    "project": "Project",
+    "list": "List"
+  }
+}

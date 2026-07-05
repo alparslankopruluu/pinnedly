@@ -2,11 +2,11 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import i18n from '@/lib/i18n';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
@@ -15,7 +15,7 @@ Notifications.setNotificationHandler({
 });
 
 export interface NotificationData {
-  type: 'task_reminder' | 'project_update' | 'invitation' | 'general';
+  type: 'task_reminder' | 'project_update' | 'invitation' | 'general' | 'bookmark_digest';
   entityId?: string;
   entityType?: 'project' | 'task' | 'note' | 'bookmark';
   title: string;
@@ -120,8 +120,8 @@ export class NotificationService {
         type: 'task_reminder',
         entityId: taskId,
         entityType: 'task',
-        title: 'Task Reminder',
-        body: `Don't forget: ${taskTitle}`,
+        title: i18n.t('notifications.taskReminder.title'),
+        body: i18n.t('notifications.taskReminder.body', { taskTitle }),
       },
       {
         date: reminderTime,
@@ -139,11 +139,26 @@ export class NotificationService {
         type: 'project_update',
         entityId: projectId,
         entityType: 'project',
-        title: 'Project Nudge',
-        body: `Time to work on: ${projectTitle}`,
+        title: i18n.t('notifications.projectNudge.title'),
+        body: i18n.t('notifications.projectNudge.body', { projectTitle }),
       },
       {
         date: nudgeTime,
+      } as Notifications.DateTriggerInput
+    );
+  }
+
+  async scheduleBookmarkDigest(unreadCount: number, triggerTime: Date): Promise<string | null> {
+    return this.scheduleLocalNotification(
+      {
+        type: 'bookmark_digest',
+        entityType: 'bookmark',
+        entityId: 'inbox',
+        title: i18n.t('notifications.bookmarkDigest.title'),
+        body: i18n.t('notifications.bookmarkDigest.body', { count: unreadCount, defaultValue: '' }),
+      },
+      {
+        date: triggerTime,
       } as Notifications.DateTriggerInput
     );
   }

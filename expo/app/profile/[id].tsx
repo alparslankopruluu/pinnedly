@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/store/useAuthStore';
 import { User } from '@/types';
 
 export default function UserProfileScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getUserById } = useAuth();
   const insets = useSafeAreaInsets();
@@ -43,7 +45,7 @@ export default function UserProfileScreen() {
   if (!user) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>Profile not found</Text>
+        <Text style={styles.errorText}>{t('userProfile.notFound')}</Text>
       </View>
     );
   }
@@ -71,11 +73,11 @@ export default function UserProfileScreen() {
       <View style={styles.statsRow}>
         <View style={styles.stat}>
           <Text style={styles.statValue}>{user.followerCount}</Text>
-          <Text style={styles.statLabel}>Followers</Text>
+          <Text style={styles.statLabel}>{t('userProfile.followers')}</Text>
         </View>
         <View style={styles.stat}>
           <Text style={styles.statValue}>{user.followingCount}</Text>
-          <Text style={styles.statLabel}>Following</Text>
+          <Text style={styles.statLabel}>{t('userProfile.following')}</Text>
         </View>
       </View>
     </ScrollView>

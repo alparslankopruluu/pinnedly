@@ -1,59 +1,62 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, FileText, Bookmark, FolderOpen, Users } from 'lucide-react-native';
 
-const onboardingScreens = [
-  {
-    id: 1,
-    title: 'Capture Everything',
-    subtitle: 'Save bookmarks, notes, and ideas in one place',
-    description: 'Never lose important content again. Our offline-first approach ensures your data is always available.',
-    icon: <Bookmark size={80} color="#4F46E5" />,
-    color: '#4F46E5'
-  },
-  {
-    id: 2,
-    title: 'Organize Projects',
-    subtitle: 'Manage tasks with powerful Kanban boards',
-    description: 'Track progress, set deadlines, and collaborate with team members on any project.',
-    icon: <FolderOpen size={80} color="#059669" />,
-    color: '#059669'
-  },
-  {
-    id: 3,
-    title: 'Rich Note Taking',
-    subtitle: 'Write in Markdown with live preview',
-    description: 'Create beautiful notes with formatting, links, and organize your thoughts effortlessly.',
-    icon: <FileText size={80} color="#DC2626" />,
-    color: '#DC2626'
-  },
-  {
-    id: 4,
-    title: 'Share & Collaborate',
-    subtitle: 'Work together seamlessly',
-    description: 'Share your work with others, get feedback, and build amazing things together.',
-    icon: <Users size={80} color="#7C3AED" />,
-    color: '#7C3AED'
-  }
-];
-
 export default function Welcome() {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<number>(0);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(true);
   const opacity = useRef(new Animated.Value(1)).current;
+
+  const onboardingScreens = useMemo(
+    () => [
+      {
+        id: 1,
+        title: t('welcome.screens.captureEverything.title'),
+        subtitle: t('welcome.screens.captureEverything.subtitle'),
+        description: t('welcome.screens.captureEverything.description'),
+        icon: <Bookmark size={80} color="#4F46E5" />,
+        color: '#4F46E5',
+      },
+      {
+        id: 2,
+        title: t('welcome.screens.organizeProjects.title'),
+        subtitle: t('welcome.screens.organizeProjects.subtitle'),
+        description: t('welcome.screens.organizeProjects.description'),
+        icon: <FolderOpen size={80} color="#059669" />,
+        color: '#059669',
+      },
+      {
+        id: 3,
+        title: t('welcome.screens.richNoteTaking.title'),
+        subtitle: t('welcome.screens.richNoteTaking.subtitle'),
+        description: t('welcome.screens.richNoteTaking.description'),
+        icon: <FileText size={80} color="#DC2626" />,
+        color: '#DC2626',
+      },
+      {
+        id: 4,
+        title: t('welcome.screens.shareCollaborate.title'),
+        subtitle: t('welcome.screens.shareCollaborate.subtitle'),
+        description: t('welcome.screens.shareCollaborate.description'),
+        icon: <Users size={80} color="#7C3AED" />,
+        color: '#7C3AED',
+      },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, isLoading]);
-
-
 
   const handleNext = () => {
     if (currentScreen < onboardingScreens.length - 1) {
@@ -116,12 +119,12 @@ export default function Welcome() {
         
         <View style={styles.onboardingButtons}>
           <Pressable onPress={handleSkip} style={styles.skipButton}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t('common.skip')}</Text>
           </Pressable>
           
           <Pressable onPress={handleNext} style={[styles.nextButton, { backgroundColor: screen.color }]}>
             <Text style={styles.nextText}>
-              {currentScreen === onboardingScreens.length - 1 ? 'Get Started' : 'Next'}
+              {currentScreen === onboardingScreens.length - 1 ? t('common.getStarted') : t('common.next')}
             </Text>
             <ChevronRight size={20} color="white" />
           </Pressable>
@@ -137,21 +140,21 @@ export default function Welcome() {
           <View style={styles.logoContainer}>
             <Bookmark size={40} color="#4F46E5" />
           </View>
-          <Text style={styles.title}>Pinnedly</Text>
+          <Text style={styles.title}>{t('common.appName')}</Text>
           <Text style={styles.subtitle}>
-            Your offline-first workspace for notes, bookmarks, and projects
+            {t('welcome.subtitle')}
           </Text>
         </View>
 
         <View style={styles.buttonContainer}>
           <Button
-            title="Sign In"
+            title={t('auth.signIn')}
             onPress={() => router.push('./sign-in')}
             style={styles.primaryButton}
           />
           
           <Button
-            title="Create Account"
+            title={t('auth.createAccount')}
             onPress={() => router.push('./sign-up')}
             variant="outline"
             style={styles.secondaryButton}
@@ -159,7 +162,7 @@ export default function Welcome() {
         </View>
 
         <Text style={styles.footerText}>
-          By continuing, you agree to our Terms of Service and Privacy Policy
+          {t('auth.termsFooter')}
         </Text>
       </View>
     );
@@ -169,7 +172,7 @@ export default function Welcome() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={styles.loadingText}>{t('welcome.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -196,7 +199,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#64748b',
   },
-  // Onboarding styles
   onboardingContainer: {
     flex: 1,
     paddingHorizontal: 24,
@@ -276,7 +278,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
-  // Auth screen styles
   content: {
     flex: 1,
     paddingHorizontal: 24,

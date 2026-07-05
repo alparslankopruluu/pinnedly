@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   View, 
   Text, 
@@ -6,51 +7,57 @@ import {
   TextInput, 
   Pressable, 
   ScrollView,
-  Alert,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { X, Lock, Globe, Users } from 'lucide-react-native';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { Visibility } from '@/types';
 
-const visibilityOptions: { value: Visibility; label: string; description: string; icon: React.ReactNode; color: string }[] = [
-  { 
-    value: 'private', 
-    label: 'Private', 
-    description: 'Only you can see this note',
-    icon: <Lock size={20} color="#6B7280" />,
-    color: '#6B7280'
-  },
-  { 
-    value: 'shared', 
-    label: 'Shared', 
-    description: 'Share with specific people',
-    icon: <Users size={20} color="#6366F1" />,
-    color: '#6366F1'
-  },
-  { 
-    value: 'public', 
-    label: 'Public', 
-    description: 'Anyone can view this note',
-    icon: <Globe size={20} color="#10B981" />,
-    color: '#10B981'
-  },
-];
-
 export default function AddNoteScreen() {
+  const { t } = useTranslation();
+  const { projectId } = useLocalSearchParams<{ projectId?: string }>();
   const { createNote } = useNoteStore();
+
+  const visibilityOptions = useMemo(
+    () => [
+      {
+        value: 'private' as Visibility,
+        label: t('common.private'),
+        description: t('addNote.visibilityOptions.private'),
+        icon: <Lock size={20} color="#6B7280" />,
+        color: '#6B7280',
+      },
+      {
+        value: 'shared' as Visibility,
+        label: t('common.shared'),
+        description: t('addNote.visibilityOptions.shared'),
+        icon: <Users size={20} color="#6366F1" />,
+        color: '#6366F1',
+      },
+      {
+        value: 'public' as Visibility,
+        label: t('common.public'),
+        description: t('addNote.visibilityOptions.public'),
+        icon: <Globe size={20} color="#10B981" />,
+        color: '#10B981',
+      },
+    ],
+    [t]
+  );
   const [title, setTitle] = useState('');
   const [markdown, setMarkdown] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('private');
 
   const handleSave = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a note title.');
+      showAppAlert(t('common.error'), t('addNote.alerts.enterTitle'), undefined, { variant: 'error' });
       return;
     }
 
@@ -59,10 +66,13 @@ export default function AddNoteScreen() {
         title: title.trim(),
         markdown: markdown.trim(),
         visibility,
+        links: projectId
+          ? [{ type: 'project', id: projectId }]
+          : [],
       });
     } catch (err) {
       console.error('Failed to create note:', err);
-      Alert.alert('Error', 'Failed to create note. Please try again.');
+      showAppAlert(t('common.error'), t('addNote.alerts.createFailed'), undefined, { variant: 'error' });
       return;
     }
 
@@ -70,10 +80,10 @@ export default function AddNoteScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Stack.Screen 
         options={{ 
-          title: 'Add Note',
+          title: t('addNote.title'),
           headerLeft: () => (
             <Pressable onPress={() => router.back()}>
               <X size={24} color="#111827" />
@@ -90,19 +100,19 @@ export default function AddNoteScreen() {
           <View style={styles.content}>
             {/* Title */}
             <View style={styles.section}>
-              <Text style={styles.label}>Note Title</Text>
+              <Text style={styles.label}>{t('addNote.noteTitle')}</Text>
               <TextInput
                 style={styles.input}
                 value={title}
                 onChangeText={setTitle}
-                placeholder="Enter note title..."
+                placeholder={t('addNote.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
               />
             </View>
 
             {/* Visibility Selector */}
             <View style={styles.section}>
-              <Text style={styles.label}>Visibility</Text>
+              <Text style={styles.label}>{t('addNote.visibility')}</Text>
               <View style={styles.visibilityGrid}>
                 {visibilityOptions.map((option) => (
                   <Pressable
@@ -137,11 +147,12 @@ export default function AddNoteScreen() {
 
             {/* Content */}
             <View style={styles.section}>
-              <Text style={styles.label}>Content</Text>
+              <Text style={styles.label}>{t('addNote.content')}</Text>
               <RichTextEditor
                 value={markdown}
                 onChangeText={(text, md) => setMarkdown(md)}
-                placeholder="Write your note..."
+                placeholder={t('addNote.contentPlaceholder')}
+                toolbarHint={t('addNote.toolbarHint')}
                 autoFocus={false}
               />
             </View>
@@ -149,20 +160,19 @@ export default function AddNoteScreen() {
             {/* Info */}
             <View style={styles.infoBox}>
               <Text style={styles.infoText}>
-                Select text and use the toolbar to apply formatting. The text appears styled as you type.
+                {t('addNote.editorHint')}
               </Text>
             </View>
           </View>
         </ScrollView>
 
-        {/* Save Button */}
-        <View style={styles.footer}>
+        <ScreenFooter>
           <Button
-            title="Create Note"
+            title={t('addNote.createNote')}
             onPress={handleSave}
             style={styles.saveButton}
           />
-        </View>
+        </ScreenFooter>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -246,12 +256,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1E40AF',
     lineHeight: 20,
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
   },
   saveButton: {
     width: '100%',

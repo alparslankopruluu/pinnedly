@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(ownerId) {
+      return isSignedIn() && request.auth.uid == ownerId;
+    }
+
+    function isPublic(visibility) {
+      return visibility == 'public';
+    }
+
+    function canReadDoc() {
+      return isOwner(resource.data.ownerId)
+        || isPublic(resource.data.visibility)
+        || (isSignedIn() && request.auth.uid in resource.data.get('sharedWith', []));
+    }
+
+    function projectData(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data;
+    }
+
+    function canAccessProject(projectId) {
+      let project = projectData(projectId);
+      return isOwner(project.ownerId)
+        || isPublic(project.visibility)
+        || (isSignedIn() && request.auth.uid in project.get('sharedWith', []));
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /notes/{noteId} {
+      allow read: if canReadDoc();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    match /bookmarks/{bookmarkId} {
+      allow read: if canReadDoc();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    match /projects/{projectId} {
+      allow read: if canReadDoc();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+
+      match /tasks/{taskId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update, delete: if isSignedIn()
+          && projectData(projectId).ownerId == request.auth.uid;
+      }
+    }
+
+    match /todos/{todoId} {
+      allow read: if canReadDoc();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    match /bookmarkLists/{listId} {
+      allow read: if resource.data.isPublic == true || isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    match /listFollowers/{followerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /projectMembers/{memberId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /shares/{shareId} {
+      allow read: if isSignedIn()
+        && (resource.data.toUserId == request.auth.uid || resource.data.createdBy == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+    }
+  }
+}

@@ -1,45 +1,55 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { syncEngine, useSyncStatus } from '@/services/sync-engine';
+import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { projectRepository } from '@/repositories/ProjectRepository';
+import { bookmarkRepository } from '@/repositories/BookmarkRepository';
+import { noteRepository } from '@/repositories/NoteRepository';
 import { notificationService } from '@/utils/notifications';
+import { useAuth } from '@/store/useAuthStore';
 import { Project, Bookmark, Note } from '@/types';
+import { dedupeProjectsById } from '@/utils/projects';
+import { recordActivity } from '@/utils/activities';
 
 export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
+  const { user, isAuthenticated } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const syncStatus = useSyncStatus();
 
   const loadProjects = useCallback(async () => {
+    if (!isAuthenticated) {
+      setProjects([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('Loading projects from repository...');
       const projectsData = await projectRepository.getProjects();
-      setProjects(projectsData);
-      
-      console.log(`Loaded ${projectsData.length} projects`);
+      setProjects(dedupeProjectsById(projectsData));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load projects';
-      console.error('Error loading projects:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const createProject = useCallback(async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'tasks' | 'collaborators'>) => {
     try {
-      console.log('Creating new project:', projectData.title);
-      
       const newProject = await projectRepository.createProject(projectData);
-      setProjects(prev => [newProject, ...prev]);
-      
-      // Schedule project nudge notifications if deadline exists
+      // Firestore subscription updates the list; optimistic prepend caused duplicate keys.
+      recordActivity({
+        type: 'project_created',
+        title: 'Created project',
+        subtitle: newProject.title,
+        relatedId: newProject.id,
+      });
+
       if (projectData.deadline) {
-        const nudgeTime = new Date(projectData.deadline - 7 * 24 * 60 * 60 * 1000); // 1 week before
+        const nudgeTime = new Date(projectData.deadline - 7 * 24 * 60 * 60 * 1000);
         if (nudgeTime > new Date()) {
           await notificationService.scheduleProjectNudge(
             newProject.id,
@@ -48,59 +58,44 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
           );
         }
       }
-      
-      console.log('Project created successfully:', newProject.id);
+
       return newProject;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create project';
-      console.error('Error creating project:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
     try {
-      console.log('Updating project:', id);
-      
       const updatedProject = await projectRepository.updateProject(id, updates);
       setProjects(prev => prev.map(p => p.id === id ? updatedProject : p));
-      
-      console.log('Project updated successfully:', id);
       return updatedProject;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update project';
-      console.error('Error updating project:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const deleteProject = useCallback(async (id: string) => {
     try {
-      console.log('Deleting project:', id);
-      
       await projectRepository.deleteProject(id);
       setProjects(prev => prev.filter(p => p.id !== id));
-      
-      console.log('Project deleted successfully:', id);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete project';
-      console.error('Error deleting project:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const addTask = useCallback(async (projectId: string, taskData: { title: string; status?: 'todo' | 'in-progress' | 'done'; dueDate?: number; notes?: string }) => {
     try {
-      console.log('Adding task to project:', projectId);
-      
       const newTask = await projectRepository.createTask(projectId, {
         ...taskData,
         status: taskData.status || 'todo'
       });
-      
-      // Schedule notification if task has due date
+
       if (taskData.dueDate) {
-        const reminderTime = new Date(taskData.dueDate - 24 * 60 * 60 * 1000); // 1 day before
+        const reminderTime = new Date(taskData.dueDate - 24 * 60 * 60 * 1000);
         if (reminderTime > new Date()) {
           await notificationService.scheduleTaskReminder(
             newTask.id,
@@ -109,76 +104,90 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
           );
         }
       }
-      
-      // Update the project in local state
+
       setProjects(prev => prev.map(p => {
         if (p.id === projectId) {
           return { ...p, tasks: [...p.tasks, newTask] };
         }
         return p;
       }));
-      
-      console.log('Task added successfully:', newTask.id);
+
       return newTask;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add task';
-      console.error('Error adding task:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const updateTask = useCallback(async (taskId: string, updates: { title?: string; status?: 'todo' | 'in-progress' | 'done'; dueDate?: number; notes?: string }) => {
-    try {
-      console.log('Updating task:', taskId);
-      
-      const updatedTask = await projectRepository.updateTask(taskId, updates);
-      
-      // Update the task in local state
-      setProjects(prev => prev.map(project => ({
+    let rollbackProjects: Project[] | null = null;
+    setProjects((prev) => {
+      rollbackProjects = prev;
+      return prev.map((project) => ({
         ...project,
-        tasks: project.tasks.map(task => task.id === taskId ? updatedTask : task)
-      })));
-      
-      console.log('Task updated successfully:', taskId);
+        tasks: project.tasks.map((task) =>
+          task.id === taskId ? { ...task, ...updates } : task
+        ),
+      }));
+    });
+
+    try {
+      const updatedTask = await projectRepository.updateTask(taskId, updates);
+      setProjects((prev) =>
+        prev.map((project) => ({
+          ...project,
+          tasks: project.tasks.map((task) =>
+            task.id === taskId ? updatedTask : task
+          ),
+        }))
+      );
       return updatedTask;
     } catch (err) {
+      if (rollbackProjects) {
+        setProjects(rollbackProjects);
+      }
       const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
-      console.error('Error updating task:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const deleteTask = useCallback(async (taskId: string) => {
     try {
-      console.log('Deleting task:', taskId);
-      
       await projectRepository.deleteTask(taskId);
-      
-      // Remove the task from local state
       setProjects(prev => prev.map(project => ({
         ...project,
         tasks: project.tasks.filter(task => task.id !== taskId)
       })));
-      
-      console.log('Task deleted successfully:', taskId);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete task';
-      console.error('Error deleting task:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
-  const syncProjects = useCallback(async () => {
+  const hydrateProject = useCallback(async (projectId: string) => {
     try {
-      console.log('Syncing projects...');
-      await projectRepository.syncProjects();
-      await loadProjects(); // Reload after sync
-      console.log('Projects synced successfully');
+      const fullProject = await projectRepository.getProject(projectId);
+      if (!fullProject) return null;
+      setProjects((prev) =>
+        dedupeProjectsById(
+          prev.map((project) => (project.id === projectId ? fullProject : project))
+        )
+      );
+      return fullProject;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sync projects';
-      console.error('Error syncing projects:', errorMessage);
-      throw new Error(errorMessage);
+      console.warn(`Failed to hydrate project ${projectId}:`, err);
+      return null;
     }
+  }, []);
+
+  const hydrateProjectTasks = useCallback(async (projectIds: string[]) => {
+    const uniqueIds = [...new Set(projectIds)];
+    await Promise.all(uniqueIds.map((projectId) => hydrateProject(projectId)));
+  }, [hydrateProject]);
+
+  const syncProjects = useCallback(async () => {
+    await projectRepository.syncProjects();
+    await loadProjects();
   }, [loadProjects]);
 
   const scheduleTaskReminder = useCallback(async (taskId: string, taskTitle: string, reminderTime: Date) => {
@@ -189,10 +198,41 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     return notificationService.scheduleProjectNudge(projectId, projectTitle, nudgeTime);
   }, []);
 
-  // Load projects on mount but don't auto-sync on every online status change
   useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+    if (!isAuthenticated || !user?.id) {
+      setProjects([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const unsubscribe = projectRepository.subscribeToProjects(
+      user.id,
+      (projectsData) => {
+        setProjects((prev) => {
+          const incoming = dedupeProjectsById(projectsData);
+          return incoming.map((project) => {
+            const existing = prev.find((item) => item.id === project.id);
+            if (existing?.tasks.length && !project.tasks.length) {
+              return { ...project, tasks: existing.tasks, collaborators: existing.collaborators };
+            }
+            return project;
+          });
+        });
+        setLoading(false);
+        setError(null);
+      },
+      (subscriptionError) => {
+        const errorMessage = subscriptionError instanceof Error
+          ? subscriptionError.message
+          : 'Failed to load projects';
+        setError(errorMessage);
+        setLoading(false);
+      }
+    );
+
+    return unsubscribe;
+  }, [isAuthenticated, user?.id]);
 
   return useMemo(() => ({
     projects,
@@ -200,6 +240,8 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     error,
     syncStatus,
     loadProjects,
+    hydrateProject,
+    hydrateProjectTasks,
     createProject,
     updateProject,
     deleteProject,
@@ -209,150 +251,104 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     syncProjects,
     scheduleTaskReminder,
     scheduleProjectNudge
-  }), [projects, loading, error, syncStatus, loadProjects, createProject, updateProject, deleteProject, addTask, updateTask, deleteTask, syncProjects, scheduleTaskReminder, scheduleProjectNudge]);
+  }), [projects, loading, error, syncStatus, loadProjects, hydrateProject, hydrateProjectTasks, createProject, updateProject, deleteProject, addTask, updateTask, deleteTask, syncProjects, scheduleTaskReminder, scheduleProjectNudge]);
 });
 
-// Bookmark Store with offline-first approach
 export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() => {
+  const { user, isAuthenticated } = useAuth();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const syncStatus = useSyncStatus();
 
   const loadBookmarks = useCallback(async () => {
+    if (!isAuthenticated) {
+      setBookmarks([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('Loading bookmarks...');
-      const bookmarksData = await syncEngine.getData('bookmarks');
-      
-      // Transform Supabase data to app format
-      const transformedBookmarks = bookmarksData.map((bookmark: any) => ({
-        id: bookmark.id,
-        url: bookmark.url,
-        title: bookmark.title,
-        description: bookmark.description,
-        imagePreview: bookmark.image_preview,
-        screenshotUri: bookmark.screenshot_uri,
-        notes: [], // Will be populated separately if needed
-        tags: [], // Will be populated separately if needed
-        createdAt: new Date(bookmark.created_at).getTime(),
-        openCount: bookmark.open_count || 0,
-        lastOpenedAt: bookmark.last_opened_at ? new Date(bookmark.last_opened_at).getTime() : undefined,
-        source: bookmark.source,
-        userId: bookmark.owner_id,
-        visibility: bookmark.visibility
-      }));
-      
-      setBookmarks(transformedBookmarks);
-      console.log(`Loaded ${transformedBookmarks.length} bookmarks`);
+      const bookmarksData = await bookmarkRepository.getBookmarks();
+      setBookmarks(bookmarksData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load bookmarks';
-      console.error('Error loading bookmarks:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const createBookmark = useCallback(async (bookmarkData: Omit<Bookmark, 'id' | 'createdAt' | 'openCount' | 'notes' | 'tags' | 'userId'>) => {
     try {
-      console.log('Creating new bookmark:', bookmarkData.title);
-      
-      const newBookmarkData = {
-        url: bookmarkData.url,
-        title: bookmarkData.title,
-        description: bookmarkData.description,
-        image_preview: bookmarkData.imagePreview,
-        screenshot_uri: bookmarkData.screenshotUri,
-        source: bookmarkData.source,
-        visibility: bookmarkData.visibility || 'private'
-      };
-      
-      const createdBookmark = await syncEngine.createData('bookmarks', newBookmarkData);
-      
-      const transformedBookmark: Bookmark = {
-        id: createdBookmark.id,
-        url: createdBookmark.url,
-        title: createdBookmark.title,
-        description: createdBookmark.description,
-        imagePreview: createdBookmark.image_preview,
-        screenshotUri: createdBookmark.screenshot_uri,
-        notes: [],
-        tags: [],
-        createdAt: new Date(createdBookmark.created_at).getTime(),
-        openCount: 0,
-        lastOpenedAt: undefined,
-        source: createdBookmark.source,
-        userId: createdBookmark.owner_id,
-        visibility: createdBookmark.visibility
-      };
-      
-      setBookmarks(prev => [transformedBookmark, ...prev]);
-      console.log('Bookmark created successfully:', transformedBookmark.id);
+      const transformedBookmark = await bookmarkRepository.createBookmark({
+        ...bookmarkData,
+        status: bookmarkData.status ?? 'inbox',
+        tagNames: bookmarkData.tagNames ?? [],
+      });
+      // Firestore subscription updates the list; optimistic prepend caused duplicate keys.
+      recordActivity({
+        type: 'bookmark_added',
+        title: 'Added bookmark',
+        subtitle: transformedBookmark.title || transformedBookmark.url,
+        relatedId: transformedBookmark.id,
+      });
       return transformedBookmark;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create bookmark';
-      console.error('Error creating bookmark:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }, []);
+
+  const openBookmark = useCallback(async (id: string) => {
+    try {
+      const updatedBookmark = await bookmarkRepository.incrementOpenCount(id);
+      setBookmarks(prev => prev.map(b => b.id === id ? updatedBookmark : b));
+      return updatedBookmark;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to open bookmark';
       throw new Error(errorMessage);
     }
   }, []);
 
   const updateBookmark = useCallback(async (id: string, updates: Partial<Bookmark>) => {
     try {
-      console.log('Updating bookmark:', id);
-      
-      const updateData: any = {};
-      if (updates.url !== undefined) updateData.url = updates.url;
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.imagePreview !== undefined) updateData.image_preview = updates.imagePreview;
-      if (updates.screenshotUri !== undefined) updateData.screenshot_uri = updates.screenshotUri;
-      if (updates.source !== undefined) updateData.source = updates.source;
-      if (updates.visibility !== undefined) updateData.visibility = updates.visibility;
-      if (updates.openCount !== undefined) updateData.open_count = updates.openCount;
-      if (updates.lastOpenedAt !== undefined) updateData.last_opened_at = new Date(updates.lastOpenedAt).toISOString();
-      
-      const updatedBookmark = await syncEngine.updateData('bookmarks', id, updateData);
-      
-      setBookmarks(prev => prev.map(b => {
-        if (b.id === id) {
-          return {
-            ...b,
-            ...updates,
-            updatedAt: new Date(updatedBookmark.updated_at).getTime()
-          };
-        }
-        return b;
-      }));
-      
-      console.log('Bookmark updated successfully:', id);
+      const updatedBookmark = await bookmarkRepository.updateBookmark(id, updates);
+      setBookmarks(prev => prev.map(b => b.id === id ? updatedBookmark : b));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update bookmark';
-      console.error('Error updating bookmark:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const deleteBookmark = useCallback(async (id: string) => {
     try {
-      console.log('Deleting bookmark:', id);
-      
-      await syncEngine.deleteData('bookmarks', id);
+      await bookmarkRepository.deleteBookmark(id);
       setBookmarks(prev => prev.filter(b => b.id !== id));
-      
-      console.log('Bookmark deleted successfully:', id);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete bookmark';
-      console.error('Error deleting bookmark:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   useEffect(() => {
-    loadBookmarks();
-  }, [loadBookmarks]);
+    if (!isAuthenticated || !user?.id) {
+      setBookmarks([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const unsubscribe = bookmarkRepository.subscribeToBookmarks(user.id, (bookmarksData) => {
+      setBookmarks(bookmarksData);
+      setLoading(false);
+      setError(null);
+    });
+
+    return unsubscribe;
+  }, [isAuthenticated, user?.id]);
 
   return useMemo(() => ({
     bookmarks,
@@ -362,129 +358,95 @@ export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() =>
     loadBookmarks,
     createBookmark,
     updateBookmark,
-    deleteBookmark
-  }), [bookmarks, loading, error, syncStatus, loadBookmarks, createBookmark, updateBookmark, deleteBookmark]);
+    deleteBookmark,
+    openBookmark,
+  }), [bookmarks, loading, error, syncStatus, loadBookmarks, createBookmark, updateBookmark, deleteBookmark, openBookmark]);
 });
 
-// Notes Store with offline-first approach
 export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
+  const { user, isAuthenticated } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const syncStatus = useSyncStatus();
 
   const loadNotes = useCallback(async () => {
+    if (!isAuthenticated) {
+      setNotes([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('Loading notes...');
-      const notesData = await syncEngine.getData('notes');
-      
-      // Transform Supabase data to app format
-      const transformedNotes = notesData.map((note: any) => ({
-        id: note.id,
-        title: note.title,
-        markdown: note.markdown,
-        links: [], // Will be populated separately if needed
-        createdAt: new Date(note.created_at).getTime(),
-        updatedAt: new Date(note.updated_at).getTime(),
-        userId: note.owner_id,
-        visibility: note.visibility
-      }));
-      
-      setNotes(transformedNotes);
-      console.log(`Loaded ${transformedNotes.length} notes`);
+      const notesData = await noteRepository.getNotes();
+      setNotes(notesData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load notes';
-      console.error('Error loading notes:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  const createNote = useCallback(async (noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'links' | 'userId'>) => {
+  const createNote = useCallback(async (
+    noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'links'> & {
+      links?: Note['links'];
+    }
+  ) => {
     try {
-      console.log('Creating new note:', noteData.title);
-      
-      const newNoteData = {
-        title: noteData.title,
-        markdown: noteData.markdown,
-        visibility: noteData.visibility || 'private'
-      };
-      
-      const createdNote = await syncEngine.createData('notes', newNoteData);
-      
-      const transformedNote: Note = {
-        id: createdNote.id,
-        title: createdNote.title,
-        markdown: createdNote.markdown,
-        links: [],
-        createdAt: new Date(createdNote.created_at).getTime(),
-        updatedAt: new Date(createdNote.updated_at).getTime(),
-        userId: createdNote.owner_id,
-        visibility: createdNote.visibility
-      };
-      
-      setNotes(prev => [transformedNote, ...prev]);
-      console.log('Note created successfully:', transformedNote.id);
+      const transformedNote = await noteRepository.createNote(noteData);
+      // Firestore subscription updates the list; optimistic prepend caused duplicate keys.
+      recordActivity({
+        type: 'note_added',
+        title: 'Added note',
+        subtitle: transformedNote.title,
+        relatedId: transformedNote.id,
+      });
       return transformedNote;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create note';
-      console.error('Error creating note:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const updateNote = useCallback(async (id: string, updates: Partial<Note>) => {
     try {
-      console.log('Updating note:', id);
-      
-      const updateData: any = {};
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.markdown !== undefined) updateData.markdown = updates.markdown;
-      if (updates.visibility !== undefined) updateData.visibility = updates.visibility;
-      
-      const updatedNote = await syncEngine.updateData('notes', id, updateData);
-      
-      setNotes(prev => prev.map(n => {
-        if (n.id === id) {
-          return {
-            ...n,
-            ...updates,
-            updatedAt: new Date(updatedNote.updated_at).getTime()
-          };
-        }
-        return n;
-      }));
-      
-      console.log('Note updated successfully:', id);
+      const updatedNote = await noteRepository.updateNote(id, updates);
+      setNotes(prev => prev.map(n => n.id === id ? updatedNote : n));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update note';
-      console.error('Error updating note:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   const deleteNote = useCallback(async (id: string) => {
     try {
-      console.log('Deleting note:', id);
-      
-      await syncEngine.deleteData('notes', id);
+      await noteRepository.deleteNote(id);
       setNotes(prev => prev.filter(n => n.id !== id));
-      
-      console.log('Note deleted successfully:', id);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete note';
-      console.error('Error deleting note:', errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
   useEffect(() => {
-    loadNotes();
-  }, [loadNotes]);
+    if (!isAuthenticated || !user?.id) {
+      setNotes([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const unsubscribe = noteRepository.subscribeToNotes(user.id, (notesData) => {
+      setNotes(notesData);
+      setLoading(false);
+      setError(null);
+    });
+
+    return unsubscribe;
+  }, [isAuthenticated, user?.id]);
 
   return useMemo(() => ({
     notes,

@@ -1,37 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   Pressable,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Switch,
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Calendar, Flag } from 'lucide-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTodoStore } from '@/store/useTodoStore';
-import { TodoItem, ID } from '@/types';
+import { TodoItem } from '@/types';
+import { DatePickerField } from '@/components/ui/DatePickerField';
 
-const PRIORITY_OPTIONS: { id: TodoItem['priority']; label: string; color: string }[] = [
-  { id: 'high', label: 'High', color: '#EF4444' },
-  { id: 'medium', label: 'Medium', color: '#F59E0B' },
-  { id: 'low', label: 'Low', color: '#6B7280' },
-];
+function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
 
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+function dueDateToTimestamp(date: Date): number {
+  const normalized = new Date(date);
+  normalized.setHours(23, 59, 59, 999);
+  return normalized.getTime();
+}
+
+function addDays(base: Date, days: number): Date {
+  const next = new Date(base);
+  next.setDate(next.getDate() + days);
+  return next;
 }
 
 export default function AddTodoScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+
+  const priorityOptions = useMemo(
+    () => [
+      { id: 'high' as TodoItem['priority'], label: t('todos.filters.high'), color: '#EF4444' },
+      { id: 'medium' as TodoItem['priority'], label: t('todos.filters.medium'), color: '#F59E0B' },
+      { id: 'low' as TodoItem['priority'], label: t('todos.filters.low'), color: '#6B7280' },
+    ],
+    [t]
+  );
   const params = useLocalSearchParams<{ id?: string }>();
   const { allTodos, createTodo, updateTodo } = useTodoStore();
 
@@ -42,9 +59,10 @@ export default function AddTodoScreen() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TodoItem['priority']>('medium');
   const [hasDueDate, setHasDueDate] = useState(false);
-  const [dueDate, setDueDate] = useState(formatDate(new Date()));
+  const [dueDate, setDueDate] = useState<Date>(startOfToday());
   const [completed, setCompleted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (existingTodo) {
@@ -54,30 +72,33 @@ export default function AddTodoScreen() {
       setCompleted(existingTodo.completed);
       if (existingTodo.dueDate) {
         setHasDueDate(true);
-        setDueDate(formatDate(new Date(existingTodo.dueDate)));
+        setDueDate(new Date(existingTodo.dueDate));
       }
     }
   }, [existingTodo]);
 
-  const handleDateChange = useCallback((text: string) => {
-    const cleaned = text.replace(/[^0-9-]/g, '');
-    setDueDate(cleaned);
-  }, []);
-
   const parseDueDate = (): number | undefined => {
-    if (!hasDueDate || !dueDate.trim()) return undefined;
-    const parsed = new Date(dueDate);
-    if (isNaN(parsed.getTime())) return undefined;
-    return parsed.getTime();
+    if (!hasDueDate) return undefined;
+    return dueDateToTimestamp(dueDate);
   };
 
+  const handleDueDateToggle = useCallback((enabled: boolean) => {
+    setHasDueDate(enabled);
+    if (enabled) {
+      setDueDate(startOfToday());
+    }
+  }, []);
+
   const handleSave = useCallback(async () => {
+    if (savingRef.current) return;
+
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      Alert.alert('Required', 'Please enter a task title.');
+      showAppAlert(t('common.required'), t('addTodo.alerts.enterTitle'));
       return;
     }
 
+    savingRef.current = true;
     setSaving(true);
     try {
       if (isEditing && existingTodo) {
@@ -99,12 +120,13 @@ export default function AddTodoScreen() {
       }
       router.back();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to save todo';
-      Alert.alert('Error', msg);
+      const msg = err instanceof Error ? err.message : t('addTodo.saveFailed');
+      showAppAlert(t('common.error'), msg, undefined, { variant: 'error' });
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
-  }, [title, description, priority, completed, hasDueDate, dueDate, isEditing, existingTodo, createTodo, updateTodo]);
+  }, [title, description, priority, completed, hasDueDate, dueDate, isEditing, existingTodo, createTodo, updateTodo, t]);
 
   return (
     <KeyboardAvoidingView
@@ -119,7 +141,7 @@ export default function AddTodoScreen() {
           <X size={24} color="#6B7280" />
         </Pressable>
         <Text style={styles.headerTitle}>
-          {isEditing ? 'Edit Todo' : 'New Todo'}
+          {isEditing ? t('addTodo.editTodo') : t('addTodo.newTodo')}
         </Text>
         <Pressable
           style={({ pressed }) => [
@@ -131,7 +153,7 @@ export default function AddTodoScreen() {
           disabled={saving || !title.trim()}
         >
           <Text style={[styles.saveButtonText, !title.trim() && styles.saveButtonTextDisabled]}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? t('common.saving') : t('common.save')}
           </Text>
         </Pressable>
       </View>
@@ -142,24 +164,24 @@ export default function AddTodoScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Title */}
-        <Text style={styles.label}>Title</Text>
+        <Text style={styles.label}>{t('addTodo.title')}</Text>
         <TextInput
           style={styles.input}
           value={title}
           onChangeText={setTitle}
-          placeholder="What do you need to do?"
+          placeholder={t('addTodo.titlePlaceholder')}
           placeholderTextColor="#9CA3AF"
           autoFocus={!isEditing}
           maxLength={200}
         />
 
         {/* Description */}
-        <Text style={styles.label}>Description (optional)</Text>
+        <Text style={styles.label}>{t('addTodo.descriptionOptional')}</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={description}
           onChangeText={setDescription}
-          placeholder="Add details..."
+          placeholder={t('addTodo.detailsPlaceholder')}
           placeholderTextColor="#9CA3AF"
           multiline
           numberOfLines={4}
@@ -168,9 +190,9 @@ export default function AddTodoScreen() {
         />
 
         {/* Priority */}
-        <Text style={styles.label}>Priority</Text>
+        <Text style={styles.label}>{t('addTodo.priority')}</Text>
         <View style={styles.priorityRow}>
-          {PRIORITY_OPTIONS.map((opt) => (
+          {priorityOptions.map((opt) => (
             <Pressable
               key={opt.id}
               style={({ pressed }) => [
@@ -192,11 +214,11 @@ export default function AddTodoScreen() {
         <View style={styles.switchRow}>
           <View style={styles.switchLabelRow}>
             <Calendar size={18} color="#6B7280" />
-            <Text style={styles.switchLabel}>Set due date</Text>
+            <Text style={styles.switchLabel}>{t('addTodo.setDueDate')}</Text>
           </View>
           <Switch
             value={hasDueDate}
-            onValueChange={setHasDueDate}
+            onValueChange={handleDueDateToggle}
             trackColor={{ false: '#E5E7EB', true: '#FECACA' }}
             thumbColor={hasDueDate ? '#EF4444' : '#D1D5DB'}
           />
@@ -204,20 +226,17 @@ export default function AddTodoScreen() {
 
         {hasDueDate && (
           <View style={styles.dateInputContainer}>
-            <TextInput
-              style={styles.input}
+            <DatePickerField
               value={dueDate}
-              onChangeText={handleDateChange}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#9CA3AF"
-              keyboardType="numbers-and-punctuation"
+              onChange={setDueDate}
+              minimumDate={isEditing ? undefined : startOfToday()}
+              placeholder={t('addTodo.dueDatePlaceholder')}
             />
             <View style={styles.quickDates}>
               {[
-                { label: 'Today', getDate: () => formatDate(new Date()) },
-                { label: 'Tomorrow', getDate: () => formatDate(new Date(Date.now() + 86400000)) },
-                { label: 'Next Week', getDate: () => formatDate(new Date(Date.now() + 7 * 86400000)) },
-                { label: 'Clear', getDate: () => '' },
+                { label: t('addTodo.quickDates.today'), date: startOfToday() },
+                { label: t('addTodo.quickDates.tomorrow'), date: addDays(startOfToday(), 1) },
+                { label: t('addTodo.quickDates.nextWeek'), date: addDays(startOfToday(), 7) },
               ].map((qd) => (
                 <Pressable
                   key={qd.label}
@@ -225,11 +244,20 @@ export default function AddTodoScreen() {
                     styles.quickDateChip,
                     pressed && styles.buttonPressed,
                   ]}
-                  onPress={() => setDueDate(qd.getDate())}
+                  onPress={() => setDueDate(qd.date)}
                 >
                   <Text style={styles.quickDateText}>{qd.label}</Text>
                 </Pressable>
               ))}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.quickDateChip,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => handleDueDateToggle(false)}
+              >
+                <Text style={styles.quickDateText}>{t('addTodo.quickDates.clear')}</Text>
+              </Pressable>
             </View>
           </View>
         )}
@@ -237,7 +265,7 @@ export default function AddTodoScreen() {
         {/* Mark completed (edit only) */}
         {isEditing && (
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Mark as completed</Text>
+            <Text style={styles.switchLabel}>{t('addTodo.markCompleted')}</Text>
             <Switch
               value={completed}
               onValueChange={setCompleted}

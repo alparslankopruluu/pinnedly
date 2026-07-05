@@ -1,0 +1,876 @@
+{
+  "common": {
+    "appName": "Pinnedly",
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "ok": "موافق",
+    "delete": "حذف",
+    "save": "حفظ",
+    "create": "إنشاء",
+    "edit": "تعديل",
+    "share": "مشاركة",
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "info": "معلومات",
+    "required": "مطلوب",
+    "comingSoon": "قريبًا",
+    "untitled": "بدون عنوان",
+    "next": "التالي",
+    "skip": "تخطي",
+    "getStarted": "ابدأ الآن",
+    "viewNotes": "عرض الملاحظات",
+    "tryAgain": "حاول مرة أخرى",
+    "all": "الكل",
+    "active": "نشط",
+    "done": "مكتمل",
+    "private": "خاص",
+    "public": "عام",
+    "shared": "مشترك",
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "exporting": "جارٍ التصدير...",
+    "processing": "جارٍ المعالجة...",
+    "saving": "جارٍ الحفظ...",
+    "sharing": "جارٍ المشاركة...",
+    "sending": "جارٍ الإرسال...",
+    "verifying": "جارٍ التحقق...",
+    "signingIn": "جارٍ تسجيل الدخول...",
+    "creatingAccount": "جارٍ إنشاء الحساب...",
+    "followers": "{{count}} متابع",
+    "linkedItems_one": "{{count}} عنصر مرتبط",
+    "linkedItems_other": "{{count}} عناصر مرتبطة",
+    "sortLabel": "الترتيب: {{sort}}",
+    "errorWithMessage": "خطأ: {{message}}",
+    "noContent": "لا يوجد محتوى",
+    "unknownUser": "مستخدم غير معروف"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "bookmarks": "الإشارات المرجعية",
+    "projects": "المشاريع",
+    "notes": "الملاحظات",
+    "todos": "المهام",
+    "profile": "الملف الشخصي"
+  },
+  "navigation": {
+    "settings": "الإعدادات",
+    "aiAssistant": "مساعد الذكاء الاصطناعي",
+    "todo": "مهمة",
+    "shareInbox": "صندوق المشاركات",
+    "findPeople": "البحث عن أشخاص",
+    "discoverLists": "اكتشاف القوائم",
+    "createList": "إنشاء قائمة",
+    "bookmarkList": "قائمة الإشارات المرجعية",
+    "profile": "Profile",
+    "addNote": "Add Note",
+    "addProject": "Add Project"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "createAccount": "إنشاء حساب",
+    "phoneSignIn": "تسجيل الدخول بالهاتف",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "checkYourEmail": "تحقق من بريدك الإلكتروني",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "fullName": "الاسم الكامل",
+    "phoneNumber": "رقم الهاتف",
+    "verificationCode": "رمز التحقق",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "orContinueWith": "أو المتابعة باستخدام",
+    "google": "Google",
+    "signInWithPhone": "تسجيل الدخول برقم الهاتف",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "rememberPassword": "هل تتذكر كلمة المرور؟",
+    "backToSignIn": "العودة لتسجيل الدخول",
+    "sendCode": "إرسال الرمز",
+    "verifyAndSignIn": "تحقق وسجّل الدخول",
+    "changePhoneNumber": "تغيير رقم الهاتف",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "emailSent": "تم إرسال البريد!",
+    "emailSentMessage": "أرسلنا رابط إعادة تعيين كلمة المرور إلى {{email}}. يرجى التحقق من بريدك الإلكتروني واتباع التعليمات لإعادة تعيين كلمة المرور.",
+    "resetDescription": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.",
+    "phoneHint": "أدخل رمز بلدك. مثال: +905551234567",
+    "termsFooter": "بالمتابعة، فإنك توافق على شروط الخدمة وسياسة الخصوصية",
+    "placeholders": {
+      "email": "أدخل بريدك الإلكتروني",
+      "password": "أدخل كلمة المرور",
+      "createPassword": "أنشئ كلمة مرور",
+      "confirmPassword": "أكد كلمة المرور",
+      "fullName": "أدخل اسمك الكامل",
+      "phone": "+905551234567",
+      "verificationCode": "123456"
+    },
+    "errors": {
+      "fillAllFields": "يرجى ملء جميع الحقول",
+      "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+      "passwordTooShort": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+      "signInFailed": "فشل تسجيل الدخول",
+      "checkCredentials": "يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى",
+      "signUpFailed": "فشل إنشاء الحساب",
+      "pleaseTryAgain": "يرجى المحاولة مرة أخرى",
+      "appleSignInFailed": "فشل تسجيل الدخول عبر Apple",
+      "appleSignUpFailed": "فشل التسجيل عبر Apple",
+      "googleSignInFailed": "فشل تسجيل الدخول عبر Google",
+      "googleSignUpFailed": "فشل التسجيل عبر Google",
+      "enterEmail": "يرجى إدخال بريدك الإلكتروني",
+      "resetEmailFailed": "فشل إرسال بريد إعادة التعيين. يرجى المحاولة مرة أخرى.",
+      "enterPhone": "يرجى إدخال رقم هاتفك مع رمز البلد (مثل +905551234567)",
+      "enterVerificationCode": "يرجى إدخال رمز التحقق",
+      "verificationFailed": "فشل التحقق",
+      "invalidCode": "رمز غير صالح",
+      "couldNotSendCode": "تعذر إرسال رمز التحقق"
+    },
+    "alerts": {
+      "codeSent": "تم إرسال الرمز",
+      "enterCodeFromSms": "أدخل رمز التحقق من الرسالة النصية",
+      "failed": "فشل"
+    },
+    "resendEmail": "Didn't receive the email? Try again"
+  },
+  "welcome": {
+    "subtitle": "مساحة عملك ذات الأولوية للعمل دون اتصال للملاحظات والإشارات المرجعية والمشاريع",
+    "loading": "جارٍ التحميل...",
+    "screens": {
+      "captureEverything": {
+        "title": "احفظ كل شيء",
+        "subtitle": "احفظ الإشارات المرجعية والملاحظات والأفكار في مكان واحد",
+        "description": "لا تفقد المحتوى المهم مرة أخرى. يضمن نهجنا ذو الأولوية للعمل دون اتصال أن تكون بياناتك متاحة دائمًا."
+      },
+      "organizeProjects": {
+        "title": "نظّم المشاريع",
+        "subtitle": "أدر المهام بلوحات Kanban قوية",
+        "description": "تتبع التقدم وحدد المواعيد النهائية وتعاون مع أعضاء الفريق في أي مشروع."
+      },
+      "richNoteTaking": {
+        "title": "تدوين ملاحظات غني",
+        "subtitle": "اكتب بصيغة Markdown مع معاينة مباشرة",
+        "description": "أنشئ ملاحظات جميلة بالتنسيق والروابط ونظّم أفكارك بسهولة."
+      },
+      "shareCollaborate": {
+        "title": "شارك وتعاون",
+        "subtitle": "اعمل معًا بسلاسة",
+        "description": "شارك عملك مع الآخرين واحصل على ملاحظات وابنِ أشياء رائعة معًا."
+      }
+    }
+  },
+  "onboarding": {
+    "skip": "تخطي",
+    "screens": {
+      "saveWhatMatters": {
+        "headline": "احفظ ما يهم، ولا تنسَ مرة أخرى.",
+        "body": "يساعدك Pinnedly على إضافة الإشارات المرجعية وإنشاء الملاحظات وإدارة المشاريع بسهولة للبقاء على اطلاع بكل شيء.",
+        "cta": "ابدأ الآن"
+      },
+      "saveBookmarks": {
+        "headline": "احفظ الإشارات المرجعية من أي مكان.",
+        "body": "الصق رابطًا، أضف لقطات شاشة، وتتبع عدد مرات زيارتك له.",
+        "cta": "التالي"
+      },
+      "projectsMoveForward": {
+        "headline": "شاهد مشاريعك تتقدم.",
+        "body": "أنشئ مشاريع وأضف مهامًا وشاهد تقدمك ينمو.",
+        "cta": "التالي"
+      },
+      "shareCollaborate": {
+        "headline": "شارك وتعاون.",
+        "body": "تابع الأصدقاء وشارك الإشارات المرجعية واعمل على المشاريع معًا.",
+        "cta": "ابدأ الآن"
+      }
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "sections": {
+      "account": "الحساب",
+      "subscription": "الاشتراك",
+      "notifications": "الإشعارات",
+      "appearance": "المظهر",
+      "dataPrivacy": "البيانات والخصوصية",
+      "about": "حول",
+      "developer": "المطور"
+    },
+    "profile": {
+      "title": "الملف الشخصي",
+      "subtitle": "إدارة معلومات ملفك الشخصي"
+    },
+    "appleSignIn": "تسجيل الدخول عبر Apple",
+    "googleSignIn": {
+      "title": "تسجيل الدخول عبر Google",
+      "subtitle": "اربط حساب Google الخاص بك"
+    },
+    "currentPlan": {
+      "title": "الخطة الحالية",
+      "free": "الخطة المجانية",
+      "plan": "خطة {{plan}}"
+    },
+    "billingHistory": {
+      "title": "سجل الفواتير",
+      "subtitle": "عرض سجل المدفوعات"
+    },
+    "pushNotifications": {
+      "title": "الإشعارات الفورية",
+      "subtitle": "استلم الإشعارات على جهازك"
+    },
+    "emailNotifications": {
+      "title": "إشعارات البريد الإلكتروني",
+      "subtitle": "استلم الإشعارات عبر البريد الإلكتروني"
+    },
+    "notificationPreferences": {
+      "title": "تفضيلات الإشعارات",
+      "subtitle": "خصص إعدادات الإشعارات"
+    },
+    "theme": {
+      "title": "السمة",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام",
+      "chooseTheme": "اختر السمة"
+    },
+    "fontSize": {
+      "title": "حجم الخط",
+      "percent": "{{percent}}%"
+    },
+    "exportData": {
+      "title": "تصدير البيانات",
+      "subtitle": "حمّل بياناتك بصيغة JSON"
+    },
+    "importData": {
+      "title": "استيراد البيانات",
+      "subtitle": "استعادة من نسخة احتياطية"
+    },
+    "deleteAccount": {
+      "title": "حذف الحساب",
+      "subtitle": "حذف حسابك نهائيًا"
+    },
+    "version": {
+      "title": "الإصدار",
+      "value": "1.0.0"
+    },
+    "termsOfService": {
+      "title": "شروط الخدمة",
+      "subtitle": "اقرأ الشروط والأحكام"
+    },
+    "privacyPolicy": {
+      "title": "سياسة الخصوصية",
+      "subtitle": "تعرّف على كيفية حماية بياناتك"
+    },
+    "testCrash": {
+      "title": "اختبار التعطل",
+      "subtitle": "إرسال تعطل اختباري إلى Firebase Crashlytics"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "App display language",
+      "chooseLanguage": "Choose Language",
+      "systemDefault": "System default"
+    }
+  },
+  "home": {
+    "aiChat": {
+      "title": "مساعد الدردشة بالذكاء الاصطناعي",
+      "description": "اسأل أي شيء واحفظ المحادثات كملاحظات"
+    },
+    "continue": "متابعة",
+    "dueAndOverdueTasks": "المهام المستحقة والمتأخرة",
+    "recentActivity": "النشاط الأخير",
+    "bookmark": "إشارة مرجعية",
+    "note": "ملاحظة",
+    "overdue": "متأخر",
+    "dueToday": "مستحق اليوم",
+    "streakBadge": "سلسلة {{days}} أيام",
+    "streakTitle": "حافظ على الزخم!",
+    "empty": {
+      "noContinueItems": "لا توجد عناصر للمتابعة",
+      "noDueTasks": "لا توجد مهام مستحقة",
+      "noRecentActivity": "لا يوجد نشاط حديث"
+    }
+  },
+  "bookmarks": {
+    "searchPlaceholder": "ابحث في المحفوظات والوسوم والملاحظات...",
+    "yourSaves": "محفوظاتك",
+    "sort": {
+      "recent": "الأحدث",
+      "mostOpened": "الأكثر فتحًا",
+      "oldestUnread": "الأقدم غير المقروء"
+    },
+    "filters": {
+      "all": "الكل",
+      "readLater": "اقرأ لاحقًا",
+      "neverOpened": "لم يُفتح أبدًا",
+      "tagged": "موسوم",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "medium": "Medium"
+    },
+    "loading": "جارٍ تحميل الإشارات المرجعية...",
+    "empty": {
+      "title": "لا توجد محفوظات بعد",
+      "description": "شارك الروابط من Twitter أو LinkedIn أو Safari باستخدام زر المشاركة، أو أضف واحدًا يدويًا.",
+      "button": "إضافة إشارة مرجعية"
+    }
+  },
+  "notes": {
+    "empty": {
+      "title": "لا توجد ملاحظات بعد",
+      "description": "ابدأ بتدوين أفكارك وملاحظاتك بصيغة Markdown.",
+      "button": "أنشئ ملاحظتك الأولى"
+    }
+  },
+  "projects": {
+    "viewModes": {
+      "list": "قائمة",
+      "kanban": "Kanban"
+    },
+    "filters": {
+      "onTrack": "على المسار",
+      "atRisk": "معرض للخطر",
+      "overdue": "متأخر"
+    },
+    "kanban": {
+      "todo": "للتنفيذ",
+      "inProgress": "قيد التنفيذ",
+      "done": "مكتمل"
+    },
+    "loading": "جارٍ تحميل المشاريع...",
+    "empty": {
+      "title": "لا توجد مشاريع بعد",
+      "description": "ابدأ بإنشاء مشروعك الأول.",
+      "button": "إنشاء مشروع جديد"
+    },
+    "addTask": {
+      "placeholder": "أدخل عنوان المهمة...",
+      "button": "إنشاء مهمة",
+      "title": "Add Task",
+      "status": "Status",
+      "taskTitle": "Task Title",
+      "createFailed": "Failed to create task."
+    },
+    "due": "Due: "
+  },
+  "todos": {
+    "searchPlaceholder": "ابحث في المهام...",
+    "filters": {
+      "active": "نشط",
+      "done": "مكتمل",
+      "all": "الكل",
+      "allPriorities": "جميع الأولويات",
+      "high": "عالية",
+      "medium": "متوسطة",
+      "low": "منخفضة"
+    },
+    "due": "مستحق: ",
+    "overduePrefix": "متأخر: ",
+    "project": "مشروع",
+    "empty": {
+      "title": "لا توجد مهام بعد",
+      "description": "أضف مهمتك الأولى للبدء.",
+      "button": "إضافة مهمة"
+    },
+    "deleteConfirm": {
+      "title": "حذف المهمة",
+      "message": "هل أنت متأكد أنك تريد حذف هذه المهمة؟"
+    },
+    "loading": "Loading todos...",
+    "emptyDescriptionLong": "Tap the + button to create your first task and stay organized"
+  },
+  "profile": {
+    "defaultName": "مستخدم Pinnedly",
+    "tagline": "حافظ على معرفتك منظمة",
+    "yourStats": "إحصائياتك",
+    "stats": {
+      "bookmarks": "الإشارات المرجعية",
+      "projects": "المشاريع",
+      "notes": "الملاحظات",
+      "totalOpens": "إجمالي الفتحات"
+    },
+    "goals": "الأهداف",
+    "dailyGoal": "الهدف اليومي",
+    "weeklyGoal": "الهدف الأسبوعي",
+    "bookmarksGoal": "{{count}} إشارة مرجعية",
+    "upgradePremium": "الترقية إلى Premium",
+    "upgradeSubtitle": "افتح ميزات التعاون القوية"
+  },
+  "aiChat": {
+    "title": "دردشة الذكاء الاصطناعي",
+    "systemPrompt": "أنت مساعد Pinnedly للذكاء الاصطناعي. أجب دائمًا بالعربية حتى لو كتب المستخدم بلغة أخرى. كن موجزًا وودودًا وعمليًا.",
+    "placeholder": "اسألني أي شيء...",
+    "empty": {
+      "title": "مساعد الدردشة بالذكاء الاصطناعي",
+      "description": "اسألني أي شيء! يمكنني مساعدتك في البحث والعصف الذهني والكتابة والمزيد. يمكنك حفظ محادثتنا كملاحظة في أي وقت.",
+      "tryAsking": "جرّب السؤال:",
+      "suggestions": {
+        "quantum": "اشرح الحوسبة الكمية",
+        "brainstorm": "ابتكر أفكار تطبيقات",
+        "meditation": "فوائد التأمل"
+      }
+    },
+    "roles": {
+      "you": "أنت",
+      "ai": "الذكاء الاصطناعي"
+    },
+    "savedNoteTitle": "دردشة الذكاء الاصطناعي: {{title}}",
+    "alerts": {
+      "noConversation": "لا توجد محادثة",
+      "noMessagesToSave": "لا توجد رسائل للحفظ.",
+      "savedAsNote": "تم حفظ المحادثة كملاحظة!",
+      "sendFailed": "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.",
+      "saveFailed": "فشل حفظ المحادثة. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "premium": {
+    "title": "الترقية إلى Premium",
+    "subtitle": "افتح الميزات القوية",
+    "choosePlan": "اختر خطتك",
+    "mostPopular": "الأكثر شعبية",
+    "startFreeTrial": "ابدأ التجربة المجانية",
+    "terms": "تجربة مجانية لمدة 7 أيام، ثم {{price}}{{period}}. يمكنك الإلغاء في أي وقت.",
+    "plans": {
+      "monthly": "شهري",
+      "yearly": "سنوي",
+      "perMonth": "/شهر",
+      "perYear": "/سنة",
+      "savePercent": "وفر 33%"
+    },
+    "features": {
+      "teamCollaboration": {
+        "title": "تعاون الفريق",
+        "description": "شارك المشاريع والقوائم مع أعضاء فريقك"
+      },
+      "voiceNotes": {
+        "title": "ملاحظات صوتية",
+        "description": "سجّل الملاحظات الصوتية وحوّلها إلى نص فورًا"
+      },
+      "smartReminders": {
+        "title": "تذكيرات ذكية",
+        "description": "إشعارات وتنبيهات مدعومة بالذكاء الاصطناعي"
+      },
+      "advancedFeatures": {
+        "title": "ميزات متقدمة",
+        "description": "افتح أدوات الإنتاجية القوية"
+      },
+      "unlimitedLists": "قوائم إشارات مرجعية غير محدودة",
+      "collaborativeProjects": "مشاريع تعاونية",
+      "voiceNotesFeature": "ملاحظات صوتية",
+      "advancedReminders": "تذكيرات متقدمة",
+      "prioritySupport": "دعم ذو أولوية",
+      "everythingMonthly": "كل ما في الخطة الشهرية",
+      "advancedAnalytics": "تحليلات متقدمة",
+      "customThemes": "سمات مخصصة",
+      "exportFormats": "تصدير إلى صيغ متعددة",
+      "teamManagement": "أدوات إدارة الفريق",
+      "apiAccess": "وصول إلى API"
+    }
+  },
+  "share": {
+    "shareEntity": "مشاركة {{entityTitle}}",
+    "enterEmailOrUsername": "أدخل البريد الإلكتروني أو اسم المستخدم",
+    "enterEmail": "أدخل عنوان البريد الإلكتروني",
+    "permissions": {
+      "view": "عرض",
+      "edit": "تعديل"
+    },
+    "sharedBy": "شاركه {{name}}",
+    "alerts": {
+      "enterEmailOrUsername": "يرجى إدخال بريد إلكتروني أو اسم مستخدم",
+      "sharedSuccessfully": "تمت مشاركة العنصر بنجاح",
+      "shareFailed": "فشلت المشاركة",
+      "updatePermissionFailed": "فشل تحديث الإذن",
+      "removeShareFailed": "فشل إزالة المشاركة"
+    },
+    "addPeople": "Add People",
+    "emailOrUsername": "Email or Username",
+    "sharedWith": "Shared With",
+    "permission": "Permission"
+  },
+  "shareInbox": {
+    "title": "صندوق المشاركات",
+    "empty": {
+      "title": "لا توجد عناصر مشتركة",
+      "description": "ستظهر العناصر المشتركة معك هنا"
+    }
+  },
+  "discoverLists": {
+    "title": "اكتشاف القوائم",
+    "searchPlaceholder": "ابحث في القوائم العامة...",
+    "loading": "جارٍ التحميل...",
+    "noListsFound": "لم يتم العثور على قوائم",
+    "noPublicLists": "لا توجد قوائم عامة بعد",
+    "tryDifferentKeywords": "جرّب البحث بكلمات مفتاحية مختلفة",
+    "beFirstToCreate": "كن أول من ينشئ قائمة عامة!",
+    "createList": "إنشاء قائمة"
+  },
+  "peopleSearch": {
+    "title": "البحث عن أشخاص",
+    "searchPlaceholder": "ابحث بالاسم أو اسم المستخدم...",
+    "empty": {
+      "title": "ابحث عن أشخاص",
+      "description": "أدخل اسمًا أو اسم مستخدم للتواصل مع الآخرين"
+    },
+    "noResults": {
+      "title": "لا توجد نتائج",
+      "description": "لم يتم العثور على مستخدمين لـ \"{{query}}\""
+    }
+  },
+  "addBookmark": {
+    "title": "إضافة إشارة مرجعية",
+    "urlPlaceholder": "الصق الرابط هنا...",
+    "titlePlaceholder": "أدخل العنوان...",
+    "descriptionPlaceholder": "أدخل الوصف...",
+    "notePlaceholder": "أضف ملاحظة سريعة...",
+    "tagsPlaceholder": "أضف وسومًا...",
+    "addBookmark": "إضافة إشارة مرجعية",
+    "alerts": {
+      "permissionNeeded": "الإذن مطلوب",
+      "cameraPermission": "يرجى منح إذن الوصول إلى معرض الصور لتحميل لقطات الشاشة.",
+      "signInRequired": "تسجيل الدخول مطلوب",
+      "signInToSave": "يرجى تسجيل الدخول لحفظ الإشارات المرجعية.",
+      "provideUrlOrScreenshot": "يرجى تقديم رابط أو تحميل لقطة شاشة.",
+      "saveFailed": "فشل الحفظ",
+      "couldNotSave": "تعذر حفظ الإشارة المرجعية."
+    },
+    "labels": {
+      "url": "URL",
+      "or": "OR",
+      "uploadScreenshot": "Upload Screenshot",
+      "title": "Title",
+      "description": "Description",
+      "commentOptional": "Comment (optional)",
+      "tags": "Tags"
+    },
+    "metadataFetchFailed": "Metadata Fetch Failed",
+    "metadataFetchMessage": "Could not automatically fetch page details. You can still add the bookmark manually."
+  },
+  "addNote": {
+    "titlePlaceholder": "أدخل عنوان الملاحظة...",
+    "contentPlaceholder": "اكتب ملاحظتك...",
+    "createNote": "إنشاء ملاحظة",
+    "alerts": {
+      "enterTitle": "يرجى إدخال عنوان الملاحظة.",
+      "createFailed": "فشل إنشاء الملاحظة. يرجى المحاولة مرة أخرى."
+    },
+    "title": "Add Note",
+    "noteTitle": "Note Title",
+    "visibility": "Visibility",
+    "content": "Content",
+    "visibilityOptions": {
+      "private": "Only you can see this note",
+      "shared": "Share with specific people",
+      "public": "Anyone can view this note"
+    },
+    "editorHint": "Select text and use the toolbar to apply formatting. The text appears styled as you type.",
+    "toolbarHint": "Select text to format"
+  },
+  "addProject": {
+    "titlePlaceholder": "أدخل عنوان المشروع...",
+    "descriptionPlaceholder": "صف مشروعك...",
+    "createProject": "إنشاء مشروع",
+    "alerts": {
+      "enterTitle": "يرجى إدخال عنوان المشروع."
+    },
+    "title": "Add Project",
+    "projectTitle": "Project Title",
+    "descriptionOptional": "Description (optional)",
+    "deadlineOptional": "Deadline (optional)",
+    "deadlines": {
+      "oneWeek": "1 week",
+      "oneMonth": "1 month",
+      "threeMonths": "3 months"
+    },
+    "info": "You can add tasks and track progress after creating the project."
+  },
+  "addTodo": {
+    "titlePlaceholder": "ماذا تحتاج أن تفعل؟",
+    "detailsPlaceholder": "أضف تفاصيل...",
+    "dueDatePlaceholder": "YYYY-MM-DD",
+    "alerts": {
+      "enterTitle": "يرجى إدخال عنوان المهمة."
+    },
+    "newTodo": "New Todo",
+    "editTodo": "Edit Todo",
+    "title": "Title",
+    "descriptionOptional": "Description (optional)",
+    "priority": "Priority",
+    "setDueDate": "Set due date",
+    "markCompleted": "Mark as completed",
+    "quickDates": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "nextWeek": "Next Week",
+      "clear": "Clear"
+    },
+    "saveFailed": "Failed to save todo"
+  },
+  "createList": {
+    "namePlaceholder": "أدخل اسم القائمة",
+    "descriptionPlaceholder": "أضف وصفًا (اختياري)",
+    "alerts": {
+      "enterName": "يرجى إدخال اسم القائمة",
+      "createFailed": "فشل إنشاء القائمة. يرجى المحاولة مرة أخرى."
+    },
+    "title": "Create List",
+    "listName": "List Name *",
+    "description": "Description",
+    "makePublic": "Make Public",
+    "makePublicDescription": "Public lists can be discovered and followed by other users",
+    "publicNotice": "📢 Public lists will appear in the discover section and can be followed by other users."
+  },
+  "bookmarkDetail": {
+    "noUrl": "لا يوجد رابط",
+    "noLinkToOpen": "لا تحتوي هذه الإشارة المرجعية على رابط للفتح.",
+    "deleteTitle": "حذف الإشارة المرجعية",
+    "deleteMessage": "لا يمكن التراجع عن هذا الإجراء.",
+    "notePlaceholder": "أضف ملاحظة لنفسك المستقبلية...",
+    "saveNote": "حفظ الملاحظة",
+    "openLink": "فتح الرابط",
+    "notFound": "Bookmark not found",
+    "bookmark": "Bookmark",
+    "openedCount": "Opened {{count}}×",
+    "whySaved": "Why I saved this",
+    "tapToAddNote": "Tap to add a note...",
+    "archive": "Archive"
+  },
+  "noteDetail": {
+    "titlePlaceholder": "عنوان الملاحظة",
+    "contentPlaceholder": "اكتب ملاحظتك هنا...",
+    "alerts": {
+      "titleEmpty": "لا يمكن أن يكون عنوان الملاحظة فارغًا"
+    },
+    "notFound": "Note not found",
+    "editNote": "Edit Note",
+    "deleteTitle": "Delete Note",
+    "deleteMessage": "Are you sure you want to delete this note? This action cannot be undone.",
+    "created": "Created {{date}}",
+    "updated": "Updated {{date}}",
+    "you": "You",
+    "sharedWith": "Shared with",
+    "addPeople": "Add people"
+  },
+  "projectDetail": {
+    "addTaskPlaceholder": "إضافة مهمة",
+    "emailPlaceholder": "أدخل عنوان البريد الإلكتروني",
+    "titlePlaceholder": "أدخل عنوان المشروع",
+    "descriptionPlaceholder": "أدخل وصف المشروع",
+    "alerts": {
+      "enterTaskTitle": "يرجى إدخال عنوان المهمة",
+      "createTaskFailed": "فشل إنشاء المهمة",
+      "updateTaskFailed": "فشل تحديث المهمة",
+      "deleteTaskFailed": "فشل حذف المهمة",
+      "enterEmail": "يرجى إدخال عنوان بريد إلكتروني",
+      "sharedWith": "تمت مشاركة المشروع مع {{email}}",
+      "shareFailed": "فشلت مشاركة المشروع",
+      "titleRequired": "عنوان المشروع مطلوب",
+      "updatedSuccessfully": "تم تحديث المشروع بنجاح",
+      "archived": "تم أرشفة المشروع",
+      "notificationsNotSupported": "الإشعارات غير مدعومة على الويب. يرجى استخدام تطبيق الهاتف.",
+      "nudgeScheduled": "تم جدولة التذكير في {{time}}",
+      "scheduleNudgeFailed": "فشل جدولة التذكير"
+    },
+    "notFound": "Project not found",
+    "progress": "Progress",
+    "members": "Members",
+    "nudgeMe": "Nudge Me",
+    "tabs": {
+      "tasks": "Tasks",
+      "timeline": "Timeline",
+      "gallery": "Gallery"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left"
+    },
+    "quickAdd": {
+      "title": "Quick Add",
+      "message": "What would you like to add?",
+      "task": "Task",
+      "note": "Note",
+      "bookmark": "Bookmark"
+    },
+    "deleteTask": {
+      "title": "Delete Task",
+      "message": "Are you sure you want to delete this task?"
+    },
+    "shareProject": "Share Project",
+    "emailAddress": "Email Address",
+    "permission": "Permission",
+    "viewOnly": "View Only",
+    "canEdit": "Can Edit",
+    "editProject": "Edit Project",
+    "projectTitle": "Project Title",
+    "description": "Description",
+    "deleteProject": {
+      "title": "Delete Project",
+      "message": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "archiveProject": {
+      "title": "Archive Project",
+      "message": "Are you sure you want to archive this project?",
+      "action": "Archive"
+    },
+    "scheduleNudge": {
+      "title": "Schedule Nudge",
+      "message": "When would you like to be reminded about this project?",
+      "in1Hour": "In 1 hour",
+      "tomorrow": "Tomorrow",
+      "in3Days": "In 3 days"
+    },
+    "adding": "Adding...",
+    "swipeHint": "Swipe left on a task for more options",
+    "relatedContent": "Related Content",
+    "created": "Created {{relative}}",
+    "empty": {
+      "activityTitle": "No Activity Yet",
+      "activityDescription": "Project activity will appear here as you work",
+      "imagesTitle": "No Images Yet",
+      "imagesDescription": "Add images to showcase your project progress",
+      "uploadImage": "Upload Image"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "bookmarkList": {
+    "alerts": {
+      "loadFailed": "فشل تحميل بيانات القائمة",
+      "followFailed": "فشل تحديث حالة المتابعة",
+      "deleteFailed": "فشل حذف القائمة",
+      "sharingComingSoon": "ميزة المشاركة قادمة قريبًا!"
+    },
+    "empty": {
+      "title": "لا توجد إشارات مرجعية بعد",
+      "description": "This list doesn't have any bookmarks yet."
+    },
+    "deleteTitle": "Delete List",
+    "deleteMessage": "Are you sure you want to delete this list? This action cannot be undone.",
+    "shareTitle": "Share"
+  },
+  "projectMembers": {
+    "alerts": {
+      "enterEmail": "يرجى إدخال عنوان بريد إلكتروني",
+      "memberAdded": "تمت إضافة العضو بنجاح",
+      "addMemberFailed": "فشلت إضافة العضو. يرجى المحاولة مرة أخرى.",
+      "memberRemoved": "تمت إزالة العضو بنجاح",
+      "removeMemberFailed": "فشلت إزالة العضو. يرجى المحاولة مرة أخرى.",
+      "permissionUpdated": "تم تحديث الإذن بنجاح",
+      "updatePermissionFailed": "فشل تحديث الإذن. يرجى المحاولة مرة أخرى."
+    },
+    "title": "Project Members",
+    "currentMembers": "Current Members",
+    "addMember": "Add Member",
+    "canView": "Can View",
+    "canEdit": "Can Edit",
+    "permissionLabel": "Permission:",
+    "adding": "Adding...",
+    "dismiss": "Dismiss",
+    "removeMember": {
+      "title": "Remove Member",
+      "message": "Are you sure you want to remove {{email}} from this project?",
+      "action": "Remove"
+    }
+  },
+  "shareIntent": {
+    "signInRequired": "تسجيل الدخول مطلوب",
+    "signInToSaveLinks": "يرجى تسجيل الدخول لحفظ الروابط المشتركة في Pinnedly.",
+    "savedToPinnedly": "تم الحفظ في Pinnedly",
+    "linkSavedToReadLater": "تم حفظ الرابط في اقرأ لاحقًا.",
+    "view": "View",
+    "couldNotSave": "Could not save",
+    "unableToSave": "Unable to save shared content."
+  },
+  "quickAdd": {
+    "addBookmark": "إضافة إشارة مرجعية",
+    "addProject": "إضافة مشروع",
+    "addNote": "إضافة ملاحظة"
+  },
+  "errorBoundary": {
+    "title": "حدث خطأ ما",
+    "message": "حدث خطأ غير متوقع",
+    "tryAgain": "حاول مرة أخرى"
+  },
+  "notFound": {
+    "title": "عذرًا!",
+    "message": "هذه الشاشة غير موجودة.",
+    "goHome": "انتقل إلى الشاشة الرئيسية!"
+  },
+  "languages": {
+    "en": "الإنجليزية",
+    "tr": "التركية",
+    "ar": "العربية",
+    "ru": "الروسية",
+    "de": "الألمانية",
+    "pt": "البرتغالية",
+    "es": "الإسبانية",
+    "it": "الإيطالية",
+    "ja": "اليابانية",
+    "zh": "الصينية"
+  },
+  "sources": {
+    "twitter": "Twitter / X",
+    "instagram": "Instagram",
+    "medium": "Medium",
+    "linkedin": "LinkedIn",
+    "wikipedia": "Wikipedia",
+    "youtube": "YouTube",
+    "reddit": "Reddit",
+    "substack": "Substack",
+    "github": "GitHub",
+    "other": "Web"
+  },
+  "notifications": {
+    "taskReminder": {
+      "title": "Task Reminder",
+      "body": "Don't forget: {{taskTitle}}"
+    },
+    "projectNudge": {
+      "title": "Project Nudge",
+      "body": "Time to work on: {{projectTitle}}"
+    },
+    "bookmarkDigest": {
+      "title": "Read Later reminder",
+      "body_one": "You have 1 unread save waiting for you.",
+      "body_other": "You have {{count}} unread saves waiting for you."
+    }
+  },
+  "bookmarkCard": {
+    "neverOpened": "Never opened",
+    "openedCount": "Opened {{count}}×",
+    "readLater": "Read later",
+    "screenshot": "Screenshot"
+  },
+  "clipboard": {
+    "title": "Link in clipboard",
+    "message": "Save this link to Pinnedly?",
+    "save": "Save",
+    "openAddBookmark": "Review & save",
+    "dismiss": "Not now"
+  },
+  "userProfile": {
+    "notFound": "Profile not found",
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "projectCard": {
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "weeksLeft_one": "{{count}} week left",
+    "weeksLeft_other": "{{count}} weeks left",
+    "monthsLeft_one": "{{count}} month left",
+    "monthsLeft_other": "{{count}} months left",
+    "tasksDone": "{{completed}}/{{total}} tasks done"
+  },
+  "entityTypes": {
+    "bookmark": "Bookmark",
+    "note": "Note",
+    "project": "Project",
+    "list": "List"
+  }
+}

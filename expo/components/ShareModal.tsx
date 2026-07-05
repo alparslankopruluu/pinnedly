@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  Alert,
   Platform,
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/ui/Button';
 import { useSharing } from '@/store/useSharingStore';
@@ -26,6 +27,7 @@ interface ShareModalProps {
 }
 
 export function ShareModal({ visible, onClose, entityId, entityType, entityTitle }: ShareModalProps) {
+  const { t } = useTranslation();
   const { shareEntity, getEntityShares, updateSharePermission, removeShare, isLoading } = useSharing();
   const { searchUsersByEmail } = useAuth();
   const [email, setEmail] = useState<string>('');
@@ -65,7 +67,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
 
   const handleShare = async () => {
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter an email or username');
+      showAppAlert(t('common.error'), t('share.alerts.enterEmailOrUsername'), undefined, { variant: 'error' });
       return;
     }
 
@@ -80,9 +82,9 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
       setEmail('');
       setSearchResults([]);
       await loadShares();
-      Alert.alert('Success', 'Entity shared successfully');
+      showAppAlert(t('common.success'), t('share.alerts.sharedSuccessfully'), undefined, { variant: 'success' });
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to share');
+      showAppAlert(t('common.error'), error instanceof Error ? error.message : t('share.alerts.shareFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -91,7 +93,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
       await updateSharePermission(shareId, newPermission, entityId, entityType);
       await loadShares();
     } catch (error) {
-      Alert.alert('Error', 'Failed to update permission');
+      showAppAlert(t('common.error'), t('share.alerts.updatePermissionFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -100,7 +102,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
       await removeShare(shareId, entityId, entityType);
       await loadShares();
     } catch (error) {
-      Alert.alert('Error', 'Failed to remove share');
+      showAppAlert(t('common.error'), t('share.alerts.removeShareFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -116,21 +118,21 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color="#1e293b" />
           </TouchableOpacity>
-          <Text style={styles.title}>Share {entityTitle}</Text>
+          <Text style={styles.title}>{t('share.shareEntity', { entityTitle })}</Text>
           <View style={styles.placeholder} />
         </View>
 
         <ScrollView style={styles.content}>
           <View style={styles.shareForm}>
-            <Text style={styles.sectionTitle}>Add People</Text>
+            <Text style={styles.sectionTitle}>{t('share.addPeople')}</Text>
             
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email or Username</Text>
+              <Text style={styles.label}>{t('share.emailOrUsername')}</Text>
               <TextInput
                 style={styles.input}
                 value={email}
                 onChangeText={handleSearch}
-                placeholder="Enter email or username"
+                placeholder={t('share.enterEmailOrUsername')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -162,7 +164,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
             </View>
 
             <View style={styles.permissionContainer}>
-              <Text style={styles.label}>Permission</Text>
+              <Text style={styles.label}>{t('share.permission')}</Text>
               <View style={styles.permissionButtons}>
                 <TouchableOpacity
                   style={[
@@ -182,7 +184,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
                       permission === 'view' && styles.permissionButtonTextActive,
                     ]}
                   >
-                    View
+                    {t('share.permissions.view')}
                   </Text>
                 </TouchableOpacity>
 
@@ -204,14 +206,14 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
                       permission === 'edit' && styles.permissionButtonTextActive,
                     ]}
                   >
-                    Edit
+                    {t('share.permissions.edit')}
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             <Button
-              title={isLoading ? 'Sharing...' : 'Share'}
+              title={isLoading ? t('common.sharing') : t('common.share')}
               onPress={handleShare}
               disabled={isLoading || !email.trim()}
               style={styles.shareButton}
@@ -220,7 +222,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
 
           {shares.length > 0 && (
             <View style={styles.existingShares}>
-              <Text style={styles.sectionTitle}>Shared With</Text>
+              <Text style={styles.sectionTitle}>{t('share.sharedWith')}</Text>
               
               {shares.map((share) => (
                 <View key={share.id} style={styles.shareItem}>
@@ -255,7 +257,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
                           share.permission === 'view' ? styles.viewChipText : styles.editChipText,
                         ]}
                       >
-                        {share.permission}
+                        {t(`share.permissions.${share.permission}` as 'share.permissions.view')}
                       </Text>
                     </TouchableOpacity>
 

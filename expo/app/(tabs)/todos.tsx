@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -6,9 +7,10 @@ import {
   FlatList,
   Pressable,
   TextInput,
-  Alert,
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getFabBottomOffset, getScrollBottomPadding } from '@/utils/layout';
 import { Check, Circle, Plus, Search, Trash2, Flag, ChevronRight, ListTodo } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useTodoStore, PriorityFilter, StatusFilter } from '@/store/useTodoStore';
@@ -19,12 +21,6 @@ const PRIORITY_COLORS: Record<string, string> = {
   high: '#EF4444',
   medium: '#F59E0B',
   low: '#6B7280',
-};
-
-const PRIORITY_LABELS: Record<string, string> = {
-  high: 'High',
-  medium: 'Medium',
-  low: 'Low',
 };
 
 function TodoRow({
@@ -38,6 +34,7 @@ function TodoRow({
   onDelete: (id: ID) => void;
   onPress: (id: ID) => void;
 }) {
+  const { t } = useTranslation();
   const priorityColor = PRIORITY_COLORS[todo.priority] || '#6B7280';
   const isOverdueTask = todo.dueDate && !todo.completed && isOverdue(todo.dueDate);
 
@@ -82,13 +79,13 @@ function TodoRow({
           <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '18' }]}>
             <Flag size={10} color={priorityColor} />
             <Text style={[styles.priorityLabel, { color: priorityColor }]}>
-              {PRIORITY_LABELS[todo.priority]}
+              {t(`todos.filters.${todo.priority}`)}
             </Text>
           </View>
           {/* Due date */}
           {todo.dueDate ? (
             <Text style={[styles.dueDate, !!isOverdueTask && styles.dueDateOverdue]}>
-              {isOverdueTask ? 'Overdue: ' : 'Due: '}
+              {isOverdueTask ? t('todos.overduePrefix') : t('todos.due')}
               {new Date(todo.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </Text>
           ) : null}
@@ -96,7 +93,7 @@ function TodoRow({
           {todo.projectId ? (
             <View style={styles.linkBadge}>
               <ChevronRight size={10} color="#9CA3AF" />
-              <Text style={styles.linkLabel}>Project</Text>
+              <Text style={styles.linkLabel}>{t('todos.project')}</Text>
             </View>
           ) : null}
         </View>
@@ -106,9 +103,9 @@ function TodoRow({
       <Pressable
         style={({ pressed }) => [styles.deleteButton, pressed && styles.deleteButtonPressed]}
         onPress={() => {
-          Alert.alert('Delete Todo', 'Are you sure you want to delete this task?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => onDelete(todo.id) },
+          showAppAlert(t('todos.deleteConfirm.title'), t('todos.deleteConfirm.message'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('common.delete'), style: 'destructive', onPress: () => onDelete(todo.id) },
           ]);
         }}
         hitSlop={8}
@@ -120,6 +117,7 @@ function TodoRow({
 }
 
 export default function TodosScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const {
     todos,
@@ -159,7 +157,7 @@ export default function TodosScreen() {
         <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search todos..."
+          placeholder={t('todos.searchPlaceholder')}
           placeholderTextColor="#9CA3AF"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -169,9 +167,9 @@ export default function TodosScreen() {
       {/* Status filter chips */}
       <View style={styles.filterRow}>
         {([
-          { id: 'active' as StatusFilter, label: 'Active', count: counts.active },
-          { id: 'completed' as StatusFilter, label: 'Done', count: counts.completed },
-          { id: 'all' as StatusFilter, label: 'All', count: counts.total },
+          { id: 'active' as StatusFilter, label: t('todos.filters.active'), count: counts.active },
+          { id: 'completed' as StatusFilter, label: t('todos.filters.done'), count: counts.completed },
+          { id: 'all' as StatusFilter, label: t('todos.filters.all'), count: counts.total },
         ]).map((filter) => (
           <Pressable
             key={filter.id}
@@ -197,10 +195,10 @@ export default function TodosScreen() {
       {/* Priority filter chips */}
       <View style={styles.filterRow}>
         {([
-          { id: 'all' as PriorityFilter, label: 'All Priorities' },
-          { id: 'high' as PriorityFilter, label: 'High', count: counts.high },
-          { id: 'medium' as PriorityFilter, label: 'Medium' },
-          { id: 'low' as PriorityFilter, label: 'Low' },
+          { id: 'all' as PriorityFilter, label: t('todos.filters.allPriorities') },
+          { id: 'high' as PriorityFilter, label: t('todos.filters.high'), count: counts.high },
+          { id: 'medium' as PriorityFilter, label: t('todos.filters.medium') },
+          { id: 'low' as PriorityFilter, label: t('todos.filters.low') },
         ]).map((filter) => (
           <Pressable
             key={filter.id}
@@ -232,9 +230,9 @@ export default function TodosScreen() {
       <View style={styles.emptyIcon}>
         <ListTodo size={48} color="#D1D5DB" />
       </View>
-      <Text style={styles.emptyTitle}>No todos yet</Text>
+      <Text style={styles.emptyTitle}>{t('todos.empty.title')}</Text>
       <Text style={styles.emptyDescription}>
-        Tap the + button to create your first task and stay organized
+        {t('todos.emptyDescriptionLong')}
       </Text>
     </View>
   );
@@ -242,7 +240,7 @@ export default function TodosScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text style={styles.loadingText}>Loading todos...</Text>
+        <Text style={styles.loadingText}>{t('todos.loading')}</Text>
       </View>
     );
   }
@@ -250,7 +248,7 @@ export default function TodosScreen() {
   if (error) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+        <Text style={styles.errorText}>{t('common.errorWithMessage', { message: error })}</Text>
       </View>
     );
   }
@@ -267,7 +265,7 @@ export default function TodosScreen() {
         contentContainerStyle={[
           styles.listContent,
           todos.length === 0 && styles.emptyListContent,
-          { paddingBottom: insets.bottom + 100 },
+          { paddingBottom: getScrollBottomPadding(insets.bottom) },
         ]}
       />
 
@@ -275,6 +273,7 @@ export default function TodosScreen() {
       <Pressable
         style={({ pressed }) => [
           styles.fab,
+          { bottom: getFabBottomOffset(insets.bottom) },
           pressed && styles.fabPressed,
         ]}
         onPress={() => router.push('/add-todo' as any)}
@@ -546,7 +545,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 90,
     width: 56,
     height: 56,
     borderRadius: 28,

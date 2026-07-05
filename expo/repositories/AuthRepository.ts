@@ -1,242 +1,138 @@
-import { supabase } from '@/lib/supabase';
-import { User, AuthState, ID } from '@/types';
-import { AuthError } from '@supabase/supabase-js';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import Constants from 'expo-constants';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Platform } from 'react-native';
+import { User, ID } from '@/types';
+import { COLLECTIONS, serverTimestamp } from '@/lib/firestore';
 
 class AuthRepository {
   private currentUser: User | null = null;
+  private phoneConfirmation: FirebaseAuthTypes.ConfirmationResult | null = null;
 
   async initialize(): Promise<void> {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        const profile = await this.getProfileById(session.user.id);
-        if (profile) {
-          this.currentUser = { ...profile, email: session.user.email || '' };
-        }
-      }
-    } catch (error) {
-      console.error('Failed to initialize auth:', error);
+    const webClientId = Constants.expoConfig?.extra?.googleWebClientId as string | undefined;
+    if (webClientId) {
+      GoogleSignin.configure({ webClientId });
+    }
+
+    const firebaseUser = auth().currentUser;
+    if (firebaseUser) {
+      this.currentUser = await this.loadOrCreateProfile(firebaseUser);
     }
   }
 
-  private async getProfileById(id: string): Promise<User | null> {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', id)
-        .single();
+  onAuthStateChanged(listener: (user: User | null) => void): () => void {
+    return auth().onAuthStateChanged(async (firebaseUser) => {
+      if (!firebaseUser) {
+        this.currentUser = null;
+        listener(null);
+        return;
+      }
+      this.currentUser = await this.loadOrCreateProfile(firebaseUser);
+      listener(this.currentUser);
+    });
+  }
 
-      if (error || !data) return null;
+  private async loadOrCreateProfile(firebaseUser: FirebaseAuthTypes.User): Promise<User> {
+    const docRef = firestore().collection(COLLECTIONS.users).doc(firebaseUser.uid);
+    const doc = await docRef.get();
 
-      return {
-        id: data.id,
-        handle: data.handle,
-        email: '', // We'll get this from auth.user
-        displayName: data.display_name,
-        avatar: data.avatar_url,
-        bio: data.bio,
-        isVerified: data.is_verified,
-        followerCount: data.follower_count,
-        followingCount: data.following_count,
-        createdAt: new Date(data.created_at).getTime(),
-      };
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      return null;
+    if (doc.exists()) {
+      return this.mapUserDoc(firebaseUser.uid, doc.data()!, firebaseUser.email);
     }
+
+    const handle = (firebaseUser.email?.split('@')[0] || 'user')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '')
+      .slice(0, 20) + Math.random().toString(36).slice(2, 6);
+
+    const profile = {
+      handle,
+      displayName: firebaseUser.displayName || handle,
+      email: firebaseUser.email || '',
+      avatar: firebaseUser.photoURL || null,
+      bio: null,
+      isVerified: false,
+      followerCount: 0,
+      followingCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    await docRef.set(profile);
+    const created = await docRef.get();
+    return this.mapUserDoc(firebaseUser.uid, created.data()!, firebaseUser.email);
+  }
+
+  private mapUserDoc(id: string, data: FirebaseFirestoreTypes.DocumentData, email?: string | null): User {
+    return {
+      id,
+      handle: data.handle as string,
+      email: (data.email as string) || email || '',
+      displayName: data.displayName as string,
+      avatar: data.avatar as string | undefined,
+      bio: data.bio as string | undefined,
+      isVerified: (data.isVerified as boolean) ?? false,
+      followerCount: (data.followerCount as number) ?? 0,
+      followingCount: (data.followingCount as number) ?? 0,
+      createdAt: data.createdAt?.toMillis?.() ?? Date.now(),
+    };
   }
 
   async signIn(email: string, password: string): Promise<User> {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data.user) {
-        throw new Error('No user returned from sign in');
-      }
-
-      const profile = await this.getProfileById(data.user.id);
-      if (!profile) {
-        throw new Error('Profile not found');
-      }
-
-      this.currentUser = { ...profile, email: data.user.email || '' };
-      return this.currentUser;
-    } catch (error) {
-      console.error('Sign in error:', error);
-      throw error;
-    }
-  }
-
-  async signUp(email: string, password: string, displayName: string): Promise<User> {
-    try {
-      console.log('Starting sign up process for:', email);
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error('Supabase auth sign up error:', error);
-        throw new Error(error.message);
-      }
-
-      if (!data.user) {
-        throw new Error('No user returned from sign up');
-      }
-
-      console.log('User created successfully:', data.user.id);
-      console.log('Creating profile for user...');
-
-      // Create profile
-      const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-      
-      console.log('Attempting to insert profile with data:', {
-        id: data.user.id,
-        handle,
-        display_name: displayName,
-      });
-      
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          handle,
-          display_name: displayName,
-          is_verified: false,
-          follower_count: 0,
-          following_count: 0,
-        });
-
-      if (profileError) {
-        console.error('Profile creation error details:', {
-          code: profileError.code,
-          message: profileError.message,
-          details: profileError.details,
-          hint: profileError.hint,
-        });
-        throw new Error('Failed to create profile');
-      }
-      
-      console.log('Profile created successfully');
-
-      const user: User = {
-        id: data.user.id,
-        handle,
-        email,
-        displayName,
-        followerCount: 0,
-        followingCount: 0,
-        createdAt: Date.now(),
-      };
-
-      this.currentUser = user;
-      return user;
-    } catch (error) {
-      console.error('Sign up error:', error);
-      throw error;
-    }
-  }
-
-  async signOut(): Promise<void> {
-    try {
-      await supabase.auth.signOut();
-      this.currentUser = null;
-    } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
-    }
-  }
-
-  getCurrentUser(): User | null {
+    const credential = await auth().signInWithEmailAndPassword(email, password);
+    this.currentUser = await this.loadOrCreateProfile(credential.user);
     return this.currentUser;
   }
 
-  async updateProfile(updates: Partial<User>): Promise<User> {
-    if (!this.currentUser) {
-      throw new Error('No user logged in');
-    }
+  async signUp(email: string, password: string, displayName: string): Promise<User> {
+    const credential = await auth().createUserWithEmailAndPassword(email, password);
+    const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          handle: updates.handle,
-          display_name: updates.displayName,
-          avatar_url: updates.avatar,
-          bio: updates.bio,
-        })
-        .eq('id', this.currentUser.id);
+    await firestore().collection(COLLECTIONS.users).doc(credential.user.uid).set({
+      handle,
+      displayName,
+      email,
+      avatar: null,
+      bio: null,
+      isVerified: false,
+      followerCount: 0,
+      followingCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
 
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      this.currentUser = { ...this.currentUser, ...updates };
-      return this.currentUser;
-    } catch (error) {
-      console.error('Update profile error:', error);
-      throw error;
-    }
+    this.currentUser = await this.loadOrCreateProfile(credential.user);
+    return this.currentUser;
   }
 
-  async checkHandleAvailability(handle: string): Promise<boolean> {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('handle', handle.toLowerCase())
-        .single();
+  async signInWithGoogle(): Promise<User> {
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    const signInResult = await GoogleSignin.signIn();
+    const idToken = signInResult.data?.idToken;
+    if (!idToken) throw new Error('No Google ID token received');
 
-      return !data; // Available if no data found
-    } catch (error) {
-      return true; // Assume available on error
-    }
+    const credential = auth.GoogleAuthProvider.credential(idToken);
+    const result = await auth().signInWithCredential(credential);
+    this.currentUser = await this.loadOrCreateProfile(result.user);
+    return this.currentUser;
   }
 
-  async searchUsers(query: string): Promise<User[]> {
-    if (!query.trim()) return [];
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .or(`handle.ilike.%${query}%,display_name.ilike.%${query}%`)
-        .limit(10);
-
-      if (error || !data) return [];
-
-      return data.map(profile => ({
-        id: profile.id,
-        handle: profile.handle,
-        email: '',
-        displayName: profile.display_name,
-        avatar: profile.avatar_url,
-        bio: profile.bio,
-        isVerified: profile.is_verified,
-        followerCount: profile.follower_count,
-        followingCount: profile.following_count,
-        createdAt: new Date(profile.created_at).getTime(),
-      }));
-    } catch (error) {
-      console.error('Search users error:', error);
-      return [];
-    }
+  async sendPhoneVerification(phoneNumber: string): Promise<void> {
+    this.phoneConfirmation = await auth().signInWithPhoneNumber(phoneNumber);
   }
 
-  async getUserById(id: ID): Promise<User | null> {
-    return this.getProfileById(id);
+  async confirmPhoneCode(code: string): Promise<User> {
+    if (!this.phoneConfirmation) {
+      throw new Error('No phone verification in progress. Send code first.');
+    }
+    const credential = await this.phoneConfirmation.confirm(code);
+    if (!credential?.user) throw new Error('Phone verification failed');
+    this.currentUser = await this.loadOrCreateProfile(credential.user);
+    this.phoneConfirmation = null;
+    return this.currentUser;
   }
 
   async signInWithApple(): Promise<User> {
@@ -244,137 +140,115 @@ class AuthRepository {
       throw new Error('Apple Sign-In is only available on iOS');
     }
 
-    try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
 
-      if (!credential.identityToken) {
-        throw new Error('No identity token received from Apple');
-      }
-
-      const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'apple',
-        token: credential.identityToken,
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data.user) {
-        throw new Error('No user returned from Apple sign in');
-      }
-
-      // Check if profile exists
-      let profile = await this.getProfileById(data.user.id);
-      
-      if (!profile) {
-        // Create profile for new Apple user
-        const displayName = credential.fullName 
-          ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
-          : data.user.email?.split('@')[0] || 'User';
-        
-        const handle = (data.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).substr(2, 4);
-        
-        console.log('Creating Apple user profile with data:', {
-          id: data.user.id,
-          handle,
-          display_name: displayName,
-        });
-        
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            handle,
-            display_name: displayName,
-            is_verified: false,
-            follower_count: 0,
-            following_count: 0,
-          });
-
-        if (profileError) {
-          console.error('Apple profile creation error details:', {
-            code: profileError.code,
-            message: profileError.message,
-            details: profileError.details,
-            hint: profileError.hint,
-          });
-          throw new Error('Failed to create profile');
-        }
-        
-        console.log('Apple user profile created successfully');
-
-        profile = {
-          id: data.user.id,
-          handle,
-          email: data.user.email || '',
-          displayName,
-          followerCount: 0,
-          followingCount: 0,
-          createdAt: Date.now(),
-        };
-      }
-
-      this.currentUser = { ...profile, email: data.user.email || '' };
-      return this.currentUser;
-    } catch (error) {
-      console.error('Apple sign in error:', error);
-      throw error;
+    if (!credential.identityToken) {
+      throw new Error('No identity token received from Apple');
     }
+
+    const appleCredential = auth.AppleAuthProvider.credential(credential.identityToken);
+    const result = await auth().signInWithCredential(appleCredential);
+
+    if (!result.additionalUserInfo?.isNewUser) {
+      this.currentUser = await this.loadOrCreateProfile(result.user);
+      return this.currentUser;
+    }
+
+    const displayName = credential.fullName
+      ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
+      : result.user.email?.split('@')[0] || 'User';
+
+    await firestore().collection(COLLECTIONS.users).doc(result.user.uid).set({
+      handle: (result.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).slice(2, 4),
+      displayName,
+      email: result.user.email || '',
+      avatar: null,
+      bio: null,
+      isVerified: false,
+      followerCount: 0,
+      followingCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    this.currentUser = await this.loadOrCreateProfile(result.user);
+    return this.currentUser;
+  }
+
+  async signOut(): Promise<void> {
+    try {
+      await GoogleSignin.signOut();
+    } catch {
+      // User may not have signed in with Google
+    }
+    await auth().signOut();
+    this.currentUser = null;
+    this.phoneConfirmation = null;
+  }
+
+  getCurrentUser(): User | null {
+    return this.currentUser;
+  }
+
+  async updateProfile(updates: Partial<User>): Promise<User> {
+    if (!this.currentUser) throw new Error('No user logged in');
+
+    await firestore().collection(COLLECTIONS.users).doc(this.currentUser.id).update({
+      ...(updates.handle !== undefined && { handle: updates.handle }),
+      ...(updates.displayName !== undefined && { displayName: updates.displayName }),
+      ...(updates.avatar !== undefined && { avatar: updates.avatar }),
+      ...(updates.bio !== undefined && { bio: updates.bio }),
+      updatedAt: serverTimestamp(),
+    });
+
+    const doc = await firestore().collection(COLLECTIONS.users).doc(this.currentUser.id).get();
+    this.currentUser = this.mapUserDoc(this.currentUser.id, doc.data()!, this.currentUser.email);
+    return this.currentUser;
+  }
+
+  async checkHandleAvailability(handle: string): Promise<boolean> {
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.users)
+      .where('handle', '==', handle.toLowerCase())
+      .limit(1)
+      .get();
+    return snapshot.empty;
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    if (!query.trim()) return [];
+
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.users)
+      .where('handle', '>=', query.toLowerCase())
+      .where('handle', '<=', query.toLowerCase() + '\uf8ff')
+      .limit(10)
+      .get();
+
+    return snapshot.docs.map((doc) =>
+      this.mapUserDoc(doc.id, doc.data(), doc.data().email)
+    );
+  }
+
+  async getUserById(id: ID): Promise<User | null> {
+    const doc = await firestore().collection(COLLECTIONS.users).doc(id).get();
+    const data = doc.data();
+    if (!doc.exists() || !data) return null;
+    return this.mapUserDoc(doc.id, data, data.email);
   }
 
   async searchUsersByEmail(email: string): Promise<User[]> {
-    if (!email.trim()) return [];
-
-    try {
-      // First search in profiles by email (we'll need to add email to profiles or use auth.users)
-      // For now, let's search by handle and display_name
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .or(`handle.ilike.%${email}%,display_name.ilike.%${email}%`)
-        .limit(10);
-
-      if (error || !data) return [];
-
-      return data.map(profile => ({
-        id: profile.id,
-        handle: profile.handle,
-        email: '',
-        displayName: profile.display_name,
-        avatar: profile.avatar_url,
-        bio: profile.bio,
-        isVerified: profile.is_verified,
-        followerCount: profile.follower_count,
-        followingCount: profile.following_count,
-        createdAt: new Date(profile.created_at).getTime(),
-      }));
-    } catch (error) {
-      console.error('Search users by email error:', error);
-      return [];
-    }
+    return this.searchUsers(email);
   }
 
   async resetPassword(email: string): Promise<void> {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://your-app.com/reset-password',
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-    } catch (error) {
-      console.error('Reset password error:', error);
-      throw error;
-    }
+    await auth().sendPasswordResetEmail(email);
   }
-
 }
 
 export const authRepository = new AuthRepository();

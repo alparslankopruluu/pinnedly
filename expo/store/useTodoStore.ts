@@ -1,13 +1,15 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { todoRepository } from '@/repositories/TodoRepository';
-import { useSyncStatus } from '@/services/sync-engine';
+import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useAuth } from '@/store/useAuthStore';
 import { TodoItem, ID } from '@/types';
 
 export type PriorityFilter = 'all' | 'low' | 'medium' | 'high';
 export type StatusFilter = 'all' | 'active' | 'completed';
 
 export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
+  const { user, isAuthenticated } = useAuth();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +19,12 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
   const syncStatus = useSyncStatus();
 
   const loadTodos = useCallback(async () => {
+    if (!isAuthenticated) {
+      setTodos([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -28,58 +36,31 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const createTodo = useCallback(async (data: Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
-    try {
-      const newTodo = await todoRepository.createTodo(data);
-      setTodos(prev => [newTodo, ...prev]);
-      return newTodo;
-    } catch (err) {
-      throw err;
-    }
+    return todoRepository.createTodo(data);
   }, []);
 
   const updateTodo = useCallback(async (id: ID, updates: Partial<Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>) => {
-    try {
-      const updated = await todoRepository.updateTodo(id, updates);
-      setTodos(prev => prev.map(t => t.id === id ? updated : t));
-      return updated;
-    } catch (err) {
-      throw err;
-    }
+    return todoRepository.updateTodo(id, updates);
   }, []);
 
   const toggleTodo = useCallback(async (id: ID) => {
     const todo = todos.find(t => t.id === id);
     if (!todo) return;
-    try {
-      const updated = await todoRepository.toggleTodo(id, !todo.completed);
-      setTodos(prev => prev.map(t => t.id === id ? updated : t));
-    } catch (err) {
-      throw err;
-    }
+    return todoRepository.toggleTodo(id, !todo.completed);
   }, [todos]);
 
   const deleteTodo = useCallback(async (id: ID) => {
-    try {
-      await todoRepository.deleteTodo(id);
-      setTodos(prev => prev.filter(t => t.id !== id));
-    } catch (err) {
-      throw err;
-    }
+    await todoRepository.deleteTodo(id);
   }, []);
 
   const syncTodos = useCallback(async () => {
-    try {
-      await todoRepository.syncTodos();
-      await loadTodos();
-    } catch (err) {
-      throw err;
-    }
+    await todoRepository.syncTodos();
+    await loadTodos();
   }, [loadTodos]);
 
-  // Filtered todos
   const filteredTodos = useMemo(() => {
     let result = todos;
 
@@ -101,7 +82,6 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
       );
     }
 
-    // Sort: incomplete first, then by priority, then by dueDate
     return result.sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       const priorityOrder = { high: 0, medium: 1, low: 2 };
@@ -123,8 +103,21 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
   }), [todos]);
 
   useEffect(() => {
-    loadTodos();
-  }, [loadTodos]);
+    if (!isAuthenticated || !user?.id) {
+      setTodos([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const unsubscribe = todoRepository.subscribeToTodos(user.id, (todosData) => {
+      setTodos(todosData);
+      setLoading(false);
+      setError(null);
+    });
+
+    return unsubscribe;
+  }, [isAuthenticated, user?.id]);
 
   return useMemo(() => ({
     todos: filteredTodos,

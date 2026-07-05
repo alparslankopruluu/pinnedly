@@ -1,0 +1,876 @@
+{
+  "common": {
+    "appName": "Pinnedly",
+    "back": "Zurück",
+    "cancel": "Abbrechen",
+    "ok": "OK",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "create": "Erstellen",
+    "edit": "Bearbeiten",
+    "share": "Teilen",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "info": "Info",
+    "required": "Erforderlich",
+    "comingSoon": "Demnächst verfügbar",
+    "untitled": "Ohne Titel",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "getStarted": "Loslegen",
+    "viewNotes": "Notizen anzeigen",
+    "tryAgain": "Erneut versuchen",
+    "all": "Alle",
+    "active": "Aktiv",
+    "done": "Erledigt",
+    "private": "Privat",
+    "public": "Öffentlich",
+    "shared": "Geteilt",
+    "connected": "Verbunden",
+    "notConnected": "Nicht verbunden",
+    "exporting": "Wird exportiert...",
+    "processing": "Wird verarbeitet...",
+    "saving": "Wird gespeichert...",
+    "sharing": "Wird geteilt...",
+    "sending": "Wird gesendet...",
+    "verifying": "Wird überprüft...",
+    "signingIn": "Anmeldung läuft...",
+    "creatingAccount": "Konto wird erstellt...",
+    "followers": "{{count}} Follower",
+    "linkedItems_one": "{{count}} verknüpftes Element",
+    "linkedItems_other": "{{count}} verknüpfte Elemente",
+    "sortLabel": "Sortieren: {{sort}}",
+    "errorWithMessage": "Fehler: {{message}}",
+    "noContent": "Kein Inhalt",
+    "unknownUser": "Unbekannter Benutzer"
+  },
+  "tabs": {
+    "home": "Start",
+    "bookmarks": "Lesezeichen",
+    "projects": "Projekte",
+    "notes": "Notizen",
+    "todos": "Aufgaben",
+    "profile": "Profil"
+  },
+  "navigation": {
+    "settings": "Einstellungen",
+    "aiAssistant": "KI-Assistent",
+    "todo": "Aufgabe",
+    "shareInbox": "Geteilte Inhalte",
+    "findPeople": "Personen finden",
+    "discoverLists": "Listen entdecken",
+    "createList": "Liste erstellen",
+    "bookmarkList": "Lesezeichenliste",
+    "profile": "Profil",
+    "addNote": "Notiz hinzufügen",
+    "addProject": "Projekt hinzufügen"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "createAccount": "Konto erstellen",
+    "phoneSignIn": "Anmeldung per Telefon",
+    "resetPassword": "Passwort zurücksetzen",
+    "checkYourEmail": "E-Mail prüfen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "fullName": "Vollständiger Name",
+    "phoneNumber": "Telefonnummer",
+    "verificationCode": "Bestätigungscode",
+    "forgotPassword": "Passwort vergessen?",
+    "orContinueWith": "oder fortfahren mit",
+    "google": "Google",
+    "signInWithPhone": "Mit Telefonnummer anmelden",
+    "dontHaveAccount": "Noch kein Konto?",
+    "alreadyHaveAccount": "Bereits ein Konto?",
+    "rememberPassword": "Passwort wieder eingefallen?",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "sendCode": "Code senden",
+    "verifyAndSignIn": "Bestätigen & anmelden",
+    "changePhoneNumber": "Telefonnummer ändern",
+    "sendResetLink": "Link zum Zurücksetzen senden",
+    "emailSent": "E-Mail gesendet!",
+    "emailSentMessage": "Wir haben einen Link zum Zurücksetzen des Passworts an {{email}} gesendet. Bitte prüfe deine E-Mail und folge den Anweisungen.",
+    "resetDescription": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+    "phoneHint": "Gib deine Ländervorwahl an. Beispiel: +905551234567",
+    "termsFooter": "Mit der Fortsetzung stimmst du unseren Nutzungsbedingungen und der Datenschutzrichtlinie zu",
+    "placeholders": {
+      "email": "E-Mail eingeben",
+      "password": "Passwort eingeben",
+      "createPassword": "Passwort erstellen",
+      "confirmPassword": "Passwort bestätigen",
+      "fullName": "Vollständigen Namen eingeben",
+      "phone": "+905551234567",
+      "verificationCode": "123456"
+    },
+    "errors": {
+      "fillAllFields": "Bitte fülle alle Felder aus",
+      "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+      "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
+      "signInFailed": "Anmeldung fehlgeschlagen",
+      "checkCredentials": "Bitte überprüfe deine Zugangsdaten und versuche es erneut",
+      "signUpFailed": "Registrierung fehlgeschlagen",
+      "pleaseTryAgain": "Bitte versuche es erneut",
+      "appleSignInFailed": "Apple-Anmeldung fehlgeschlagen",
+      "appleSignUpFailed": "Apple-Registrierung fehlgeschlagen",
+      "googleSignInFailed": "Google-Anmeldung fehlgeschlagen",
+      "googleSignUpFailed": "Google-Registrierung fehlgeschlagen",
+      "enterEmail": "Bitte gib deine E-Mail-Adresse ein",
+      "resetEmailFailed": "E-Mail zum Zurücksetzen konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "enterPhone": "Bitte gib deine Telefonnummer mit Ländervorwahl ein (z. B. +905551234567)",
+      "enterVerificationCode": "Bitte gib den Bestätigungscode ein",
+      "verificationFailed": "Verifizierung fehlgeschlagen",
+      "invalidCode": "Ungültiger Code",
+      "couldNotSendCode": "Bestätigungscode konnte nicht gesendet werden"
+    },
+    "alerts": {
+      "codeSent": "Code gesendet",
+      "enterCodeFromSms": "Gib den Bestätigungscode aus der SMS ein",
+      "failed": "Fehlgeschlagen"
+    },
+    "resendEmail": "E-Mail nicht erhalten? Erneut versuchen"
+  },
+  "welcome": {
+    "subtitle": "Dein Offline-First-Arbeitsbereich für Notizen, Lesezeichen und Projekte",
+    "loading": "Wird geladen...",
+    "screens": {
+      "captureEverything": {
+        "title": "Alles erfassen",
+        "subtitle": "Speichere Lesezeichen, Notizen und Ideen an einem Ort",
+        "description": "Verliere nie wieder wichtige Inhalte. Unser Offline-First-Ansatz sorgt dafür, dass deine Daten immer verfügbar sind."
+      },
+      "organizeProjects": {
+        "title": "Projekte organisieren",
+        "subtitle": "Verwalte Aufgaben mit leistungsstarken Kanban-Boards",
+        "description": "Verfolge den Fortschritt, setze Fristen und arbeite mit Teammitgliedern an jedem Projekt zusammen."
+      },
+      "richNoteTaking": {
+        "title": "Umfangreiche Notizen",
+        "subtitle": "Schreibe in Markdown mit Live-Vorschau",
+        "description": "Erstelle schöne Notizen mit Formatierung und Links und organisiere deine Gedanken mühelos."
+      },
+      "shareCollaborate": {
+        "title": "Teilen & zusammenarbeiten",
+        "subtitle": "Nahtlos zusammenarbeiten",
+        "description": "Teile deine Arbeit mit anderen, erhalte Feedback und erschaffe gemeinsam Großartiges."
+      }
+    }
+  },
+  "onboarding": {
+    "skip": "Überspringen",
+    "screens": {
+      "saveWhatMatters": {
+        "headline": "Speichere, was wichtig ist – vergiss es nie wieder.",
+        "body": "Pinnedly hilft dir, mühelos Lesezeichen hinzuzufügen, Notizen zu erstellen und Projekte zu verwalten, damit du alles im Blick behältst.",
+        "cta": "Loslegen"
+      },
+      "saveBookmarks": {
+        "headline": "Speichere Lesezeichen von überall.",
+        "body": "Füge eine URL ein, füge Screenshots hinzu und verfolge, wie oft du sie wieder besuchst.",
+        "cta": "Weiter"
+      },
+      "projectsMoveForward": {
+        "headline": "Sieh deine Projekte vorankommen.",
+        "body": "Erstelle Projekte, füge Aufgaben hinzu und beobachte deinen Fortschritt.",
+        "cta": "Weiter"
+      },
+      "shareCollaborate": {
+        "headline": "Teilen und zusammenarbeiten.",
+        "body": "Folge Freunden, teile Lesezeichen und arbeitet gemeinsam an Projekten.",
+        "cta": "Loslegen"
+      }
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "sections": {
+      "account": "Konto",
+      "subscription": "Abonnement",
+      "notifications": "Benachrichtigungen",
+      "appearance": "Darstellung",
+      "dataPrivacy": "Daten & Datenschutz",
+      "about": "Über",
+      "developer": "Entwickler"
+    },
+    "profile": {
+      "title": "Profil",
+      "subtitle": "Verwalte deine Profilinformationen"
+    },
+    "appleSignIn": "Apple-Anmeldung",
+    "googleSignIn": {
+      "title": "Google-Anmeldung",
+      "subtitle": "Verbinde dein Google-Konto"
+    },
+    "currentPlan": {
+      "title": "Aktueller Plan",
+      "free": "Kostenloser Plan",
+      "plan": "{{plan}}-Plan"
+    },
+    "billingHistory": {
+      "title": "Abrechnungsverlauf",
+      "subtitle": "Zahlungsverlauf anzeigen"
+    },
+    "pushNotifications": {
+      "title": "Push-Benachrichtigungen",
+      "subtitle": "Benachrichtigungen auf deinem Gerät erhalten"
+    },
+    "emailNotifications": {
+      "title": "E-Mail-Benachrichtigungen",
+      "subtitle": "Benachrichtigungen per E-Mail erhalten"
+    },
+    "notificationPreferences": {
+      "title": "Benachrichtigungseinstellungen",
+      "subtitle": "Benachrichtigungen anpassen"
+    },
+    "theme": {
+      "title": "Design",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System",
+      "chooseTheme": "Design wählen"
+    },
+    "fontSize": {
+      "title": "Schriftgröße",
+      "percent": "{{percent}}%"
+    },
+    "exportData": {
+      "title": "Daten exportieren",
+      "subtitle": "Lade deine Daten als JSON herunter"
+    },
+    "importData": {
+      "title": "Daten importieren",
+      "subtitle": "Aus Backup wiederherstellen"
+    },
+    "deleteAccount": {
+      "title": "Konto löschen",
+      "subtitle": "Konto dauerhaft löschen"
+    },
+    "version": {
+      "title": "Version",
+      "value": "1.0.0"
+    },
+    "termsOfService": {
+      "title": "Nutzungsbedingungen",
+      "subtitle": "Lies unsere Geschäftsbedingungen"
+    },
+    "privacyPolicy": {
+      "title": "Datenschutzrichtlinie",
+      "subtitle": "Erfahre, wie wir deine Daten schützen"
+    },
+    "testCrash": {
+      "title": "Absturz testen",
+      "subtitle": "Sende einen Testabsturz an Firebase Crashlytics"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "App display language",
+      "chooseLanguage": "Choose Language",
+      "systemDefault": "System default"
+    }
+  },
+  "home": {
+    "aiChat": {
+      "title": "KI-Chat-Assistent",
+      "description": "Stelle beliebige Fragen und speichere Unterhaltungen als Notizen"
+    },
+    "continue": "Fortsetzen",
+    "dueAndOverdueTasks": "Fällige & überfällige Aufgaben",
+    "recentActivity": "Letzte Aktivität",
+    "bookmark": "Lesezeichen",
+    "note": "Notiz",
+    "overdue": "Überfällig",
+    "dueToday": "Heute fällig",
+    "streakBadge": "{{days}}-TAGE-SERIE",
+    "streakTitle": "Behalte den Schwung bei!",
+    "empty": {
+      "noContinueItems": "Keine Elemente zum Fortsetzen",
+      "noDueTasks": "Keine fälligen Aufgaben",
+      "noRecentActivity": "Keine letzte Aktivität"
+    }
+  },
+  "bookmarks": {
+    "searchPlaceholder": "Speicherungen, Tags, Notizen suchen...",
+    "yourSaves": "Deine Speicherungen",
+    "sort": {
+      "recent": "Neueste",
+      "mostOpened": "Am häufigsten geöffnet",
+      "oldestUnread": "Älteste ungelesene"
+    },
+    "filters": {
+      "all": "Alle",
+      "readLater": "Später lesen",
+      "neverOpened": "Nie geöffnet",
+      "tagged": "Mit Tags",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "medium": "Medium"
+    },
+    "loading": "Lesezeichen werden geladen...",
+    "empty": {
+      "title": "Noch keine Speicherungen",
+      "description": "Teile Links von Twitter, LinkedIn oder Safari über die Teilen-Schaltfläche oder füge manuell eines hinzu.",
+      "button": "Lesezeichen hinzufügen"
+    }
+  },
+  "notes": {
+    "empty": {
+      "title": "Noch keine Notizen",
+      "description": "Beginne, deine Gedanken und Ideen im Markdown-Format festzuhalten.",
+      "button": "Erste Notiz erstellen"
+    }
+  },
+  "projects": {
+    "viewModes": {
+      "list": "Liste",
+      "kanban": "Kanban"
+    },
+    "filters": {
+      "onTrack": "Im Plan",
+      "atRisk": "Gefährdet",
+      "overdue": "Überfällig"
+    },
+    "kanban": {
+      "todo": "Zu erledigen",
+      "inProgress": "In Bearbeitung",
+      "done": "Erledigt"
+    },
+    "loading": "Projekte werden geladen...",
+    "empty": {
+      "title": "Noch keine Projekte",
+      "description": "Beginne mit der Erstellung deines ersten Projekts.",
+      "button": "Neues Projekt erstellen"
+    },
+    "addTask": {
+      "placeholder": "Aufgabentitel eingeben...",
+      "button": "Aufgabe erstellen",
+      "title": "Aufgabe hinzufügen",
+      "status": "Status",
+      "taskTitle": "Aufgabentitel",
+      "createFailed": "Aufgabe konnte nicht erstellt werden."
+    },
+    "due": "Fällig: "
+  },
+  "todos": {
+    "searchPlaceholder": "Aufgaben suchen...",
+    "filters": {
+      "active": "Aktiv",
+      "done": "Erledigt",
+      "all": "Alle",
+      "allPriorities": "Alle Prioritäten",
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
+    },
+    "due": "Fällig: ",
+    "overduePrefix": "Überfällig: ",
+    "project": "Projekt",
+    "empty": {
+      "title": "Noch keine Aufgaben",
+      "description": "Füge deine erste Aufgabe hinzu, um loszulegen.",
+      "button": "Aufgabe hinzufügen"
+    },
+    "deleteConfirm": {
+      "title": "Aufgabe löschen",
+      "message": "Möchtest du diese Aufgabe wirklich löschen?"
+    },
+    "loading": "Aufgaben werden geladen...",
+    "emptyDescriptionLong": "Tippe auf +, um deine erste Aufgabe zu erstellen und organisiert zu bleiben"
+  },
+  "profile": {
+    "defaultName": "Pinnedly-Benutzer",
+    "tagline": "Halte dein Wissen organisiert",
+    "yourStats": "Deine Statistiken",
+    "stats": {
+      "bookmarks": "Lesezeichen",
+      "projects": "Projekte",
+      "notes": "Notizen",
+      "totalOpens": "Gesamtöffnungen"
+    },
+    "goals": "Ziele",
+    "dailyGoal": "Tagesziel",
+    "weeklyGoal": "Wochenziel",
+    "bookmarksGoal": "{{count}} Lesezeichen",
+    "upgradePremium": "Auf Premium upgraden",
+    "upgradeSubtitle": "Leistungsstarke Kollaborationsfunktionen freischalten"
+  },
+  "aiChat": {
+    "title": "KI-Chat",
+    "systemPrompt": "Du bist Pinnedlys KI-Assistent. Antworte immer auf Deutsch, auch wenn der Nutzer in einer anderen Sprache schreibt. Sei prägnant, freundlich und praktisch.",
+    "placeholder": "Frag mich alles...",
+    "empty": {
+      "title": "KI-Chat-Assistent",
+      "description": "Frag mich alles! Ich kann dir bei Recherche, Brainstorming, Schreiben und mehr helfen. Du kannst unsere Unterhaltung jederzeit als Notiz speichern.",
+      "tryAsking": "Probiere zum Beispiel:",
+      "suggestions": {
+        "quantum": "Quantencomputing erklären",
+        "brainstorm": "App-Ideen brainstormen",
+        "meditation": "Vorteile der Meditation"
+      }
+    },
+    "roles": {
+      "you": "Du",
+      "ai": "KI"
+    },
+    "savedNoteTitle": "KI-Chat: {{title}}",
+    "alerts": {
+      "noConversation": "Keine Unterhaltung",
+      "noMessagesToSave": "Es gibt keine Nachrichten zum Speichern.",
+      "savedAsNote": "Unterhaltung als Notiz gespeichert!",
+      "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "saveFailed": "Unterhaltung konnte nicht gespeichert werden. Bitte versuche es erneut."
+    }
+  },
+  "premium": {
+    "title": "Auf Premium upgraden",
+    "subtitle": "Leistungsstarke Funktionen freischalten",
+    "choosePlan": "Wähle deinen Plan",
+    "mostPopular": "Am beliebtesten",
+    "startFreeTrial": "Kostenlose Testversion starten",
+    "terms": "7 Tage kostenlos testen, danach {{price}}{{period}}. Jederzeit kündbar.",
+    "plans": {
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "perMonth": "/Monat",
+      "perYear": "/Jahr",
+      "savePercent": "33 % sparen"
+    },
+    "features": {
+      "teamCollaboration": {
+        "title": "Teamzusammenarbeit",
+        "description": "Teile Projekte und Listen mit deinen Teammitgliedern"
+      },
+      "voiceNotes": {
+        "title": "Sprachnotizen",
+        "description": "Sprachmemos sofort aufnehmen und transkribieren"
+      },
+      "smartReminders": {
+        "title": "Intelligente Erinnerungen",
+        "description": "KI-gestützte Benachrichtigungen und Hinweise"
+      },
+      "advancedFeatures": {
+        "title": "Erweiterte Funktionen",
+        "description": "Leistungsstarke Produktivitätstools freischalten"
+      },
+      "unlimitedLists": "Unbegrenzte Lesezeichenlisten",
+      "collaborativeProjects": "Kollaborative Projekte",
+      "voiceNotesFeature": "Sprachnotizen",
+      "advancedReminders": "Erweiterte Erinnerungen",
+      "prioritySupport": "Prioritäts-Support",
+      "everythingMonthly": "Alles aus Monatlich",
+      "advancedAnalytics": "Erweiterte Analysen",
+      "customThemes": "Benutzerdefinierte Designs",
+      "exportFormats": "Export in mehrere Formate",
+      "teamManagement": "Teamverwaltungstools",
+      "apiAccess": "API-Zugang"
+    }
+  },
+  "share": {
+    "shareEntity": "{{entityTitle}} teilen",
+    "enterEmailOrUsername": "E-Mail oder Benutzername eingeben",
+    "enterEmail": "E-Mail-Adresse eingeben",
+    "permissions": {
+      "view": "Ansehen",
+      "edit": "Bearbeiten"
+    },
+    "sharedBy": "Geteilt von {{name}}",
+    "alerts": {
+      "enterEmailOrUsername": "Bitte gib eine E-Mail oder einen Benutzernamen ein",
+      "sharedSuccessfully": "Element erfolgreich geteilt",
+      "shareFailed": "Teilen fehlgeschlagen",
+      "updatePermissionFailed": "Berechtigung konnte nicht aktualisiert werden",
+      "removeShareFailed": "Freigabe konnte nicht entfernt werden"
+    },
+    "addPeople": "Add People",
+    "emailOrUsername": "Email or Username",
+    "sharedWith": "Shared With",
+    "permission": "Permission"
+  },
+  "shareInbox": {
+    "title": "Geteilte Inhalte",
+    "empty": {
+      "title": "Keine geteilten Elemente",
+      "description": "Mit dir geteilte Elemente erscheinen hier"
+    }
+  },
+  "discoverLists": {
+    "title": "Listen entdecken",
+    "searchPlaceholder": "Öffentliche Listen suchen...",
+    "loading": "Wird geladen...",
+    "noListsFound": "Keine Listen gefunden",
+    "noPublicLists": "Noch keine öffentlichen Listen",
+    "tryDifferentKeywords": "Versuche es mit anderen Suchbegriffen",
+    "beFirstToCreate": "Sei der Erste, der eine öffentliche Liste erstellt!",
+    "createList": "Liste erstellen"
+  },
+  "peopleSearch": {
+    "title": "Personen finden",
+    "searchPlaceholder": "Nach Name oder Benutzername suchen...",
+    "empty": {
+      "title": "Nach Personen suchen",
+      "description": "Gib einen Namen oder Benutzernamen ein, um Personen zum Vernetzen zu finden"
+    },
+    "noResults": {
+      "title": "Keine Ergebnisse",
+      "description": "Keine Benutzer gefunden für „{{query}}“"
+    }
+  },
+  "addBookmark": {
+    "title": "Lesezeichen hinzufügen",
+    "urlPlaceholder": "URL hier einfügen...",
+    "titlePlaceholder": "Titel eingeben...",
+    "descriptionPlaceholder": "Beschreibung eingeben...",
+    "notePlaceholder": "Kurze Notiz hinzufügen...",
+    "tagsPlaceholder": "Tags hinzufügen...",
+    "addBookmark": "Lesezeichen hinzufügen",
+    "alerts": {
+      "permissionNeeded": "Berechtigung erforderlich",
+      "cameraPermission": "Bitte erteile Zugriff auf die Fotomediathek, um Screenshots hochzuladen.",
+      "signInRequired": "Anmeldung erforderlich",
+      "signInToSave": "Bitte melde dich an, um Lesezeichen zu speichern.",
+      "provideUrlOrScreenshot": "Bitte gib eine URL an oder lade einen Screenshot hoch.",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "couldNotSave": "Lesezeichen konnte nicht gespeichert werden."
+    },
+    "labels": {
+      "url": "URL",
+      "or": "ODER",
+      "uploadScreenshot": "Screenshot hochladen",
+      "title": "Titel",
+      "description": "Beschreibung",
+      "commentOptional": "Kommentar (optional)",
+      "tags": "Tags"
+    },
+    "metadataFetchFailed": "Metadaten konnten nicht abgerufen werden",
+    "metadataFetchMessage": "Seitendetails konnten nicht automatisch abgerufen werden. Du kannst das Lesezeichen trotzdem manuell hinzufügen."
+  },
+  "addNote": {
+    "titlePlaceholder": "Notiztitel eingeben...",
+    "contentPlaceholder": "Schreibe deine Notiz...",
+    "createNote": "Notiz erstellen",
+    "alerts": {
+      "enterTitle": "Bitte gib einen Notiztitel ein.",
+      "createFailed": "Notiz konnte nicht erstellt werden. Bitte versuche es erneut."
+    },
+    "title": "Notiz hinzufügen",
+    "noteTitle": "Notiztitel",
+    "visibility": "Sichtbarkeit",
+    "content": "Inhalt",
+    "visibilityOptions": {
+      "private": "Nur du kannst diese Notiz sehen",
+      "shared": "Mit bestimmten Personen teilen",
+      "public": "Jeder kann diese Notiz ansehen"
+    },
+    "editorHint": "Text markieren und die Symbolleiste nutzen, um Formatierungen anzuwenden. Der Text wird beim Tippen formatiert angezeigt.",
+    "toolbarHint": "Select text to format"
+  },
+  "addProject": {
+    "titlePlaceholder": "Projekttitel eingeben...",
+    "descriptionPlaceholder": "Beschreibe dein Projekt...",
+    "createProject": "Projekt erstellen",
+    "alerts": {
+      "enterTitle": "Bitte gib einen Projekttitel ein."
+    },
+    "title": "Projekt hinzufügen",
+    "projectTitle": "Projekttitel",
+    "descriptionOptional": "Beschreibung (optional)",
+    "deadlineOptional": "Frist (optional)",
+    "deadlines": {
+      "oneWeek": "1 Woche",
+      "oneMonth": "1 Monat",
+      "threeMonths": "3 Monate"
+    },
+    "info": "Nach der Erstellung kannst du Aufgaben hinzufügen und den Fortschritt verfolgen."
+  },
+  "addTodo": {
+    "titlePlaceholder": "Was musst du erledigen?",
+    "detailsPlaceholder": "Details hinzufügen...",
+    "dueDatePlaceholder": "JJJJ-MM-TT",
+    "alerts": {
+      "enterTitle": "Bitte gib einen Aufgabentitel ein."
+    },
+    "newTodo": "Neue Aufgabe",
+    "editTodo": "Aufgabe bearbeiten",
+    "title": "Titel",
+    "descriptionOptional": "Beschreibung (optional)",
+    "priority": "Priorität",
+    "setDueDate": "Fälligkeitsdatum festlegen",
+    "markCompleted": "Als erledigt markieren",
+    "quickDates": {
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "nextWeek": "Nächste Woche",
+      "clear": "Löschen"
+    },
+    "saveFailed": "Aufgabe konnte nicht gespeichert werden"
+  },
+  "createList": {
+    "namePlaceholder": "Listenname eingeben",
+    "descriptionPlaceholder": "Beschreibung hinzufügen (optional)",
+    "alerts": {
+      "enterName": "Bitte gib einen Listennamen ein",
+      "createFailed": "Liste konnte nicht erstellt werden. Bitte versuche es erneut."
+    },
+    "title": "Create List",
+    "listName": "List Name *",
+    "description": "Description",
+    "makePublic": "Make Public",
+    "makePublicDescription": "Public lists can be discovered and followed by other users",
+    "publicNotice": "📢 Public lists will appear in the discover section and can be followed by other users."
+  },
+  "bookmarkDetail": {
+    "noUrl": "Keine URL",
+    "noLinkToOpen": "Dieses Lesezeichen hat keinen Link zum Öffnen.",
+    "deleteTitle": "Lesezeichen löschen",
+    "deleteMessage": "Dies kann nicht rückgängig gemacht werden.",
+    "notePlaceholder": "Füge eine Notiz für dein zukünftiges Ich hinzu...",
+    "saveNote": "Notiz speichern",
+    "openLink": "Link öffnen",
+    "notFound": "Lesezeichen nicht gefunden",
+    "bookmark": "Lesezeichen",
+    "openedCount": "{{count}}× geöffnet",
+    "whySaved": "Warum ich das gespeichert habe",
+    "tapToAddNote": "Tippen, um eine Notiz hinzuzufügen...",
+    "archive": "Archivieren"
+  },
+  "noteDetail": {
+    "titlePlaceholder": "Notiztitel",
+    "contentPlaceholder": "Schreibe deine Notiz hier...",
+    "alerts": {
+      "titleEmpty": "Notiztitel darf nicht leer sein"
+    },
+    "notFound": "Note not found",
+    "editNote": "Edit Note",
+    "deleteTitle": "Delete Note",
+    "deleteMessage": "Are you sure you want to delete this note? This action cannot be undone.",
+    "created": "Created {{date}}",
+    "updated": "Updated {{date}}",
+    "you": "You",
+    "sharedWith": "Shared with",
+    "addPeople": "Add people"
+  },
+  "projectDetail": {
+    "addTaskPlaceholder": "Aufgabe hinzufügen",
+    "emailPlaceholder": "E-Mail-Adresse eingeben",
+    "titlePlaceholder": "Projekttitel eingeben",
+    "descriptionPlaceholder": "Projektbeschreibung eingeben",
+    "alerts": {
+      "enterTaskTitle": "Bitte gib einen Aufgabentitel ein",
+      "createTaskFailed": "Aufgabe konnte nicht erstellt werden",
+      "updateTaskFailed": "Aufgabe konnte nicht aktualisiert werden",
+      "deleteTaskFailed": "Aufgabe konnte nicht gelöscht werden",
+      "enterEmail": "Bitte gib eine E-Mail-Adresse ein",
+      "sharedWith": "Projekt geteilt mit {{email}}",
+      "shareFailed": "Projekt konnte nicht geteilt werden",
+      "titleRequired": "Projekttitel ist erforderlich",
+      "updatedSuccessfully": "Projekt erfolgreich aktualisiert",
+      "archived": "Projekt archiviert",
+      "notificationsNotSupported": "Benachrichtigungen werden im Web nicht unterstützt. Bitte nutze die mobile App.",
+      "nudgeScheduled": "Erinnerung geplant für {{time}}",
+      "scheduleNudgeFailed": "Erinnerung konnte nicht geplant werden"
+    },
+    "notFound": "Project not found",
+    "progress": "Progress",
+    "members": "Members",
+    "nudgeMe": "Nudge Me",
+    "tabs": {
+      "tasks": "Tasks",
+      "timeline": "Timeline",
+      "gallery": "Gallery"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left"
+    },
+    "quickAdd": {
+      "title": "Quick Add",
+      "message": "What would you like to add?",
+      "task": "Task",
+      "note": "Note",
+      "bookmark": "Bookmark"
+    },
+    "deleteTask": {
+      "title": "Delete Task",
+      "message": "Are you sure you want to delete this task?"
+    },
+    "shareProject": "Share Project",
+    "emailAddress": "Email Address",
+    "permission": "Permission",
+    "viewOnly": "View Only",
+    "canEdit": "Can Edit",
+    "editProject": "Edit Project",
+    "projectTitle": "Project Title",
+    "description": "Description",
+    "deleteProject": {
+      "title": "Delete Project",
+      "message": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "archiveProject": {
+      "title": "Archive Project",
+      "message": "Are you sure you want to archive this project?",
+      "action": "Archive"
+    },
+    "scheduleNudge": {
+      "title": "Schedule Nudge",
+      "message": "When would you like to be reminded about this project?",
+      "in1Hour": "In 1 hour",
+      "tomorrow": "Tomorrow",
+      "in3Days": "In 3 days"
+    },
+    "adding": "Adding...",
+    "swipeHint": "Swipe left on a task for more options",
+    "relatedContent": "Related Content",
+    "created": "Created {{relative}}",
+    "empty": {
+      "activityTitle": "No Activity Yet",
+      "activityDescription": "Project activity will appear here as you work",
+      "imagesTitle": "No Images Yet",
+      "imagesDescription": "Add images to showcase your project progress",
+      "uploadImage": "Upload Image"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "bookmarkList": {
+    "alerts": {
+      "loadFailed": "Listendaten konnten nicht geladen werden",
+      "followFailed": "Follow-Status konnte nicht aktualisiert werden",
+      "deleteFailed": "Liste konnte nicht gelöscht werden",
+      "sharingComingSoon": "Teilen-Funktion demnächst verfügbar!"
+    },
+    "empty": {
+      "title": "Noch keine Lesezeichen",
+      "description": "This list doesn't have any bookmarks yet."
+    },
+    "deleteTitle": "Delete List",
+    "deleteMessage": "Are you sure you want to delete this list? This action cannot be undone.",
+    "shareTitle": "Share"
+  },
+  "projectMembers": {
+    "alerts": {
+      "enterEmail": "Bitte gib eine E-Mail-Adresse ein",
+      "memberAdded": "Mitglied erfolgreich hinzugefügt",
+      "addMemberFailed": "Mitglied konnte nicht hinzugefügt werden. Bitte versuche es erneut.",
+      "memberRemoved": "Mitglied erfolgreich entfernt",
+      "removeMemberFailed": "Mitglied konnte nicht entfernt werden. Bitte versuche es erneut.",
+      "permissionUpdated": "Berechtigung erfolgreich aktualisiert",
+      "updatePermissionFailed": "Berechtigung konnte nicht aktualisiert werden. Bitte versuche es erneut."
+    },
+    "title": "Project Members",
+    "currentMembers": "Current Members",
+    "addMember": "Add Member",
+    "canView": "Can View",
+    "canEdit": "Can Edit",
+    "permissionLabel": "Permission:",
+    "adding": "Adding...",
+    "dismiss": "Dismiss",
+    "removeMember": {
+      "title": "Remove Member",
+      "message": "Are you sure you want to remove {{email}} from this project?",
+      "action": "Remove"
+    }
+  },
+  "shareIntent": {
+    "signInRequired": "Anmeldung erforderlich",
+    "signInToSaveLinks": "Bitte melde dich an, um geteilte Links in Pinnedly zu speichern.",
+    "savedToPinnedly": "In Pinnedly gespeichert",
+    "linkSavedToReadLater": "Link unter Später lesen gespeichert.",
+    "view": "Ansehen",
+    "couldNotSave": "Speichern nicht möglich",
+    "unableToSave": "Geteilte Inhalte konnten nicht gespeichert werden."
+  },
+  "quickAdd": {
+    "addBookmark": "Lesezeichen hinzufügen",
+    "addProject": "Projekt hinzufügen",
+    "addNote": "Notiz hinzufügen"
+  },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "message": "Ein unerwarteter Fehler ist aufgetreten",
+    "tryAgain": "Erneut versuchen"
+  },
+  "notFound": {
+    "title": "Hoppla!",
+    "message": "Dieser Bildschirm existiert nicht.",
+    "goHome": "Zur Startseite!"
+  },
+  "languages": {
+    "en": "Englisch",
+    "tr": "Türkisch",
+    "ar": "Arabisch",
+    "ru": "Russisch",
+    "de": "Deutsch",
+    "pt": "Portugiesisch",
+    "es": "Spanisch",
+    "it": "Italienisch",
+    "ja": "Japanisch",
+    "zh": "Chinesisch"
+  },
+  "sources": {
+    "twitter": "Twitter / X",
+    "instagram": "Instagram",
+    "medium": "Medium",
+    "linkedin": "LinkedIn",
+    "wikipedia": "Wikipedia",
+    "youtube": "YouTube",
+    "reddit": "Reddit",
+    "substack": "Substack",
+    "github": "GitHub",
+    "other": "Web"
+  },
+  "notifications": {
+    "taskReminder": {
+      "title": "Aufgabenerinnerung",
+      "body": "Nicht vergessen: {{taskTitle}}"
+    },
+    "projectNudge": {
+      "title": "Projekt-Erinnerung",
+      "body": "Zeit, an folgendem Projekt zu arbeiten: {{projectTitle}}"
+    },
+    "bookmarkDigest": {
+      "title": "Später-lesen-Erinnerung",
+      "body_one": "Du hast 1 ungelesenes Element, das auf dich wartet.",
+      "body_other": "Du hast {{count}} ungelesene Elemente, die auf dich warten."
+    }
+  },
+  "bookmarkCard": {
+    "neverOpened": "Nie geöffnet",
+    "openedCount": "{{count}}× geöffnet",
+    "readLater": "Später lesen",
+    "screenshot": "Screenshot"
+  },
+  "clipboard": {
+    "title": "Link in clipboard",
+    "message": "Save this link to Pinnedly?",
+    "save": "Save",
+    "openAddBookmark": "Review & save",
+    "dismiss": "Not now"
+  },
+  "userProfile": {
+    "notFound": "Profile not found",
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "projectCard": {
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "weeksLeft_one": "{{count}} week left",
+    "weeksLeft_other": "{{count}} weeks left",
+    "monthsLeft_one": "{{count}} month left",
+    "monthsLeft_other": "{{count}} months left",
+    "tasksDone": "{{completed}}/{{total}} tasks done"
+  },
+  "entityTypes": {
+    "bookmark": "Bookmark",
+    "note": "Note",
+    "project": "Project",
+    "list": "List"
+  }
+}

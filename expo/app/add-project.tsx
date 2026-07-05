@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   View, 
   Text, 
@@ -6,38 +7,49 @@ import {
   TextInput, 
   TouchableOpacity, 
   ScrollView,
-  Alert,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { X, Calendar } from 'lucide-react-native';
-import { useAppStore } from '@/store/useAppStore';
+import { useProjectStore } from '@/providers/OfflineProvider';
+import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
+import { ScreenFooter } from '@/components/ui/ScreenFooter';
 
 export default function AddProjectScreen() {
-  const { addProject } = useAppStore();
+  const { t } = useTranslation();
+  const { createProject } = useProjectStore();
+  const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState<Date | null>(null);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a project title.');
+      showAppAlert(t('common.error'), t('addProject.alerts.enterTitle'), undefined, { variant: 'error' });
       return;
     }
 
-    addProject({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      deadline: deadline?.getTime(),
-      visibility: 'private',
-      userId: 'local',
-      collaborators: [],
-    });
-
-    router.back();
+    setIsSaving(true);
+    try {
+      await createProject({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        deadline: deadline?.getTime(),
+        visibility: 'private',
+        userId: user?.id || '',
+      });
+      router.back();
+    } catch (err) {
+      console.error('Failed to create project:', err);
+      showAppAlert(t('common.error'), t('addProject.alerts.createFailed'), undefined, { variant: 'error' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -55,10 +67,10 @@ export default function AddProjectScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Stack.Screen 
         options={{ 
-          title: 'Add Project',
+          title: t('addProject.title'),
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
               <X size={24} color="#111827" />
@@ -75,24 +87,24 @@ export default function AddProjectScreen() {
           <View style={styles.content}>
             {/* Title */}
             <View style={styles.section}>
-              <Text style={styles.label}>Project Title</Text>
+              <Text style={styles.label}>{t('addProject.projectTitle')}</Text>
               <TextInput
                 style={styles.input}
                 value={title}
                 onChangeText={setTitle}
-                placeholder="Enter project title..."
+                placeholder={t('addProject.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
               />
             </View>
 
             {/* Description */}
             <View style={styles.section}>
-              <Text style={styles.label}>Description (optional)</Text>
+              <Text style={styles.label}>{t('addProject.descriptionOptional')}</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Describe your project..."
+                placeholder={t('addProject.descriptionPlaceholder')}
                 placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={4}
@@ -101,7 +113,7 @@ export default function AddProjectScreen() {
 
             {/* Deadline */}
             <View style={styles.section}>
-              <Text style={styles.label}>Deadline (optional)</Text>
+              <Text style={styles.label}>{t('addProject.deadlineOptional')}</Text>
               
               {deadline ? (
                 <View style={styles.deadlineContainer}>
@@ -122,19 +134,19 @@ export default function AddProjectScreen() {
                     style={styles.quickDeadlineButton}
                     onPress={() => setQuickDeadline(7)}
                   >
-                    <Text style={styles.quickDeadlineText}>1 week</Text>
+                    <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.oneWeek')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.quickDeadlineButton}
                     onPress={() => setQuickDeadline(30)}
                   >
-                    <Text style={styles.quickDeadlineText}>1 month</Text>
+                    <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.oneMonth')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.quickDeadlineButton}
                     onPress={() => setQuickDeadline(90)}
                   >
-                    <Text style={styles.quickDeadlineText}>3 months</Text>
+                    <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.threeMonths')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -143,20 +155,20 @@ export default function AddProjectScreen() {
             {/* Info */}
             <View style={styles.infoBox}>
               <Text style={styles.infoText}>
-                You can add tasks and track progress after creating the project.
+                {t('addProject.info')}
               </Text>
             </View>
           </View>
         </ScrollView>
 
-        {/* Save Button */}
-        <View style={styles.footer}>
+        <ScreenFooter>
           <Button
-            title="Create Project"
+            title={isSaving ? t('common.saving') : t('addProject.createProject')}
             onPress={handleSave}
+            disabled={isSaving}
             style={styles.saveButton}
           />
-        </View>
+        </ScreenFooter>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -250,12 +262,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1E40AF',
     lineHeight: 20,
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
   },
   saveButton: {
     width: '100%',

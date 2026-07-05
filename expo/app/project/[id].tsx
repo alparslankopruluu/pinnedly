@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,22 @@ import {
   TouchableOpacity,
   TextInput,
   ImageBackground,
-  Alert,
+  Image,
   Dimensions,
   Animated,
   PanResponder,
   Modal,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
+import { showAppAlert } from '@/providers/DialogProvider';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getOverlayFabBottomOffset } from '@/utils/layout';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
-import { useProjectStore } from '@/store/useProjectStore';
+import { useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
 import { Task, ID } from '@/types';
 import {
   ArrowLeft,
@@ -39,10 +44,97 @@ import {
 } from 'lucide-react-native';
 import { notificationService } from '@/utils/notifications';
 import { ProjectMembersModal } from '@/components/ProjectMembersModal';
+import { TaskStatusCheckbox } from '@/components/TaskStatusCheckbox';
+import { getActivityTitle } from '@/utils/activities';
+import { getNextTaskStatus } from '@/utils/taskStatus';
 
 const { width } = Dimensions.get('window');
 
 type TabType = 'tasks' | 'timeline' | 'gallery';
+
+interface ProjectTaskRowProps {
+  task: Task;
+  isSwiped: boolean;
+  onSwipe: (taskId: string | null) => void;
+  onToggle: (taskId: string) => void;
+  onDelete: (taskId: string) => void;
+}
+
+function ProjectTaskRow({
+  task,
+  isSwiped,
+  onSwipe,
+  onToggle,
+  onDelete,
+}: ProjectTaskRowProps) {
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dx) > 12 && Math.abs(gestureState.dy) < 12,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dx < 0) {
+          translateX.setValue(Math.max(gestureState.dx, -80));
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx < -50) {
+          Animated.spring(translateX, {
+            toValue: -80,
+            useNativeDriver: true,
+          }).start();
+          onSwipe(task.id);
+        } else {
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+          onSwipe(null);
+        }
+      },
+    })
+  ).current;
+
+  useEffect(() => {
+    if (!isSwiped) {
+      translateX.setValue(0);
+    }
+  }, [isSwiped, translateX]);
+
+  return (
+    <View style={styles.taskItemContainer}>
+      {isSwiped && (
+        <View style={styles.taskActions}>
+          <TouchableOpacity
+            style={styles.deleteAction}
+            onPress={() => onDelete(task.id)}
+          >
+            <Trash2 size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      )}
+      <Animated.View style={[styles.taskItem, { transform: [{ translateX }] }]}>
+        <TaskStatusCheckbox
+          status={task.status}
+          onPress={() => onToggle(task.id)}
+          size={20}
+          style={styles.checkbox}
+        />
+        <View style={styles.taskTitleContainer} {...panResponder.panHandlers}>
+          <Text
+            style={[
+              styles.taskTitle,
+              task.status === 'done' && styles.taskTitleCompleted,
+            ]}
+          >
+            {task.title}
+          </Text>
+        </View>
+      </Animated.View>
+    </View>
+  );
+}
 
 interface ActivityItem {
   id: string;
@@ -53,6 +145,8 @@ interface ActivityItem {
 }
 
 export default function ProjectDetailScreen() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('tasks');
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
@@ -65,42 +159,34 @@ export default function ProjectDetailScreen() {
   const [editDescription, setEditDescription] = useState<string>('');
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showMembersModal, setShowMembersModal] = useState<boolean>(false);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const taskInputRef = useRef<TextInput>(null);
+
+  const { bookmarks, activities } = useAppStore();
+  const { notes } = useNoteStore();
 
   const {
     projects,
-    bookmarks,
-    notes,
-    activities,
-    updateProject,
-    deleteProject,
-  } = useAppStore();
-
-  const {
-    currentProject,
-    projectMembers,
-    isCreatingTask,
-    isUpdatingTask,
-    error: projectError,
-    loadProject,
-    createTask,
+    loading: projectsLoading,
+    hydrateProject,
+    addTask,
     updateTask,
     deleteTask,
-    loadProjectMembers,
-    clearError,
+    updateProject,
+    deleteProject,
   } = useProjectStore();
 
   useEffect(() => {
-    // Initialize notification service
     notificationService.initialize();
-    
-    // Load project data from Supabase
-    if (id) {
-      loadProject(id);
-    }
-  }, [id, loadProject]);
+  }, []);
 
-  // Use currentProject from store if available, fallback to local projects
-  const project = currentProject || projects.find((p) => p.id === id);
+  const project = projects.find((p) => p.id === id);
+
+  useEffect(() => {
+    if (!id || !project || project.tasks.length > 0) return;
+    void hydrateProject(id);
+  }, [id, project, hydrateProject]);
   const relatedBookmarks = bookmarks.filter((b) =>
     notes.some((n) => n.links.some((l) => l.type === 'project' && l.id === id))
   );
@@ -123,16 +209,26 @@ export default function ProjectDetailScreen() {
       .slice(0, 20);
   }, [activities, project, id]);
 
+  if (projectsLoading && !project) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <ActivityIndicator size="large" color="#EF4444" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (!project) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Project not found</Text>
+          <Text style={styles.errorText}>{t('projectDetail.notFound')}</Text>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text style={styles.backButtonText}>{t('common.back')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -150,88 +246,134 @@ export default function ProjectDetailScreen() {
     const daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
 
     if (daysLeft < 0) {
-      return { text: 'Overdue', color: '#EF4444', bgColor: '#FEE2E2' };
+      return { text: t('projectDetail.deadline.overdue'), color: '#EF4444', bgColor: '#FEE2E2' };
     } else if (daysLeft <= 7) {
-      return { text: `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`, color: '#F59E0B', bgColor: '#FEF3C7' };
+      return { text: t('projectDetail.deadline.daysLeft', { count: daysLeft }), color: '#F59E0B', bgColor: '#FEF3C7' };
     } else {
-      return { text: `${daysLeft} days left`, color: '#10B981', bgColor: '#D1FAE5' };
+      return { text: t('projectDetail.deadline.daysLeft', { count: daysLeft }), color: '#10B981', bgColor: '#D1FAE5' };
     }
   };
 
   const deadlineStatus = getDeadlineStatus();
 
   const handleAddTask = async () => {
-    if (!newTaskTitle.trim()) {
-      Alert.alert('Error', 'Please enter a task title');
+    if (!project || isAddingTask) return;
+
+    const trimmedTitle = newTaskTitle.trim();
+    if (!trimmedTitle) {
+      taskInputRef.current?.focus();
       return;
     }
 
+    setIsAddingTask(true);
     try {
-      await createTask(project.id, {
-        title: newTaskTitle.trim(),
+      await addTask(project.id, {
+        title: trimmedTitle,
         status: 'todo',
       });
       setNewTaskTitle('');
     } catch (error) {
       console.error('Failed to create task:', error);
-      Alert.alert('Error', 'Failed to create task');
+      showAppAlert(t('common.error'), t('projectDetail.alerts.createTaskFailed'), undefined, { variant: 'error' });
+    } finally {
+      setIsAddingTask(false);
     }
   };
 
   const handleFabPress = () => {
-    Alert.alert(
-      'Quick Add',
-      'What would you like to add?',
+    showAppAlert(
+      t('projectDetail.quickAdd.title'),
+      t('projectDetail.quickAdd.message'),
       [
         {
-          text: 'Task',
+          text: t('projectDetail.quickAdd.task'),
           onPress: () => {
-            // Focus on the add task input
-            console.log('Focus on add task input');
+            setActiveTab('tasks');
+            setTimeout(() => taskInputRef.current?.focus(), 150);
           },
         },
         {
-          text: 'Note',
-          onPress: () => router.push('/add-note' as any),
+          text: t('projectDetail.quickAdd.note'),
+          onPress: () =>
+            router.push({
+              pathname: '/add-note',
+              params: { projectId: project.id },
+            } as any),
         },
         {
-          text: 'Bookmark',
+          text: t('projectDetail.quickAdd.bookmark'),
           onPress: () => router.push('/add-bookmark' as any),
         },
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ]
     );
   };
 
   const handleToggleTask = async (taskId: string) => {
     const task = project.tasks.find((t) => t.id === taskId);
-    if (task) {
-      try {
-        await updateTask(taskId, {
-          status: task.status === 'done' ? 'todo' : 'done',
-        });
-      } catch (error) {
-        console.error('Failed to update task:', error);
-        Alert.alert('Error', 'Failed to update task');
-      }
+    if (!task) return;
+
+    const nextStatus = getNextTaskStatus(task.status);
+    try {
+      await updateTask(taskId, { status: nextStatus });
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      showAppAlert(t('common.error'), t('projectDetail.alerts.updateTaskFailed'), undefined, { variant: 'error' });
+    }
+  };
+
+  const handleUploadGalleryImage = async () => {
+    if (!project || isUploadingGallery) return;
+
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      showAppAlert(
+        t('common.error'),
+        t('projectDetail.alerts.galleryPermissionDenied'),
+        undefined,
+        { variant: 'error' }
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled || result.assets.length === 0) return;
+
+    setIsUploadingGallery(true);
+    try {
+      const nextGallery = [
+        ...(project.gallery ?? []),
+        ...result.assets.map((asset) => asset.uri),
+      ];
+      await updateProject(project.id, { gallery: nextGallery });
+    } catch (error) {
+      console.error('Failed to upload gallery image:', error);
+      showAppAlert(t('common.error'), t('projectDetail.alerts.uploadImageFailed'), undefined, { variant: 'error' });
+    } finally {
+      setIsUploadingGallery(false);
     }
   };
 
   const handleDeleteTask = (taskId: string) => {
-    Alert.alert(
-      'Delete Task',
-      'Are you sure you want to delete this task?',
+    showAppAlert(
+      t('projectDetail.deleteTask.title'),
+      t('projectDetail.deleteTask.message'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteTask(taskId);
             } catch (error) {
               console.error('Failed to delete task:', error);
-              Alert.alert('Error', 'Failed to delete task');
+              showAppAlert(t('common.error'), t('projectDetail.alerts.deleteTaskFailed'), undefined, { variant: 'error' });
             }
           },
         },
@@ -247,20 +389,20 @@ export default function ProjectDetailScreen() {
 
   const handleShareProject = async () => {
     if (!shareEmail.trim()) {
-      Alert.alert('Error', 'Please enter an email address');
+      showAppAlert(t('common.error'), t('projectDetail.alerts.enterEmail'), undefined, { variant: 'error' });
       return;
     }
 
     try {
       // Here you would implement the actual sharing logic with Supabase
       console.log('Sharing project with:', shareEmail, 'permission:', sharePermission);
-      Alert.alert('Success', `Project shared with ${shareEmail}`);
+      showAppAlert(t('common.success'), t('projectDetail.alerts.sharedWith', { email: shareEmail }), undefined, { variant: 'success' });
       setShowShareModal(false);
       setShareEmail('');
       setSharePermission('view');
     } catch (error) {
       console.error('Share error:', error);
-      Alert.alert('Error', 'Failed to share project');
+      showAppAlert(t('common.error'), t('projectDetail.alerts.shareFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -276,44 +418,53 @@ export default function ProjectDetailScreen() {
     setShowMembersModal(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editTitle.trim()) {
-      Alert.alert('Error', 'Project title is required');
+      showAppAlert(t('common.error'), t('projectDetail.alerts.titleRequired'), undefined, { variant: 'error' });
       return;
     }
 
-    updateProject(project.id, {
-      title: editTitle.trim(),
-      description: editDescription.trim() || undefined,
-    });
-
-    setShowEditModal(false);
-    Alert.alert('Success', 'Project updated successfully');
+    try {
+      await updateProject(project.id, {
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined,
+      });
+      setShowEditModal(false);
+      showAppAlert(t('common.success'), t('projectDetail.alerts.updatedSuccessfully'), undefined, { variant: 'success' });
+    } catch (error) {
+      console.error('Failed to update project:', error);
+      showAppAlert(t('common.error'), t('projectDetail.alerts.updateFailed'), undefined, { variant: 'error' });
+    }
   };
 
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    deleteProject(project.id);
-    setShowDeleteModal(false);
-    router.back();
+  const confirmDelete = async () => {
+    try {
+      await deleteProject(project.id);
+      setShowDeleteModal(false);
+      router.back();
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      showAppAlert(t('common.error'), t('projectDetail.alerts.deleteFailed'), undefined, { variant: 'error' });
+    }
   };
 
   const handleArchive = () => {
-    Alert.alert(
-      'Archive Project',
-      'Are you sure you want to archive this project?',
+    showAppAlert(
+      t('projectDetail.archiveProject.title'),
+      t('projectDetail.archiveProject.message'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Archive',
+          text: t('projectDetail.archiveProject.action'),
           style: 'destructive',
           onPress: () => {
             // Here you would implement archiving logic
             console.log('Archiving project:', project.id);
-            Alert.alert('Success', 'Project archived');
+            showAppAlert(t('common.success'), t('projectDetail.alerts.archived'), undefined, { variant: 'success' });
           },
         },
       ]
@@ -322,27 +473,27 @@ export default function ProjectDetailScreen() {
 
   const handleNudgeMe = async () => {
     if (Platform.OS === 'web') {
-      Alert.alert('Info', 'Notifications are not supported on web. Please use the mobile app.');
+      showAppAlert(t('common.info'), t('projectDetail.alerts.notificationsNotSupported'), undefined, { variant: 'info' });
       return;
     }
 
-    Alert.alert(
-      'Schedule Nudge',
-      'When would you like to be reminded about this project?',
+    showAppAlert(
+      t('projectDetail.scheduleNudge.title'),
+      t('projectDetail.scheduleNudge.message'),
       [
         {
-          text: 'In 1 hour',
+          text: t('projectDetail.scheduleNudge.in1Hour'),
           onPress: () => scheduleNudge(1),
         },
         {
-          text: 'Tomorrow',
+          text: t('projectDetail.scheduleNudge.tomorrow'),
           onPress: () => scheduleNudge(24),
         },
         {
-          text: 'In 3 days',
+          text: t('projectDetail.scheduleNudge.in3Days'),
           onPress: () => scheduleNudge(72),
         },
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ]
     );
   };
@@ -357,13 +508,13 @@ export default function ProjectDetailScreen() {
       );
 
       if (notificationId) {
-        Alert.alert('Success', `Nudge scheduled for ${nudgeTime.toLocaleString()}`);
+        showAppAlert(t('common.success'), t('projectDetail.alerts.nudgeScheduled', { time: nudgeTime.toLocaleString() }), undefined, { variant: 'success' });
       } else {
-        Alert.alert('Error', 'Failed to schedule nudge');
+        showAppAlert(t('common.error'), t('projectDetail.alerts.scheduleNudgeFailed'), undefined, { variant: 'error' });
       }
     } catch (error) {
       console.error('Nudge scheduling error:', error);
-      Alert.alert('Error', 'Failed to schedule nudge');
+      showAppAlert(t('common.error'), t('projectDetail.alerts.scheduleNudgeFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -373,82 +524,10 @@ export default function ProjectDetailScreen() {
     const diffTime = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays === 0) return t('projectDetail.date.today');
+    if (diffDays === 1) return t('projectDetail.date.yesterday');
+    if (diffDays < 7) return t('projectDetail.date.daysAgo', { count: diffDays });
     return date.toLocaleDateString();
-  };
-
-  const TaskItem = ({ task }: { task: Task }) => {
-    const translateX = new Animated.Value(0);
-
-    const panResponder = PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 20;
-      },
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx < 0) {
-          translateX.setValue(Math.max(gestureState.dx, -100));
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx < -50) {
-          Animated.spring(translateX, {
-            toValue: -80,
-            useNativeDriver: true,
-          }).start();
-          setSwipedTaskId(task.id);
-        } else {
-          Animated.spring(translateX, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-          setSwipedTaskId(null);
-        }
-      },
-    });
-
-    return (
-      <View style={styles.taskItemContainer}>
-        <Animated.View
-          style={[
-            styles.taskItem,
-            { transform: [{ translateX }] },
-          ]}
-          {...panResponder.panHandlers}
-        >
-          <TouchableOpacity
-            style={[
-              styles.checkbox,
-              task.status === 'done' && styles.checkboxChecked,
-            ]}
-            onPress={() => handleToggleTask(task.id)}
-          >
-            {task.status === 'done' && (
-              <Check size={16} color="#FFFFFF" />
-            )}
-          </TouchableOpacity>
-          <Text
-            style={[
-              styles.taskTitle,
-              task.status === 'done' && styles.taskTitleCompleted,
-            ]}
-          >
-            {task.title}
-          </Text>
-        </Animated.View>
-        {swipedTaskId === task.id && (
-          <View style={styles.taskActions}>
-            <TouchableOpacity
-              style={styles.deleteAction}
-              onPress={() => handleDeleteTask(task.id)}
-            >
-              <Trash2 size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    );
   };
 
   const renderTabContent = () => {
@@ -458,36 +537,57 @@ export default function ProjectDetailScreen() {
           <View style={styles.tabContent}>
             <View style={styles.tasksSection}>
               {project.tasks.map((task) => (
-                <TaskItem key={task.id} task={task} />
+                <ProjectTaskRow
+                  key={task.id}
+                  task={task}
+                  isSwiped={swipedTaskId === task.id}
+                  onSwipe={setSwipedTaskId}
+                  onToggle={handleToggleTask}
+                  onDelete={handleDeleteTask}
+                />
               ))}
-              
+
               <View style={styles.addTaskContainer}>
-                <Plus size={20} color="#6B7280" />
                 <TextInput
+                  ref={taskInputRef}
                   style={styles.addTaskInput}
-                  placeholder="Add Task"
+                  placeholder={t('projectDetail.addTaskPlaceholder')}
                   placeholderTextColor="#6B7280"
                   value={newTaskTitle}
                   onChangeText={setNewTaskTitle}
                   onSubmitEditing={handleAddTask}
                   returnKeyType="done"
-                  editable={!isCreatingTask}
+                  editable={!isAddingTask}
                 />
-                {isCreatingTask && (
-                  <Text style={styles.loadingText}>Adding...</Text>
-                )}
+                <TouchableOpacity
+                  style={[
+                    styles.addTaskActionButton,
+                    (!newTaskTitle.trim() || isAddingTask) && styles.addTaskActionButtonDisabled,
+                  ]}
+                  onPress={handleAddTask}
+                  disabled={isAddingTask}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  {isAddingTask ? (
+                    <ActivityIndicator size="small" color="#4F46E5" />
+                  ) : newTaskTitle.trim() ? (
+                    <Check size={22} color="#4F46E5" />
+                  ) : (
+                    <Plus size={22} color="#9CA3AF" />
+                  )}
+                </TouchableOpacity>
               </View>
               
               {project.tasks.length > 0 && (
                 <Text style={styles.swipeHint}>
-                  Swipe left on a task for more options
+                  {t('projectDetail.swipeHint')}
                 </Text>
               )}
             </View>
 
             {(relatedBookmarks.length > 0 || relatedNotes.length > 0) && (
               <View style={styles.relatedSection}>
-                <Text style={styles.sectionTitle}>Related Content</Text>
+                <Text style={styles.sectionTitle}>{t('projectDetail.relatedContent')}</Text>
                 
                 {relatedBookmarks.map((bookmark) => (
                   <TouchableOpacity
@@ -501,7 +601,7 @@ export default function ProjectDetailScreen() {
                         {bookmark.title || bookmark.url}
                       </Text>
                       <Text style={styles.relatedItemSubtitle}>
-                        {bookmark.url ? new URL(bookmark.url).hostname : 'Bookmark'}
+                        {bookmark.url ? new URL(bookmark.url).hostname : t('entityTypes.bookmark')}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -517,7 +617,7 @@ export default function ProjectDetailScreen() {
                     <View style={styles.relatedItemContent}>
                       <Text style={styles.relatedItemTitle}>{note.title}</Text>
                       <Text style={styles.relatedItemSubtitle}>
-                        Created {formatDate(note.createdAt)}
+                        {t('projectDetail.created', { relative: formatDate(note.createdAt) })}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -535,7 +635,7 @@ export default function ProjectDetailScreen() {
                 <View key={activity.id} style={styles.timelineItem}>
                   <View style={styles.timelineDot} />
                   <View style={styles.timelineContent}>
-                    <Text style={styles.timelineTitle}>{activity.title}</Text>
+                    <Text style={styles.timelineTitle}>{getActivityTitle(activity, t)}</Text>
                     {activity.subtitle && (
                       <Text style={styles.timelineSubtitle}>{activity.subtitle}</Text>
                     )}
@@ -548,30 +648,66 @@ export default function ProjectDetailScreen() {
             ) : (
               <View style={styles.emptyState}>
                 <Clock size={48} color="#9CA3AF" />
-                <Text style={styles.emptyStateTitle}>No Activity Yet</Text>
+                <Text style={styles.emptyStateTitle}>{t('projectDetail.empty.activityTitle')}</Text>
                 <Text style={styles.emptyStateSubtitle}>
-                  Project activity will appear here as you work
+                  {t('projectDetail.empty.activityDescription')}
                 </Text>
               </View>
             )}
           </View>
         );
 
-      case 'gallery':
+      case 'gallery': {
+        const galleryImages = project.gallery ?? [];
         return (
           <View style={styles.tabContent}>
-            <View style={styles.emptyState}>
-              <Plus size={48} color="#9CA3AF" />
-              <Text style={styles.emptyStateTitle}>No Images Yet</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Add images to showcase your project progress
-              </Text>
-              <TouchableOpacity style={styles.uploadButton}>
-                <Text style={styles.uploadButtonText}>Upload Image</Text>
-              </TouchableOpacity>
-            </View>
+            {galleryImages.length > 0 ? (
+              <View style={styles.gallerySection}>
+                <View style={styles.galleryGrid}>
+                  {galleryImages.map((uri, index) => (
+                    <Image
+                      key={`${uri}-${index}`}
+                      source={{ uri }}
+                      style={styles.galleryImage}
+                      resizeMode="cover"
+                    />
+                  ))}
+                </View>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={handleUploadGalleryImage}
+                  disabled={isUploadingGallery}
+                >
+                  {isUploadingGallery ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.uploadButtonText}>{t('projectDetail.empty.uploadImage')}</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <Plus size={48} color="#9CA3AF" />
+                <Text style={styles.emptyStateTitle}>{t('projectDetail.empty.imagesTitle')}</Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  {t('projectDetail.empty.imagesDescription')}
+                </Text>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={handleUploadGalleryImage}
+                  disabled={isUploadingGallery}
+                >
+                  {isUploadingGallery ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.uploadButtonText}>{t('projectDetail.empty.uploadImage')}</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         );
+      }
 
       default:
         return null;
@@ -629,7 +765,7 @@ export default function ProjectDetailScreen() {
             
             <View style={styles.progressSection}>
               <View style={styles.progressHeader}>
-                <Text style={styles.progressLabel}>Progress</Text>
+                <Text style={styles.progressLabel}>{t('projectDetail.progress')}</Text>
                 <Text style={styles.progressPercentage}>{Math.round(progress)}%</Text>
               </View>
               <View style={styles.progressBar}>
@@ -665,7 +801,7 @@ export default function ProjectDetailScreen() {
               <View style={styles.actionButtons}>
                 <TouchableOpacity style={styles.editButton} onPress={handleShowMembers}>
                   <Users size={16} color="#6B7280" />
-                  <Text style={styles.editButtonText}>Members</Text>
+                  <Text style={styles.editButtonText}>{t('projectDetail.members')}</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity
@@ -673,7 +809,7 @@ export default function ProjectDetailScreen() {
                   onPress={handleNudgeMe}
                 >
                   <Bell size={16} color="#4F46E5" />
-                  <Text style={styles.nudgeButtonText}>Nudge Me</Text>
+                  <Text style={styles.nudgeButtonText}>{t('projectDetail.nudgeMe')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -696,7 +832,7 @@ export default function ProjectDetailScreen() {
                     activeTab === tab && styles.activeTabText,
                   ]}
                 >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {t(`projectDetail.tabs.${tab}` as 'projectDetail.tabs.tasks')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -707,7 +843,10 @@ export default function ProjectDetailScreen() {
         </ScrollView>
 
         {/* Floating Action Button */}
-        <TouchableOpacity style={styles.fab} onPress={handleFabPress}>
+        <TouchableOpacity
+          style={[styles.fab, { bottom: getOverlayFabBottomOffset(insets.bottom) }]}
+          onPress={handleFabPress}
+        >
           <Plus size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
@@ -721,24 +860,24 @@ export default function ProjectDetailScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Share Project</Text>
+                <Text style={styles.modalTitle}>{t('projectDetail.shareProject')}</Text>
                 <TouchableOpacity onPress={() => setShowShareModal(false)}>
                   <X size={24} color="#6B7280" />
                 </TouchableOpacity>
               </View>
               
               <View style={styles.modalBody}>
-                <Text style={styles.inputLabel}>Email Address</Text>
+                <Text style={styles.inputLabel}>{t('projectDetail.emailAddress')}</Text>
                 <TextInput
                   style={styles.modalInput}
-                  placeholder="Enter email address"
+                  placeholder={t('projectDetail.emailPlaceholder')}
                   value={shareEmail}
                   onChangeText={setShareEmail}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
                 
-                <Text style={styles.inputLabel}>Permission</Text>
+                <Text style={styles.inputLabel}>{t('projectDetail.permission')}</Text>
                 <View style={styles.permissionButtons}>
                   <TouchableOpacity
                     style={[
@@ -753,7 +892,7 @@ export default function ProjectDetailScreen() {
                         sharePermission === 'view' && styles.permissionButtonTextActive,
                       ]}
                     >
-                      View Only
+                      {t('projectDetail.viewOnly')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -769,7 +908,7 @@ export default function ProjectDetailScreen() {
                         sharePermission === 'edit' && styles.permissionButtonTextActive,
                       ]}
                     >
-                      Can Edit
+                      {t('projectDetail.canEdit')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -780,14 +919,14 @@ export default function ProjectDetailScreen() {
                   style={styles.modalButtonSecondary}
                   onPress={() => setShowShareModal(false)}
                 >
-                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                  <Text style={styles.modalButtonSecondaryText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalButtonPrimary}
                   onPress={handleShareProject}
                 >
                   <Send size={16} color="#FFFFFF" />
-                  <Text style={styles.modalButtonPrimaryText}>Share</Text>
+                  <Text style={styles.modalButtonPrimaryText}>{t('common.share')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -804,25 +943,25 @@ export default function ProjectDetailScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Edit Project</Text>
+                <Text style={styles.modalTitle}>{t('projectDetail.editProject')}</Text>
                 <TouchableOpacity onPress={() => setShowEditModal(false)}>
                   <X size={24} color="#6B7280" />
                 </TouchableOpacity>
               </View>
               
               <View style={styles.modalBody}>
-                <Text style={styles.inputLabel}>Project Title</Text>
+                <Text style={styles.inputLabel}>{t('projectDetail.projectTitle')}</Text>
                 <TextInput
                   style={styles.modalInput}
-                  placeholder="Enter project title"
+                  placeholder={t('projectDetail.titlePlaceholder')}
                   value={editTitle}
                   onChangeText={setEditTitle}
                 />
                 
-                <Text style={styles.inputLabel}>Description</Text>
+                <Text style={styles.inputLabel}>{t('projectDetail.description')}</Text>
                 <TextInput
                   style={[styles.modalInput, styles.modalTextArea]}
-                  placeholder="Enter project description"
+                  placeholder={t('projectDetail.descriptionPlaceholder')}
                   value={editDescription}
                   onChangeText={setEditDescription}
                   multiline
@@ -835,13 +974,13 @@ export default function ProjectDetailScreen() {
                   style={styles.modalButtonSecondary}
                   onPress={() => setShowEditModal(false)}
                 >
-                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                  <Text style={styles.modalButtonSecondaryText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalButtonPrimary}
                   onPress={handleSaveEdit}
                 >
-                  <Text style={styles.modalButtonPrimaryText}>Save</Text>
+                  <Text style={styles.modalButtonPrimaryText}>{t('common.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -857,9 +996,9 @@ export default function ProjectDetailScreen() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.deleteModalContent}>
-              <Text style={styles.deleteModalTitle}>Delete Project</Text>
+              <Text style={styles.deleteModalTitle}>{t('projectDetail.deleteProject.title')}</Text>
               <Text style={styles.deleteModalText}>
-                Are you sure you want to delete &quot;{project?.title}&quot;? This action cannot be undone.
+                {t('projectDetail.deleteProject.message', { title: project?.title })}
               </Text>
               
               <View style={styles.modalFooter}>
@@ -867,13 +1006,13 @@ export default function ProjectDetailScreen() {
                   style={styles.modalButtonSecondary}
                   onPress={() => setShowDeleteModal(false)}
                 >
-                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                  <Text style={styles.modalButtonSecondaryText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={confirmDelete}
                 >
-                  <Text style={styles.deleteButtonText}>Delete</Text>
+                  <Text style={styles.deleteButtonText}>{t('common.delete')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1087,18 +1226,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
     marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#4F46E5',
-    borderColor: '#4F46E5',
   },
   taskTitle: {
     flex: 1,
@@ -1143,8 +1271,37 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#1E293B',
-    marginLeft: 8,
     padding: 4,
+  },
+  addTaskActionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  addTaskActionButtonDisabled: {
+    opacity: 0.5,
+  },
+  taskTitleContainer: {
+    flex: 1,
+    paddingVertical: 4,
+  },
+  gallerySection: {
+    paddingBottom: 16,
+  },
+  galleryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  galleryImage: {
+    width: (width - 48) / 2,
+    height: (width - 48) / 2,
+    borderRadius: 12,
+    backgroundColor: '#E5E7EB',
   },
   loadingText: {
     fontSize: 12,
@@ -1257,7 +1414,6 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 24,
     right: 24,
     width: 56,
     height: 56,

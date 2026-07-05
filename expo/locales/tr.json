@@ -1,0 +1,893 @@
+{
+  "common": {
+    "appName": "Pinnedly",
+    "back": "Geri",
+    "cancel": "İptal",
+    "ok": "Tamam",
+    "delete": "Sil",
+    "save": "Kaydet",
+    "create": "Oluştur",
+    "edit": "Düzenle",
+    "share": "Paylaş",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "info": "Bilgi",
+    "required": "Gerekli",
+    "comingSoon": "Yakında",
+    "untitled": "Başlıksız",
+    "next": "İleri",
+    "skip": "Atla",
+    "getStarted": "Başlayın",
+    "viewNotes": "Notları Görüntüle",
+    "tryAgain": "Tekrar Dene",
+    "all": "Tümü",
+    "active": "Aktif",
+    "done": "Tamamlandı",
+    "private": "Özel",
+    "public": "Herkese Açık",
+    "shared": "Paylaşılan",
+    "connected": "Bağlı",
+    "notConnected": "Bağlı değil",
+    "exporting": "Dışa aktarılıyor...",
+    "processing": "İşleniyor...",
+    "saving": "Kaydediliyor...",
+    "selectDate": "Tarih seç",
+    "sharing": "Paylaşılıyor...",
+    "sending": "Gönderiliyor...",
+    "verifying": "Doğrulanıyor...",
+    "signingIn": "Giriş yapılıyor...",
+    "creatingAccount": "Hesap oluşturuluyor...",
+    "followers": "{{count}} takipçi",
+    "linkedItems_one": "{{count}} bağlantılı öğe",
+    "linkedItems_other": "{{count}} bağlantılı öğe",
+    "sortLabel": "Sırala: {{sort}}",
+    "errorWithMessage": "Hata: {{message}}",
+    "noContent": "İçerik yok",
+    "unknownUser": "Bilinmeyen Kullanıcı"
+  },
+  "tabs": {
+    "home": "Ana Sayfa",
+    "bookmarks": "Yer İmleri",
+    "projects": "Projeler",
+    "notes": "Notlar",
+    "todos": "Görevler",
+    "profile": "Profil"
+  },
+  "navigation": {
+    "settings": "Ayarlar",
+    "aiAssistant": "Yapay Zeka Asistanı",
+    "todo": "Görev",
+    "shareInbox": "Paylaşım Gelen Kutusu",
+    "findPeople": "Kişi Bul",
+    "discoverLists": "Listeleri Keşfet",
+    "createList": "Liste Oluştur",
+    "bookmarkList": "Yer İmi Listesi",
+    "profile": "Profil",
+    "addNote": "Not Ekle",
+    "addProject": "Proje Ekle"
+  },
+  "sources": {
+    "twitter": "Twitter / X",
+    "instagram": "Instagram",
+    "medium": "Medium",
+    "linkedin": "LinkedIn",
+    "wikipedia": "Vikipedi",
+    "youtube": "YouTube",
+    "reddit": "Reddit",
+    "substack": "Substack",
+    "github": "GitHub",
+    "other": "Web"
+  },
+  "notifications": {
+    "taskReminder": {
+      "title": "Görev Hatırlatıcısı",
+      "body": "Unutmayın: {{taskTitle}}"
+    },
+    "projectNudge": {
+      "title": "Proje Hatırlatması",
+      "body": "Şimdi çalışma zamanı: {{projectTitle}}"
+    },
+    "bookmarkDigest": {
+      "title": "Sonra Oku hatırlatması",
+      "body_one": "Sizi bekleyen 1 okunmamış kayıt var.",
+      "body_other": "Sizi bekleyen {{count}} okunmamış kayıt var."
+    }
+  },
+  "bookmarkCard": {
+    "neverOpened": "Hiç açılmadı",
+    "openedCount": "{{count}} kez açıldı",
+    "readLater": "Sonra oku",
+    "screenshot": "Ekran görüntüsü"
+  },
+  "auth": {
+    "signIn": "Giriş Yap",
+    "signUp": "Kayıt Ol",
+    "createAccount": "Hesap Oluştur",
+    "phoneSignIn": "Telefonla Giriş",
+    "resetPassword": "Şifreyi Sıfırla",
+    "checkYourEmail": "E-postanızı Kontrol Edin",
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifreyi Onayla",
+    "fullName": "Ad Soyad",
+    "phoneNumber": "Telefon Numarası",
+    "verificationCode": "Doğrulama Kodu",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "orContinueWith": "veya şununla devam edin",
+    "google": "Google",
+    "signInWithPhone": "Telefon numarasıyla giriş yap",
+    "dontHaveAccount": "Hesabınız yok mu?",
+    "alreadyHaveAccount": "Zaten hesabınız var mı?",
+    "rememberPassword": "Şifrenizi hatırlıyor musunuz?",
+    "backToSignIn": "Girişe Dön",
+    "sendCode": "Kod Gönder",
+    "verifyAndSignIn": "Doğrula ve Giriş Yap",
+    "changePhoneNumber": "Telefon numarasını değiştir",
+    "sendResetLink": "Sıfırlama Bağlantısı Gönder",
+    "emailSent": "E-posta Gönderildi!",
+    "emailSentMessage": "{{email}} adresine bir şifre sıfırlama bağlantısı gönderdik. Lütfen e-postanızı kontrol edin ve şifrenizi sıfırlamak için talimatları izleyin.",
+    "resetDescription": "E-posta adresinizi girin, size şifrenizi sıfırlamak için bir bağlantı gönderelim.",
+    "phoneHint": "Ülke kodunuzu ekleyin. Örnek: +905551234567",
+    "termsFooter": "Devam ederek Hizmet Şartlarımızı ve Gizlilik Politikamızı kabul etmiş olursunuz",
+    "resendEmail": "E-postayı almadınız mı? Tekrar deneyin",
+    "placeholders": {
+      "email": "E-postanızı girin",
+      "password": "Şifrenizi girin",
+      "createPassword": "Bir şifre oluşturun",
+      "confirmPassword": "Şifrenizi onaylayın",
+      "fullName": "Ad soyadınızı girin",
+      "phone": "+905551234567",
+      "verificationCode": "123456"
+    },
+    "errors": {
+      "fillAllFields": "Lütfen tüm alanları doldurun",
+      "passwordsDoNotMatch": "Şifreler eşleşmiyor",
+      "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
+      "signInFailed": "Giriş Başarısız",
+      "checkCredentials": "Lütfen bilgilerinizi kontrol edip tekrar deneyin",
+      "signUpFailed": "Kayıt Başarısız",
+      "pleaseTryAgain": "Lütfen tekrar deneyin",
+      "appleSignInFailed": "Apple ile Giriş Başarısız",
+      "appleSignUpFailed": "Apple ile Kayıt Başarısız",
+      "googleSignInFailed": "Google ile Giriş Başarısız",
+      "googleSignUpFailed": "Google ile Kayıt Başarısız",
+      "enterEmail": "Lütfen e-posta adresinizi girin",
+      "resetEmailFailed": "Sıfırlama e-postası gönderilemedi. Lütfen tekrar deneyin.",
+      "enterPhone": "Lütfen ülke koduyla birlikte telefon numaranızı girin (ör. +905551234567)",
+      "enterVerificationCode": "Lütfen doğrulama kodunu girin",
+      "verificationFailed": "Doğrulama Başarısız",
+      "invalidCode": "Geçersiz kod",
+      "couldNotSendCode": "Doğrulama kodu gönderilemedi"
+    },
+    "alerts": {
+      "codeSent": "Kod Gönderildi",
+      "enterCodeFromSms": "SMS'ten gelen doğrulama kodunu girin",
+      "failed": "Başarısız"
+    }
+  },
+  "welcome": {
+    "subtitle": "Notlar, yer imleri ve projeler için çevrimdışı öncelikli çalışma alanınız",
+    "loading": "Yükleniyor...",
+    "screens": {
+      "captureEverything": {
+        "title": "Her Şeyi Kaydedin",
+        "subtitle": "Yer imlerini, notları ve fikirleri tek bir yerde saklayın",
+        "description": "Önemli içerikleri bir daha kaybetmeyin. Çevrimdışı öncelikli yaklaşımımız verilerinizin her zaman erişilebilir olmasını sağlar."
+      },
+      "organizeProjects": {
+        "title": "Projeleri Düzenleyin",
+        "subtitle": "Güçlü Kanban panolarıyla görevleri yönetin",
+        "description": "İlerlemeyi takip edin, son tarihler belirleyin ve herhangi bir projede ekip üyeleriyle iş birliği yapın."
+      },
+      "richNoteTaking": {
+        "title": "Zengin Not Alma",
+        "subtitle": "Canlı önizleme ile Markdown yazın",
+        "description": "Biçimlendirme ve bağlantılarla güzel notlar oluşturun, düşüncelerinizi zahmetsizce düzenleyin."
+      },
+      "shareCollaborate": {
+        "title": "Paylaşın ve İş Birliği Yapın",
+        "subtitle": "Sorunsuz birlikte çalışın",
+        "description": "Çalışmalarınızı başkalarıyla paylaşın, geri bildirim alın ve birlikte harika şeyler oluşturun."
+      }
+    }
+  },
+  "onboarding": {
+    "skip": "Atla",
+    "screens": {
+      "saveWhatMatters": {
+        "headline": "Önemli olanı kaydedin, bir daha unutmayın.",
+        "body": "Pinnedly, yer imleri eklemenize, notlar oluşturmanıza ve projeleri yönetmenize kolayca yardımcı olarak her şeyin üstünde kalmanızı sağlar.",
+        "cta": "Başlayın"
+      },
+      "saveBookmarks": {
+        "headline": "Yer imlerini her yerden kaydedin.",
+        "body": "Bir URL yapıştırın, ekran görüntüleri ekleyin ve ne sıklıkla tekrar ziyaret ettiğinizi takip edin.",
+        "cta": "İleri"
+      },
+      "projectsMoveForward": {
+        "headline": "Projelerinizin ilerlediğini görün.",
+        "body": "Projeler oluşturun, görevler ekleyin ve ilerlemenizin büyümesini izleyin.",
+        "cta": "İleri"
+      },
+      "shareCollaborate": {
+        "headline": "Paylaşın ve iş birliği yapın.",
+        "body": "Arkadaşlarınızı takip edin, yer imlerini paylaşın ve projeler üzerinde birlikte çalışın.",
+        "cta": "Başlayın"
+      }
+    }
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "sections": {
+      "account": "Hesap",
+      "subscription": "Abonelik",
+      "notifications": "Bildirimler",
+      "appearance": "Görünüm",
+      "dataPrivacy": "Veri ve Gizlilik",
+      "about": "Hakkında",
+      "developer": "Geliştirici"
+    },
+    "profile": {
+      "title": "Profil",
+      "subtitle": "Profil bilgilerinizi yönetin"
+    },
+    "appleSignIn": "Apple ile Giriş",
+    "googleSignIn": {
+      "title": "Google ile Giriş",
+      "subtitle": "Google hesabınızı bağlayın"
+    },
+    "currentPlan": {
+      "title": "Mevcut Plan",
+      "free": "Ücretsiz Plan",
+      "plan": "{{plan}} Planı"
+    },
+    "billingHistory": {
+      "title": "Fatura Geçmişi",
+      "subtitle": "Ödeme geçmişinizi görüntüleyin"
+    },
+    "pushNotifications": {
+      "title": "Anlık Bildirimler",
+      "subtitle": "Cihazınızda bildirim alın"
+    },
+    "emailNotifications": {
+      "title": "E-posta Bildirimleri",
+      "subtitle": "E-posta yoluyla bildirim alın"
+    },
+    "notificationPreferences": {
+      "title": "Bildirim Tercihleri",
+      "subtitle": "Bildirim ayarlarınızı özelleştirin"
+    },
+    "theme": {
+      "title": "Tema",
+      "light": "Açık",
+      "dark": "Koyu",
+      "system": "Sistem",
+      "chooseTheme": "Tema Seçin"
+    },
+    "fontSize": {
+      "title": "Yazı Boyutu",
+      "percent": "%{{percent}}"
+    },
+    "exportData": {
+      "title": "Verileri Dışa Aktar",
+      "subtitle": "Verilerinizi JSON olarak indirin"
+    },
+    "importData": {
+      "title": "Verileri İçe Aktar",
+      "subtitle": "Yedekten geri yükleyin"
+    },
+    "deleteAccount": {
+      "title": "Hesabı Sil",
+      "subtitle": "Hesabınızı kalıcı olarak silin"
+    },
+    "version": {
+      "title": "Sürüm",
+      "value": "1.0.0"
+    },
+    "termsOfService": {
+      "title": "Hizmet Şartları",
+      "subtitle": "Şartlarımızı ve koşullarımızı okuyun"
+    },
+    "privacyPolicy": {
+      "title": "Gizlilik Politikası",
+      "subtitle": "Verilerinizi nasıl koruduğumuzu öğrenin"
+    },
+    "testCrash": {
+      "title": "Test Çökmesi",
+      "subtitle": "Firebase Crashlytics'e test çökmesi gönderin"
+    },
+    "language": {
+      "title": "Dil",
+      "subtitle": "Uygulama görüntüleme dili",
+      "chooseLanguage": "Dil Seçin",
+      "systemDefault": "Sistem varsayılanı"
+    }
+  },
+  "home": {
+    "aiChat": {
+      "title": "Yapay Zeka Sohbet Asistanı",
+      "description": "Her şeyi sorun ve sohbetleri not olarak kaydedin"
+    },
+    "continue": "Devam Et",
+    "dueAndOverdueTasks": "Vadesi Gelen ve Geciken Görevler",
+    "recentActivity": "Son Etkinlik",
+    "bookmark": "Yer İmi",
+    "note": "Not",
+    "overdue": "Gecikmiş",
+    "dueToday": "Bugün Vadesi Doluyor",
+    "streakBadge": "{{days}} GÜNLÜK SERİ",
+    "streakTitle": "Momentumu koruyun!",
+    "empty": {
+      "noContinueItems": "Devam edilecek öğe yok",
+      "noDueTasks": "Vadesi gelen görev yok",
+      "noRecentActivity": "Son etkinlik yok"
+    }
+  },
+  "activities": {
+    "bookmark_added": "Yer imi eklendi",
+    "bookmark_opened": "Yer imi açıldı",
+    "project_created": "Proje oluşturuldu",
+    "task_completed": "Görev tamamlandı",
+    "note_added": "Not eklendi",
+    "todo_added": "Yapılacak eklendi",
+    "todo_completed": "Yapılacak tamamlandı"
+  },
+  "bookmarks": {
+    "searchPlaceholder": "Kayıtları, etiketleri, notları ara...",
+    "yourSaves": "Kayıtlarınız",
+    "sort": {
+      "recent": "En Yeni",
+      "mostOpened": "En Çok Açılan",
+      "oldestUnread": "En Eski Okunmamış"
+    },
+    "filters": {
+      "all": "Tümü",
+      "readLater": "Sonra Oku",
+      "neverOpened": "Hiç Açılmamış",
+      "tagged": "Etiketli",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "medium": "Medium"
+    },
+    "loading": "Yer imleri yükleniyor...",
+    "empty": {
+      "title": "Henüz kayıt yok",
+      "description": "Paylaş düğmesini kullanarak Twitter, LinkedIn veya Safari'den bağlantı paylaşın ya da manuel olarak ekleyin.",
+      "button": "Yer İmi Ekle"
+    }
+  },
+  "notes": {
+    "empty": {
+      "title": "Henüz not yok",
+      "description": "Düşüncelerinizi ve fikirlerinizi markdown formatında kaydetmeye başlayın.",
+      "button": "İlk Notunuzu Oluşturun"
+    }
+  },
+  "projects": {
+    "viewModes": {
+      "list": "Liste",
+      "kanban": "Kanban"
+    },
+    "filters": {
+      "onTrack": "Yolunda",
+      "atRisk": "Risk altında",
+      "overdue": "Gecikmiş"
+    },
+    "kanban": {
+      "todo": "Yapılacak",
+      "inProgress": "Devam Ediyor",
+      "done": "Tamamlandı"
+    },
+    "loading": "Projeler yükleniyor...",
+    "empty": {
+      "title": "Henüz Proje Yok",
+      "description": "İlk projenizi oluşturarak başlayın.",
+      "button": "Yeni Proje Oluştur"
+    },
+    "addTask": {
+      "placeholder": "Görev başlığını girin...",
+      "button": "Görev Oluştur",
+      "title": "Görev Ekle",
+      "status": "Durum",
+      "taskTitle": "Görev Başlığı",
+      "createFailed": "Görev oluşturulamadı."
+    },
+    "due": "Vade: "
+  },
+  "todos": {
+    "loading": "Görevler yükleniyor...",
+    "emptyDescriptionLong": "İlk görevinizi oluşturmak ve düzenli kalmanız için + düğmesine dokunun",
+    "searchPlaceholder": "Görevleri ara...",
+    "filters": {
+      "active": "Aktif",
+      "done": "Tamamlandı",
+      "all": "Tümü",
+      "allPriorities": "Tüm Öncelikler",
+      "high": "Yüksek",
+      "medium": "Orta",
+      "low": "Düşük"
+    },
+    "due": "Vade: ",
+    "overduePrefix": "Gecikmiş: ",
+    "project": "Proje",
+    "empty": {
+      "title": "Henüz görev yok",
+      "description": "Başlamak için ilk görevinizi ekleyin.",
+      "button": "Görev Ekle"
+    },
+    "deleteConfirm": {
+      "title": "Görevi Sil",
+      "message": "Bu görevi silmek istediğinizden emin misiniz?"
+    }
+  },
+  "profile": {
+    "defaultName": "Pinnedly Kullanıcısı",
+    "tagline": "Bilginizi düzenli tutun",
+    "yourStats": "İstatistikleriniz",
+    "stats": {
+      "bookmarks": "Yer İmleri",
+      "projects": "Projeler",
+      "notes": "Notlar",
+      "totalOpens": "Toplam Açılma"
+    },
+    "goals": "Hedefler",
+    "dailyGoal": "Günlük Hedef",
+    "weeklyGoal": "Haftalık Hedef",
+    "bookmarksGoal": "{{count}} yer imi",
+    "upgradePremium": "Premium'a Yükselt",
+    "upgradeSubtitle": "Güçlü iş birliği özelliklerinin kilidini açın"
+  },
+  "aiChat": {
+    "title": "Yapay Zeka Sohbeti",
+    "systemPrompt": "Sen Pinnedly yapay zeka asistanısın. Her zaman Türkçe yanıt ver; kullanıcı başka dilde yazsa bile yanıtların Türkçe olmalı. Kısa, net, samimi ve pratik ol. Araştırma, beyin fırtınası, yazma ve üretkenlik konularında yardımcı ol.",
+    "placeholder": "Bana her şeyi sorun...",
+    "empty": {
+      "title": "Yapay Zeka Sohbet Asistanı",
+      "description": "Bana her şeyi sorun! Araştırma, beyin fırtınası, yazma ve daha fazlasında yardımcı olabilirim. Sohbetimizi istediğiniz zaman not olarak kaydedebilirsiniz.",
+      "tryAsking": "Şunu sormayı deneyin:",
+      "suggestions": {
+        "quantum": "Kuantum bilgisayarları açıkla",
+        "brainstorm": "Uygulama fikirleri üret",
+        "meditation": "Meditasyonun faydaları"
+      }
+    },
+    "thinking": "Yanıt hazırlanıyor",
+    "roles": {
+      "you": "Siz",
+      "ai": "YZ"
+    },
+    "savedNoteTitle": "YZ Sohbeti: {{title}}",
+    "alerts": {
+      "noConversation": "Sohbet Yok",
+      "noMessagesToSave": "Kaydedilecek mesaj yok.",
+      "savedAsNote": "Sohbet not olarak kaydedildi!",
+      "sendFailed": "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
+      "saveFailed": "Sohbet kaydedilemedi. Lütfen tekrar deneyin."
+    }
+  },
+  "premium": {
+    "title": "Premium'a Yükselt",
+    "subtitle": "Güçlü özelliklerin kilidini açın",
+    "choosePlan": "Planınızı Seçin",
+    "mostPopular": "En Popüler",
+    "startFreeTrial": "Ücretsiz Denemeyi Başlat",
+    "terms": "7 günlük ücretsiz deneme, ardından {{price}}{{period}}. İstediğiniz zaman iptal edin.",
+    "plans": {
+      "monthly": "Aylık",
+      "yearly": "Yıllık",
+      "perMonth": "/ay",
+      "perYear": "/yıl",
+      "savePercent": "%33 Tasarruf"
+    },
+    "features": {
+      "teamCollaboration": {
+        "title": "Ekip İş Birliği",
+        "description": "Projeleri ve listeleri ekip üyelerinizle paylaşın"
+      },
+      "voiceNotes": {
+        "title": "Sesli Notlar",
+        "description": "Sesli notları anında kaydedin ve yazıya dökün"
+      },
+      "smartReminders": {
+        "title": "Akıllı Hatırlatıcılar",
+        "description": "Yapay zeka destekli bildirimler ve hatırlatmalar"
+      },
+      "advancedFeatures": {
+        "title": "Gelişmiş Özellikler",
+        "description": "Güçlü verimlilik araçlarının kilidini açın"
+      },
+      "unlimitedLists": "Sınırsız yer imi listesi",
+      "collaborativeProjects": "İş birlikçi projeler",
+      "voiceNotesFeature": "Sesli notlar",
+      "advancedReminders": "Gelişmiş hatırlatıcılar",
+      "prioritySupport": "Öncelikli destek",
+      "everythingMonthly": "Aylık plandaki her şey",
+      "advancedAnalytics": "Gelişmiş analizler",
+      "customThemes": "Özel temalar",
+      "exportFormats": "Birden fazla formata dışa aktarma",
+      "teamManagement": "Ekip yönetim araçları",
+      "apiAccess": "API erişimi"
+    }
+  },
+  "share": {
+    "shareEntity": "{{entityTitle}} paylaş",
+    "addPeople": "Kişi Ekle",
+    "emailOrUsername": "E-posta veya Kullanıcı Adı",
+    "sharedWith": "Paylaşılan Kişiler",
+    "permission": "İzin",
+    "enterEmailOrUsername": "E-posta veya kullanıcı adı girin",
+    "enterEmail": "E-posta adresi girin",
+    "permissions": {
+      "view": "Görüntüleme",
+      "edit": "Düzenleme"
+    },
+    "sharedBy": "{{name}} tarafından paylaşıldı",
+    "alerts": {
+      "enterEmailOrUsername": "Lütfen bir e-posta veya kullanıcı adı girin",
+      "sharedSuccessfully": "Öğe başarıyla paylaşıldı",
+      "shareFailed": "Paylaşım başarısız",
+      "updatePermissionFailed": "İzin güncellenemedi",
+      "removeShareFailed": "Paylaşım kaldırılamadı"
+    }
+  },
+  "shareInbox": {
+    "title": "Paylaşım Gelen Kutusu",
+    "empty": {
+      "title": "Paylaşılan Öğe Yok",
+      "description": "Sizinle paylaşılan öğeler burada görünecek"
+    }
+  },
+  "discoverLists": {
+    "title": "Listeleri Keşfet",
+    "searchPlaceholder": "Herkese açık listeleri ara...",
+    "loading": "Yükleniyor...",
+    "noListsFound": "Liste bulunamadı",
+    "noPublicLists": "Henüz herkese açık liste yok",
+    "tryDifferentKeywords": "Farklı anahtar kelimelerle aramayı deneyin",
+    "beFirstToCreate": "Herkese açık liste oluşturan ilk kişi olun!",
+    "createList": "Liste Oluştur"
+  },
+  "peopleSearch": {
+    "title": "Kişi Bul",
+    "searchPlaceholder": "Ad veya kullanıcı adıyla ara...",
+    "empty": {
+      "title": "Kişi Ara",
+      "description": "Bağlantı kurmak için ad veya kullanıcı adı girin"
+    },
+    "noResults": {
+      "title": "Sonuç Yok",
+      "description": "\"{{query}}\" için kullanıcı bulunamadı"
+    }
+  },
+  "addBookmark": {
+    "title": "Yer İmi Ekle",
+    "labels": {
+      "url": "URL",
+      "or": "VEYA",
+      "uploadScreenshot": "Ekran Görüntüsü Yükle",
+      "title": "Başlık",
+      "description": "Açıklama",
+      "commentOptional": "Yorum (isteğe bağlı)",
+      "tags": "Etiketler"
+    },
+    "metadataFetchFailed": "Meta Veri Alınamadı",
+    "metadataFetchMessage": "Sayfa ayrıntıları otomatik olarak alınamadı. Yer imini yine de manuel olarak ekleyebilirsiniz.",
+    "urlPlaceholder": "URL'yi buraya yapıştırın...",
+    "titlePlaceholder": "Başlık girin...",
+    "descriptionPlaceholder": "Açıklama girin...",
+    "notePlaceholder": "Hızlı bir not ekleyin...",
+    "tagsPlaceholder": "Etiket ekleyin...",
+    "addBookmark": "Yer İmi Ekle",
+    "alerts": {
+      "permissionNeeded": "İzin gerekli",
+      "cameraPermission": "Ekran görüntüsü yüklemek için galeri izni verin.",
+      "signInRequired": "Giriş gerekli",
+      "signInToSave": "Yer imlerini kaydetmek için lütfen giriş yapın.",
+      "provideUrlOrScreenshot": "Lütfen bir URL sağlayın veya ekran görüntüsü yükleyin.",
+      "saveFailed": "Kaydetme başarısız",
+      "couldNotSave": "Yer imi kaydedilemedi."
+    }
+  },
+  "addNote": {
+    "title": "Not Ekle",
+    "noteTitle": "Not Başlığı",
+    "visibility": "Görünürlük",
+    "content": "İçerik",
+    "visibilityOptions": {
+      "private": "Bu notu yalnızca siz görebilirsiniz",
+      "shared": "Belirli kişilerle paylaşın",
+      "public": "Herkes bu notu görüntüleyebilir"
+    },
+    "editorHint": "Metni seçin ve biçimlendirmek için araç çubuğunu kullanın. Metin yazdıkça biçimlendirilmiş görünür.",
+    "toolbarHint": "Biçimlendirmek için metni seçin",
+    "titlePlaceholder": "Not başlığını girin...",
+    "contentPlaceholder": "Notunuzu yazın...",
+    "createNote": "Not Oluştur",
+    "alerts": {
+      "enterTitle": "Lütfen bir not başlığı girin.",
+      "createFailed": "Not oluşturulamadı. Lütfen tekrar deneyin."
+    }
+  },
+  "addProject": {
+    "title": "Proje Ekle",
+    "projectTitle": "Proje Başlığı",
+    "descriptionOptional": "Açıklama (isteğe bağlı)",
+    "deadlineOptional": "Son Tarih (isteğe bağlı)",
+    "deadlines": {
+      "oneWeek": "1 hafta",
+      "oneMonth": "1 ay",
+      "threeMonths": "3 ay"
+    },
+    "info": "Projeyi oluşturduktan sonra görev ekleyebilir ve ilerlemeyi takip edebilirsiniz.",
+    "titlePlaceholder": "Proje başlığını girin...",
+    "descriptionPlaceholder": "Projenizi açıklayın...",
+    "createProject": "Proje Oluştur",
+    "alerts": {
+      "enterTitle": "Lütfen bir proje başlığı girin.",
+      "createFailed": "Proje oluşturulamadı. Lütfen tekrar deneyin."
+    }
+  },
+  "addTodo": {
+    "newTodo": "Yeni Görev",
+    "editTodo": "Görevi Düzenle",
+    "title": "Başlık",
+    "descriptionOptional": "Açıklama (isteğe bağlı)",
+    "priority": "Öncelik",
+    "setDueDate": "Son tarih belirle",
+    "markCompleted": "Tamamlandı olarak işaretle",
+    "quickDates": {
+      "today": "Bugün",
+      "tomorrow": "Yarın",
+      "nextWeek": "Gelecek Hafta",
+      "clear": "Temizle"
+    },
+    "saveFailed": "Görev kaydedilemedi",
+    "titlePlaceholder": "Ne yapmanız gerekiyor?",
+    "detailsPlaceholder": "Ayrıntı ekleyin...",
+    "dueDatePlaceholder": "Son tarih seçin",
+    "alerts": {
+      "enterTitle": "Lütfen bir görev başlığı girin."
+    }
+  },
+  "createList": {
+    "title": "Liste Oluştur",
+    "listName": "Liste Adı *",
+    "description": "Açıklama",
+    "makePublic": "Herkese Açık Yap",
+    "makePublicDescription": "Herkese açık listeler diğer kullanıcılar tarafından keşfedilebilir ve takip edilebilir",
+    "publicNotice": "📢 Herkese açık listeler keşfet bölümünde görünür ve diğer kullanıcılar tarafından takip edilebilir.",
+    "namePlaceholder": "Liste adını girin",
+    "descriptionPlaceholder": "Açıklama ekleyin (isteğe bağlı)",
+    "alerts": {
+      "enterName": "Lütfen bir liste adı girin",
+      "createFailed": "Liste oluşturulamadı. Lütfen tekrar deneyin."
+    }
+  },
+  "bookmarkDetail": {
+    "notFound": "Yer imi bulunamadı",
+    "bookmark": "Yer İmi",
+    "openedCount": "{{count}} kez açıldı",
+    "whySaved": "Bunu neden kaydettim",
+    "tapToAddNote": "Not eklemek için dokunun...",
+    "archive": "Arşivle",
+    "noUrl": "URL Yok",
+    "noLinkToOpen": "Bu yer iminin açılacak bir bağlantısı yok.",
+    "deleteTitle": "Yer imini sil",
+    "deleteMessage": "Bu işlem geri alınamaz.",
+    "notePlaceholder": "Gelecekteki kendiniz için bir not ekleyin...",
+    "saveNote": "Notu kaydet",
+    "openLink": "Bağlantıyı aç"
+  },
+  "noteDetail": {
+    "notFound": "Not bulunamadı",
+    "editNote": "Notu Düzenle",
+    "deleteTitle": "Notu Sil",
+    "deleteMessage": "Bu notu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "titlePlaceholder": "Not başlığı",
+    "contentPlaceholder": "Notunuzu buraya yazın...",
+    "created": "Oluşturuldu {{date}}",
+    "updated": "Güncellendi {{date}}",
+    "you": "Siz",
+    "sharedWith": "Paylaşılan kişiler",
+    "addPeople": "Kişi ekle",
+    "alerts": {
+      "titleEmpty": "Not başlığı boş olamaz"
+    }
+  },
+  "projectDetail": {
+    "notFound": "Proje bulunamadı",
+    "progress": "İlerleme",
+    "members": "Üyeler",
+    "nudgeMe": "Hatırlat",
+    "tabs": {
+      "tasks": "Görevler",
+      "timeline": "Zaman Çizelgesi",
+      "gallery": "Galeri"
+    },
+    "deadline": {
+      "overdue": "Gecikmiş",
+      "daysLeft_one": "{{count}} gün kaldı",
+      "daysLeft_other": "{{count}} gün kaldı"
+    },
+    "quickAdd": {
+      "title": "Hızlı Ekle",
+      "message": "Ne eklemek istersiniz?",
+      "task": "Görev",
+      "note": "Not",
+      "bookmark": "Yer İmi"
+    },
+    "deleteTask": {
+      "title": "Görevi Sil",
+      "message": "Bu görevi silmek istediğinizden emin misiniz?"
+    },
+    "shareProject": "Projeyi Paylaş",
+    "emailAddress": "E-posta Adresi",
+    "permission": "İzin",
+    "viewOnly": "Yalnızca Görüntüleme",
+    "canEdit": "Düzenleyebilir",
+    "editProject": "Projeyi Düzenle",
+    "projectTitle": "Proje Başlığı",
+    "description": "Açıklama",
+    "deleteProject": {
+      "title": "Projeyi Sil",
+      "message": "\"{{title}}\" projesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    },
+    "archiveProject": {
+      "title": "Projeyi Arşivle",
+      "message": "Bu projeyi arşivlemek istediğinizden emin misiniz?",
+      "action": "Arşivle"
+    },
+    "scheduleNudge": {
+      "title": "Hatırlatma Planla",
+      "message": "Bu proje hakkında ne zaman hatırlatılmak istersiniz?",
+      "in1Hour": "1 saat içinde",
+      "tomorrow": "Yarın",
+      "in3Days": "3 gün içinde"
+    },
+    "adding": "Ekleniyor...",
+    "swipeHint": "Daha fazla seçenek için görevi sola kaydırın",
+    "relatedContent": "İlgili İçerik",
+    "created": "Oluşturuldu {{relative}}",
+    "empty": {
+      "activityTitle": "Henüz Etkinlik Yok",
+      "activityDescription": "Çalıştıkça proje etkinliği burada görünecek",
+      "imagesTitle": "Henüz Görsel Yok",
+      "imagesDescription": "Proje ilerlemenizi göstermek için görseller ekleyin",
+      "uploadImage": "Görsel Yükle"
+    },
+    "date": {
+      "today": "Bugün",
+      "yesterday": "Dün",
+      "daysAgo": "{{count}} gün önce"
+    },
+    "addTaskPlaceholder": "Görev Ekle",
+    "emailPlaceholder": "E-posta adresi girin",
+    "titlePlaceholder": "Proje başlığını girin",
+    "descriptionPlaceholder": "Proje açıklamasını girin",
+    "alerts": {
+      "enterTaskTitle": "Lütfen bir görev başlığı girin",
+      "createTaskFailed": "Görev oluşturulamadı",
+      "updateTaskFailed": "Görev güncellenemedi",
+      "deleteTaskFailed": "Görev silinemedi",
+      "enterEmail": "Lütfen bir e-posta adresi girin",
+      "sharedWith": "Proje {{email}} ile paylaşıldı",
+      "shareFailed": "Proje paylaşılamadı",
+      "titleRequired": "Proje başlığı gerekli",
+      "updatedSuccessfully": "Proje başarıyla güncellendi",
+      "updateFailed": "Proje güncellenemedi",
+      "deleteFailed": "Proje silinemedi",
+      "archived": "Proje arşivlendi",
+      "notificationsNotSupported": "Bildirimler web'de desteklenmiyor. Lütfen mobil uygulamayı kullanın.",
+      "nudgeScheduled": "Hatırlatma {{time}} için planlandı",
+      "scheduleNudgeFailed": "Hatırlatma planlanamadı",
+      "galleryPermissionDenied": "Galeriye erişim için izin gerekli",
+      "uploadImageFailed": "Görsel yüklenemedi"
+    }
+  },
+  "bookmarkList": {
+    "deleteTitle": "Listeyi Sil",
+    "deleteMessage": "Bu listeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "shareTitle": "Paylaş",
+    "alerts": {
+      "loadFailed": "Liste verileri yüklenemedi",
+      "followFailed": "Takip durumu güncellenemedi",
+      "deleteFailed": "Liste silinemedi",
+      "sharingComingSoon": "Paylaşım özelliği yakında geliyor!"
+    },
+    "empty": {
+      "title": "Henüz yer imi yok",
+      "description": "Bu listede henüz yer imi yok."
+    }
+  },
+  "userProfile": {
+    "notFound": "Profil bulunamadı",
+    "followers": "Takipçiler",
+    "following": "Takip Edilen"
+  },
+  "projectCard": {
+    "overdue": "Gecikmiş",
+    "dueToday": "Bugün Vadesi Doluyor",
+    "daysLeft_one": "{{count}} gün kaldı",
+    "daysLeft_other": "{{count}} gün kaldı",
+    "weeksLeft_one": "{{count}} hafta kaldı",
+    "weeksLeft_other": "{{count}} hafta kaldı",
+    "monthsLeft_one": "{{count}} ay kaldı",
+    "monthsLeft_other": "{{count}} ay kaldı",
+    "tasksDone": "{{completed}}/{{total}} görev tamamlandı"
+  },
+  "entityTypes": {
+    "bookmark": "Yer İmi",
+    "note": "Not",
+    "project": "Proje",
+    "list": "Liste"
+  },
+  "projectMembers": {
+    "title": "Proje Üyeleri",
+    "currentMembers": "Mevcut Üyeler",
+    "addMember": "Üye Ekle",
+    "canView": "Görüntüleyebilir",
+    "canEdit": "Düzenleyebilir",
+    "permissionLabel": "İzin:",
+    "adding": "Ekleniyor...",
+    "dismiss": "Kapat",
+    "removeMember": {
+      "title": "Üyeyi Kaldır",
+      "message": "{{email}} adresini bu projeden kaldırmak istediğinizden emin misiniz?",
+      "action": "Kaldır"
+    },
+    "alerts": {
+      "enterEmail": "Lütfen bir e-posta adresi girin",
+      "memberAdded": "Üye başarıyla eklendi",
+      "addMemberFailed": "Üye eklenemedi. Lütfen tekrar deneyin.",
+      "memberRemoved": "Üye başarıyla kaldırıldı",
+      "removeMemberFailed": "Üye kaldırılamadı. Lütfen tekrar deneyin.",
+      "permissionUpdated": "İzin başarıyla güncellendi",
+      "updatePermissionFailed": "İzin güncellenemedi. Lütfen tekrar deneyin."
+    }
+  },
+  "shareIntent": {
+    "saving": "Paylaşılan içerik kaydediliyor...",
+    "signInRequired": "Giriş gerekli",
+    "signInToSaveLinks": "Paylaşılan bağlantıları Pinnedly'e kaydetmek için lütfen giriş yapın.",
+    "savedToPinnedly": "Pinnedly'e kaydedildi",
+    "linkSavedToReadLater": "Bağlantı Sonra Oku'ya kaydedildi.",
+    "view": "Görüntüle",
+    "couldNotSave": "Kaydedilemedi",
+    "unableToSave": "Paylaşılan içerik kaydedilemedi."
+  },
+  "quickAdd": {
+    "addBookmark": "Yer İmi Ekle",
+    "addProject": "Proje Ekle",
+    "addNote": "Not Ekle"
+  },
+  "errorBoundary": {
+    "title": "Bir şeyler ters gitti",
+    "message": "Beklenmeyen bir hata oluştu",
+    "tryAgain": "Tekrar Dene"
+  },
+  "notFound": {
+    "title": "Hay aksi!",
+    "message": "Bu ekran mevcut değil.",
+    "goHome": "Ana ekrana git!"
+  },
+  "languages": {
+    "en": "İngilizce",
+    "tr": "Türkçe",
+    "ar": "Arapça",
+    "ru": "Rusça",
+    "de": "Almanca",
+    "pt": "Portekizce",
+    "es": "İspanyolca",
+    "it": "İtalyanca",
+    "ja": "Japonca",
+    "zh": "Çince"
+  },
+  "clipboard": {
+    "title": "Panoda bağlantı var",
+    "message": "Bu bağlantıyı Pinnedly'ye kaydetmek ister misiniz?",
+    "save": "Kaydet",
+    "openAddBookmark": "İncele ve kaydet",
+    "dismiss": "Şimdi değil"
+  }
+}

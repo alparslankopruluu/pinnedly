@@ -1,0 +1,876 @@
+{
+  "common": {
+    "appName": "Pinnedly",
+    "back": "返回",
+    "cancel": "取消",
+    "ok": "确定",
+    "delete": "删除",
+    "save": "保存",
+    "create": "创建",
+    "edit": "编辑",
+    "share": "分享",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "info": "信息",
+    "required": "必填",
+    "comingSoon": "即将推出",
+    "untitled": "无标题",
+    "next": "下一步",
+    "skip": "跳过",
+    "getStarted": "开始使用",
+    "viewNotes": "查看笔记",
+    "tryAgain": "重试",
+    "all": "全部",
+    "active": "进行中",
+    "done": "已完成",
+    "private": "私密",
+    "public": "公开",
+    "shared": "已分享",
+    "connected": "已连接",
+    "notConnected": "未连接",
+    "exporting": "导出中...",
+    "processing": "处理中...",
+    "saving": "保存中...",
+    "sharing": "分享中...",
+    "sending": "发送中...",
+    "verifying": "验证中...",
+    "signingIn": "登录中...",
+    "creatingAccount": "创建账户中...",
+    "followers": "{{count}} 位关注者",
+    "linkedItems_one": "{{count}} 个关联项",
+    "linkedItems_other": "{{count}} 个关联项",
+    "sortLabel": "排序：{{sort}}",
+    "errorWithMessage": "错误：{{message}}",
+    "noContent": "无内容",
+    "unknownUser": "未知用户"
+  },
+  "tabs": {
+    "home": "首页",
+    "bookmarks": "书签",
+    "projects": "项目",
+    "notes": "笔记",
+    "todos": "待办",
+    "profile": "个人资料"
+  },
+  "navigation": {
+    "settings": "设置",
+    "aiAssistant": "AI 助手",
+    "todo": "待办",
+    "shareInbox": "分享收件箱",
+    "findPeople": "查找用户",
+    "discoverLists": "发现列表",
+    "createList": "创建列表",
+    "bookmarkList": "书签列表",
+    "profile": "个人资料",
+    "addNote": "添加笔记",
+    "addProject": "添加项目"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signUp": "注册",
+    "createAccount": "创建账户",
+    "phoneSignIn": "手机号登录",
+    "resetPassword": "重置密码",
+    "checkYourEmail": "请查收邮件",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "fullName": "姓名",
+    "phoneNumber": "手机号码",
+    "verificationCode": "验证码",
+    "forgotPassword": "忘记密码？",
+    "orContinueWith": "或使用以下方式继续",
+    "google": "Google",
+    "signInWithPhone": "使用手机号登录",
+    "dontHaveAccount": "还没有账户？",
+    "alreadyHaveAccount": "已有账户？",
+    "rememberPassword": "想起密码了？",
+    "backToSignIn": "返回登录",
+    "sendCode": "发送验证码",
+    "verifyAndSignIn": "验证并登录",
+    "changePhoneNumber": "更换手机号",
+    "sendResetLink": "发送重置链接",
+    "emailSent": "邮件已发送！",
+    "emailSentMessage": "我们已向 {{email}} 发送了密码重置链接。请查收邮件并按照说明重置密码。",
+    "resetDescription": "输入您的邮箱地址，我们将发送密码重置链接。",
+    "phoneHint": "请包含国家代码。示例：+905551234567",
+    "termsFooter": "继续即表示您同意我们的服务条款和隐私政策",
+    "placeholders": {
+      "email": "输入邮箱",
+      "password": "输入密码",
+      "createPassword": "创建密码",
+      "confirmPassword": "确认密码",
+      "fullName": "输入姓名",
+      "phone": "+905551234567",
+      "verificationCode": "123456"
+    },
+    "errors": {
+      "fillAllFields": "请填写所有字段",
+      "passwordsDoNotMatch": "两次输入的密码不一致",
+      "passwordTooShort": "密码至少需要 6 个字符",
+      "signInFailed": "登录失败",
+      "checkCredentials": "请检查您的凭据后重试",
+      "signUpFailed": "注册失败",
+      "pleaseTryAgain": "请重试",
+      "appleSignInFailed": "Apple 登录失败",
+      "appleSignUpFailed": "Apple 注册失败",
+      "googleSignInFailed": "Google 登录失败",
+      "googleSignUpFailed": "Google 注册失败",
+      "enterEmail": "请输入邮箱地址",
+      "resetEmailFailed": "发送重置邮件失败，请重试。",
+      "enterPhone": "请输入带国家代码的手机号（例如 +905551234567）",
+      "enterVerificationCode": "请输入验证码",
+      "verificationFailed": "验证失败",
+      "invalidCode": "验证码无效",
+      "couldNotSendCode": "无法发送验证码"
+    },
+    "alerts": {
+      "codeSent": "验证码已发送",
+      "enterCodeFromSms": "请输入短信中的验证码",
+      "failed": "失败"
+    },
+    "resendEmail": "没收到邮件？重试"
+  },
+  "welcome": {
+    "subtitle": "您的离线优先工作空间，用于笔记、书签和项目",
+    "loading": "加载中...",
+    "screens": {
+      "captureEverything": {
+        "title": "捕获一切",
+        "subtitle": "在一个地方保存书签、笔记和想法",
+        "description": "再也不会丢失重要内容。我们的离线优先方案确保您的数据始终可用。"
+      },
+      "organizeProjects": {
+        "title": "组织项目",
+        "subtitle": "使用强大的看板管理任务",
+        "description": "跟踪进度、设置截止日期，并与团队成员在任何项目上协作。"
+      },
+      "richNoteTaking": {
+        "title": "丰富的笔记功能",
+        "subtitle": "使用 Markdown 编写并实时预览",
+        "description": "创建格式精美、带链接的笔记，轻松整理您的想法。"
+      },
+      "shareCollaborate": {
+        "title": "分享与协作",
+        "subtitle": "无缝协作",
+        "description": "与他人分享您的工作，获取反馈，一起创造精彩成果。"
+      }
+    }
+  },
+  "onboarding": {
+    "skip": "跳过",
+    "screens": {
+      "saveWhatMatters": {
+        "headline": "保存重要内容，不再遗忘。",
+        "body": "Pinnedly 帮助您轻松添加书签、创建笔记和管理项目，让您掌控一切。",
+        "cta": "开始使用"
+      },
+      "saveBookmarks": {
+        "headline": "随时随地保存书签。",
+        "body": "粘贴 URL、添加截图，并跟踪您再次访问的频率。",
+        "cta": "下一步"
+      },
+      "projectsMoveForward": {
+        "headline": "见证项目不断前进。",
+        "body": "创建项目、添加任务，看着您的进度不断增长。",
+        "cta": "下一步"
+      },
+      "shareCollaborate": {
+        "headline": "分享与协作。",
+        "body": "关注好友、分享书签，一起完成项目。",
+        "cta": "开始使用"
+      }
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "sections": {
+      "account": "账户",
+      "subscription": "订阅",
+      "notifications": "通知",
+      "appearance": "外观",
+      "dataPrivacy": "数据与隐私",
+      "about": "关于",
+      "developer": "开发者"
+    },
+    "profile": {
+      "title": "个人资料",
+      "subtitle": "管理您的个人资料信息"
+    },
+    "appleSignIn": "Apple 登录",
+    "googleSignIn": {
+      "title": "Google 登录",
+      "subtitle": "连接您的 Google 账户"
+    },
+    "currentPlan": {
+      "title": "当前方案",
+      "free": "免费方案",
+      "plan": "{{plan}} 方案"
+    },
+    "billingHistory": {
+      "title": "账单记录",
+      "subtitle": "查看您的付款记录"
+    },
+    "pushNotifications": {
+      "title": "推送通知",
+      "subtitle": "在设备上接收通知"
+    },
+    "emailNotifications": {
+      "title": "邮件通知",
+      "subtitle": "通过邮件接收通知"
+    },
+    "notificationPreferences": {
+      "title": "通知偏好",
+      "subtitle": "自定义通知设置"
+    },
+    "theme": {
+      "title": "主题",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统",
+      "chooseTheme": "选择主题"
+    },
+    "fontSize": {
+      "title": "字体大小",
+      "percent": "{{percent}}%"
+    },
+    "exportData": {
+      "title": "导出数据",
+      "subtitle": "将数据下载为 JSON"
+    },
+    "importData": {
+      "title": "导入数据",
+      "subtitle": "从备份恢复"
+    },
+    "deleteAccount": {
+      "title": "删除账户",
+      "subtitle": "永久删除您的账户"
+    },
+    "version": {
+      "title": "版本",
+      "value": "1.0.0"
+    },
+    "termsOfService": {
+      "title": "服务条款",
+      "subtitle": "阅读我们的条款和条件"
+    },
+    "privacyPolicy": {
+      "title": "隐私政策",
+      "subtitle": "了解我们如何保护您的数据"
+    },
+    "testCrash": {
+      "title": "测试崩溃",
+      "subtitle": "向 Firebase Crashlytics 发送测试崩溃"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "App display language",
+      "chooseLanguage": "Choose Language",
+      "systemDefault": "System default"
+    }
+  },
+  "home": {
+    "aiChat": {
+      "title": "AI 聊天助手",
+      "description": "随时提问，并将对话保存为笔记"
+    },
+    "continue": "继续",
+    "dueAndOverdueTasks": "到期与逾期任务",
+    "recentActivity": "最近活动",
+    "bookmark": "书签",
+    "note": "笔记",
+    "overdue": "已逾期",
+    "dueToday": "今日到期",
+    "streakBadge": "连续 {{days}} 天",
+    "streakTitle": "保持势头！",
+    "empty": {
+      "noContinueItems": "没有可继续的项目",
+      "noDueTasks": "没有到期任务",
+      "noRecentActivity": "没有最近活动"
+    }
+  },
+  "bookmarks": {
+    "searchPlaceholder": "搜索保存、标签、笔记...",
+    "yourSaves": "您的保存",
+    "sort": {
+      "recent": "最近",
+      "mostOpened": "打开最多",
+      "oldestUnread": "最久未读"
+    },
+    "filters": {
+      "all": "全部",
+      "readLater": "稍后阅读",
+      "neverOpened": "从未打开",
+      "tagged": "已标记",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "medium": "Medium"
+    },
+    "loading": "正在加载书签...",
+    "empty": {
+      "title": "还没有保存",
+      "description": "通过分享按钮从 Twitter、LinkedIn 或 Safari 分享链接，或手动添加。",
+      "button": "添加书签"
+    }
+  },
+  "notes": {
+    "empty": {
+      "title": "还没有笔记",
+      "description": "开始以 Markdown 格式记录您的想法和灵感。",
+      "button": "创建第一条笔记"
+    }
+  },
+  "projects": {
+    "viewModes": {
+      "list": "列表",
+      "kanban": "看板"
+    },
+    "filters": {
+      "onTrack": "进展顺利",
+      "atRisk": "有风险",
+      "overdue": "已逾期"
+    },
+    "kanban": {
+      "todo": "待办",
+      "inProgress": "进行中",
+      "done": "已完成"
+    },
+    "loading": "正在加载项目...",
+    "empty": {
+      "title": "还没有项目",
+      "description": "创建您的第一个项目开始使用。",
+      "button": "创建新项目"
+    },
+    "addTask": {
+      "placeholder": "输入任务标题...",
+      "button": "创建任务",
+      "title": "添加任务",
+      "status": "状态",
+      "taskTitle": "任务标题",
+      "createFailed": "创建任务失败。"
+    },
+    "due": "截止："
+  },
+  "todos": {
+    "searchPlaceholder": "搜索待办...",
+    "filters": {
+      "active": "进行中",
+      "done": "已完成",
+      "all": "全部",
+      "allPriorities": "所有优先级",
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "due": "截止：",
+    "overduePrefix": "逾期：",
+    "project": "项目",
+    "empty": {
+      "title": "还没有待办",
+      "description": "添加您的第一个任务开始使用。",
+      "button": "添加待办"
+    },
+    "deleteConfirm": {
+      "title": "删除待办",
+      "message": "确定要删除此任务吗？"
+    },
+    "loading": "正在加载待办...",
+    "emptyDescriptionLong": "点击 + 按钮创建您的第一个任务，保持井井有条"
+  },
+  "profile": {
+    "defaultName": "Pinnedly 用户",
+    "tagline": "让知识井井有条",
+    "yourStats": "您的统计",
+    "stats": {
+      "bookmarks": "书签",
+      "projects": "项目",
+      "notes": "笔记",
+      "totalOpens": "总打开次数"
+    },
+    "goals": "目标",
+    "dailyGoal": "每日目标",
+    "weeklyGoal": "每周目标",
+    "bookmarksGoal": "{{count}} 个书签",
+    "upgradePremium": "升级到 Premium",
+    "upgradeSubtitle": "解锁强大的协作功能"
+  },
+  "aiChat": {
+    "title": "AI 聊天",
+    "systemPrompt": "你是 Pinnedly 的 AI 助手。即使用户使用其他语言提问，也请始终用中文回答。回答要简洁、友好、实用。",
+    "placeholder": "随便问我...",
+    "empty": {
+      "title": "AI 聊天助手",
+      "description": "随便问我！我可以帮助您进行研究、头脑风暴、写作等。您可以随时将我们的对话保存为笔记。",
+      "tryAsking": "试试问：",
+      "suggestions": {
+        "quantum": "解释量子计算",
+        "brainstorm": "头脑风暴应用创意",
+        "meditation": "冥想的好处"
+      }
+    },
+    "roles": {
+      "you": "您",
+      "ai": "AI"
+    },
+    "savedNoteTitle": "AI 聊天：{{title}}",
+    "alerts": {
+      "noConversation": "没有对话",
+      "noMessagesToSave": "没有可保存的消息。",
+      "savedAsNote": "对话已保存为笔记！",
+      "sendFailed": "发送消息失败，请重试。",
+      "saveFailed": "保存对话失败，请重试。"
+    }
+  },
+  "premium": {
+    "title": "升级到 Premium",
+    "subtitle": "解锁强大功能",
+    "choosePlan": "选择您的方案",
+    "mostPopular": "最受欢迎",
+    "startFreeTrial": "开始免费试用",
+    "terms": "7 天免费试用，之后 {{price}}{{period}}。随时可取消。",
+    "plans": {
+      "monthly": "月付",
+      "yearly": "年付",
+      "perMonth": "/月",
+      "perYear": "/年",
+      "savePercent": "节省 33%"
+    },
+    "features": {
+      "teamCollaboration": {
+        "title": "团队协作",
+        "description": "与团队成员分享项目和列表"
+      },
+      "voiceNotes": {
+        "title": "语音笔记",
+        "description": "即时录制并转录语音备忘录"
+      },
+      "smartReminders": {
+        "title": "智能提醒",
+        "description": "AI 驱动的通知和提醒"
+      },
+      "advancedFeatures": {
+        "title": "高级功能",
+        "description": "解锁强大的生产力工具"
+      },
+      "unlimitedLists": "无限书签列表",
+      "collaborativeProjects": "协作项目",
+      "voiceNotesFeature": "语音笔记",
+      "advancedReminders": "高级提醒",
+      "prioritySupport": "优先支持",
+      "everythingMonthly": "月付方案的全部功能",
+      "advancedAnalytics": "高级分析",
+      "customThemes": "自定义主题",
+      "exportFormats": "导出为多种格式",
+      "teamManagement": "团队管理工具",
+      "apiAccess": "API 访问"
+    }
+  },
+  "share": {
+    "shareEntity": "分享 {{entityTitle}}",
+    "enterEmailOrUsername": "输入邮箱或用户名",
+    "enterEmail": "输入邮箱地址",
+    "permissions": {
+      "view": "查看",
+      "edit": "编辑"
+    },
+    "sharedBy": "由 {{name}} 分享",
+    "alerts": {
+      "enterEmailOrUsername": "请输入邮箱或用户名",
+      "sharedSuccessfully": "分享成功",
+      "shareFailed": "分享失败",
+      "updatePermissionFailed": "更新权限失败",
+      "removeShareFailed": "移除分享失败"
+    },
+    "addPeople": "Add People",
+    "emailOrUsername": "Email or Username",
+    "sharedWith": "Shared With",
+    "permission": "Permission"
+  },
+  "shareInbox": {
+    "title": "分享收件箱",
+    "empty": {
+      "title": "没有分享内容",
+      "description": "与您分享的内容将显示在这里"
+    }
+  },
+  "discoverLists": {
+    "title": "发现列表",
+    "searchPlaceholder": "搜索公开列表...",
+    "loading": "加载中...",
+    "noListsFound": "未找到列表",
+    "noPublicLists": "还没有公开列表",
+    "tryDifferentKeywords": "请尝试使用其他关键词搜索",
+    "beFirstToCreate": "成为第一个创建公开列表的人！",
+    "createList": "创建列表"
+  },
+  "peopleSearch": {
+    "title": "查找用户",
+    "searchPlaceholder": "按姓名或用户名搜索...",
+    "empty": {
+      "title": "搜索用户",
+      "description": "输入姓名或用户名以查找要联系的用户"
+    },
+    "noResults": {
+      "title": "无结果",
+      "description": "未找到与「{{query}}」匹配的用户"
+    }
+  },
+  "addBookmark": {
+    "title": "添加书签",
+    "urlPlaceholder": "在此粘贴 URL...",
+    "titlePlaceholder": "输入标题...",
+    "descriptionPlaceholder": "输入描述...",
+    "notePlaceholder": "添加快速备注...",
+    "tagsPlaceholder": "添加标签...",
+    "addBookmark": "添加书签",
+    "alerts": {
+      "permissionNeeded": "需要权限",
+      "cameraPermission": "请授予相册权限以上传截图。",
+      "signInRequired": "需要登录",
+      "signInToSave": "请登录以保存书签。",
+      "provideUrlOrScreenshot": "请提供 URL 或上传截图。",
+      "saveFailed": "保存失败",
+      "couldNotSave": "无法保存书签。"
+    },
+    "labels": {
+      "url": "URL",
+      "or": "或",
+      "uploadScreenshot": "上传截图",
+      "title": "标题",
+      "description": "描述",
+      "commentOptional": "评论（可选）",
+      "tags": "标签"
+    },
+    "metadataFetchFailed": "获取元数据失败",
+    "metadataFetchMessage": "无法自动获取页面详情。您仍可手动添加书签。"
+  },
+  "addNote": {
+    "titlePlaceholder": "输入笔记标题...",
+    "contentPlaceholder": "编写您的笔记...",
+    "createNote": "创建笔记",
+    "alerts": {
+      "enterTitle": "请输入笔记标题。",
+      "createFailed": "创建笔记失败，请重试。"
+    },
+    "title": "添加笔记",
+    "noteTitle": "笔记标题",
+    "visibility": "可见性",
+    "content": "内容",
+    "visibilityOptions": {
+      "private": "仅您可见此笔记",
+      "shared": "与特定人员分享",
+      "public": "任何人都可以查看此笔记"
+    },
+    "editorHint": "选择文本并使用工具栏应用格式。输入时文本会显示为已格式化样式。",
+    "toolbarHint": "Select text to format"
+  },
+  "addProject": {
+    "titlePlaceholder": "输入项目标题...",
+    "descriptionPlaceholder": "描述您的项目...",
+    "createProject": "创建项目",
+    "alerts": {
+      "enterTitle": "请输入项目标题。"
+    },
+    "title": "添加项目",
+    "projectTitle": "项目标题",
+    "descriptionOptional": "描述（可选）",
+    "deadlineOptional": "截止日期（可选）",
+    "deadlines": {
+      "oneWeek": "1 周",
+      "oneMonth": "1 个月",
+      "threeMonths": "3 个月"
+    },
+    "info": "创建项目后，您可以添加任务并跟踪进度。"
+  },
+  "addTodo": {
+    "titlePlaceholder": "您需要做什么？",
+    "detailsPlaceholder": "添加详情...",
+    "dueDatePlaceholder": "YYYY-MM-DD",
+    "alerts": {
+      "enterTitle": "请输入任务标题。"
+    },
+    "newTodo": "新建待办",
+    "editTodo": "编辑待办",
+    "title": "标题",
+    "descriptionOptional": "描述（可选）",
+    "priority": "优先级",
+    "setDueDate": "设置截止日期",
+    "markCompleted": "标记为已完成",
+    "quickDates": {
+      "today": "今天",
+      "tomorrow": "明天",
+      "nextWeek": "下周",
+      "clear": "清除"
+    },
+    "saveFailed": "保存待办失败"
+  },
+  "createList": {
+    "namePlaceholder": "输入列表名称",
+    "descriptionPlaceholder": "添加描述（可选）",
+    "alerts": {
+      "enterName": "请输入列表名称",
+      "createFailed": "创建列表失败，请重试。"
+    },
+    "title": "Create List",
+    "listName": "List Name *",
+    "description": "Description",
+    "makePublic": "Make Public",
+    "makePublicDescription": "Public lists can be discovered and followed by other users",
+    "publicNotice": "📢 Public lists will appear in the discover section and can be followed by other users."
+  },
+  "bookmarkDetail": {
+    "noUrl": "无 URL",
+    "noLinkToOpen": "此书签没有可打开的链接。",
+    "deleteTitle": "删除书签",
+    "deleteMessage": "此操作无法撤销。",
+    "notePlaceholder": "为未来的自己添加备注...",
+    "saveNote": "保存备注",
+    "openLink": "打开链接",
+    "notFound": "未找到书签",
+    "bookmark": "书签",
+    "openedCount": "已打开 {{count}} 次",
+    "whySaved": "保存原因",
+    "tapToAddNote": "点击添加备注...",
+    "archive": "归档"
+  },
+  "noteDetail": {
+    "titlePlaceholder": "笔记标题",
+    "contentPlaceholder": "在此编写笔记...",
+    "alerts": {
+      "titleEmpty": "笔记标题不能为空"
+    },
+    "notFound": "Note not found",
+    "editNote": "Edit Note",
+    "deleteTitle": "Delete Note",
+    "deleteMessage": "Are you sure you want to delete this note? This action cannot be undone.",
+    "created": "Created {{date}}",
+    "updated": "Updated {{date}}",
+    "you": "You",
+    "sharedWith": "Shared with",
+    "addPeople": "Add people"
+  },
+  "projectDetail": {
+    "addTaskPlaceholder": "添加任务",
+    "emailPlaceholder": "输入邮箱地址",
+    "titlePlaceholder": "输入项目标题",
+    "descriptionPlaceholder": "输入项目描述",
+    "alerts": {
+      "enterTaskTitle": "请输入任务标题",
+      "createTaskFailed": "创建任务失败",
+      "updateTaskFailed": "更新任务失败",
+      "deleteTaskFailed": "删除任务失败",
+      "enterEmail": "请输入邮箱地址",
+      "sharedWith": "项目已与 {{email}} 分享",
+      "shareFailed": "分享项目失败",
+      "titleRequired": "项目标题为必填项",
+      "updatedSuccessfully": "项目更新成功",
+      "archived": "项目已归档",
+      "notificationsNotSupported": "网页端不支持通知，请使用移动应用。",
+      "nudgeScheduled": "提醒已安排在 {{time}}",
+      "scheduleNudgeFailed": "安排提醒失败"
+    },
+    "notFound": "Project not found",
+    "progress": "Progress",
+    "members": "Members",
+    "nudgeMe": "Nudge Me",
+    "tabs": {
+      "tasks": "Tasks",
+      "timeline": "Timeline",
+      "gallery": "Gallery"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left"
+    },
+    "quickAdd": {
+      "title": "Quick Add",
+      "message": "What would you like to add?",
+      "task": "Task",
+      "note": "Note",
+      "bookmark": "Bookmark"
+    },
+    "deleteTask": {
+      "title": "Delete Task",
+      "message": "Are you sure you want to delete this task?"
+    },
+    "shareProject": "Share Project",
+    "emailAddress": "Email Address",
+    "permission": "Permission",
+    "viewOnly": "View Only",
+    "canEdit": "Can Edit",
+    "editProject": "Edit Project",
+    "projectTitle": "Project Title",
+    "description": "Description",
+    "deleteProject": {
+      "title": "Delete Project",
+      "message": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "archiveProject": {
+      "title": "Archive Project",
+      "message": "Are you sure you want to archive this project?",
+      "action": "Archive"
+    },
+    "scheduleNudge": {
+      "title": "Schedule Nudge",
+      "message": "When would you like to be reminded about this project?",
+      "in1Hour": "In 1 hour",
+      "tomorrow": "Tomorrow",
+      "in3Days": "In 3 days"
+    },
+    "adding": "Adding...",
+    "swipeHint": "Swipe left on a task for more options",
+    "relatedContent": "Related Content",
+    "created": "Created {{relative}}",
+    "empty": {
+      "activityTitle": "No Activity Yet",
+      "activityDescription": "Project activity will appear here as you work",
+      "imagesTitle": "No Images Yet",
+      "imagesDescription": "Add images to showcase your project progress",
+      "uploadImage": "Upload Image"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "bookmarkList": {
+    "alerts": {
+      "loadFailed": "加载列表数据失败",
+      "followFailed": "更新关注状态失败",
+      "deleteFailed": "删除列表失败",
+      "sharingComingSoon": "分享功能即将推出！"
+    },
+    "empty": {
+      "title": "还没有书签",
+      "description": "This list doesn't have any bookmarks yet."
+    },
+    "deleteTitle": "Delete List",
+    "deleteMessage": "Are you sure you want to delete this list? This action cannot be undone.",
+    "shareTitle": "Share"
+  },
+  "projectMembers": {
+    "alerts": {
+      "enterEmail": "请输入邮箱地址",
+      "memberAdded": "成员添加成功",
+      "addMemberFailed": "添加成员失败，请重试。",
+      "memberRemoved": "成员移除成功",
+      "removeMemberFailed": "移除成员失败，请重试。",
+      "permissionUpdated": "权限更新成功",
+      "updatePermissionFailed": "更新权限失败，请重试。"
+    },
+    "title": "Project Members",
+    "currentMembers": "Current Members",
+    "addMember": "Add Member",
+    "canView": "Can View",
+    "canEdit": "Can Edit",
+    "permissionLabel": "Permission:",
+    "adding": "Adding...",
+    "dismiss": "Dismiss",
+    "removeMember": {
+      "title": "Remove Member",
+      "message": "Are you sure you want to remove {{email}} from this project?",
+      "action": "Remove"
+    }
+  },
+  "shareIntent": {
+    "signInRequired": "需要登录",
+    "signInToSaveLinks": "请登录以将分享的链接保存到 Pinnedly。",
+    "savedToPinnedly": "已保存到 Pinnedly",
+    "linkSavedToReadLater": "链接已保存到稍后阅读。",
+    "view": "查看",
+    "couldNotSave": "无法保存",
+    "unableToSave": "无法保存分享的内容。"
+  },
+  "quickAdd": {
+    "addBookmark": "添加书签",
+    "addProject": "添加项目",
+    "addNote": "添加笔记"
+  },
+  "errorBoundary": {
+    "title": "出了点问题",
+    "message": "发生了意外错误",
+    "tryAgain": "重试"
+  },
+  "notFound": {
+    "title": "哎呀！",
+    "message": "此页面不存在。",
+    "goHome": "返回首页！"
+  },
+  "languages": {
+    "en": "英语",
+    "tr": "土耳其语",
+    "ar": "阿拉伯语",
+    "ru": "俄语",
+    "de": "德语",
+    "pt": "葡萄牙语",
+    "es": "西班牙语",
+    "it": "意大利语",
+    "ja": "日语",
+    "zh": "中文"
+  },
+  "sources": {
+    "twitter": "Twitter / X",
+    "instagram": "Instagram",
+    "medium": "Medium",
+    "linkedin": "LinkedIn",
+    "wikipedia": "Wikipedia",
+    "youtube": "YouTube",
+    "reddit": "Reddit",
+    "substack": "Substack",
+    "github": "GitHub",
+    "other": "网页"
+  },
+  "notifications": {
+    "taskReminder": {
+      "title": "任务提醒",
+      "body": "别忘了：{{taskTitle}}"
+    },
+    "projectNudge": {
+      "title": "项目提醒",
+      "body": "该处理项目了：{{projectTitle}}"
+    },
+    "bookmarkDigest": {
+      "title": "稍后阅读提醒",
+      "body_one": "您有 1 条未读保存等待查看。",
+      "body_other": "您有 {{count}} 条未读保存等待查看。"
+    }
+  },
+  "bookmarkCard": {
+    "neverOpened": "从未打开",
+    "openedCount": "已打开 {{count}} 次",
+    "readLater": "稍后阅读",
+    "screenshot": "截图"
+  },
+  "clipboard": {
+    "title": "Link in clipboard",
+    "message": "Save this link to Pinnedly?",
+    "save": "Save",
+    "openAddBookmark": "Review & save",
+    "dismiss": "Not now"
+  },
+  "userProfile": {
+    "notFound": "Profile not found",
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "projectCard": {
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "weeksLeft_one": "{{count}} week left",
+    "weeksLeft_other": "{{count}} weeks left",
+    "monthsLeft_one": "{{count}} month left",
+    "monthsLeft_other": "{{count}} months left",
+    "tasksDone": "{{completed}}/{{total}} tasks done"
+  },
+  "entityTypes": {
+    "bookmark": "Bookmark",
+    "note": "Note",
+    "project": "Project",
+    "list": "List"
+  }
+}

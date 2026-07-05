@@ -1,43 +1,58 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Modal, Text, Pressable } from 'react-native';
 import { Plus, Bookmark, FolderPlus, FileText } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { trackButtonPress } from '@/lib/analytics';
+import { getFabBottomOffset } from '@/utils/layout';
 
 export function QuickAddFAB() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [isVisible, setIsVisible] = useState(false);
 
-  const options = [
-    {
-      icon: <Bookmark size={24} color="white" />,
-      label: 'Add Bookmark',
-      onPress: () => {
-        setIsVisible(false);
-        router.push('/add-bookmark');
+  const options = useMemo(
+    () => [
+      {
+        icon: <Bookmark size={24} color="white" />,
+        label: t('quickAdd.addBookmark'),
+        onPress: () => {
+          trackButtonPress('home', 'fab_add_bookmark');
+          setIsVisible(false);
+          router.push('/add-bookmark');
+        },
       },
-    },
-    {
-      icon: <FolderPlus size={24} color="white" />,
-      label: 'Add Project',
-      onPress: () => {
-        setIsVisible(false);
-        router.push('/add-project');
+      {
+        icon: <FolderPlus size={24} color="white" />,
+        label: t('quickAdd.addProject'),
+        onPress: () => {
+          trackButtonPress('home', 'fab_add_project');
+          setIsVisible(false);
+          router.push('/add-project');
+        },
       },
-    },
-    {
-      icon: <FileText size={24} color="white" />,
-      label: 'Add Note',
-      onPress: () => {
-        setIsVisible(false);
-        router.push('/add-note');
+      {
+        icon: <FileText size={24} color="white" />,
+        label: t('quickAdd.addNote'),
+        onPress: () => {
+          trackButtonPress('home', 'fab_add_note');
+          setIsVisible(false);
+          router.push('/add-note');
+        },
       },
-    },
-  ];
+    ],
+    [t]
+  );
 
   return (
     <>
       <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setIsVisible(true)}
+        style={[styles.fab, { bottom: getFabBottomOffset(insets.bottom) }]}
+        onPress={() => {
+          trackButtonPress('home', 'fab_open');
+          setIsVisible(true);
+        }}
         activeOpacity={0.8}
       >
         <Plus size={24} color="white" />
@@ -71,7 +86,6 @@ export function QuickAddFAB() {
 const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
-    bottom: 100,
     right: 20,
     width: 56,
     height: 56,

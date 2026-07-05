@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AlertTriangle, RefreshCw } from 'lucide-react-native';
+import i18n from '@/lib/i18n';
+import { recordError } from '@/lib/crashlytics';
 
 interface Props {
   children: React.ReactNode;
@@ -23,6 +25,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
+    recordError(error, `ErrorBoundary: ${errorInfo.componentStack}`);
   }
 
   handleRetry = () => {
@@ -35,13 +38,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <View style={styles.container}>
           <View style={styles.content}>
             <AlertTriangle size={48} color="#ef4444" />
-            <Text style={styles.title}>Something went wrong</Text>
+            <Text style={styles.title}>{i18n.t('errorBoundary.title')}</Text>
             <Text style={styles.message}>
-              {this.state.error?.message || 'An unexpected error occurred'}
+              {this.state.error?.message || i18n.t('errorBoundary.message')}
             </Text>
             <TouchableOpacity style={styles.retryButton} onPress={this.handleRetry}>
               <RefreshCw size={20} color="#ffffff" />
-              <Text style={styles.retryText}>Try Again</Text>
+              <Text style={styles.retryText}>{i18n.t('errorBoundary.tryAgain')}</Text>
             </TouchableOpacity>
           </View>
         </View>

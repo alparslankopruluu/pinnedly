@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useOnboarding } from '@/store/useOnboardingStore';
@@ -26,42 +27,46 @@ type OnboardingScreen = {
   ctaText: string;
 };
 
-const onboardingScreens: OnboardingScreen[] = [
-  {
-    id: '1',
-    illustration: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face',
-    headline: 'Save what matters, don\'t forget again.',
-    body: 'Pinnedly helps you effortlessly add bookmarks, create notes, and manage projects to stay on top of everything.',
-    ctaText: 'Get Started',
-  },
-  {
-    id: '2',
-    illustration: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-    headline: 'Save bookmarks from anywhere.',
-    body: 'Paste a URL, add screenshots, and track how often you revisit it.',
-    ctaText: 'Next',
-  },
-  {
-    id: '3',
-    illustration: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=300&h=300&fit=crop',
-    headline: 'See your projects move forward.',
-    body: 'Create projects, add tasks, and watch your progress grow.',
-    ctaText: 'Next',
-  },
-  {
-    id: '4',
-    illustration: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=300&fit=crop',
-    headline: 'Share and collaborate.',
-    body: 'Follow friends, share bookmarks, and work on projects together.',
-    ctaText: 'Get Started',
-  },
-];
-
 export default function Onboarding() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const { completeOnboarding, skipOnboarding } = useOnboarding();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const flatListRef = useRef<FlatList<OnboardingScreen>>(null);
+
+  const onboardingScreens: OnboardingScreen[] = useMemo(
+    () => [
+      {
+        id: '1',
+        illustration: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face',
+        headline: t('onboarding.screens.saveWhatMatters.headline'),
+        body: t('onboarding.screens.saveWhatMatters.body'),
+        ctaText: t('onboarding.screens.saveWhatMatters.cta'),
+      },
+      {
+        id: '2',
+        illustration: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
+        headline: t('onboarding.screens.saveBookmarks.headline'),
+        body: t('onboarding.screens.saveBookmarks.body'),
+        ctaText: t('onboarding.screens.saveBookmarks.cta'),
+      },
+      {
+        id: '3',
+        illustration: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=300&h=300&fit=crop',
+        headline: t('onboarding.screens.projectsMoveForward.headline'),
+        body: t('onboarding.screens.projectsMoveForward.body'),
+        ctaText: t('onboarding.screens.projectsMoveForward.cta'),
+      },
+      {
+        id: '4',
+        illustration: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=300&fit=crop',
+        headline: t('onboarding.screens.shareCollaborate.headline'),
+        body: t('onboarding.screens.shareCollaborate.body'),
+        ctaText: t('onboarding.screens.shareCollaborate.cta'),
+      },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -69,50 +74,43 @@ export default function Onboarding() {
     }
   }, [isAuthenticated]);
 
+  const handleCompleteOnboarding = useCallback(async () => {
+    try {
+      await completeOnboarding();
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+    }
+  }, [completeOnboarding]);
+
+  const handleSkipOnboarding = useCallback(async () => {
+    try {
+      await skipOnboarding();
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Failed to skip onboarding:', error);
+    }
+  }, [skipOnboarding]);
+
   const handleNext = useCallback(async () => {
     if (currentIndex < onboardingScreens.length - 1) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-    } else {
-      // Last screen - complete onboarding
-      await handleCompleteOnboarding();
+      return;
     }
-  }, [currentIndex]);
+
+    await handleCompleteOnboarding();
+  }, [currentIndex, onboardingScreens.length, handleCompleteOnboarding]);
 
   const handleSkip = useCallback(async () => {
     await handleSkipOnboarding();
+  }, [handleSkipOnboarding]);
+
+  const onMomentumScrollEnd = useCallback((event: { nativeEvent: { contentOffset: { x: number } } }) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+    setCurrentIndex(index);
   }, []);
-
-  const handleCompleteOnboarding = async () => {
-    try {
-      completeOnboarding();
-      router.replace('/(tabs)');
-    } catch (error) {
-      console.error('Failed to complete onboarding:', error);
-      router.replace('/(tabs)');
-    }
-  };
-
-  const handleSkipOnboarding = async () => {
-    try {
-      skipOnboarding();
-      router.replace('/(tabs)');
-    } catch (error) {
-      console.error('Failed to skip onboarding:', error);
-      router.replace('/(tabs)');
-    }
-  };
-
-  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      setCurrentIndex(viewableItems[0].index || 0);
-    }
-  }, []);
-
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-  };
 
   const renderScreen = ({ item }: { item: OnboardingScreen }) => (
     <View style={styles.screenContainer}>
@@ -148,14 +146,12 @@ export default function Onboarding() {
     >
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
-        {/* Skip Button */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Screens */}
         <FlatList
           ref={flatListRef}
           data={onboardingScreens}
@@ -164,12 +160,10 @@ export default function Onboarding() {
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
+          onMomentumScrollEnd={onMomentumScrollEnd}
           style={styles.flatList}
         />
 
-        {/* Bottom Section */}
         <View style={styles.bottomSection}>
           {renderPaginationDots()}
           

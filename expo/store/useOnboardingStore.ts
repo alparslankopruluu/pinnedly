@@ -59,11 +59,12 @@ export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
   };
 
   const saveOnboardingState = async (state: OnboardingState) => {
+    setOnboardingState(state);
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(state));
-      setOnboardingState(state);
     } catch (error) {
       console.error('Failed to save onboarding state:', error);
+      throw error;
     }
   };
 
@@ -79,14 +80,14 @@ export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
     saveOnboardingState(newState);
   }, [onboardingState]);
 
-  const completeOnboarding = useCallback(() => {
+  const completeOnboarding = useCallback(async () => {
     const newState = { ...onboardingState, isCompleted: true };
-    saveOnboardingState(newState);
+    await saveOnboardingState(newState);
   }, [onboardingState]);
 
-  const skipOnboarding = useCallback(() => {
+  const skipOnboarding = useCallback(async () => {
     const newState = { ...onboardingState, isCompleted: true };
-    saveOnboardingState(newState);
+    await saveOnboardingState(newState);
   }, [onboardingState]);
 
   const resetOnboarding = useCallback(() => {

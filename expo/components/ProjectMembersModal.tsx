@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   FlatList,
-  Alert,
-  ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { X, Users, Plus, Trash2, UserCheck, UserX } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/store/useProjectStore';
 import { ProjectCollaborator, User } from '@/types';
 
@@ -32,6 +33,7 @@ export function ProjectMembersModal({
   projectId, 
   projectTitle 
 }: ProjectMembersModalProps) {
+  const { t } = useTranslation();
   const [newUserEmail, setNewUserEmail] = useState<string>('');
   const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
@@ -66,7 +68,7 @@ export function ProjectMembersModal({
 
   const handleAddMember = async () => {
     if (!newUserEmail.trim()) {
-      Alert.alert('Error', 'Please enter an email address');
+      showAppAlert(t('common.error'), t('projectMembers.alerts.enterEmail'), undefined, { variant: 'error' });
       return;
     }
 
@@ -76,29 +78,29 @@ export function ProjectMembersModal({
       setSelectedPermission('view');
       setShowAddForm(false);
       clearSearchResults();
-      Alert.alert('Success', 'Member added successfully');
+      showAppAlert(t('common.success'), t('projectMembers.alerts.memberAdded'), undefined, { variant: 'success' });
     } catch (error) {
       console.error('Failed to add member:', error);
-      Alert.alert('Error', 'Failed to add member. Please try again.');
+      showAppAlert(t('common.error'), t('projectMembers.alerts.addMemberFailed'), undefined, { variant: 'error' });
     }
   };
 
   const handleRemoveMember = async (memberId: string, memberEmail: string) => {
-    Alert.alert(
-      'Remove Member',
-      `Are you sure you want to remove ${memberEmail} from this project?`,
+    showAppAlert(
+      t('projectMembers.removeMember.title'),
+      t('projectMembers.removeMember.message', { email: memberEmail }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('projectMembers.removeMember.action'),
           style: 'destructive',
           onPress: async () => {
             try {
               await removeProjectMember(projectId, memberId);
-              Alert.alert('Success', 'Member removed successfully');
+              showAppAlert(t('common.success'), t('projectMembers.alerts.memberRemoved'), undefined, { variant: 'success' });
             } catch (error) {
               console.error('Failed to remove member:', error);
-              Alert.alert('Error', 'Failed to remove member. Please try again.');
+              showAppAlert(t('common.error'), t('projectMembers.alerts.removeMemberFailed'), undefined, { variant: 'error' });
             }
           },
         },
@@ -113,10 +115,10 @@ export function ProjectMembersModal({
     
     try {
       await updateMemberPermission(projectId, memberId, sanitizedPermission);
-      Alert.alert('Success', 'Permission updated successfully');
+      showAppAlert(t('common.success'), t('projectMembers.alerts.permissionUpdated'), undefined, { variant: 'success' });
     } catch (error) {
       console.error('Failed to update permission:', error);
-      Alert.alert('Error', 'Failed to update permission. Please try again.');
+      showAppAlert(t('common.error'), t('projectMembers.alerts.updatePermissionFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -124,12 +126,12 @@ export function ProjectMembersModal({
     <View style={styles.memberItem}>
       <View style={styles.memberInfo}>
         <View style={styles.memberHeader}>
-          <Text style={styles.memberName}>{item.user?.displayName || item.user?.email || 'Unknown User'}</Text>
+          <Text style={styles.memberName}>{item.user?.displayName || item.user?.email || t('common.unknownUser')}</Text>
           <View style={[styles.permissionBadge, 
             (item.permission === 'edit' || item.role === 'editor') ? styles.editBadge : styles.viewBadge]}>
             <Text style={[styles.permissionText,
               (item.permission === 'edit' || item.role === 'editor') ? styles.editText : styles.viewText]}>
-              {(item.permission === 'edit' || item.role === 'editor') ? 'Can Edit' : 'Can View'}
+              {(item.permission === 'edit' || item.role === 'editor') ? t('projectMembers.canEdit') : t('projectMembers.canView')}
             </Text>
           </View>
         </View>
@@ -174,6 +176,114 @@ export function ProjectMembersModal({
     </TouchableOpacity>
   );
 
+  const listHeader = (
+    <View style={styles.section}>
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={clearError}>
+            <Text style={styles.errorDismiss}>{t('projectMembers.dismiss')}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{t('projectMembers.currentMembers')}</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setShowAddForm(!showAddForm)}
+        >
+          <Plus size={20} color="#007AFF" />
+          <Text style={styles.addButtonText}>{t('projectMembers.addMember')}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showAddForm && (
+        <View style={styles.addForm}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder={t('projectDetail.emailPlaceholder')}
+              value={newUserEmail}
+              onChangeText={setNewUserEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            {searchResults.length > 0 && (
+              <View style={styles.searchResults}>
+                {searchResults.map((item) => (
+                  <View key={item.id}>{renderSearchResult({ item })}</View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.permissionSelector}>
+            <Text style={styles.permissionLabel}>{t('projectMembers.permissionLabel')}</Text>
+            <View style={styles.permissionOptions}>
+              <TouchableOpacity
+                style={[
+                  styles.permissionOption,
+                  selectedPermission === 'view' && styles.selectedPermission,
+                ]}
+                onPress={() => setSelectedPermission('view')}
+              >
+                <Text
+                  style={[
+                    styles.permissionOptionText,
+                    selectedPermission === 'view' && styles.selectedPermissionText,
+                  ]}
+                >
+                  {t('projectMembers.canView')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.permissionOption,
+                  selectedPermission === 'edit' && styles.selectedPermission,
+                ]}
+                onPress={() => setSelectedPermission('edit')}
+              >
+                <Text
+                  style={[
+                    styles.permissionOptionText,
+                    selectedPermission === 'edit' && styles.selectedPermissionText,
+                  ]}
+                >
+                  {t('projectMembers.canEdit')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.formActions}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                setShowAddForm(false);
+                setNewUserEmail('');
+                clearSearchResults();
+              }}
+            >
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addMemberButton}
+              onPress={handleAddMember}
+              disabled={isManagingMembers || !newUserEmail.trim()}
+            >
+              <Text style={styles.addMemberButtonText}>
+                {isManagingMembers ? t('projectMembers.adding') : t('projectMembers.addMember')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <Modal
       visible={visible}
@@ -181,12 +291,12 @@ export function ProjectMembersModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Users size={24} color="#007AFF" />
             <View style={styles.headerText}>
-              <Text style={styles.title}>Project Members</Text>
+              <Text style={styles.title}>{t('projectMembers.title')}</Text>
               <Text style={styles.subtitle}>{projectTitle}</Text>
             </View>
           </View>
@@ -195,125 +305,16 @@ export function ProjectMembersModal({
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.content}>
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity onPress={clearError}>
-                <Text style={styles.errorDismiss}>Dismiss</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Current Members</Text>
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => setShowAddForm(!showAddForm)}
-              >
-                <Plus size={20} color="#007AFF" />
-                <Text style={styles.addButtonText}>Add Member</Text>
-              </TouchableOpacity>
-            </View>
-
-            {showAddForm && (
-              <View style={styles.addForm}>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter email address"
-                    value={newUserEmail}
-                    onChangeText={setNewUserEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
-                  
-                  {searchResults.length > 0 && (
-                    <View style={styles.searchResults}>
-                      <FlatList
-                        data={searchResults}
-                        renderItem={renderSearchResult}
-                        keyExtractor={(item) => item.id}
-                        style={styles.searchResultsList}
-                      />
-                    </View>
-                  )}
-                </View>
-
-                <View style={styles.permissionSelector}>
-                  <Text style={styles.permissionLabel}>Permission:</Text>
-                  <View style={styles.permissionOptions}>
-                    <TouchableOpacity
-                      style={[
-                        styles.permissionOption,
-                        selectedPermission === 'view' && styles.selectedPermission,
-                      ]}
-                      onPress={() => setSelectedPermission('view')}
-                    >
-                      <Text
-                        style={[
-                          styles.permissionOptionText,
-                          selectedPermission === 'view' && styles.selectedPermissionText,
-                        ]}
-                      >
-                        Can View
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.permissionOption,
-                        selectedPermission === 'edit' && styles.selectedPermission,
-                      ]}
-                      onPress={() => setSelectedPermission('edit')}
-                    >
-                      <Text
-                        style={[
-                          styles.permissionOptionText,
-                          selectedPermission === 'edit' && styles.selectedPermissionText,
-                        ]}
-                      >
-                        Can Edit
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <View style={styles.formActions}>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => {
-                      setShowAddForm(false);
-                      setNewUserEmail('');
-                      clearSearchResults();
-                    }}
-                  >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.addMemberButton}
-                    onPress={handleAddMember}
-                    disabled={isManagingMembers || !newUserEmail.trim()}
-                  >
-                    <Text style={styles.addMemberButtonText}>
-                      {isManagingMembers ? 'Adding...' : 'Add Member'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            <FlatList
-              data={projectMembers}
-              renderItem={renderMember}
-              keyExtractor={(item) => item.id}
-              style={styles.membersList}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
-        </ScrollView>
-      </View>
+        <FlatList
+          data={projectMembers}
+          renderItem={renderMember}
+          keyExtractor={(item) => item.id}
+          style={styles.content}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={listHeader}
+          showsVerticalScrollIndicator={false}
+        />
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -357,6 +358,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  listContent: {
+    paddingBottom: 24,
   },
   errorContainer: {
     backgroundColor: '#FFEBEE',
@@ -522,6 +526,7 @@ const styles = StyleSheet.create({
   memberItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',

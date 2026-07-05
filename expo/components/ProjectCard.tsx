@@ -4,6 +4,7 @@ import { Project } from '@/types';
 import { ProgressRing } from './ui/ProgressRing';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
 import { Edit3 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 interface ProjectCardProps {
   project: Project;
@@ -12,6 +13,7 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
+  const { t } = useTranslation();
   const completedTasks = project.tasks.filter((task) => task.status === 'done').length;
   const totalTasks = project.tasks.length;
   const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
@@ -44,19 +46,19 @@ export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
 
     if (isOverdueTask) {
       chipStyle = styles.deadlineChipRed;
-      text = 'Overdue';
+      text = t('projectCard.overdue');
     } else if (isDueTodayTask) {
       chipStyle = styles.deadlineChipAmber;
-      text = 'Due Today';
+      text = t('projectCard.dueToday');
     } else {
       const daysLeft = Math.ceil((project.deadline - Date.now()) / (1000 * 60 * 60 * 24));
       if (daysLeft <= 7) {
         chipStyle = styles.deadlineChipAmber;
-        text = `${daysLeft} days left`;
+        text = t('projectCard.daysLeft', { count: daysLeft });
       } else if (daysLeft <= 30) {
-        text = `${Math.ceil(daysLeft / 7)} weeks left`;
+        text = t('projectCard.weeksLeft', { count: Math.ceil(daysLeft / 7) });
       } else {
-        text = `${Math.ceil(daysLeft / 30)} months left`;
+        text = t('projectCard.monthsLeft', { count: Math.ceil(daysLeft / 30) });
       }
     }
 
@@ -84,7 +86,7 @@ export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
               {project.title}
             </Text>
             <Text style={styles.taskCount}>
-              {completedTasks}/{totalTasks} tasks done
+              {t('projectCard.tasksDone', { completed: completedTasks, total: totalTasks })}
             </Text>
           </View>
           

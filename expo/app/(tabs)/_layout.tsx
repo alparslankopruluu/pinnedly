@@ -2,8 +2,16 @@ import { Tabs, router } from 'expo-router';
 import { Home, Bookmark, FolderOpen, FileText, User, Settings, Plus, ListTodo } from 'lucide-react-native';
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getTabBarBottomInset, getTabBarHeight } from '@/utils/layout';
 
 export default function TabLayout() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const tabBarBottomInset = getTabBarBottomInset(insets.bottom);
+  const tabBarHeight = getTabBarHeight(insets.bottom);
+
   return (
     <Tabs
       screenOptions={{
@@ -25,19 +33,25 @@ export default function TabLayout() {
           backgroundColor: 'white',
           borderTopWidth: 1,
           borderTopColor: '#F3F4F6',
+          paddingBottom: tabBarBottomInset,
+          paddingTop: 4,
+          height: tabBarHeight,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '500',
-          marginTop: 4,
-          marginBottom: 4,
+          marginTop: 2,
+          marginBottom: 2,
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
@@ -52,7 +66,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="bookmarks"
         options={{
-          title: 'Bookmarks',
+          title: t('tabs.bookmarks'),
           tabBarIcon: ({ color, size }) => <Bookmark size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
@@ -67,7 +81,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="projects"
         options={{
-          title: 'Projects',
+          title: t('tabs.projects'),
           tabBarIcon: ({ color, size }) => <FolderOpen size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
@@ -82,7 +96,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="notes"
         options={{
-          title: 'Notes',
+          title: t('tabs.notes'),
           tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
@@ -97,7 +111,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="todos"
         options={{
-          title: 'Todos',
+          title: t('tabs.todos'),
           tabBarIcon: ({ color, size }) => <ListTodo size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
@@ -112,7 +126,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('tabs.profile'),
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 

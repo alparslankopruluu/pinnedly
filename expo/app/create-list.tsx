@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Switch, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Switch, ScrollView } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { Button } from '@/components/ui/Button';
 
 export default function CreateListScreen() {
+  const { t } = useTranslation();
   const { createList, isCreating } = useBookmarkLists();
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -14,7 +17,7 @@ export default function CreateListScreen() {
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a list name');
+      showAppAlert(t('common.error'), t('createList.alerts.enterName'), undefined, { variant: 'error' });
       return;
     }
 
@@ -26,7 +29,7 @@ export default function CreateListScreen() {
       // router.push(`/bookmark-list/${newList.id}`);
     } catch (error) {
       console.error('Create list error:', error);
-      Alert.alert('Error', 'Failed to create list. Please try again.');
+      showAppAlert(t('common.error'), t('createList.alerts.createFailed'), undefined, { variant: 'error' });
     }
   };
 
@@ -34,14 +37,14 @@ export default function CreateListScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Button
-          title="Cancel"
+          title={t('common.cancel')}
           onPress={() => router.back()}
           variant="outline"
           style={styles.cancelButton}
         />
-        <Text style={styles.title}>Create List</Text>
+        <Text style={styles.title}>{t('createList.title')}</Text>
         <Button
-          title="Create"
+          title={t('common.create')}
           onPress={handleCreate}
           disabled={!name.trim() || isCreating}
           style={styles.createButton}
@@ -50,10 +53,10 @@ export default function CreateListScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.label}>List Name *</Text>
+          <Text style={styles.label}>{t('createList.listName')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter list name"
+            placeholder={t('createList.namePlaceholder')}
             value={name}
             onChangeText={setName}
             maxLength={100}
@@ -62,10 +65,10 @@ export default function CreateListScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('createList.description')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Add a description (optional)"
+            placeholder={t('createList.descriptionPlaceholder')}
             value={description}
             onChangeText={setDescription}
             multiline
@@ -78,9 +81,9 @@ export default function CreateListScreen() {
         <View style={styles.section}>
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <Text style={styles.switchLabel}>Make Public</Text>
+              <Text style={styles.switchLabel}>{t('createList.makePublic')}</Text>
               <Text style={styles.switchDescription}>
-                Public lists can be discovered and followed by other users
+                {t('createList.makePublicDescription')}
               </Text>
             </View>
             <Switch
@@ -95,7 +98,7 @@ export default function CreateListScreen() {
         {isPublic && (
           <View style={styles.publicNotice}>
             <Text style={styles.publicNoticeText}>
-              📢 Public lists will appear in the discover section and can be followed by other users.
+              {t('createList.publicNotice')}
             </Text>
           </View>
         )}

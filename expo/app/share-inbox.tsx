@@ -9,12 +9,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useSharing } from '@/store/useSharingStore';
 import { EntityShare } from '@/types';
 
 export default function ShareInbox() {
+  const { t } = useTranslation();
   const { getUserShares, isLoading } = useSharing();
   const [shares, setShares] = useState<EntityShare[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -87,20 +89,20 @@ export default function ShareInbox() {
             color="#4f46e5"
           />
           <Text style={styles.entityType}>
-            {item.entityType.charAt(0).toUpperCase() + item.entityType.slice(1)}
+            {t(`entityTypes.${item.entityType}` as 'entityTypes.bookmark')}
           </Text>
         </View>
         
         <View style={[styles.permissionBadge, { backgroundColor: getPermissionColor(item.permission) + '20' }]}>
           <Text style={[styles.permissionText, { color: getPermissionColor(item.permission) }]}>
-            {item.permission}
+            {t(`share.permissions.${item.permission}` as 'share.permissions.view')}
           </Text>
         </View>
       </View>
 
       <View style={styles.shareDetails}>
         <Text style={styles.sharedBy}>
-          Shared by {item.user?.displayName || 'Unknown User'}
+          {t('share.sharedBy', { name: item.user?.displayName || t('common.unknownUser') })}
         </Text>
         <Text style={styles.shareDate}>
           {new Date(item.createdAt).toLocaleDateString()}
@@ -119,7 +121,7 @@ export default function ShareInbox() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text style={styles.title}>Share Inbox</Text>
+        <Text style={styles.title}>{t('shareInbox.title')}</Text>
         <TouchableOpacity onPress={() => router.push('/people-search')} style={styles.searchButton}>
           <Ionicons name="search" size={24} color="#1e293b" />
         </TouchableOpacity>
@@ -128,8 +130,8 @@ export default function ShareInbox() {
       <View style={styles.content}>
         {shares.length === 0 && !isLoading ? (
           <EmptyState
-            title="No Shared Items"
-            description="Items shared with you will appear here"
+            title={t('shareInbox.empty.title')}
+            description={t('shareInbox.empty.description')}
           />
         ) : (
           <FlatList

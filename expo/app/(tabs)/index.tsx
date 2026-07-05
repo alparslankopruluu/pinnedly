@@ -1,33 +1,38 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
+import { useBookmarkStore, useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
 import { QuickAddFAB } from '@/components/QuickAddFAB';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
+import { getScrollBottomPadding } from '@/utils/layout';
+import { getActivityRoute, getActivityTitle } from '@/utils/activities';
+import { Bookmark, Note } from '@/types';
 
 function HomeContent() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const {
-    bookmarks,
-    projects,
-    activities,
-    loadData,
-    isLoading,
-  } = useAppStore();
+  const { activities, loadData } = useAppStore();
+  const { bookmarks } = useBookmarkStore();
+  const { notes } = useNoteStore();
+  const { projects } = useProjectStore();
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  const getContinueItems = () => {
+  const getContinueItems = (): Array<Bookmark | Note> => {
     const neverOpenedBookmarks = bookmarks
       .filter((b) => b.openCount === 0)
       .slice(0, 2);
-    
-    const recentNotes: any[] = []; // TODO: Add notes when implemented
-    
+
+    const recentNotes = [...notes]
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, 2);
+
     return [...neverOpenedBookmarks, ...recentNotes];
   };
 
@@ -83,26 +88,28 @@ function HomeContent() {
             <Sparkles size={24} color="#EF4444" />
           </View>
           <View style={styles.aiContent}>
-            <Text style={styles.aiTitle}>AI Chat Assistant</Text>
+            <Text style={styles.aiTitle}>{t('home.aiChat.title')}</Text>
             <Text style={styles.aiDescription}>
-              Ask anything and save conversations as notes
+              {t('home.aiChat.description')}
             </Text>
           </View>
         </TouchableOpacity>
 
         {/* Continue Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Continue</Text>
+          <Text style={styles.sectionTitle}>{t('home.continue')}</Text>
           {continueItems.length > 0 ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {continueItems.map((item, index) => (
+              {continueItems.map((item) => (
                 <TouchableOpacity
-                  key={index}
+                  key={item.id}
                   style={styles.continueCard}
                   onPress={() => {
                     if ('url' in item) {
-                      router.push('/bookmarks');
+                      router.push(`/bookmark/${item.id}` as never);
+                      return;
                     }
+                    router.push(`/note/${item.id}` as never);
                   }}
                 >
                   <View style={styles.continueImage}>
@@ -111,22 +118,22 @@ function HomeContent() {
                     </Text>
                   </View>
                   <Text style={styles.continueTitle} numberOfLines={2}>
-                    {item.title || 'Untitled'}
+                    {item.title || t('common.untitled')}
                   </Text>
                   <Text style={styles.continueSubtitle}>
-                    {'url' in item ? 'Bookmark' : 'Note'} • {formatRelativeTime(item.createdAt)}
+                    {'url' in item ? t('home.bookmark') : t('home.note')} • {formatRelativeTime(item.createdAt)}
                   </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
           ) : (
-            <Text style={styles.emptyText}>No items to continue with</Text>
+            <Text style={styles.emptyText}>{t('home.empty.noContinueItems')}</Text>
           )}
         </View>
 
         {/* Due & Overdue Tasks */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Due & Overdue Tasks</Text>
+          <Text style={styles.sectionTitle}>{t('home.dueAndOverdueTasks')}</Text>
           {dueAndOverdueTasks.length > 0 ? (
             dueAndOverdueTasks.map((task) => (
               <View key={task.id} style={styles.taskRow}>
@@ -146,13 +153,13 @@ function HomeContent() {
                         : styles.dueToday,
                     ]}
                   >
-                    {task.dueDate && isOverdue(task.dueDate) ? 'Overdue' : 'Due Today'}
+                    {task.dueDate && isOverdue(task.dueDate) ? t('home.overdue') : t('home.dueToday')}
                   </Text>
                 </View>
               </View>
             ))
           ) : (
-            <Text style={styles.emptyText}>No due tasks</Text>
+            <Text style={styles.emptyText}>{t('home.empty.noDueTasks')}</Text>
           )}
         </View>
 
@@ -161,8 +168,8 @@ function HomeContent() {
           <View style={styles.section}>
             <View style={styles.streakCard}>
               <View style={styles.streakContent}>
-                <Text style={styles.streakBadge}>{streak}-DAY STREAK</Text>
-                <Text style={styles.streakTitle}>Keep the momentum going!</Text>
+                <Text style={styles.streakBadge}>{t('home.streakBadge', { days: streak })}</Text>
+                <Text style={styles.streakTitle}>{t('home.streakTitle')}</Text>
               </View>
               <TrendingUp size={32} color="#EF4444" />
             </View>
@@ -171,30 +178,38 @@ function HomeContent() {
 
         {/* Recent Activity */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <Text style={styles.sectionTitle}>{t('home.recentActivity')}</Text>
           {recentActivities.length > 0 ? (
-            recentActivities.map((activity) => (
-              <View key={activity.id} style={styles.activityRow}>
-                <View style={styles.activityIcon}>
-                  <CheckCircle size={16} color="#059669" />
-                </View>
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>{activity.title}</Text>
-                  {activity.subtitle && (
-                    <Text style={styles.activitySubtitle}>{activity.subtitle}</Text>
-                  )}
-                </View>
-                <Text style={styles.activityTime}>
-                  {formatRelativeTime(activity.timestamp)}
-                </Text>
-              </View>
-            ))
+            recentActivities.map((activity) => {
+              const route = getActivityRoute(activity, projects);
+              return (
+                <TouchableOpacity
+                  key={activity.id}
+                  style={[styles.activityRow, !route && styles.activityRowDisabled]}
+                  disabled={!route}
+                  onPress={() => route && router.push(route as never)}
+                >
+                  <View style={styles.activityIcon}>
+                    <CheckCircle size={16} color="#059669" />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>{getActivityTitle(activity, t)}</Text>
+                    {activity.subtitle && (
+                      <Text style={styles.activitySubtitle}>{activity.subtitle}</Text>
+                    )}
+                  </View>
+                  <Text style={styles.activityTime}>
+                    {formatRelativeTime(activity.timestamp)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })
           ) : (
-            <Text style={styles.emptyText}>No recent activity</Text>
+            <Text style={styles.emptyText}>{t('home.empty.noRecentActivity')}</Text>
           )}
         </View>
 
-        <View style={[styles.bottomPadding, { height: insets.bottom + 100 }]} />
+        <View style={[styles.bottomPadding, { height: getScrollBottomPadding(insets.bottom) }]} />
       </ScrollView>
 
       <QuickAddFAB />
@@ -381,6 +396,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
+  },
+  activityRowDisabled: {
+    opacity: 0.7,
   },
   activityIcon: {
     width: 32,

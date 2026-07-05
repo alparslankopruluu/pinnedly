@@ -63,12 +63,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   isLoading: false,
 
   addBookmark: (bookmarkData) => {
+    const tagNames = bookmarkData.tagNames ?? bookmarkData.tags?.map((t) => t.name) ?? [];
     const bookmark: Bookmark = {
       ...bookmarkData,
       id: generateId(),
       createdAt: Date.now(),
       openCount: 0,
       notes: [],
+      tagNames,
+      status: bookmarkData.status ?? 'inbox',
     };
     
     set((state) => ({

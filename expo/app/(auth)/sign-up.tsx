@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
+import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
+import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
 export default function SignUp() {
-  const { signUp, signInWithApple, isLoading } = useAuth();
+  const { t } = useTranslation();
+  const { signUp, signInWithApple, signInWithGoogle, isLoading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -18,39 +22,44 @@ export default function SignUp() {
 
   const handleSignUp = async () => {
     if (!email.trim() || !password.trim() || !displayName.trim() || !confirmPassword.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showAppAlert(t('common.error'), t('auth.errors.fillAllFields'), undefined, { variant: 'error' });
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showAppAlert(t('common.error'), t('auth.errors.passwordsDoNotMatch'), undefined, { variant: 'error' });
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      showAppAlert(t('common.error'), t('auth.errors.passwordTooShort'), undefined, { variant: 'error' });
       return;
     }
 
     try {
+      await trackButtonPress('sign_up', 'email_sign_up');
       await signUp(email.trim(), password, displayName.trim());
-      router.replace('/(tabs)');
     } catch (error) {
-      Alert.alert('Sign Up Failed', error instanceof Error ? error.message : 'Please try again');
+      showAppAlert(t('auth.errors.signUpFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
     }
   };
 
   const handleAppleSignUp = async () => {
     try {
+      await trackButtonPress('sign_up', 'apple_sign_up');
       await signInWithApple();
-      router.replace('/(tabs)');
     } catch (error) {
-      Alert.alert('Apple Sign Up Failed', error instanceof Error ? error.message : 'Please try again');
+      showAppAlert(t('auth.errors.appleSignUpFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
     }
   };
 
-  const handleGoogleSignUp = () => {
-    Alert.alert('Coming Soon', 'Google Sign-Up will be available in a future update');
+  const handleGoogleSignUp = async () => {
+    try {
+      await trackButtonPress('sign_up', 'google_sign_up');
+      await signInWithGoogle();
+    } catch (error) {
+      showAppAlert(t('auth.errors.googleSignUpFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
+    }
   };
 
   return (
@@ -59,30 +68,30 @@ export default function SignUp() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.title}>{t('auth.createAccount')}</Text>
       </View>
 
       <View style={styles.content}>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t('auth.fullName')}</Text>
             <TextInput
               style={styles.input}
               value={displayName}
               onChangeText={setDisplayName}
-              placeholder="Enter your full name"
+              placeholder={t('auth.placeholders.fullName')}
               autoCapitalize="words"
               autoCorrect={false}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.email')}</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email"
+              placeholder={t('auth.placeholders.email')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -90,13 +99,13 @@ export default function SignUp() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('auth.password')}</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Create a password"
+                placeholder={t('auth.placeholders.createPassword')}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -115,13 +124,13 @@ export default function SignUp() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password</Text>
+            <Text style={styles.label}>{t('auth.confirmPassword')}</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Confirm your password"
+                placeholder={t('auth.placeholders.confirmPassword')}
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -140,7 +149,7 @@ export default function SignUp() {
           </View>
 
           <Button
-            title={isLoading ? 'Creating Account...' : 'Create Account'}
+            title={isLoading ? t('common.creatingAccount') : t('auth.createAccount')}
             onPress={handleSignUp}
             disabled={isLoading}
             style={styles.signUpButton}
@@ -149,7 +158,7 @@ export default function SignUp() {
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or continue with</Text>
+          <Text style={styles.dividerText}>{t('auth.orContinueWith')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -166,18 +175,18 @@ export default function SignUp() {
           
           <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp}>
             <Ionicons name="logo-google" size={20} color="#db4437" />
-            <Text style={styles.socialButtonText}>Google (Coming Soon)</Text>
+            <Text style={styles.socialButtonText}>{t('auth.google')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Text
               style={styles.footerLink}
               onPress={() => router.push('./sign-in')}
             >
-              Sign In
+              {t('auth.signIn')}
             </Text>
           </Text>
         </View>

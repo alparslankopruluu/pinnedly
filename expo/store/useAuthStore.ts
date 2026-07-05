@@ -2,8 +2,30 @@ import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { User, AuthState } from '@/types';
 import { authRepository } from '@/repositories/AuthRepository';
-import { socialRepository } from '@/repositories/SocialRepository';
-import { slugRepository } from '@/repositories/SlugRepository';
+import {
+  setAnalyticsUserId,
+  setAnalyticsUserProperties,
+  trackAuthEvent,
+  type AuthMethod,
+} from '@/lib/analytics';
+import { setCrashlyticsUser, recordError, logCrashlytics } from '@/lib/crashlytics';
+
+function handleAuthFailure(method: AuthMethod, error: unknown): void {
+  const message = error instanceof Error ? error.message : 'Unknown auth error';
+  trackAuthEvent('auth_failed', method, { error_message: message });
+  recordError(error instanceof Error ? error : new Error(message), `auth:${method}`);
+}
+
+async function handleAuthSuccess(user: User, method: AuthMethod, isNewUser = false): Promise<void> {
+  await setAnalyticsUserId(user.id);
+  await setCrashlyticsUser(user.id);
+  await setAnalyticsUserProperties({
+    auth_method: method,
+    user_handle: user.handle,
+  });
+  logCrashlytics(`User authenticated via ${method}: ${user.id}`);
+  await trackAuthEvent(isNewUser ? 'sign_up' : 'login', method);
+}
 
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -13,40 +35,48 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   });
 
   useEffect(() => {
-    initializeAuth();
-  }, []);
+    let unsubscribe: (() => void) | undefined;
 
-  const initializeAuth = async () => {
-    try {
-      console.log('Initializing auth...');
-      await authRepository.initialize();
-      
-      const user = authRepository.getCurrentUser();
-      setAuthState({
-        user,
-        isAuthenticated: !!user,
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error('Failed to initialize auth:', error);
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
-  };
+    const init = async () => {
+      try {
+        await authRepository.initialize();
+        unsubscribe = authRepository.onAuthStateChanged(async (user) => {
+          if (!user) {
+            await setAnalyticsUserId(null);
+            await setCrashlyticsUser(null);
+          }
+          setAuthState({
+            user,
+            isAuthenticated: !!user,
+            isLoading: false,
+          });
+        });
+      } catch (error) {
+        console.error('Failed to initialize auth:', error);
+        recordError(error instanceof Error ? error : new Error('Auth init failed'), 'auth:init');
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    };
+
+    init();
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string): Promise<void> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
       const user = await authRepository.signIn(email, password);
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
+      await handleAuthSuccess(user, 'email');
+      setAuthState({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
+      handleAuthFailure('email', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
     }
@@ -56,12 +86,46 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
       const user = await authRepository.signUp(email, password, displayName);
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
+      await handleAuthSuccess(user, 'email', true);
+      setAuthState({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
+      handleAuthFailure('email', error);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async (): Promise<void> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const user = await authRepository.signInWithGoogle();
+      await handleAuthSuccess(user, 'google');
+      setAuthState({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      handleAuthFailure('google', error);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  }, []);
+
+  const sendPhoneVerification = useCallback(async (phoneNumber: string): Promise<void> => {
+    try {
+      await authRepository.sendPhoneVerification(phoneNumber);
+      await trackAuthEvent('phone_code_sent', 'phone');
+    } catch (error) {
+      handleAuthFailure('phone', error);
+      throw error;
+    }
+  }, []);
+
+  const confirmPhoneCode = useCallback(async (code: string): Promise<void> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const user = await authRepository.confirmPhoneCode(code);
+      await handleAuthSuccess(user, 'phone');
+      setAuthState({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      handleAuthFailure('phone', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
     }
@@ -69,7 +133,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const signOut = useCallback(async (): Promise<void> => {
     try {
+      await trackAuthEvent('logout');
       await authRepository.signOut();
+      await setAnalyticsUserId(null);
+      await setCrashlyticsUser(null);
       setAuthState({
         user: null,
         isAuthenticated: false,
@@ -77,22 +144,18 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       });
     } catch (error) {
       console.error('Failed to sign out:', error);
+      recordError(error instanceof Error ? error : new Error('Sign out failed'), 'auth:sign_out');
     }
   }, []);
 
   const updateProfile = useCallback(async (updates: Partial<User>): Promise<void> => {
     if (!authState.user) return;
-    
-    try {
-      const updatedUser = await authRepository.updateProfile(updates);
-      setAuthState(prev => ({
-        ...prev,
-        user: updatedUser,
-      }));
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      throw error;
-    }
+
+    const updatedUser = await authRepository.updateProfile(updates);
+    setAuthState(prev => ({
+      ...prev,
+      user: updatedUser,
+    }));
   }, [authState.user]);
 
   const checkHandleAvailability = useCallback(async (handle: string): Promise<boolean> => {
@@ -111,12 +174,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
       const user = await authRepository.signInWithApple();
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
+      await handleAuthSuccess(user, 'apple');
+      setAuthState({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
+      handleAuthFailure('apple', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
     }
@@ -127,7 +188,13 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   }, []);
 
   const resetPassword = useCallback(async (email: string): Promise<void> => {
-    return authRepository.resetPassword(email);
+    try {
+      await authRepository.resetPassword(email);
+      await trackAuthEvent('password_reset', 'email');
+    } catch (error) {
+      handleAuthFailure('email', error);
+      throw error;
+    }
   }, []);
 
   return useMemo(() => ({
@@ -135,6 +202,9 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     signIn,
     signUp,
     signOut,
+    signInWithGoogle,
+    sendPhoneVerification,
+    confirmPhoneCode,
     updateProfile,
     checkHandleAvailability,
     searchUsers,
@@ -142,5 +212,5 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     signInWithApple,
     searchUsersByEmail,
     resetPassword,
-  }), [authState, signIn, signUp, signOut, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail, resetPassword]);
+  }), [authState, signIn, signUp, signOut, signInWithGoogle, sendPhoneVerification, confirmPhoneCode, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail, resetPassword]);
 });

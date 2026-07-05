@@ -1,43 +1,55 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
+import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
+import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
 export default function SignIn() {
-  const { signIn, signInWithApple, isLoading } = useAuth();
+  const { t } = useTranslation();
+  const { signIn, signInWithApple, signInWithGoogle, isLoading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showAppAlert(t('common.error'), t('auth.errors.fillAllFields'), undefined, { variant: 'error' });
       return;
     }
 
     try {
+      await trackButtonPress('sign_in', 'email_sign_in');
       await signIn(email.trim(), password);
       router.replace('/(tabs)');
     } catch (error) {
-      Alert.alert('Sign In Failed', 'Please check your credentials and try again');
+      showAppAlert(t('auth.errors.signInFailed'), t('auth.errors.checkCredentials'));
     }
   };
 
   const handleAppleSignIn = async () => {
     try {
+      await trackButtonPress('sign_in', 'apple_sign_in');
       await signInWithApple();
       router.replace('/(tabs)');
     } catch (error) {
-      Alert.alert('Apple Sign In Failed', error instanceof Error ? error.message : 'Please try again');
+      showAppAlert(t('auth.errors.appleSignInFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
     }
   };
 
-  const handleGoogleSignIn = () => {
-    Alert.alert('Coming Soon', 'Google Sign-In will be available in a future update');
+  const handleGoogleSignIn = async () => {
+    try {
+      await trackButtonPress('sign_in', 'google_sign_in');
+      await signInWithGoogle();
+      router.replace('/(tabs)');
+    } catch (error) {
+      showAppAlert(t('auth.errors.googleSignInFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
+    }
   };
 
   return (
@@ -46,18 +58,18 @@ export default function SignIn() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text style={styles.title}>Sign In</Text>
+        <Text style={styles.title}>{t('auth.signIn')}</Text>
       </View>
 
       <View style={styles.content}>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.email')}</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email"
+              placeholder={t('auth.placeholders.email')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -65,13 +77,13 @@ export default function SignIn() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('auth.password')}</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Enter your password"
+                placeholder={t('auth.placeholders.password')}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -90,11 +102,11 @@ export default function SignIn() {
           </View>
 
           <TouchableOpacity onPress={() => router.push('./forgot-password')}>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
+            <Text style={styles.forgotPassword}>{t('auth.forgotPassword')}</Text>
           </TouchableOpacity>
 
           <Button
-            title={isLoading ? 'Signing In...' : 'Sign In'}
+            title={isLoading ? t('common.signingIn') : t('auth.signIn')}
             onPress={handleSignIn}
             disabled={isLoading}
             style={styles.signInButton}
@@ -103,7 +115,7 @@ export default function SignIn() {
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or continue with</Text>
+          <Text style={styles.dividerText}>{t('auth.orContinueWith')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -120,18 +132,29 @@ export default function SignIn() {
           
           <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn}>
             <Ionicons name="logo-google" size={20} color="#db4437" />
-            <Text style={styles.socialButtonText}>Google (Coming Soon)</Text>
+            <Text style={styles.socialButtonText}>{t('auth.google')}</Text>
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity
+          style={styles.phoneLink}
+          onPress={() => {
+            trackButtonPress('sign_in', 'phone_sign_in_link');
+            router.push('./phone-sign-in');
+          }}
+        >
+          <Ionicons name="call-outline" size={18} color="#4f46e5" />
+          <Text style={styles.phoneLinkText}>{t('auth.signInWithPhone')}</Text>
+        </TouchableOpacity>
+
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don&apos;t have an account?{' '}
+            {t('auth.dontHaveAccount')}{' '}
             <Text
               style={styles.footerLink}
               onPress={() => router.push('./sign-up')}
             >
-              Sign Up
+              {t('auth.signUp')}
             </Text>
           </Text>
         </View>
@@ -283,5 +306,17 @@ const styles = StyleSheet.create({
   appleButton: {
     height: 44,
     marginBottom: 12,
+  },
+  phoneLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 24,
+  },
+  phoneLinkText: {
+    fontSize: 14,
+    color: '#4f46e5',
+    fontWeight: '500' as const,
   },
 });

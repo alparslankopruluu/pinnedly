@@ -12,6 +12,20 @@ export type CommentNote = {
   createdAt: number;
 };
 
+export type BookmarkSource =
+  | 'twitter'
+  | 'instagram'
+  | 'medium'
+  | 'linkedin'
+  | 'wikipedia'
+  | 'youtube'
+  | 'reddit'
+  | 'substack'
+  | 'github'
+  | 'other';
+
+export type BookmarkStatus = 'inbox' | 'reading' | 'done' | 'archived';
+
 export type Bookmark = {
   id: ID;
   url?: string;
@@ -21,10 +35,15 @@ export type Bookmark = {
   screenshotUri?: string;
   notes: CommentNote[];
   tags: Tag[];
+  tagNames: string[];
+  personalNote?: string;
+  status: BookmarkStatus;
+  reminderAt?: number;
+  readAt?: number;
   createdAt: number;
   openCount: number;
   lastOpenedAt?: number;
-  source?: 'twitter' | 'instagram' | 'medium' | 'linkedin' | 'other';
+  source?: BookmarkSource;
   userId: ID;
   visibility: Visibility;
 };

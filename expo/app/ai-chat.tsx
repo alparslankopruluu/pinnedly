@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,15 @@ import {
   Platform,
   Pressable,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { X, Send, Save, Sparkles } from 'lucide-react-native';
 import { useRorkAgent } from '@rork-ai/toolkit-sdk';
 import { useNoteStore } from '@/providers/OfflineProvider';
+import { ChatTypingIndicator } from '@/components/ChatTypingIndicator';
 
 interface Message {
   id: string;
@@ -24,16 +26,61 @@ interface Message {
   timestamp: number;
 }
 
+const SYSTEM_MESSAGE_ID = 'pinnedly-system-prompt';
+
 export default function AIChatScreen() {
+  const { t, i18n } = useTranslation();
   const { createNote } = useNoteStore();
   const [input, setInput] = useState('');
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const savingNoteRef = useRef(false);
 
-  const { messages, error, sendMessage } = useRorkAgent({
+  const systemMessage = useMemo(
+    () => ({
+      id: SYSTEM_MESSAGE_ID,
+      role: 'system' as const,
+      parts: [{ type: 'text' as const, text: t('aiChat.systemPrompt') }],
+    }),
+    [t, i18n.language]
+  );
+
+  const { messages, error, sendMessage, setMessages, status } = useRorkAgent({
     tools: {},
   });
+
+  const isResponding = status === 'submitted' || status === 'streaming';
+
+  const latestAssistantText = useMemo(() => {
+    const assistantMessages = messages.filter((message) => message.role === 'assistant');
+    const latest = assistantMessages[assistantMessages.length - 1];
+    if (!latest) return '';
+
+    return latest.parts
+      .filter((part) => part.type === 'text')
+      .map((part) => (part as { text: string }).text)
+      .join('');
+  }, [messages]);
+
+  const showTypingIndicator = isResponding && latestAssistantText.trim().length === 0;
+
+  useEffect(() => {
+    setMessages((prev) => {
+      const conversation = prev.filter((message) => message.id !== SYSTEM_MESSAGE_ID);
+      return [systemMessage, ...conversation];
+    });
+  }, [systemMessage, setMessages]);
+
+  useEffect(() => {
+    if (!showTypingIndicator) return;
+
+    const timeoutId = setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
+  }, [showTypingIndicator]);
 
   useEffect(() => {
     const newMessages: Message[] = messages.map((m, index) => ({
@@ -63,21 +110,24 @@ export default function AIChatScreen() {
       }, 100);
     } catch (err) {
       console.error('Failed to send message:', err);
-      Alert.alert('Error', 'Failed to send message. Please try again.');
+      showAppAlert(t('common.error'), t('aiChat.alerts.sendFailed'), undefined, { variant: 'error' });
     }
   };
 
   const handleSaveAsNote = async () => {
-    if (localMessages.length === 0) {
-      Alert.alert('No Conversation', 'There are no messages to save.');
+    if (savingNoteRef.current || localMessages.length === 0) {
+      if (localMessages.length === 0) {
+        showAppAlert(t('aiChat.alerts.noConversation'), t('aiChat.alerts.noMessagesToSave'));
+      }
       return;
     }
 
+    savingNoteRef.current = true;
     setIsSaving(true);
 
     try {
       const conversationText = localMessages
-        .map((msg) => `**${msg.role === 'user' ? 'You' : 'AI'}:** ${msg.content}`)
+        .map((msg) => `**${msg.role === 'user' ? t('aiChat.roles.you') : t('aiChat.roles.ai')}:** ${msg.content}`)
         .join('\n\n');
 
       const firstUserMessage = localMessages.find((m) => m.role === 'user')?.content || 'AI Conversation';
@@ -86,24 +136,26 @@ export default function AIChatScreen() {
         : firstUserMessage;
 
       await createNote({
-        title: `AI Chat: ${title}`,
+        title: t('aiChat.savedNoteTitle', { title }),
         markdown: conversationText,
         visibility: 'private',
       });
 
-      Alert.alert('Success', 'Conversation saved as a note!', [
+      showAppAlert(t('common.success'), t('aiChat.alerts.savedAsNote'), [
         {
-          text: 'View Notes',
+          text: t('common.ok'),
+          style: 'cancel',
+        },
+        {
+          text: t('common.viewNotes'),
           onPress: () => router.push('/notes'),
         },
-        {
-          text: 'OK',
-        },
-      ]);
+      ], { variant: 'success' });
     } catch (err) {
       console.error('Failed to save note:', err);
-      Alert.alert('Error', 'Failed to save conversation. Please try again.');
+      showAppAlert(t('common.error'), t('aiChat.alerts.saveFailed'), undefined, { variant: 'error' });
     } finally {
+      savingNoteRef.current = false;
       setIsSaving(false);
     }
   };
@@ -137,30 +189,29 @@ export default function AIChatScreen() {
       <View style={styles.emptyIconContainer}>
         <Sparkles size={48} color="#EF4444" />
       </View>
-      <Text style={styles.emptyTitle}>AI Chat Assistant</Text>
+      <Text style={styles.emptyTitle}>{t('aiChat.empty.title')}</Text>
       <Text style={styles.emptyDescription}>
-        Ask me anything! I can help you with research, brainstorming, writing, and more.
-        You can save our conversation as a note anytime.
+        {t('aiChat.empty.description')}
       </Text>
       <View style={styles.suggestionContainer}>
-        <Text style={styles.suggestionTitle}>Try asking:</Text>
+        <Text style={styles.suggestionTitle}>{t('aiChat.empty.tryAsking')}</Text>
         <Pressable
           style={styles.suggestionChip}
-          onPress={() => setInput('Explain quantum computing in simple terms')}
+          onPress={() => setInput(t('aiChat.empty.suggestions.quantum'))}
         >
-          <Text style={styles.suggestionText}>Explain quantum computing</Text>
+          <Text style={styles.suggestionText}>{t('aiChat.empty.suggestions.quantum')}</Text>
         </Pressable>
         <Pressable
           style={styles.suggestionChip}
-          onPress={() => setInput('Help me brainstorm ideas for a mobile app')}
+          onPress={() => setInput(t('aiChat.empty.suggestions.brainstorm'))}
         >
-          <Text style={styles.suggestionText}>Brainstorm app ideas</Text>
+          <Text style={styles.suggestionText}>{t('aiChat.empty.suggestions.brainstorm')}</Text>
         </Pressable>
         <Pressable
           style={styles.suggestionChip}
-          onPress={() => setInput('Write a summary of the benefits of meditation')}
+          onPress={() => setInput(t('aiChat.empty.suggestions.meditation'))}
         >
-          <Text style={styles.suggestionText}>Benefits of meditation</Text>
+          <Text style={styles.suggestionText}>{t('aiChat.empty.suggestions.meditation')}</Text>
         </Pressable>
       </View>
     </View>
@@ -170,7 +221,7 @@ export default function AIChatScreen() {
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Stack.Screen
         options={{
-          title: 'AI Chat',
+          title: t('aiChat.title'),
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.headerButton}>
               <X size={24} color="#111827" />
@@ -206,6 +257,11 @@ export default function AIChatScreen() {
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={renderEmpty}
+          ListFooterComponent={
+            showTypingIndicator
+              ? () => <ChatTypingIndicator label={t('aiChat.thinking')} />
+              : null
+          }
           contentContainerStyle={
             localMessages.length === 0 ? styles.emptyContainer : styles.listContainer
           }
@@ -215,7 +271,7 @@ export default function AIChatScreen() {
 
         {error && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>Error: {String(error)}</Text>
+            <Text style={styles.errorText}>{t('common.errorWithMessage', { message: String(error) })}</Text>
           </View>
         )}
 
@@ -224,7 +280,7 @@ export default function AIChatScreen() {
             style={styles.input}
             value={input}
             onChangeText={setInput}
-            placeholder="Ask me anything..."
+            placeholder={t('aiChat.placeholder')}
             placeholderTextColor="#9CA3AF"
             multiline
             maxLength={2000}
@@ -232,13 +288,13 @@ export default function AIChatScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.sendButton,
-              (!input.trim() || messages.some(m => m.parts.some(p => (p as any).state === 'input-streaming'))) && styles.sendButtonDisabled,
+              (!input.trim() || isResponding) && styles.sendButtonDisabled,
               pressed && styles.sendButtonPressed,
             ]}
             onPress={handleSend}
-            disabled={!input.trim() || messages.some(m => m.parts.some(p => (p as any).state === 'input-streaming'))}
+            disabled={!input.trim() || isResponding}
           >
-            {messages.some(m => m.parts.some(p => (p as any).state === 'input-streaming')) ? (
+            {isResponding ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
               <Send size={20} color="white" />

@@ -1,0 +1,876 @@
+{
+  "common": {
+    "appName": "Pinnedly",
+    "back": "Назад",
+    "cancel": "Отмена",
+    "ok": "ОК",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "create": "Создать",
+    "edit": "Редактировать",
+    "share": "Поделиться",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "info": "Информация",
+    "required": "Обязательно",
+    "comingSoon": "Скоро",
+    "untitled": "Без названия",
+    "next": "Далее",
+    "skip": "Пропустить",
+    "getStarted": "Начать",
+    "viewNotes": "Просмотреть заметки",
+    "tryAgain": "Повторить",
+    "all": "Все",
+    "active": "Активные",
+    "done": "Выполнено",
+    "private": "Приватный",
+    "public": "Публичный",
+    "shared": "Общий",
+    "connected": "Подключено",
+    "notConnected": "Не подключено",
+    "exporting": "Экспорт...",
+    "processing": "Обработка...",
+    "saving": "Сохранение...",
+    "sharing": "Отправка...",
+    "sending": "Отправка...",
+    "verifying": "Проверка...",
+    "signingIn": "Вход...",
+    "creatingAccount": "Создание аккаунта...",
+    "followers": "{{count}} подписчиков",
+    "linkedItems_one": "{{count}} связанный элемент",
+    "linkedItems_other": "{{count}} связанных элементов",
+    "sortLabel": "Сортировка: {{sort}}",
+    "errorWithMessage": "Ошибка: {{message}}",
+    "noContent": "Нет содержимого",
+    "unknownUser": "Неизвестный пользователь"
+  },
+  "tabs": {
+    "home": "Главная",
+    "bookmarks": "Закладки",
+    "projects": "Проекты",
+    "notes": "Заметки",
+    "todos": "Задачи",
+    "profile": "Профиль"
+  },
+  "navigation": {
+    "settings": "Настройки",
+    "aiAssistant": "ИИ-ассистент",
+    "todo": "Задача",
+    "shareInbox": "Входящие",
+    "findPeople": "Найти людей",
+    "discoverLists": "Обзор списков",
+    "createList": "Создать список",
+    "bookmarkList": "Список закладок",
+    "profile": "Profile",
+    "addNote": "Add Note",
+    "addProject": "Add Project"
+  },
+  "auth": {
+    "signIn": "Войти",
+    "signUp": "Регистрация",
+    "createAccount": "Создать аккаунт",
+    "phoneSignIn": "Вход по телефону",
+    "resetPassword": "Сброс пароля",
+    "checkYourEmail": "Проверьте почту",
+    "email": "Эл. почта",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "fullName": "Полное имя",
+    "phoneNumber": "Номер телефона",
+    "verificationCode": "Код подтверждения",
+    "forgotPassword": "Забыли пароль?",
+    "orContinueWith": "или продолжить с",
+    "google": "Google",
+    "signInWithPhone": "Войти по номеру телефона",
+    "dontHaveAccount": "Нет аккаунта?",
+    "alreadyHaveAccount": "Уже есть аккаунт?",
+    "rememberPassword": "Вспомнили пароль?",
+    "backToSignIn": "Вернуться ко входу",
+    "sendCode": "Отправить код",
+    "verifyAndSignIn": "Подтвердить и войти",
+    "changePhoneNumber": "Изменить номер телефона",
+    "sendResetLink": "Отправить ссылку для сброса",
+    "emailSent": "Письмо отправлено!",
+    "emailSentMessage": "Мы отправили ссылку для сброса пароля на {{email}}. Проверьте почту и следуйте инструкциям для сброса пароля.",
+    "resetDescription": "Введите адрес эл. почты, и мы отправим вам ссылку для сброса пароля.",
+    "phoneHint": "Укажите код страны. Пример: +905551234567",
+    "termsFooter": "Продолжая, вы соглашаетесь с Условиями обслуживания и Политикой конфиденциальности",
+    "placeholders": {
+      "email": "Введите эл. почту",
+      "password": "Введите пароль",
+      "createPassword": "Создайте пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "fullName": "Введите полное имя",
+      "phone": "+905551234567",
+      "verificationCode": "123456"
+    },
+    "errors": {
+      "fillAllFields": "Пожалуйста, заполните все поля",
+      "passwordsDoNotMatch": "Пароли не совпадают",
+      "passwordTooShort": "Пароль должен содержать не менее 6 символов",
+      "signInFailed": "Ошибка входа",
+      "checkCredentials": "Проверьте учетные данные и попробуйте снова",
+      "signUpFailed": "Ошибка регистрации",
+      "pleaseTryAgain": "Пожалуйста, попробуйте снова",
+      "appleSignInFailed": "Ошибка входа через Apple",
+      "appleSignUpFailed": "Ошибка регистрации через Apple",
+      "googleSignInFailed": "Ошибка входа через Google",
+      "googleSignUpFailed": "Ошибка регистрации через Google",
+      "enterEmail": "Пожалуйста, введите адрес эл. почты",
+      "resetEmailFailed": "Не удалось отправить письмо для сброса. Попробуйте снова.",
+      "enterPhone": "Введите номер телефона с кодом страны (например, +905551234567)",
+      "enterVerificationCode": "Пожалуйста, введите код подтверждения",
+      "verificationFailed": "Ошибка подтверждения",
+      "invalidCode": "Неверный код",
+      "couldNotSendCode": "Не удалось отправить код подтверждения"
+    },
+    "alerts": {
+      "codeSent": "Код отправлен",
+      "enterCodeFromSms": "Введите код подтверждения из SMS",
+      "failed": "Ошибка"
+    },
+    "resendEmail": "Didn't receive the email? Try again"
+  },
+  "welcome": {
+    "subtitle": "Ваше офлайн-пространство для заметок, закладок и проектов",
+    "loading": "Загрузка...",
+    "screens": {
+      "captureEverything": {
+        "title": "Сохраняйте всё",
+        "subtitle": "Храните закладки, заметки и идеи в одном месте",
+        "description": "Больше не теряйте важный контент. Наш офлайн-подход гарантирует, что ваши данные всегда доступны."
+      },
+      "organizeProjects": {
+        "title": "Организуйте проекты",
+        "subtitle": "Управляйте задачами с мощными Kanban-досками",
+        "description": "Отслеживайте прогресс, устанавливайте сроки и сотрудничайте с командой над любым проектом."
+      },
+      "richNoteTaking": {
+        "title": "Богатые заметки",
+        "subtitle": "Пишите в Markdown с живым предпросмотром",
+        "description": "Создавайте красивые заметки с форматированием и ссылками, легко организуя свои мысли."
+      },
+      "shareCollaborate": {
+        "title": "Делитесь и сотрудничайте",
+        "subtitle": "Работайте вместе без усилий",
+        "description": "Делитесь работой с другими, получайте обратную связь и создавайте удивительные вещи вместе."
+      }
+    }
+  },
+  "onboarding": {
+    "skip": "Пропустить",
+    "screens": {
+      "saveWhatMatters": {
+        "headline": "Сохраняйте важное — больше не забывайте.",
+        "body": "Pinnedly помогает легко добавлять закладки, создавать заметки и управлять проектами, чтобы вы всегда были в курсе всего.",
+        "cta": "Начать"
+      },
+      "saveBookmarks": {
+        "headline": "Сохраняйте закладки откуда угодно.",
+        "body": "Вставьте URL, добавьте скриншоты и отслеживайте, как часто вы к ним возвращаетесь.",
+        "cta": "Далее"
+      },
+      "projectsMoveForward": {
+        "headline": "Смотрите, как ваши проекты продвигаются.",
+        "body": "Создавайте проекты, добавляйте задачи и наблюдайте за ростом вашего прогресса.",
+        "cta": "Далее"
+      },
+      "shareCollaborate": {
+        "headline": "Делитесь и сотрудничайте.",
+        "body": "Подписывайтесь на друзей, делитесь закладками и работайте над проектами вместе.",
+        "cta": "Начать"
+      }
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "sections": {
+      "account": "Аккаунт",
+      "subscription": "Подписка",
+      "notifications": "Уведомления",
+      "appearance": "Внешний вид",
+      "dataPrivacy": "Данные и конфиденциальность",
+      "about": "О приложении",
+      "developer": "Разработчик"
+    },
+    "profile": {
+      "title": "Профиль",
+      "subtitle": "Управление информацией профиля"
+    },
+    "appleSignIn": "Вход через Apple",
+    "googleSignIn": {
+      "title": "Вход через Google",
+      "subtitle": "Подключите аккаунт Google"
+    },
+    "currentPlan": {
+      "title": "Текущий план",
+      "free": "Бесплатный план",
+      "plan": "План {{plan}}"
+    },
+    "billingHistory": {
+      "title": "История платежей",
+      "subtitle": "Просмотр истории оплат"
+    },
+    "pushNotifications": {
+      "title": "Push-уведомления",
+      "subtitle": "Получайте уведомления на устройстве"
+    },
+    "emailNotifications": {
+      "title": "Уведомления по почте",
+      "subtitle": "Получайте уведомления по эл. почте"
+    },
+    "notificationPreferences": {
+      "title": "Настройки уведомлений",
+      "subtitle": "Настройте параметры уведомлений"
+    },
+    "theme": {
+      "title": "Тема",
+      "light": "Светлая",
+      "dark": "Тёмная",
+      "system": "Системная",
+      "chooseTheme": "Выберите тему"
+    },
+    "fontSize": {
+      "title": "Размер шрифта",
+      "percent": "{{percent}}%"
+    },
+    "exportData": {
+      "title": "Экспорт данных",
+      "subtitle": "Скачайте данные в формате JSON"
+    },
+    "importData": {
+      "title": "Импорт данных",
+      "subtitle": "Восстановить из резервной копии"
+    },
+    "deleteAccount": {
+      "title": "Удалить аккаунт",
+      "subtitle": "Безвозвратно удалить аккаунт"
+    },
+    "version": {
+      "title": "Версия",
+      "value": "1.0.0"
+    },
+    "termsOfService": {
+      "title": "Условия обслуживания",
+      "subtitle": "Прочитайте наши условия"
+    },
+    "privacyPolicy": {
+      "title": "Политика конфиденциальности",
+      "subtitle": "Узнайте, как мы защищаем ваши данные"
+    },
+    "testCrash": {
+      "title": "Тестовый сбой",
+      "subtitle": "Отправить тестовый сбой в Firebase Crashlytics"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "App display language",
+      "chooseLanguage": "Choose Language",
+      "systemDefault": "System default"
+    }
+  },
+  "home": {
+    "aiChat": {
+      "title": "ИИ-чат ассистент",
+      "description": "Спрашивайте что угодно и сохраняйте беседы как заметки"
+    },
+    "continue": "Продолжить",
+    "dueAndOverdueTasks": "Срочные и просроченные задачи",
+    "recentActivity": "Недавняя активность",
+    "bookmark": "Закладка",
+    "note": "Заметка",
+    "overdue": "Просрочено",
+    "dueToday": "Срок сегодня",
+    "streakBadge": "СЕРИЯ {{days}} ДНЕЙ",
+    "streakTitle": "Сохраняйте темп!",
+    "empty": {
+      "noContinueItems": "Нет элементов для продолжения",
+      "noDueTasks": "Нет срочных задач",
+      "noRecentActivity": "Нет недавней активности"
+    }
+  },
+  "bookmarks": {
+    "searchPlaceholder": "Поиск сохранений, тегов, заметок...",
+    "yourSaves": "Ваши сохранения",
+    "sort": {
+      "recent": "Недавние",
+      "mostOpened": "Чаще открываемые",
+      "oldestUnread": "Старые непрочитанные"
+    },
+    "filters": {
+      "all": "Все",
+      "readLater": "Прочитать позже",
+      "neverOpened": "Никогда не открывались",
+      "tagged": "С тегами",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "medium": "Medium"
+    },
+    "loading": "Загрузка закладок...",
+    "empty": {
+      "title": "Пока нет сохранений",
+      "description": "Делитесь ссылками из Twitter, LinkedIn или Safari через кнопку «Поделиться» или добавьте вручную.",
+      "button": "Добавить закладку"
+    }
+  },
+  "notes": {
+    "empty": {
+      "title": "Пока нет заметок",
+      "description": "Начните записывать свои мысли и идеи в формате Markdown.",
+      "button": "Создать первую заметку"
+    }
+  },
+  "projects": {
+    "viewModes": {
+      "list": "Список",
+      "kanban": "Kanban"
+    },
+    "filters": {
+      "onTrack": "В срок",
+      "atRisk": "Под угрозой",
+      "overdue": "Просрочено"
+    },
+    "kanban": {
+      "todo": "К выполнению",
+      "inProgress": "В работе",
+      "done": "Выполнено"
+    },
+    "loading": "Загрузка проектов...",
+    "empty": {
+      "title": "Пока нет проектов",
+      "description": "Начните с создания первого проекта.",
+      "button": "Создать новый проект"
+    },
+    "addTask": {
+      "placeholder": "Введите название задачи...",
+      "button": "Создать задачу",
+      "title": "Add Task",
+      "status": "Status",
+      "taskTitle": "Task Title",
+      "createFailed": "Failed to create task."
+    },
+    "due": "Due: "
+  },
+  "todos": {
+    "searchPlaceholder": "Поиск задач...",
+    "filters": {
+      "active": "Активные",
+      "done": "Выполнено",
+      "all": "Все",
+      "allPriorities": "Все приоритеты",
+      "high": "Высокий",
+      "medium": "Средний",
+      "low": "Низкий"
+    },
+    "due": "Срок: ",
+    "overduePrefix": "Просрочено: ",
+    "project": "Проект",
+    "empty": {
+      "title": "Пока нет задач",
+      "description": "Добавьте первую задачу, чтобы начать.",
+      "button": "Добавить задачу"
+    },
+    "deleteConfirm": {
+      "title": "Удалить задачу",
+      "message": "Вы уверены, что хотите удалить эту задачу?"
+    },
+    "loading": "Loading todos...",
+    "emptyDescriptionLong": "Tap the + button to create your first task and stay organized"
+  },
+  "profile": {
+    "defaultName": "Пользователь Pinnedly",
+    "tagline": "Держите знания в порядке",
+    "yourStats": "Ваша статистика",
+    "stats": {
+      "bookmarks": "Закладки",
+      "projects": "Проекты",
+      "notes": "Заметки",
+      "totalOpens": "Всего открытий"
+    },
+    "goals": "Цели",
+    "dailyGoal": "Дневная цель",
+    "weeklyGoal": "Недельная цель",
+    "bookmarksGoal": "{{count}} закладок",
+    "upgradePremium": "Перейти на Premium",
+    "upgradeSubtitle": "Откройте мощные функции совместной работы"
+  },
+  "aiChat": {
+    "title": "ИИ-чат",
+    "systemPrompt": "Ты — ИИ-ассистент Pinnedly. Всегда отвечай на русском, даже если пользователь пишет на другом языке. Будь кратким, дружелюбным и практичным.",
+    "placeholder": "Спросите меня о чём угодно...",
+    "empty": {
+      "title": "ИИ-чат ассистент",
+      "description": "Спросите меня о чём угодно! Я помогу с исследованиями, мозговым штурмом, написанием текстов и многим другим. Вы можете сохранить нашу беседу как заметку в любое время.",
+      "tryAsking": "Попробуйте спросить:",
+      "suggestions": {
+        "quantum": "Объясни квантовые вычисления",
+        "brainstorm": "Придумай идеи для приложения",
+        "meditation": "Польза медитации"
+      }
+    },
+    "roles": {
+      "you": "Вы",
+      "ai": "ИИ"
+    },
+    "savedNoteTitle": "ИИ-чат: {{title}}",
+    "alerts": {
+      "noConversation": "Нет беседы",
+      "noMessagesToSave": "Нет сообщений для сохранения.",
+      "savedAsNote": "Беседа сохранена как заметка!",
+      "sendFailed": "Не удалось отправить сообщение. Попробуйте снова.",
+      "saveFailed": "Не удалось сохранить беседу. Попробуйте снова."
+    }
+  },
+  "premium": {
+    "title": "Перейти на Premium",
+    "subtitle": "Откройте мощные функции",
+    "choosePlan": "Выберите план",
+    "mostPopular": "Самый популярный",
+    "startFreeTrial": "Начать бесплатный период",
+    "terms": "7 дней бесплатно, затем {{price}}{{period}}. Отмена в любое время.",
+    "plans": {
+      "monthly": "Ежемесячно",
+      "yearly": "Ежегодно",
+      "perMonth": "/месяц",
+      "perYear": "/год",
+      "savePercent": "Экономия 33%"
+    },
+    "features": {
+      "teamCollaboration": {
+        "title": "Командная работа",
+        "description": "Делитесь проектами и списками с участниками команды"
+      },
+      "voiceNotes": {
+        "title": "Голосовые заметки",
+        "description": "Записывайте и мгновенно расшифровывайте голосовые заметки"
+      },
+      "smartReminders": {
+        "title": "Умные напоминания",
+        "description": "Уведомления и напоминания на базе ИИ"
+      },
+      "advancedFeatures": {
+        "title": "Расширенные функции",
+        "description": "Откройте мощные инструменты продуктивности"
+      },
+      "unlimitedLists": "Неограниченные списки закладок",
+      "collaborativeProjects": "Совместные проекты",
+      "voiceNotesFeature": "Голосовые заметки",
+      "advancedReminders": "Расширенные напоминания",
+      "prioritySupport": "Приоритетная поддержка",
+      "everythingMonthly": "Всё из месячного плана",
+      "advancedAnalytics": "Расширенная аналитика",
+      "customThemes": "Пользовательские темы",
+      "exportFormats": "Экспорт в несколько форматов",
+      "teamManagement": "Инструменты управления командой",
+      "apiAccess": "Доступ к API"
+    }
+  },
+  "share": {
+    "shareEntity": "Поделиться: {{entityTitle}}",
+    "enterEmailOrUsername": "Введите эл. почту или имя пользователя",
+    "enterEmail": "Введите адрес эл. почты",
+    "permissions": {
+      "view": "Просмотр",
+      "edit": "Редактирование"
+    },
+    "sharedBy": "Поделился {{name}}",
+    "alerts": {
+      "enterEmailOrUsername": "Пожалуйста, введите эл. почту или имя пользователя",
+      "sharedSuccessfully": "Элемент успешно отправлен",
+      "shareFailed": "Не удалось поделиться",
+      "updatePermissionFailed": "Не удалось обновить разрешение",
+      "removeShareFailed": "Не удалось удалить доступ"
+    },
+    "addPeople": "Add People",
+    "emailOrUsername": "Email or Username",
+    "sharedWith": "Shared With",
+    "permission": "Permission"
+  },
+  "shareInbox": {
+    "title": "Входящие",
+    "empty": {
+      "title": "Нет общих элементов",
+      "description": "Элементы, которыми с вами поделились, появятся здесь"
+    }
+  },
+  "discoverLists": {
+    "title": "Обзор списков",
+    "searchPlaceholder": "Поиск публичных списков...",
+    "loading": "Загрузка...",
+    "noListsFound": "Списки не найдены",
+    "noPublicLists": "Пока нет публичных списков",
+    "tryDifferentKeywords": "Попробуйте другие ключевые слова",
+    "beFirstToCreate": "Станьте первым, кто создаст публичный список!",
+    "createList": "Создать список"
+  },
+  "peopleSearch": {
+    "title": "Найти людей",
+    "searchPlaceholder": "Поиск по имени или имени пользователя...",
+    "empty": {
+      "title": "Поиск людей",
+      "description": "Введите имя или имя пользователя, чтобы найти людей"
+    },
+    "noResults": {
+      "title": "Нет результатов",
+      "description": "Пользователи не найдены по запросу «{{query}}»"
+    }
+  },
+  "addBookmark": {
+    "title": "Добавить закладку",
+    "urlPlaceholder": "Вставьте URL сюда...",
+    "titlePlaceholder": "Введите название...",
+    "descriptionPlaceholder": "Введите описание...",
+    "notePlaceholder": "Добавьте быструю заметку...",
+    "tagsPlaceholder": "Добавьте теги...",
+    "addBookmark": "Добавить закладку",
+    "alerts": {
+      "permissionNeeded": "Требуется разрешение",
+      "cameraPermission": "Предоставьте доступ к галерее для загрузки скриншотов.",
+      "signInRequired": "Требуется вход",
+      "signInToSave": "Войдите, чтобы сохранять закладки.",
+      "provideUrlOrScreenshot": "Укажите URL или загрузите скриншот.",
+      "saveFailed": "Ошибка сохранения",
+      "couldNotSave": "Не удалось сохранить закладку."
+    },
+    "labels": {
+      "url": "URL",
+      "or": "OR",
+      "uploadScreenshot": "Upload Screenshot",
+      "title": "Title",
+      "description": "Description",
+      "commentOptional": "Comment (optional)",
+      "tags": "Tags"
+    },
+    "metadataFetchFailed": "Metadata Fetch Failed",
+    "metadataFetchMessage": "Could not automatically fetch page details. You can still add the bookmark manually."
+  },
+  "addNote": {
+    "titlePlaceholder": "Введите название заметки...",
+    "contentPlaceholder": "Напишите заметку...",
+    "createNote": "Создать заметку",
+    "alerts": {
+      "enterTitle": "Пожалуйста, введите название заметки.",
+      "createFailed": "Не удалось создать заметку. Попробуйте снова."
+    },
+    "title": "Add Note",
+    "noteTitle": "Note Title",
+    "visibility": "Visibility",
+    "content": "Content",
+    "visibilityOptions": {
+      "private": "Only you can see this note",
+      "shared": "Share with specific people",
+      "public": "Anyone can view this note"
+    },
+    "editorHint": "Select text and use the toolbar to apply formatting. The text appears styled as you type.",
+    "toolbarHint": "Select text to format"
+  },
+  "addProject": {
+    "titlePlaceholder": "Введите название проекта...",
+    "descriptionPlaceholder": "Опишите проект...",
+    "createProject": "Создать проект",
+    "alerts": {
+      "enterTitle": "Пожалуйста, введите название проекта."
+    },
+    "title": "Add Project",
+    "projectTitle": "Project Title",
+    "descriptionOptional": "Description (optional)",
+    "deadlineOptional": "Deadline (optional)",
+    "deadlines": {
+      "oneWeek": "1 week",
+      "oneMonth": "1 month",
+      "threeMonths": "3 months"
+    },
+    "info": "You can add tasks and track progress after creating the project."
+  },
+  "addTodo": {
+    "titlePlaceholder": "Что вам нужно сделать?",
+    "detailsPlaceholder": "Добавьте детали...",
+    "dueDatePlaceholder": "ГГГГ-ММ-ДД",
+    "alerts": {
+      "enterTitle": "Пожалуйста, введите название задачи."
+    },
+    "newTodo": "New Todo",
+    "editTodo": "Edit Todo",
+    "title": "Title",
+    "descriptionOptional": "Description (optional)",
+    "priority": "Priority",
+    "setDueDate": "Set due date",
+    "markCompleted": "Mark as completed",
+    "quickDates": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "nextWeek": "Next Week",
+      "clear": "Clear"
+    },
+    "saveFailed": "Failed to save todo"
+  },
+  "createList": {
+    "namePlaceholder": "Введите название списка",
+    "descriptionPlaceholder": "Добавьте описание (необязательно)",
+    "alerts": {
+      "enterName": "Пожалуйста, введите название списка",
+      "createFailed": "Не удалось создать список. Попробуйте снова."
+    },
+    "title": "Create List",
+    "listName": "List Name *",
+    "description": "Description",
+    "makePublic": "Make Public",
+    "makePublicDescription": "Public lists can be discovered and followed by other users",
+    "publicNotice": "📢 Public lists will appear in the discover section and can be followed by other users."
+  },
+  "bookmarkDetail": {
+    "noUrl": "Нет URL",
+    "noLinkToOpen": "У этой закладки нет ссылки для открытия.",
+    "deleteTitle": "Удалить закладку",
+    "deleteMessage": "Это действие нельзя отменить.",
+    "notePlaceholder": "Добавьте заметку для себя в будущем...",
+    "saveNote": "Сохранить заметку",
+    "openLink": "Открыть ссылку",
+    "notFound": "Bookmark not found",
+    "bookmark": "Bookmark",
+    "openedCount": "Opened {{count}}×",
+    "whySaved": "Why I saved this",
+    "tapToAddNote": "Tap to add a note...",
+    "archive": "Archive"
+  },
+  "noteDetail": {
+    "titlePlaceholder": "Название заметки",
+    "contentPlaceholder": "Напишите заметку здесь...",
+    "alerts": {
+      "titleEmpty": "Название заметки не может быть пустым"
+    },
+    "notFound": "Note not found",
+    "editNote": "Edit Note",
+    "deleteTitle": "Delete Note",
+    "deleteMessage": "Are you sure you want to delete this note? This action cannot be undone.",
+    "created": "Created {{date}}",
+    "updated": "Updated {{date}}",
+    "you": "You",
+    "sharedWith": "Shared with",
+    "addPeople": "Add people"
+  },
+  "projectDetail": {
+    "addTaskPlaceholder": "Добавить задачу",
+    "emailPlaceholder": "Введите адрес эл. почты",
+    "titlePlaceholder": "Введите название проекта",
+    "descriptionPlaceholder": "Введите описание проекта",
+    "alerts": {
+      "enterTaskTitle": "Пожалуйста, введите название задачи",
+      "createTaskFailed": "Не удалось создать задачу",
+      "updateTaskFailed": "Не удалось обновить задачу",
+      "deleteTaskFailed": "Не удалось удалить задачу",
+      "enterEmail": "Пожалуйста, введите адрес эл. почты",
+      "sharedWith": "Проект отправлен пользователю {{email}}",
+      "shareFailed": "Не удалось поделиться проектом",
+      "titleRequired": "Название проекта обязательно",
+      "updatedSuccessfully": "Проект успешно обновлён",
+      "archived": "Проект архивирован",
+      "notificationsNotSupported": "Уведомления не поддерживаются в веб-версии. Используйте мобильное приложение.",
+      "nudgeScheduled": "Напоминание запланировано на {{time}}",
+      "scheduleNudgeFailed": "Не удалось запланировать напоминание"
+    },
+    "notFound": "Project not found",
+    "progress": "Progress",
+    "members": "Members",
+    "nudgeMe": "Nudge Me",
+    "tabs": {
+      "tasks": "Tasks",
+      "timeline": "Timeline",
+      "gallery": "Gallery"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left"
+    },
+    "quickAdd": {
+      "title": "Quick Add",
+      "message": "What would you like to add?",
+      "task": "Task",
+      "note": "Note",
+      "bookmark": "Bookmark"
+    },
+    "deleteTask": {
+      "title": "Delete Task",
+      "message": "Are you sure you want to delete this task?"
+    },
+    "shareProject": "Share Project",
+    "emailAddress": "Email Address",
+    "permission": "Permission",
+    "viewOnly": "View Only",
+    "canEdit": "Can Edit",
+    "editProject": "Edit Project",
+    "projectTitle": "Project Title",
+    "description": "Description",
+    "deleteProject": {
+      "title": "Delete Project",
+      "message": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "archiveProject": {
+      "title": "Archive Project",
+      "message": "Are you sure you want to archive this project?",
+      "action": "Archive"
+    },
+    "scheduleNudge": {
+      "title": "Schedule Nudge",
+      "message": "When would you like to be reminded about this project?",
+      "in1Hour": "In 1 hour",
+      "tomorrow": "Tomorrow",
+      "in3Days": "In 3 days"
+    },
+    "adding": "Adding...",
+    "swipeHint": "Swipe left on a task for more options",
+    "relatedContent": "Related Content",
+    "created": "Created {{relative}}",
+    "empty": {
+      "activityTitle": "No Activity Yet",
+      "activityDescription": "Project activity will appear here as you work",
+      "imagesTitle": "No Images Yet",
+      "imagesDescription": "Add images to showcase your project progress",
+      "uploadImage": "Upload Image"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "bookmarkList": {
+    "alerts": {
+      "loadFailed": "Не удалось загрузить данные списка",
+      "followFailed": "Не удалось обновить статус подписки",
+      "deleteFailed": "Не удалось удалить список",
+      "sharingComingSoon": "Функция совместного доступа скоро появится!"
+    },
+    "empty": {
+      "title": "Пока нет закладок",
+      "description": "This list doesn't have any bookmarks yet."
+    },
+    "deleteTitle": "Delete List",
+    "deleteMessage": "Are you sure you want to delete this list? This action cannot be undone.",
+    "shareTitle": "Share"
+  },
+  "projectMembers": {
+    "alerts": {
+      "enterEmail": "Пожалуйста, введите адрес эл. почты",
+      "memberAdded": "Участник успешно добавлен",
+      "addMemberFailed": "Не удалось добавить участника. Попробуйте снова.",
+      "memberRemoved": "Участник успешно удалён",
+      "removeMemberFailed": "Не удалось удалить участника. Попробуйте снова.",
+      "permissionUpdated": "Разрешение успешно обновлено",
+      "updatePermissionFailed": "Не удалось обновить разрешение. Попробуйте снова."
+    },
+    "title": "Project Members",
+    "currentMembers": "Current Members",
+    "addMember": "Add Member",
+    "canView": "Can View",
+    "canEdit": "Can Edit",
+    "permissionLabel": "Permission:",
+    "adding": "Adding...",
+    "dismiss": "Dismiss",
+    "removeMember": {
+      "title": "Remove Member",
+      "message": "Are you sure you want to remove {{email}} from this project?",
+      "action": "Remove"
+    }
+  },
+  "shareIntent": {
+    "signInRequired": "Требуется вход",
+    "signInToSaveLinks": "Войдите, чтобы сохранять общие ссылки в Pinnedly.",
+    "savedToPinnedly": "Сохранено в Pinnedly",
+    "linkSavedToReadLater": "Ссылка сохранена в «Прочитать позже».",
+    "view": "View",
+    "couldNotSave": "Could not save",
+    "unableToSave": "Unable to save shared content."
+  },
+  "quickAdd": {
+    "addBookmark": "Добавить закладку",
+    "addProject": "Добавить проект",
+    "addNote": "Добавить заметку"
+  },
+  "errorBoundary": {
+    "title": "Что-то пошло не так",
+    "message": "Произошла непредвиденная ошибка",
+    "tryAgain": "Повторить"
+  },
+  "notFound": {
+    "title": "Упс!",
+    "message": "Этот экран не существует.",
+    "goHome": "Перейти на главный экран!"
+  },
+  "languages": {
+    "en": "Английский",
+    "tr": "Турецкий",
+    "ar": "Арабский",
+    "ru": "Русский",
+    "de": "Немецкий",
+    "pt": "Португальский",
+    "es": "Испанский",
+    "it": "Итальянский",
+    "ja": "Японский",
+    "zh": "Китайский"
+  },
+  "sources": {
+    "twitter": "Twitter / X",
+    "instagram": "Instagram",
+    "medium": "Medium",
+    "linkedin": "LinkedIn",
+    "wikipedia": "Wikipedia",
+    "youtube": "YouTube",
+    "reddit": "Reddit",
+    "substack": "Substack",
+    "github": "GitHub",
+    "other": "Web"
+  },
+  "notifications": {
+    "taskReminder": {
+      "title": "Task Reminder",
+      "body": "Don't forget: {{taskTitle}}"
+    },
+    "projectNudge": {
+      "title": "Project Nudge",
+      "body": "Time to work on: {{projectTitle}}"
+    },
+    "bookmarkDigest": {
+      "title": "Read Later reminder",
+      "body_one": "You have 1 unread save waiting for you.",
+      "body_other": "You have {{count}} unread saves waiting for you."
+    }
+  },
+  "bookmarkCard": {
+    "neverOpened": "Never opened",
+    "openedCount": "Opened {{count}}×",
+    "readLater": "Read later",
+    "screenshot": "Screenshot"
+  },
+  "clipboard": {
+    "title": "Link in clipboard",
+    "message": "Save this link to Pinnedly?",
+    "save": "Save",
+    "openAddBookmark": "Review & save",
+    "dismiss": "Not now"
+  },
+  "userProfile": {
+    "notFound": "Profile not found",
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "projectCard": {
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "weeksLeft_one": "{{count}} week left",
+    "weeksLeft_other": "{{count}} weeks left",
+    "monthsLeft_one": "{{count}} month left",
+    "monthsLeft_other": "{{count}} months left",
+    "tasksDone": "{{completed}}/{{total}} tasks done"
+  },
+  "entityTypes": {
+    "bookmark": "Bookmark",
+    "note": "Note",
+    "project": "Project",
+    "list": "List"
+  }
+}

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Heart, Share, Users, Edit3, Trash2 } from 'lucide-react-native';
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { BookmarkList, Bookmark } from '@/types';
@@ -10,6 +12,7 @@ import { BookmarkCard } from '@/components/BookmarkCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function BookmarkListDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     getListById,
@@ -37,7 +40,7 @@ export default function BookmarkListDetailScreen() {
       setIsFollowing(isFollowingList(id));
     } catch (error) {
       console.error('Error loading list data:', error);
-      Alert.alert('Error', 'Failed to load list data');
+      showAppAlert(t('common.error'), t('bookmarkList.alerts.loadFailed'), undefined, { variant: 'error' });
     }
   }, [id, getListById, getBookmarksByListId, isFollowingList]);
 
@@ -60,20 +63,20 @@ export default function BookmarkListDetailScreen() {
       }
     } catch (error) {
       console.error('Follow error:', error);
-      Alert.alert('Error', 'Failed to update follow status');
+      showAppAlert(t('common.error'), t('bookmarkList.alerts.followFailed'), undefined, { variant: 'error' });
     }
   };
 
   const handleDelete = () => {
     if (!list) return;
     
-    Alert.alert(
-      'Delete List',
-      'Are you sure you want to delete this list? This action cannot be undone.',
+    showAppAlert(
+      t('bookmarkList.deleteTitle'),
+      t('bookmarkList.deleteMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -81,7 +84,7 @@ export default function BookmarkListDetailScreen() {
               router.back();
             } catch (error) {
               console.error('Delete error:', error);
-              Alert.alert('Error', 'Failed to delete list');
+              showAppAlert(t('common.error'), t('bookmarkList.alerts.deleteFailed'), undefined, { variant: 'error' });
             }
           },
         },
@@ -91,7 +94,7 @@ export default function BookmarkListDetailScreen() {
 
   const handleShare = () => {
     // TODO: Implement sharing functionality
-    Alert.alert('Share', 'Sharing functionality coming soon!');
+    showAppAlert(t('bookmarkList.shareTitle'), t('bookmarkList.alerts.sharingComingSoon'));
   };
 
   const renderBookmark = ({ item }: { item: Bookmark }) => (
@@ -105,7 +108,7 @@ export default function BookmarkListDetailScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -159,7 +162,7 @@ export default function BookmarkListDetailScreen() {
         <View style={styles.listStats}>
           <View style={styles.stat}>
             <Users size={16} color="#64748b" />
-            <Text style={styles.statText}>{list.followerCount} followers</Text>
+            <Text style={styles.statText}>{t('common.followers', { count: list.followerCount })}</Text>
           </View>
         </View>
       </View>
@@ -173,8 +176,8 @@ export default function BookmarkListDetailScreen() {
         ListEmptyComponent={() => (
           <EmptyState
             icon="bookmark"
-            title="No bookmarks yet"
-            description="This list doesn't have any bookmarks yet."
+            title={t('bookmarkList.empty.title')}
+            description={t('bookmarkList.empty.description')}
           />
         )}
       />
