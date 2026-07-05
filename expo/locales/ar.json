@@ -43,7 +43,8 @@
     "sortLabel": "الترتيب: {{sort}}",
     "errorWithMessage": "خطأ: {{message}}",
     "noContent": "لا يوجد محتوى",
-    "unknownUser": "مستخدم غير معروف"
+    "unknownUser": "مستخدم غير معروف",
+    "selectDate": "اختر التاريخ"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -420,7 +421,8 @@
       "savedAsNote": "تم حفظ المحادثة كملاحظة!",
       "sendFailed": "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.",
       "saveFailed": "فشل حفظ المحادثة. يرجى المحاولة مرة أخرى."
-    }
+    },
+    "thinking": "جارٍ التفكير"
   },
   "premium": {
     "title": "الترقية إلى Premium",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "صف مشروعك...",
     "createProject": "إنشاء مشروع",
     "alerts": {
-      "enterTitle": "يرجى إدخال عنوان المشروع."
+      "enterTitle": "يرجى إدخال عنوان المشروع.",
+      "createFailed": "فشل إنشاء المشروع. يرجى المحاولة مرة أخرى."
     },
     "title": "Add Project",
     "projectTitle": "Project Title",
@@ -668,7 +671,11 @@
       "archived": "تم أرشفة المشروع",
       "notificationsNotSupported": "الإشعارات غير مدعومة على الويب. يرجى استخدام تطبيق الهاتف.",
       "nudgeScheduled": "تم جدولة التذكير في {{time}}",
-      "scheduleNudgeFailed": "فشل جدولة التذكير"
+      "scheduleNudgeFailed": "فشل جدولة التذكير",
+      "updateFailed": "فشل تحديث المشروع",
+      "deleteFailed": "فشل حذف المشروع",
+      "galleryPermissionDenied": "مطلوب إذن الوصول إلى مكتبة الصور",
+      "uploadImageFailed": "فشل تحميل الصورة"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "تم حفظ الرابط في اقرأ لاحقًا.",
     "view": "View",
     "couldNotSave": "Could not save",
-    "unableToSave": "Unable to save shared content."
+    "unableToSave": "Unable to save shared content.",
+    "saving": "جارٍ حفظ المحتوى المشترك..."
   },
   "quickAdd": {
     "addBookmark": "إضافة إشارة مرجعية",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "تمت إضافة إشارة مرجعية",
+    "bookmark_opened": "تم فتح الإشارة المرجعية",
+    "project_created": "تم إنشاء المشروع",
+    "task_completed": "تم إكمال المهمة",
+    "note_added": "تمت إضافة ملاحظة",
+    "todo_added": "تمت إضافة مهمة",
+    "todo_completed": "تم إكمال المهمة"
   }
 }

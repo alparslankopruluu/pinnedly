@@ -43,7 +43,8 @@
     "sortLabel": "Ordina: {{sort}}",
     "errorWithMessage": "Errore: {{message}}",
     "noContent": "Nessun contenuto",
-    "unknownUser": "Utente sconosciuto"
+    "unknownUser": "Utente sconosciuto",
+    "selectDate": "Seleziona data"
   },
   "tabs": {
     "home": "Home",
@@ -420,7 +421,8 @@
       "savedAsNote": "Conversazione salvata come nota!",
       "sendFailed": "Invio messaggio non riuscito. Riprova.",
       "saveFailed": "Salvataggio conversazione non riuscito. Riprova."
-    }
+    },
+    "thinking": "Sto pensando"
   },
   "premium": {
     "title": "Passa a Premium",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "Descrivi il tuo progetto...",
     "createProject": "Crea progetto",
     "alerts": {
-      "enterTitle": "Inserisci un titolo per il progetto."
+      "enterTitle": "Inserisci un titolo per il progetto.",
+      "createFailed": "Impossibile creare il progetto. Riprova."
     },
     "title": "Aggiungi progetto",
     "projectTitle": "Titolo progetto",
@@ -668,7 +671,11 @@
       "archived": "Progetto archiviato",
       "notificationsNotSupported": "Le notifiche non sono supportate sul web. Usa l'app mobile.",
       "nudgeScheduled": "Promemoria programmato per {{time}}",
-      "scheduleNudgeFailed": "Programmazione promemoria non riuscita"
+      "scheduleNudgeFailed": "Programmazione promemoria non riuscita",
+      "updateFailed": "Impossibile aggiornare il progetto",
+      "deleteFailed": "Impossibile eliminare il progetto",
+      "galleryPermissionDenied": "È richiesta l'autorizzazione per la libreria foto",
+      "uploadImageFailed": "Impossibile caricare l'immagine"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "Link salvato in Leggi dopo.",
     "view": "Visualizza",
     "couldNotSave": "Impossibile salvare",
-    "unableToSave": "Impossibile salvare il contenuto condiviso."
+    "unableToSave": "Impossibile salvare il contenuto condiviso.",
+    "saving": "Salvataggio del contenuto condiviso..."
   },
   "quickAdd": {
     "addBookmark": "Aggiungi segnalibro",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "Segnalibro aggiunto",
+    "bookmark_opened": "Segnalibro aperto",
+    "project_created": "Progetto creato",
+    "task_completed": "Attività completata",
+    "note_added": "Nota aggiunta",
+    "todo_added": "Attività aggiunta",
+    "todo_completed": "Attività completata"
   }
 }

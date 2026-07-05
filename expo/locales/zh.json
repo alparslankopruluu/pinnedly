@@ -43,7 +43,8 @@
     "sortLabel": "排序：{{sort}}",
     "errorWithMessage": "错误：{{message}}",
     "noContent": "无内容",
-    "unknownUser": "未知用户"
+    "unknownUser": "未知用户",
+    "selectDate": "选择日期"
   },
   "tabs": {
     "home": "首页",
@@ -420,7 +421,8 @@
       "savedAsNote": "对话已保存为笔记！",
       "sendFailed": "发送消息失败，请重试。",
       "saveFailed": "保存对话失败，请重试。"
-    }
+    },
+    "thinking": "思考中"
   },
   "premium": {
     "title": "升级到 Premium",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "描述您的项目...",
     "createProject": "创建项目",
     "alerts": {
-      "enterTitle": "请输入项目标题。"
+      "enterTitle": "请输入项目标题。",
+      "createFailed": "创建项目失败，请重试。"
     },
     "title": "添加项目",
     "projectTitle": "项目标题",
@@ -668,7 +671,11 @@
       "archived": "项目已归档",
       "notificationsNotSupported": "网页端不支持通知，请使用移动应用。",
       "nudgeScheduled": "提醒已安排在 {{time}}",
-      "scheduleNudgeFailed": "安排提醒失败"
+      "scheduleNudgeFailed": "安排提醒失败",
+      "updateFailed": "更新项目失败",
+      "deleteFailed": "删除项目失败",
+      "galleryPermissionDenied": "需要相册访问权限",
+      "uploadImageFailed": "上传图片失败"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "链接已保存到稍后阅读。",
     "view": "查看",
     "couldNotSave": "无法保存",
-    "unableToSave": "无法保存分享的内容。"
+    "unableToSave": "无法保存分享的内容。",
+    "saving": "正在保存分享的内容..."
   },
   "quickAdd": {
     "addBookmark": "添加书签",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "已添加书签",
+    "bookmark_opened": "已打开书签",
+    "project_created": "已创建项目",
+    "task_completed": "已完成任务",
+    "note_added": "已添加笔记",
+    "todo_added": "已添加待办",
+    "todo_completed": "已完成待办"
   }
 }

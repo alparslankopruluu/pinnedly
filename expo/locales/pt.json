@@ -43,7 +43,8 @@
     "sortLabel": "Ordenar: {{sort}}",
     "errorWithMessage": "Erro: {{message}}",
     "noContent": "Sem conteúdo",
-    "unknownUser": "Usuário desconhecido"
+    "unknownUser": "Usuário desconhecido",
+    "selectDate": "Selecionar data"
   },
   "tabs": {
     "home": "Início",
@@ -420,7 +421,8 @@
       "savedAsNote": "Conversa salva como nota!",
       "sendFailed": "Falha ao enviar mensagem. Tente novamente.",
       "saveFailed": "Falha ao salvar conversa. Tente novamente."
-    }
+    },
+    "thinking": "Pensando"
   },
   "premium": {
     "title": "Atualizar para Premium",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "Descreva seu projeto...",
     "createProject": "Criar projeto",
     "alerts": {
-      "enterTitle": "Digite um título para o projeto."
+      "enterTitle": "Digite um título para o projeto.",
+      "createFailed": "Falha ao criar o projeto. Tente novamente."
     },
     "title": "Adicionar projeto",
     "projectTitle": "Título do projeto",
@@ -668,7 +671,11 @@
       "archived": "Projeto arquivado",
       "notificationsNotSupported": "Notificações não são suportadas na web. Use o aplicativo móvel.",
       "nudgeScheduled": "Lembrete agendado para {{time}}",
-      "scheduleNudgeFailed": "Falha ao agendar lembrete"
+      "scheduleNudgeFailed": "Falha ao agendar lembrete",
+      "updateFailed": "Falha ao atualizar o projeto",
+      "deleteFailed": "Falha ao excluir o projeto",
+      "galleryPermissionDenied": "É necessária permissão para a galeria de fotos",
+      "uploadImageFailed": "Falha ao enviar a imagem"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "Link salvo em Ler depois.",
     "view": "Visualizar",
     "couldNotSave": "Não foi possível salvar",
-    "unableToSave": "Não foi possível salvar o conteúdo compartilhado."
+    "unableToSave": "Não foi possível salvar o conteúdo compartilhado.",
+    "saving": "Salvando conteúdo compartilhado..."
   },
   "quickAdd": {
     "addBookmark": "Adicionar favorito",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "Marcador adicionado",
+    "bookmark_opened": "Marcador aberto",
+    "project_created": "Projeto criado",
+    "task_completed": "Tarefa concluída",
+    "note_added": "Nota adicionada",
+    "todo_added": "Tarefa adicionada",
+    "todo_completed": "Tarefa concluída"
   }
 }

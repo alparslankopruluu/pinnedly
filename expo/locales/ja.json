@@ -43,7 +43,8 @@
     "sortLabel": "並べ替え: {{sort}}",
     "errorWithMessage": "エラー: {{message}}",
     "noContent": "コンテンツなし",
-    "unknownUser": "不明なユーザー"
+    "unknownUser": "不明なユーザー",
+    "selectDate": "日付を選択"
   },
   "tabs": {
     "home": "ホーム",
@@ -420,7 +421,8 @@
       "savedAsNote": "会話をノートとして保存しました！",
       "sendFailed": "メッセージの送信に失敗しました。もう一度お試しください。",
       "saveFailed": "会話の保存に失敗しました。もう一度お試しください。"
-    }
+    },
+    "thinking": "考え中"
   },
   "premium": {
     "title": "Premiumにアップグレード",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "プロジェクトを説明...",
     "createProject": "プロジェクトを作成",
     "alerts": {
-      "enterTitle": "プロジェクトのタイトルを入力してください。"
+      "enterTitle": "プロジェクトのタイトルを入力してください。",
+      "createFailed": "プロジェクトの作成に失敗しました。もう一度お試しください。"
     },
     "title": "プロジェクトを追加",
     "projectTitle": "プロジェクトのタイトル",
@@ -668,7 +671,11 @@
       "archived": "プロジェクトをアーカイブしました",
       "notificationsNotSupported": "Webでは通知はサポートされていません。モバイルアプリをご利用ください。",
       "nudgeScheduled": "{{time}}にリマインドを予定しました",
-      "scheduleNudgeFailed": "リマインドの予定に失敗しました"
+      "scheduleNudgeFailed": "リマインドの予定に失敗しました",
+      "updateFailed": "プロジェクトの更新に失敗しました",
+      "deleteFailed": "プロジェクトの削除に失敗しました",
+      "galleryPermissionDenied": "フォトライブラリへのアクセス許可が必要です",
+      "uploadImageFailed": "画像のアップロードに失敗しました"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "リンクを「後で読む」に保存しました。",
     "view": "表示",
     "couldNotSave": "保存できませんでした",
-    "unableToSave": "共有コンテンツを保存できませんでした。"
+    "unableToSave": "共有コンテンツを保存できませんでした。",
+    "saving": "共有コンテンツを保存しています..."
   },
   "quickAdd": {
     "addBookmark": "ブックマークを追加",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "ブックマークを追加しました",
+    "bookmark_opened": "ブックマークを開きました",
+    "project_created": "プロジェクトを作成しました",
+    "task_completed": "タスクを完了しました",
+    "note_added": "メモを追加しました",
+    "todo_added": "To-doを追加しました",
+    "todo_completed": "To-doを完了しました"
   }
 }

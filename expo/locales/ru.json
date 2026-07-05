@@ -43,7 +43,8 @@
     "sortLabel": "Сортировка: {{sort}}",
     "errorWithMessage": "Ошибка: {{message}}",
     "noContent": "Нет содержимого",
-    "unknownUser": "Неизвестный пользователь"
+    "unknownUser": "Неизвестный пользователь",
+    "selectDate": "Выбрать дату"
   },
   "tabs": {
     "home": "Главная",
@@ -420,7 +421,8 @@
       "savedAsNote": "Беседа сохранена как заметка!",
       "sendFailed": "Не удалось отправить сообщение. Попробуйте снова.",
       "saveFailed": "Не удалось сохранить беседу. Попробуйте снова."
-    }
+    },
+    "thinking": "Думаю"
   },
   "premium": {
     "title": "Перейти на Premium",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "Опишите проект...",
     "createProject": "Создать проект",
     "alerts": {
-      "enterTitle": "Пожалуйста, введите название проекта."
+      "enterTitle": "Пожалуйста, введите название проекта.",
+      "createFailed": "Не удалось создать проект. Попробуйте ещё раз."
     },
     "title": "Add Project",
     "projectTitle": "Project Title",
@@ -668,7 +671,11 @@
       "archived": "Проект архивирован",
       "notificationsNotSupported": "Уведомления не поддерживаются в веб-версии. Используйте мобильное приложение.",
       "nudgeScheduled": "Напоминание запланировано на {{time}}",
-      "scheduleNudgeFailed": "Не удалось запланировать напоминание"
+      "scheduleNudgeFailed": "Не удалось запланировать напоминание",
+      "updateFailed": "Не удалось обновить проект",
+      "deleteFailed": "Не удалось удалить проект",
+      "galleryPermissionDenied": "Требуется доступ к фотогалерее",
+      "uploadImageFailed": "Не удалось загрузить изображение"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "Ссылка сохранена в «Прочитать позже».",
     "view": "View",
     "couldNotSave": "Could not save",
-    "unableToSave": "Unable to save shared content."
+    "unableToSave": "Unable to save shared content.",
+    "saving": "Сохранение общего контента..."
   },
   "quickAdd": {
     "addBookmark": "Добавить закладку",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "Закладка добавлена",
+    "bookmark_opened": "Закладка открыта",
+    "project_created": "Проект создан",
+    "task_completed": "Задача выполнена",
+    "note_added": "Заметка добавлена",
+    "todo_added": "Задача добавлена",
+    "todo_completed": "Задача выполнена"
   }
 }

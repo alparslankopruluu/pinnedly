@@ -43,7 +43,8 @@
     "sortLabel": "Sortieren: {{sort}}",
     "errorWithMessage": "Fehler: {{message}}",
     "noContent": "Kein Inhalt",
-    "unknownUser": "Unbekannter Benutzer"
+    "unknownUser": "Unbekannter Benutzer",
+    "selectDate": "Datum auswählen"
   },
   "tabs": {
     "home": "Start",
@@ -420,7 +421,8 @@
       "savedAsNote": "Unterhaltung als Notiz gespeichert!",
       "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.",
       "saveFailed": "Unterhaltung konnte nicht gespeichert werden. Bitte versuche es erneut."
-    }
+    },
+    "thinking": "Denke nach"
   },
   "premium": {
     "title": "Auf Premium upgraden",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "Beschreibe dein Projekt...",
     "createProject": "Projekt erstellen",
     "alerts": {
-      "enterTitle": "Bitte gib einen Projekttitel ein."
+      "enterTitle": "Bitte gib einen Projekttitel ein.",
+      "createFailed": "Projekt konnte nicht erstellt werden. Bitte versuche es erneut."
     },
     "title": "Projekt hinzufügen",
     "projectTitle": "Projekttitel",
@@ -668,7 +671,11 @@
       "archived": "Projekt archiviert",
       "notificationsNotSupported": "Benachrichtigungen werden im Web nicht unterstützt. Bitte nutze die mobile App.",
       "nudgeScheduled": "Erinnerung geplant für {{time}}",
-      "scheduleNudgeFailed": "Erinnerung konnte nicht geplant werden"
+      "scheduleNudgeFailed": "Erinnerung konnte nicht geplant werden",
+      "updateFailed": "Projekt konnte nicht aktualisiert werden",
+      "deleteFailed": "Projekt konnte nicht gelöscht werden",
+      "galleryPermissionDenied": "Zugriff auf die Fotobibliothek ist erforderlich",
+      "uploadImageFailed": "Bild konnte nicht hochgeladen werden"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "Link unter Später lesen gespeichert.",
     "view": "Ansehen",
     "couldNotSave": "Speichern nicht möglich",
-    "unableToSave": "Geteilte Inhalte konnten nicht gespeichert werden."
+    "unableToSave": "Geteilte Inhalte konnten nicht gespeichert werden.",
+    "saving": "Geteilte Inhalte werden gespeichert..."
   },
   "quickAdd": {
     "addBookmark": "Lesezeichen hinzufügen",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "Lesezeichen hinzugefügt",
+    "bookmark_opened": "Lesezeichen geöffnet",
+    "project_created": "Projekt erstellt",
+    "task_completed": "Aufgabe abgeschlossen",
+    "note_added": "Notiz hinzugefügt",
+    "todo_added": "To-do hinzugefügt",
+    "todo_completed": "To-do abgeschlossen"
   }
 }

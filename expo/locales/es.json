@@ -43,7 +43,8 @@
     "sortLabel": "Ordenar: {{sort}}",
     "errorWithMessage": "Error: {{message}}",
     "noContent": "Sin contenido",
-    "unknownUser": "Usuario desconocido"
+    "unknownUser": "Usuario desconocido",
+    "selectDate": "Seleccionar fecha"
   },
   "tabs": {
     "home": "Inicio",
@@ -420,7 +421,8 @@
       "savedAsNote": "¡Conversación guardada como nota!",
       "sendFailed": "Error al enviar el mensaje. Inténtalo de nuevo.",
       "saveFailed": "Error al guardar la conversación. Inténtalo de nuevo."
-    }
+    },
+    "thinking": "Pensando"
   },
   "premium": {
     "title": "Actualizar a Premium",
@@ -570,7 +572,8 @@
     "descriptionPlaceholder": "Describe tu proyecto...",
     "createProject": "Crear proyecto",
     "alerts": {
-      "enterTitle": "Introduce un título para el proyecto."
+      "enterTitle": "Introduce un título para el proyecto.",
+      "createFailed": "No se pudo crear el proyecto. Inténtalo de nuevo."
     },
     "title": "Añadir proyecto",
     "projectTitle": "Título del proyecto",
@@ -668,7 +671,11 @@
       "archived": "Proyecto archivado",
       "notificationsNotSupported": "Las notificaciones no están disponibles en la web. Usa la app móvil.",
       "nudgeScheduled": "Recordatorio programado para {{time}}",
-      "scheduleNudgeFailed": "Error al programar el recordatorio"
+      "scheduleNudgeFailed": "Error al programar el recordatorio",
+      "updateFailed": "No se pudo actualizar el proyecto",
+      "deleteFailed": "No se pudo eliminar el proyecto",
+      "galleryPermissionDenied": "Se requiere permiso para la galería de fotos",
+      "uploadImageFailed": "No se pudo subir la imagen"
     },
     "notFound": "Project not found",
     "progress": "Progress",
@@ -782,7 +789,8 @@
     "linkSavedToReadLater": "Enlace guardado en Leer después.",
     "view": "Ver",
     "couldNotSave": "No se pudo guardar",
-    "unableToSave": "No se pudo guardar el contenido compartido."
+    "unableToSave": "No se pudo guardar el contenido compartido.",
+    "saving": "Guardando contenido compartido..."
   },
   "quickAdd": {
     "addBookmark": "Añadir marcador",
@@ -872,5 +880,14 @@
     "note": "Note",
     "project": "Project",
     "list": "List"
+  },
+  "activities": {
+    "bookmark_added": "Marcador añadido",
+    "bookmark_opened": "Marcador abierto",
+    "project_created": "Proyecto creado",
+    "task_completed": "Tarea completada",
+    "note_added": "Nota añadida",
+    "todo_added": "Tarea añadida",
+    "todo_completed": "Tarea completada"
   }
 }
