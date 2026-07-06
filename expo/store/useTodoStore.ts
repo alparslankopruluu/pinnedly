@@ -10,6 +10,7 @@ import {
   scheduleEntityReminders,
   normalizeReminderSchedule,
 } from '@/services/entityReminders';
+import { recordActivity } from '@/utils/activities';
 
 export type PriorityFilter = 'all' | 'low' | 'medium' | 'high';
 export type StatusFilter = 'all' | 'active' | 'completed';
@@ -53,6 +54,12 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
       baseTime: created.createdAt,
       schedule: normalizeReminderSchedule(created.reminderSchedule),
     });
+    recordActivity({
+      type: 'todo_added',
+      title: 'Todo added',
+      subtitle: created.title,
+      relatedId: created.id,
+    });
     return created;
   }, []);
 
@@ -77,6 +84,12 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
     const updated = await todoRepository.toggleTodo(id, !todo.completed);
     if (updated.completed) {
       await cancelEntityReminders('todo', id);
+      recordActivity({
+        type: 'todo_completed',
+        title: 'Todo completed',
+        subtitle: updated.title,
+        relatedId: updated.id,
+      });
     }
     return updated;
   }, [todos]);

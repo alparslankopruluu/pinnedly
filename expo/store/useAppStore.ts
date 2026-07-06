@@ -285,6 +285,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       activities: [activity, ...state.activities.slice(0, 49)], // Keep last 50
     }));
+    get().saveData();
   },
 
   updatePreferences: (updates) => {

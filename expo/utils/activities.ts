@@ -51,7 +51,7 @@ export function getActivityRoute(
     }
     case 'todo_added':
     case 'todo_completed':
-      return '/(tabs)/todos';
+      return `/add-todo?id=${activity.relatedId}`;
     default:
       return null;
   }
