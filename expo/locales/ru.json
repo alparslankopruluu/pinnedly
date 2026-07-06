@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "ИИ-чат ассистент",
-      "description": "Спрашивайте что угодно и сохраняйте беседы как заметки"
+      "title": "Workspace Assistant",
+      "description": "Ask about your notes, projects, bookmarks, and todos"
     },
     "continue": "Продолжить",
     "dueAndOverdueTasks": "Срочные и просроченные задачи",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "Откройте мощные функции совместной работы"
   },
   "aiChat": {
-    "title": "ИИ-чат",
-    "systemPrompt": "Ты — ИИ-ассистент Draft. Всегда отвечай на русском, даже если пользователь пишет на другом языке. Будь кратким, дружелюбным и практичным.",
-    "placeholder": "Спросите меня о чём угодно...",
+    "title": "Workspace Assistant",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "ИИ-чат ассистент",
-      "description": "Спросите меня о чём угодно! Я помогу с исследованиями, мозговым штурмом, написанием текстов и многим другим. Вы можете сохранить нашу беседу как заметку в любое время.",
+      "title": "Workspace Assistant",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "Попробуйте спросить:",
       "suggestions": {
-        "quantum": "Объясни квантовые вычисления",
-        "brainstorm": "Придумай идеи для приложения",
-        "meditation": "Польза медитации"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "Нет сообщений для сохранения.",
       "savedAsNote": "Беседа сохранена как заметка!",
       "sendFailed": "Не удалось отправить сообщение. Попробуйте снова.",
-      "saveFailed": "Не удалось сохранить беседу. Попробуйте снова."
+      "saveFailed": "Не удалось сохранить беседу. Попробуйте снова.",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "Думаю"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "Категория",
+    "pickCategory": "Выберите категорию",
+    "general": "Общее",
+    "ai": "ИИ",
+    "food": "Еда",
+    "work": "Работа",
+    "personal": "Личное",
+    "ideas": "Идеи",
+    "travel": "Путешествия",
+    "health": "Здоровье"
+  },
   "shareIntent": {
     "signInRequired": "Требуется вход",
     "signInToSaveLinks": "Войдите, чтобы сохранять общие ссылки в Draft.",
@@ -797,7 +809,8 @@
     "view": "View",
     "couldNotSave": "Could not save",
     "unableToSave": "Unable to save shared content.",
-    "saving": "Сохранение общего контента..."
+    "saving": "Сохранение общего контента...",
+    "saved": "Сохранено"
   },
   "quickAdd": {
     "addBookmark": "Добавить закладку",

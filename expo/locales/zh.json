@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "AI 聊天助手",
-      "description": "随时提问，并将对话保存为笔记"
+      "title": "工作区助手",
+      "description": "询问你的笔记、项目、书签和待办"
     },
     "continue": "继续",
     "dueAndOverdueTasks": "到期与逾期任务",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "解锁强大的协作功能"
   },
   "aiChat": {
-    "title": "AI 聊天",
-    "systemPrompt": "你是 Draft 的 AI 助手。即使用户使用其他语言提问，也请始终用中文回答。回答要简洁、友好、实用。",
-    "placeholder": "随便问我...",
+    "title": "工作区助手",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "AI 聊天助手",
-      "description": "随便问我！我可以帮助您进行研究、头脑风暴、写作等。您可以随时将我们的对话保存为笔记。",
+      "title": "工作区助手",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "试试问：",
       "suggestions": {
-        "quantum": "解释量子计算",
-        "brainstorm": "头脑风暴应用创意",
-        "meditation": "冥想的好处"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "没有可保存的消息。",
       "savedAsNote": "对话已保存为笔记！",
       "sendFailed": "发送消息失败，请重试。",
-      "saveFailed": "保存对话失败，请重试。"
+      "saveFailed": "保存对话失败，请重试。",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "思考中"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "分类",
+    "pickCategory": "选择分类",
+    "general": "通用",
+    "ai": "AI",
+    "food": "美食",
+    "work": "工作",
+    "personal": "个人",
+    "ideas": "灵感",
+    "travel": "旅行",
+    "health": "健康"
+  },
   "shareIntent": {
     "signInRequired": "需要登录",
     "signInToSaveLinks": "请登录以将分享的链接保存到 Draft。",
@@ -797,7 +809,8 @@
     "view": "查看",
     "couldNotSave": "无法保存",
     "unableToSave": "无法保存分享的内容。",
-    "saving": "正在保存分享的内容..."
+    "saving": "正在保存分享的内容...",
+    "saved": "已保存"
   },
   "quickAdd": {
     "addBookmark": "添加书签",

@@ -1,6 +1,7 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { TodoItem, ID } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { trackEntityEvent } from '@/lib/analytics';
 
 export class TodoRepository {
@@ -42,6 +43,7 @@ export class TodoRepository {
       dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
       projectId: todo.projectId ?? null,
       noteId: todo.noteId ?? null,
+      category: todo.category ?? DEFAULT_CONTENT_CATEGORY,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -62,6 +64,7 @@ export class TodoRepository {
       ...(updates.dueDate !== undefined && { dueDate: updates.dueDate ? new Date(updates.dueDate) : null }),
       ...(updates.projectId !== undefined && { projectId: updates.projectId || null }),
       ...(updates.noteId !== undefined && { noteId: updates.noteId || null }),
+      ...(updates.category !== undefined && { category: updates.category }),
       updatedAt: serverTimestamp(),
     });
     const updated = await ref.get();
@@ -97,6 +100,7 @@ export class TodoRepository {
       userId: data.ownerId,
       createdAt: timestampToMillis(data.createdAt),
       updatedAt: timestampToMillis(data.updatedAt),
+      category: normalizeCategory(data.category as string | undefined),
     };
   }
 }

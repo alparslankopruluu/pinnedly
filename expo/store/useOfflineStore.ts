@@ -87,7 +87,7 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     }
   }, []);
 
-  const addTask = useCallback(async (projectId: string, taskData: { title: string; status?: 'todo' | 'in-progress' | 'done'; dueDate?: number; notes?: string }) => {
+  const addTask = useCallback(async (projectId: string, taskData: { title: string; status?: 'todo' | 'in-progress' | 'done'; dueDate?: number; notes?: string; category?: import('@/constants/contentCategories').ContentCategoryId }) => {
     try {
       const newTask = await projectRepository.createTask(projectId, {
         ...taskData,

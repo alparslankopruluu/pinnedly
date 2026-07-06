@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Bookmark } from '@/types';
 import { formatRelativeTime } from '@/utils/date';
 import { getSourceLabel, isUnreadBookmark } from '@/utils/bookmark';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { getCategoryDef } from '@/constants/contentCategories';
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -12,6 +14,7 @@ interface BookmarkCardProps {
 
 export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
   const { t } = useTranslation();
+  const categoryDef = getCategoryDef(bookmark.category);
 
   const getOpenCountText = () => {
     if (bookmark.openCount === 0) return t('bookmarkCard.neverOpened');
@@ -31,7 +34,7 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity style={[styles.container, { borderLeftColor: categoryDef.color }]} onPress={onPress}>
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.favicon}>
@@ -74,6 +77,7 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
         ) : null}
 
         <View style={styles.footer}>
+          <CategoryBadge category={bookmark.category} compact />
           {isUnreadBookmark(bookmark) && bookmark.status !== 'done' ? (
             <View style={[styles.openCount, { backgroundColor: '#FEE2E220' }]}>
               <Text style={[styles.openCountText, { color: '#B91C1C' }]}>{t('bookmarkCard.readLater')}</Text>
@@ -99,6 +103,7 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
+    borderLeftWidth: 4,
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,

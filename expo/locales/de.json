@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "KI-Chat-Assistent",
-      "description": "Stelle beliebige Fragen und speichere Unterhaltungen als Notizen"
+      "title": "Arbeitsbereich-Assistent",
+      "description": "Frage zu deinen Notizen, Projekten, Lesezeichen und Aufgaben"
     },
     "continue": "Fortsetzen",
     "dueAndOverdueTasks": "Fällige & überfällige Aufgaben",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "Leistungsstarke Kollaborationsfunktionen freischalten"
   },
   "aiChat": {
-    "title": "KI-Chat",
-    "systemPrompt": "Du bist der KI-Assistent von Draft. Antworte immer auf Deutsch, auch wenn der Nutzer in einer anderen Sprache schreibt. Sei prägnant, freundlich und praktisch.",
-    "placeholder": "Frag mich alles...",
+    "title": "Arbeitsbereich-Assistent",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "KI-Chat-Assistent",
-      "description": "Frag mich alles! Ich kann dir bei Recherche, Brainstorming, Schreiben und mehr helfen. Du kannst unsere Unterhaltung jederzeit als Notiz speichern.",
+      "title": "Arbeitsbereich-Assistent",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "Probiere zum Beispiel:",
       "suggestions": {
-        "quantum": "Quantencomputing erklären",
-        "brainstorm": "App-Ideen brainstormen",
-        "meditation": "Vorteile der Meditation"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "Es gibt keine Nachrichten zum Speichern.",
       "savedAsNote": "Unterhaltung als Notiz gespeichert!",
       "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.",
-      "saveFailed": "Unterhaltung konnte nicht gespeichert werden. Bitte versuche es erneut."
+      "saveFailed": "Unterhaltung konnte nicht gespeichert werden. Bitte versuche es erneut.",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "Denke nach"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "Kategorie",
+    "pickCategory": "Kategorie wählen",
+    "general": "Allgemein",
+    "ai": "KI",
+    "food": "Essen",
+    "work": "Arbeit",
+    "personal": "Persönlich",
+    "ideas": "Ideen",
+    "travel": "Reisen",
+    "health": "Gesundheit"
+  },
   "shareIntent": {
     "signInRequired": "Anmeldung erforderlich",
     "signInToSaveLinks": "Bitte melde dich an, um geteilte Links in Draft zu speichern.",
@@ -797,7 +809,8 @@
     "view": "Ansehen",
     "couldNotSave": "Speichern nicht möglich",
     "unableToSave": "Geteilte Inhalte konnten nicht gespeichert werden.",
-    "saving": "Geteilte Inhalte werden gespeichert..."
+    "saving": "Geteilte Inhalte werden gespeichert...",
+    "saved": "Gespeichert"
   },
   "quickAdd": {
     "addBookmark": "Lesezeichen hinzufügen",

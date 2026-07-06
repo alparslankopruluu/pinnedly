@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "AIチャットアシスタント",
-      "description": "何でも質問して、会話をノートとして保存"
+      "title": "ワークスペースアシスタント",
+      "description": "メモ、プロジェクト、ブックマーク、ToDoについて質問"
     },
     "continue": "続ける",
     "dueAndOverdueTasks": "期限切れ・期限間近のタスク",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "強力なコラボレーション機能を解放"
   },
   "aiChat": {
-    "title": "AIチャット",
-    "systemPrompt": "あなたはDraftのAIアシスタントです。ユーザーが他の言語で書いても、常に日本語で回答してください。簡潔で親しみやすく、実用的に答えてください。",
-    "placeholder": "何でも聞いてください...",
+    "title": "ワークスペースアシスタント",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "AIチャットアシスタント",
-      "description": "何でも聞いてください！リサーチ、ブレインストーミング、執筆などをお手伝いします。会話はいつでもノートとして保存できます。",
+      "title": "ワークスペースアシスタント",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "例えば聞いてみてください:",
       "suggestions": {
-        "quantum": "量子コンピューティングを説明して",
-        "brainstorm": "アプリのアイデアをブレインストーミング",
-        "meditation": "瞑想のメリット"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "保存するメッセージがありません。",
       "savedAsNote": "会話をノートとして保存しました！",
       "sendFailed": "メッセージの送信に失敗しました。もう一度お試しください。",
-      "saveFailed": "会話の保存に失敗しました。もう一度お試しください。"
+      "saveFailed": "会話の保存に失敗しました。もう一度お試しください。",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "考え中"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "カテゴリ",
+    "pickCategory": "カテゴリを選択",
+    "general": "一般",
+    "ai": "AI",
+    "food": "食事",
+    "work": "仕事",
+    "personal": "個人",
+    "ideas": "アイデア",
+    "travel": "旅行",
+    "health": "健康"
+  },
   "shareIntent": {
     "signInRequired": "サインインが必要です",
     "signInToSaveLinks": "共有リンクをDraftに保存するにはサインインしてください。",
@@ -797,7 +809,8 @@
     "view": "表示",
     "couldNotSave": "保存できませんでした",
     "unableToSave": "共有コンテンツを保存できませんでした。",
-    "saving": "共有コンテンツを保存しています..."
+    "saving": "共有コンテンツを保存しています...",
+    "saved": "保存しました"
   },
   "quickAdd": {
     "addBookmark": "ブックマークを追加",

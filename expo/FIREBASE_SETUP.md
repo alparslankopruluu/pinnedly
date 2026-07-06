@@ -112,7 +112,29 @@ Rules file: `expo/firestore.rules`
 
 Offline persistence is enabled in `lib/firestore.ts`.
 
-## 4. Analytics & Crashlytics
+## 4. Workspace AI (Cloud Functions)
+
+The in-app workspace assistant calls a Firebase HTTPS function. The OpenAI API key must **never** ship in the mobile app.
+
+**Requirements:** Blaze (pay-as-you-go) plan for Functions + secrets.
+
+```bash
+cd expo/functions
+npm install
+npm run build
+
+cd ..
+firebase functions:secrets:set OPENAI_API_KEY
+firebase deploy --only functions:aiWorkspaceChat
+```
+
+Function URL (default in `app.json` → `extra.aiFunctionsUrl`):
+
+`https://us-central1-pinnedly-48c49.cloudfunctions.net/aiWorkspaceChat`
+
+The function verifies `Authorization: Bearer <Firebase idToken>`, reads the user's Firestore notes/bookmarks/projects/todos, builds a compact context, and calls OpenAI `gpt-4o-mini`.
+
+## 5. Analytics & Crashlytics
 
 - **Analytics**: screen views (`AnalyticsProvider`), button presses (`button_press`), auth events (`login`, `sign_up`, `logout`), entity events (`note_*`, `bookmark_*`, `project_*`, `todo_*`)
 - **Crashlytics**: Gradle plugin `3.0.7` applied via `@react-native-firebase/crashlytics` Expo plugin; errors in `ErrorBoundary`
@@ -127,7 +149,7 @@ adb shell setprop debug.firebase.analytics.app app.techtactoe.draft
 # iOS — add -FIRAnalyticsDebugEnabled to Xcode scheme
 ```
 
-## 5. Local dev build (required — Expo Go does not support RN Firebase)
+## 6. Local dev build (required — Expo Go does not support RN Firebase)
 
 ```bash
 cd expo
@@ -140,14 +162,14 @@ npx expo run:android
 npx expo run:ios
 ```
 
-## 6. Google Play Console
+## 7. Google Play Console
 
 When creating the app:
 
 - **App name:** Draft
 - **Package name:** `app.techtactoe.draft` (cannot be changed after creation)
 
-## 7. Config files (do not commit secrets)
+## 8. Config files (do not commit secrets)
 
 Add to `.gitignore` if not already:
 

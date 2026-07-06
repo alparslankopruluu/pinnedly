@@ -1,3 +1,5 @@
+import type { ContentCategoryId } from '@/constants/contentCategories';
+
 export type ID = string;
 
 export type Tag = {
@@ -46,6 +48,7 @@ export type Bookmark = {
   source?: BookmarkSource;
   userId: ID;
   visibility: Visibility;
+  category?: ContentCategoryId;
 };
 
 export type Task = {
@@ -55,6 +58,7 @@ export type Task = {
   dueDate?: number;
   notes?: string;
   projectId: ID;
+  category?: ContentCategoryId;
 };
 
 export type Project = {
@@ -82,6 +86,7 @@ export type Note = {
   userId: ID;
   visibility: Visibility;
   sharedWith?: ID[]; // User IDs this note is shared with
+  category?: ContentCategoryId;
 };
 
 export type ActivityItem = {
@@ -226,4 +231,5 @@ export type TodoItem = {
   userId: ID;
   createdAt: number;
   updatedAt: number;
+  category?: ContentCategoryId;
 };

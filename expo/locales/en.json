@@ -309,8 +309,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "AI Chat Assistant",
-      "description": "Ask anything and save conversations as notes"
+      "title": "Workspace Assistant",
+      "description": "Ask about your notes, projects, bookmarks, and todos"
     },
     "continue": "Continue",
     "dueAndOverdueTasks": "Due & Overdue Tasks",
@@ -442,17 +442,16 @@
     "upgradeSubtitle": "Unlock powerful collaboration features"
   },
   "aiChat": {
-    "title": "AI Chat",
-    "systemPrompt": "You are Draft's AI assistant. Always respond in English, even if the user writes in another language. Be concise, friendly, and practical. Help with research, brainstorming, writing, and productivity.",
-    "placeholder": "Ask me anything...",
+    "title": "Workspace Assistant",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "AI Chat Assistant",
-      "description": "Ask me anything! I can help you with research, brainstorming, writing, and more. You can save our conversation as a note anytime.",
+      "title": "Workspace Assistant",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "Try asking:",
       "suggestions": {
-        "quantum": "Explain quantum computing",
-        "brainstorm": "Brainstorm app ideas",
-        "meditation": "Benefits of meditation"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "thinking": "Thinking",
@@ -460,13 +459,14 @@
       "you": "You",
       "ai": "AI"
     },
-    "savedNoteTitle": "AI Chat: {{title}}",
+    "savedNoteTitle": "Workspace Chat: {{title}}",
     "alerts": {
       "noConversation": "No Conversation",
       "noMessagesToSave": "There are no messages to save.",
       "savedAsNote": "Conversation saved as a note!",
       "sendFailed": "Failed to send message. Please try again.",
-      "saveFailed": "Failed to save conversation. Please try again."
+      "saveFailed": "Failed to save conversation. Please try again.",
+      "authRequired": "Please sign in to use the workspace assistant."
     }
   },
   "premium": {
@@ -860,10 +860,23 @@
     "openAddBookmark": "Review & save",
     "dismiss": "Not now"
   },
+  "categories": {
+    "label": "Category",
+    "pickCategory": "Choose a category",
+    "general": "General",
+    "ai": "AI",
+    "food": "Food",
+    "work": "Work",
+    "personal": "Personal",
+    "ideas": "Ideas",
+    "travel": "Travel",
+    "health": "Health"
+  },
   "shareIntent": {
     "saving": "Saving shared content...",
     "signInRequired": "Sign in required",
     "signInToSaveLinks": "Please sign in to save shared links to Draft.",
+    "saved": "Saved",
     "savedToDraft": "Saved to Draft",
     "linkSavedToReadLater": "Link saved to Read Later.",
     "view": "View",

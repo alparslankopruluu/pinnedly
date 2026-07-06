@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "Asistente de chat con IA",
-      "description": "Pregunta lo que quieras y guarda conversaciones como notas"
+      "title": "Asistente del espacio de trabajo",
+      "description": "Pregunta sobre tus notas, proyectos, marcadores y tareas"
     },
     "continue": "Continuar",
     "dueAndOverdueTasks": "Tareas vencidas y atrasadas",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "Desbloquea potentes funciones de colaboración"
   },
   "aiChat": {
-    "title": "Chat con IA",
-    "systemPrompt": "Eres el asistente de IA de Draft. Responde siempre en español, aunque el usuario escriba en otro idioma. Sé conciso, amable y práctico.",
-    "placeholder": "Pregúntame lo que quieras...",
+    "title": "Asistente del espacio de trabajo",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "Asistente de chat con IA",
-      "description": "¡Pregúntame lo que quieras! Puedo ayudarte con investigación, lluvia de ideas, redacción y más. Puedes guardar nuestra conversación como nota en cualquier momento.",
+      "title": "Asistente del espacio de trabajo",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "Prueba a preguntar:",
       "suggestions": {
-        "quantum": "Explica la computación cuántica",
-        "brainstorm": "Lluvia de ideas para apps",
-        "meditation": "Beneficios de la meditación"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "No hay mensajes para guardar.",
       "savedAsNote": "¡Conversación guardada como nota!",
       "sendFailed": "Error al enviar el mensaje. Inténtalo de nuevo.",
-      "saveFailed": "Error al guardar la conversación. Inténtalo de nuevo."
+      "saveFailed": "Error al guardar la conversación. Inténtalo de nuevo.",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "Pensando"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "Categoría",
+    "pickCategory": "Elige una categoría",
+    "general": "General",
+    "ai": "IA",
+    "food": "Comida",
+    "work": "Trabajo",
+    "personal": "Personal",
+    "ideas": "Ideas",
+    "travel": "Viajes",
+    "health": "Salud"
+  },
   "shareIntent": {
     "signInRequired": "Inicio de sesión requerido",
     "signInToSaveLinks": "Inicia sesión para guardar enlaces compartidos en Draft.",
@@ -797,7 +809,8 @@
     "view": "Ver",
     "couldNotSave": "No se pudo guardar",
     "unableToSave": "No se pudo guardar el contenido compartido.",
-    "saving": "Guardando contenido compartido..."
+    "saving": "Guardando contenido compartido...",
+    "saved": "Guardado"
   },
   "quickAdd": {
     "addBookmark": "Añadir marcador",

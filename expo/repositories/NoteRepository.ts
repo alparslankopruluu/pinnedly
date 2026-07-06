@@ -1,6 +1,8 @@
 import firestore from '@react-native-firebase/firestore';
 import { Note } from '@/types';
+import { DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 import { COLLECTIONS, requireUserId, serverTimestamp, subscribeToOwnerCollection, timestampToMillis } from '@/lib/firestore';
+import { normalizeCategory } from '@/constants/contentCategories';
 import { trackNoteEvent } from '@/lib/analytics';
 
 export class NoteRepository {
@@ -42,6 +44,7 @@ export class NoteRepository {
       visibility: note.visibility || 'private',
       links: note.links ?? [],
       sharedWith: [],
+      category: note.category ?? DEFAULT_CONTENT_CATEGORY,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -60,6 +63,7 @@ export class NoteRepository {
       ...(updates.markdown !== undefined && { markdown: updates.markdown }),
       ...(updates.visibility !== undefined && { visibility: updates.visibility }),
       ...(updates.links !== undefined && { links: updates.links }),
+      ...(updates.category !== undefined && { category: updates.category }),
       updatedAt: serverTimestamp(),
     });
     const updated = await ref.get();
@@ -85,6 +89,7 @@ export class NoteRepository {
       userId: data.ownerId as string,
       visibility: (data.visibility as Note['visibility']) || 'private',
       sharedWith: (data.sharedWith as string[]) || [],
+      category: normalizeCategory(data.category as string | undefined),
     };
   }
 }

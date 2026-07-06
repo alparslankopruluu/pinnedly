@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "Assistente chat IA",
-      "description": "Chiedi qualsiasi cosa e salva le conversazioni come note"
+      "title": "Assistente workspace",
+      "description": "Chiedi delle tue note, progetti, segnalibri e attività"
     },
     "continue": "Continua",
     "dueAndOverdueTasks": "Attività in scadenza e scadute",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "Sblocca potenti funzioni di collaborazione"
   },
   "aiChat": {
-    "title": "Chat IA",
-    "systemPrompt": "Sei l'assistente IA di Draft. Rispondi sempre in italiano, anche se l'utente scrive in un'altra lingua. Sii conciso, amichevole e pratico.",
-    "placeholder": "Chiedimi qualsiasi cosa...",
+    "title": "Assistente workspace",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "Assistente chat IA",
-      "description": "Chiedimi qualsiasi cosa! Posso aiutarti con ricerca, brainstorming, scrittura e altro. Puoi salvare la nostra conversazione come nota in qualsiasi momento.",
+      "title": "Assistente workspace",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "Prova a chiedere:",
       "suggestions": {
-        "quantum": "Spiega il quantum computing",
-        "brainstorm": "Brainstorming di idee per app",
-        "meditation": "Benefici della meditazione"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "Non ci sono messaggi da salvare.",
       "savedAsNote": "Conversazione salvata come nota!",
       "sendFailed": "Invio messaggio non riuscito. Riprova.",
-      "saveFailed": "Salvataggio conversazione non riuscito. Riprova."
+      "saveFailed": "Salvataggio conversazione non riuscito. Riprova.",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "Sto pensando"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "Categoria",
+    "pickCategory": "Scegli una categoria",
+    "general": "Generale",
+    "ai": "IA",
+    "food": "Cibo",
+    "work": "Lavoro",
+    "personal": "Personale",
+    "ideas": "Idee",
+    "travel": "Viaggi",
+    "health": "Salute"
+  },
   "shareIntent": {
     "signInRequired": "Accesso richiesto",
     "signInToSaveLinks": "Accedi per salvare i link condivisi in Draft.",
@@ -797,7 +809,8 @@
     "view": "Visualizza",
     "couldNotSave": "Impossibile salvare",
     "unableToSave": "Impossibile salvare il contenuto condiviso.",
-    "saving": "Salvataggio del contenuto condiviso..."
+    "saving": "Salvataggio del contenuto condiviso...",
+    "saved": "Salvato"
   },
   "quickAdd": {
     "addBookmark": "Aggiungi segnalibro",

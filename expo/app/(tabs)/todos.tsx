@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { useTodoStore, PriorityFilter, StatusFilter } from '@/store/useTodoStore';
 import { TodoItem, ID } from '@/types';
 import { formatRelativeTime, isOverdue } from '@/utils/date';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
 
 const PRIORITY_COLORS: Record<string, string> = {
   high: '#EF4444',
@@ -75,6 +76,7 @@ function TodoRow({
           </Text>
         ) : null}
         <View style={styles.todoMeta}>
+          <CategoryBadge category={todo.category} compact />
           {/* Priority badge */}
           <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '18' }]}>
             <Flag size={10} color={priorityColor} />

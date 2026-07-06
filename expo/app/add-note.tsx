@@ -20,6 +20,8 @@ import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { Visibility } from '@/types';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
+import { CategoryPicker } from '@/components/ui/CategoryPicker';
+import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 
 export default function AddNoteScreen() {
   useTrackFormOpen('note');
@@ -56,6 +58,7 @@ export default function AddNoteScreen() {
   const [title, setTitle] = useState('');
   const [markdown, setMarkdown] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('private');
+  const [category, setCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -68,6 +71,7 @@ export default function AddNoteScreen() {
         title: title.trim(),
         markdown: markdown.trim(),
         visibility,
+        category,
         links: projectId
           ? [{ type: 'project', id: projectId }]
           : [],
@@ -109,6 +113,15 @@ export default function AddNoteScreen() {
                 onChangeText={setTitle}
                 placeholder={t('addNote.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
+              />
+            </View>
+
+            {/* Category */}
+            <View style={styles.section}>
+              <CategoryPicker
+                label={t('categories.label')}
+                value={category}
+                onChange={setCategory}
               />
             </View>
 

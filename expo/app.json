@@ -109,7 +109,8 @@
       "typedRoutes": true
     },
     "extra": {
-      "googleWebClientId": "36179904713-taogn2iie8n5u4amrkq5cp2rquckbhef.apps.googleusercontent.com"
+      "googleWebClientId": "36179904713-taogn2iie8n5u4amrkq5cp2rquckbhef.apps.googleusercontent.com",
+      "aiFunctionsUrl": "https://us-central1-pinnedly-48c49.cloudfunctions.net/aiWorkspaceChat"
     }
   }
 }

@@ -10,6 +10,7 @@ import { Link2, X } from 'lucide-react-native';
 import { useAuth } from '@/store/useAuthStore';
 import { extractUrlFromText } from '@/utils/bookmark';
 import { saveSharedContent } from '@/services/saveSharedBookmark';
+import { getShareSuccessMessage } from '@/utils/shareSuccessMessage';
 
 const DISMISSED_CLIPBOARD_KEY = 'pinnedly_dismissed_clipboard_url';
 
@@ -92,7 +93,7 @@ export function ClipboardUrlBanner() {
       const bookmark = await saveSharedContent(clipboardUrl, clipboardUrl);
       await AsyncStorage.setItem(DISMISSED_CLIPBOARD_KEY, clipboardUrl);
       setClipboardUrl(null);
-      showAppAlert(t('shareIntent.savedToPinnedly'), bookmark.title || t('shareIntent.linkSavedToReadLater'), [
+      showAppAlert(t('shareIntent.saved'), getShareSuccessMessage(bookmark.title, t), [
         { text: t('common.ok'), style: 'cancel' },
         { text: t('shareIntent.view'), onPress: () => router.push(`/bookmark/${bookmark.id}` as never) },
       ], { variant: 'success' });

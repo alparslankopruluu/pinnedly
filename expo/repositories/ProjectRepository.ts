@@ -1,6 +1,7 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Project, Task, User, ProjectCollaborator } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { trackEntityEvent } from '@/lib/analytics';
 
 export class ProjectRepository {
@@ -121,6 +122,7 @@ export class ProjectRepository {
       status: task.status || 'todo',
       dueDate: task.dueDate ? new Date(task.dueDate) : null,
       notes: task.notes ?? null,
+      category: task.category ?? DEFAULT_CONTENT_CATEGORY,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -136,6 +138,7 @@ export class ProjectRepository {
       ...(updates.status !== undefined && { status: updates.status }),
       ...(updates.dueDate !== undefined && { dueDate: updates.dueDate ? new Date(updates.dueDate) : null }),
       ...(updates.notes !== undefined && { notes: updates.notes }),
+      ...(updates.category !== undefined && { category: updates.category }),
       updatedAt: serverTimestamp(),
     });
     const updated = await ref.get();
@@ -324,6 +327,7 @@ export class ProjectRepository {
       dueDate: data.dueDate ? timestampToMillis(data.dueDate) : undefined,
       notes: data.notes,
       projectId,
+      category: normalizeCategory(data.category as string | undefined),
     };
   }
 

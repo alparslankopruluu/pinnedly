@@ -309,8 +309,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "Yapay Zeka Sohbet Asistanı",
-      "description": "Her şeyi sorun ve sohbetleri not olarak kaydedin"
+      "title": "Çalışma Alanı Asistanı",
+      "description": "Notlarını, projelerini, yer imlerini ve yapılacaklarını sor"
     },
     "continue": "Devam Et",
     "dueAndOverdueTasks": "Vadesi Gelen ve Geciken Görevler",
@@ -442,17 +442,16 @@
     "upgradeSubtitle": "Güçlü iş birliği özelliklerinin kilidini açın"
   },
   "aiChat": {
-    "title": "Yapay Zeka Sohbeti",
-    "systemPrompt": "Sen Draft yapay zeka asistanısın. Her zaman Türkçe yanıt ver; kullanıcı başka dilde yazsa bile yanıtların Türkçe olmalı. Kısa, net, samimi ve pratik ol. Araştırma, beyin fırtınası, yazma ve üretkenlik konularında yardımcı ol.",
-    "placeholder": "Bana her şeyi sorun...",
+    "title": "Çalışma Alanı Asistanı",
+    "placeholder": "Notlarını, projelerini, yer imlerini veya yapılacaklarını sor...",
     "empty": {
-      "title": "Yapay Zeka Sohbet Asistanı",
-      "description": "Bana her şeyi sorun! Araştırma, beyin fırtınası, yazma ve daha fazlasında yardımcı olabilirim. Sohbetimizi istediğiniz zaman not olarak kaydedebilirsiniz.",
+      "title": "Çalışma Alanı Asistanı",
+      "description": "Kayıtlı içeriklerin hakkında soru sor — ilerleme, kalan işler, son notlar ve okunmamış yer imleri.",
       "tryAsking": "Şunu sormayı deneyin:",
       "suggestions": {
-        "quantum": "Kuantum bilgisayarları açıkla",
-        "brainstorm": "Uygulama fikirleri üret",
-        "meditation": "Meditasyonun faydaları"
+        "savedThisMonth": "Bu ay neler kaydettim?",
+        "remainingTasks": "Hangi işler kaldı?",
+        "projectProgress": "Projelerimde ilerleme nasıl?"
       }
     },
     "thinking": "Yanıt hazırlanıyor",
@@ -460,13 +459,14 @@
       "you": "Siz",
       "ai": "YZ"
     },
-    "savedNoteTitle": "YZ Sohbeti: {{title}}",
+    "savedNoteTitle": "Çalışma Alanı Sohbeti: {{title}}",
     "alerts": {
       "noConversation": "Sohbet Yok",
       "noMessagesToSave": "Kaydedilecek mesaj yok.",
       "savedAsNote": "Sohbet not olarak kaydedildi!",
       "sendFailed": "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
-      "saveFailed": "Sohbet kaydedilemedi. Lütfen tekrar deneyin."
+      "saveFailed": "Sohbet kaydedilemedi. Lütfen tekrar deneyin.",
+      "authRequired": "Çalışma alanı asistanını kullanmak için lütfen giriş yapın."
     }
   },
   "premium": {
@@ -853,10 +853,23 @@
       "updatePermissionFailed": "İzin güncellenemedi. Lütfen tekrar deneyin."
     }
   },
+  "categories": {
+    "label": "Kategori",
+    "pickCategory": "Kategori seçin",
+    "general": "Genel",
+    "ai": "AI",
+    "food": "Yemek",
+    "work": "İş",
+    "personal": "Kişisel",
+    "ideas": "Fikirler",
+    "travel": "Seyahat",
+    "health": "Sağlık"
+  },
   "shareIntent": {
     "saving": "Paylaşılan içerik kaydediliyor...",
     "signInRequired": "Giriş gerekli",
     "signInToSaveLinks": "Paylaşılan bağlantıları Draft'e kaydetmek için lütfen giriş yapın.",
+    "saved": "Kaydedildi",
     "savedToDraft": "Draft'e kaydedildi",
     "linkSavedToReadLater": "Bağlantı Sonra Oku'ya kaydedildi.",
     "view": "Görüntüle",

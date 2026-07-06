@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/store/useAuthStore';
 import { saveSharedContent } from '@/services/saveSharedBookmark';
 import { ShareProcessingBanner } from '@/components/ShareProcessingBanner';
+import { getShareSuccessMessage } from '@/utils/shareSuccessMessage';
 
 export function ShareIntentHandler() {
   const { t } = useTranslation();
@@ -41,7 +42,7 @@ export function ShareIntentHandler() {
       try {
         const bookmark = await saveSharedContent(sharedText, sharedUrl);
         resetShareIntent();
-        showAppAlert(t('shareIntent.savedToPinnedly'), bookmark.title || t('shareIntent.linkSavedToReadLater'), [
+        showAppAlert(t('shareIntent.saved'), getShareSuccessMessage(bookmark.title, t), [
           { text: t('common.ok'), style: 'cancel' },
           { text: t('shareIntent.view'), onPress: () => router.push(`/bookmark/${bookmark.id}` as never) },
         ], { variant: 'success' });

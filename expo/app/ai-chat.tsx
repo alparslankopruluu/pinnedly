@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,9 +15,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { X, Send, Save, Sparkles } from 'lucide-react-native';
-import { useRorkAgent } from '@rork-ai/toolkit-sdk';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { ChatTypingIndicator } from '@/components/ChatTypingIndicator';
+import { sendWorkspaceChat, WorkspaceChatError } from '@/services/aiWorkspaceChat';
 
 interface Message {
   id: string;
@@ -26,97 +26,65 @@ interface Message {
   timestamp: number;
 }
 
-const SYSTEM_MESSAGE_ID = 'pinnedly-system-prompt';
-
 export default function AIChatScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { createNote } = useNoteStore();
   const [input, setInput] = useState('');
-  const [localMessages, setLocalMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isResponding, setIsResponding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const savingNoteRef = useRef(false);
 
-  const systemMessage = useMemo(
-    () => ({
-      id: SYSTEM_MESSAGE_ID,
-      role: 'system' as const,
-      parts: [{ type: 'text' as const, text: t('aiChat.systemPrompt') }],
-    }),
-    [t, i18n.language]
-  );
-
-  const { messages, error, sendMessage, setMessages, status } = useRorkAgent({
-    tools: {},
-  });
-
-  const isResponding = status === 'submitted' || status === 'streaming';
-
-  const latestAssistantText = useMemo(() => {
-    const assistantMessages = messages.filter((message) => message.role === 'assistant');
-    const latest = assistantMessages[assistantMessages.length - 1];
-    if (!latest) return '';
-
-    return latest.parts
-      .filter((part) => part.type === 'text')
-      .map((part) => (part as { text: string }).text)
-      .join('');
-  }, [messages]);
-
-  const showTypingIndicator = isResponding && latestAssistantText.trim().length === 0;
-
-  useEffect(() => {
-    setMessages((prev) => {
-      const conversation = prev.filter((message) => message.id !== SYSTEM_MESSAGE_ID);
-      return [systemMessage, ...conversation];
-    });
-  }, [systemMessage, setMessages]);
-
-  useEffect(() => {
-    if (!showTypingIndicator) return;
-
-    const timeoutId = setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 50);
-
-    return () => clearTimeout(timeoutId);
-  }, [showTypingIndicator]);
-
-  useEffect(() => {
-    const newMessages: Message[] = messages.map((m, index) => ({
-      id: `${m.id}-${index}`,
-      role: m.role as 'user' | 'assistant',
-      content: m.parts
-        .filter((p) => p.type === 'text')
-        .map((p) => (p as any).text)
-        .join('\n'),
-      timestamp: Date.now(),
-    })).filter(m => m.role === 'user' || m.role === 'assistant');
-
-    setLocalMessages(newMessages);
-  }, [messages]);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
+  const handleSend = useCallback(async () => {
     const userMessage = input.trim();
+    if (!userMessage || isResponding) return;
+
     setInput('');
+    setErrorText(null);
+
+    const userEntry: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: userMessage,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, userEntry]);
+    setIsResponding(true);
 
     try {
-      await sendMessage(userMessage);
-      
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      const conversation = [...messages, userEntry].map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
+      const result = await sendWorkspaceChat(userMessage, conversation);
+      const assistantEntry: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: result.answer,
+        timestamp: Date.now(),
+      };
+
+      setMessages((prev) => [...prev, assistantEntry]);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (err) {
-      console.error('Failed to send message:', err);
+      if (err instanceof WorkspaceChatError && err.message === 'AUTH_REQUIRED') {
+        setErrorText(t('aiChat.alerts.authRequired'));
+      } else {
+        setErrorText(t('aiChat.alerts.sendFailed'));
+      }
       showAppAlert(t('common.error'), t('aiChat.alerts.sendFailed'), undefined, { variant: 'error' });
+    } finally {
+      setIsResponding(false);
     }
-  };
+  }, [input, isResponding, messages, t]);
 
   const handleSaveAsNote = async () => {
-    if (savingNoteRef.current || localMessages.length === 0) {
-      if (localMessages.length === 0) {
+    if (savingNoteRef.current || messages.length === 0) {
+      if (messages.length === 0) {
         showAppAlert(t('aiChat.alerts.noConversation'), t('aiChat.alerts.noMessagesToSave'));
       }
       return;
@@ -126,13 +94,13 @@ export default function AIChatScreen() {
     setIsSaving(true);
 
     try {
-      const conversationText = localMessages
+      const conversationText = messages
         .map((msg) => `**${msg.role === 'user' ? t('aiChat.roles.you') : t('aiChat.roles.ai')}:** ${msg.content}`)
         .join('\n\n');
 
-      const firstUserMessage = localMessages.find((m) => m.role === 'user')?.content || 'AI Conversation';
-      const title = firstUserMessage.length > 50 
-        ? firstUserMessage.substring(0, 50) + '...' 
+      const firstUserMessage = messages.find((m) => m.role === 'user')?.content || 'AI Conversation';
+      const title = firstUserMessage.length > 50
+        ? `${firstUserMessage.substring(0, 50)}...`
         : firstUserMessage;
 
       await createNote({
@@ -142,14 +110,8 @@ export default function AIChatScreen() {
       });
 
       showAppAlert(t('common.success'), t('aiChat.alerts.savedAsNote'), [
-        {
-          text: t('common.ok'),
-          style: 'cancel',
-        },
-        {
-          text: t('common.viewNotes'),
-          onPress: () => router.push('/notes'),
-        },
+        { text: t('common.ok'), style: 'cancel' },
+        { text: t('common.viewNotes'), onPress: () => router.push('/notes') },
       ], { variant: 'success' });
     } catch (err) {
       console.error('Failed to save note:', err);
@@ -184,35 +146,30 @@ export default function AIChatScreen() {
     );
   };
 
+  const suggestions = [
+    t('aiChat.empty.suggestions.savedThisMonth'),
+    t('aiChat.empty.suggestions.remainingTasks'),
+    t('aiChat.empty.suggestions.projectProgress'),
+  ];
+
   const renderEmpty = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIconContainer}>
         <Sparkles size={48} color="#EF4444" />
       </View>
       <Text style={styles.emptyTitle}>{t('aiChat.empty.title')}</Text>
-      <Text style={styles.emptyDescription}>
-        {t('aiChat.empty.description')}
-      </Text>
+      <Text style={styles.emptyDescription}>{t('aiChat.empty.description')}</Text>
       <View style={styles.suggestionContainer}>
         <Text style={styles.suggestionTitle}>{t('aiChat.empty.tryAsking')}</Text>
-        <Pressable
-          style={styles.suggestionChip}
-          onPress={() => setInput(t('aiChat.empty.suggestions.quantum'))}
-        >
-          <Text style={styles.suggestionText}>{t('aiChat.empty.suggestions.quantum')}</Text>
-        </Pressable>
-        <Pressable
-          style={styles.suggestionChip}
-          onPress={() => setInput(t('aiChat.empty.suggestions.brainstorm'))}
-        >
-          <Text style={styles.suggestionText}>{t('aiChat.empty.suggestions.brainstorm')}</Text>
-        </Pressable>
-        <Pressable
-          style={styles.suggestionChip}
-          onPress={() => setInput(t('aiChat.empty.suggestions.meditation'))}
-        >
-          <Text style={styles.suggestionText}>{t('aiChat.empty.suggestions.meditation')}</Text>
-        </Pressable>
+        {suggestions.map((suggestion) => (
+          <Pressable
+            key={suggestion}
+            style={styles.suggestionChip}
+            onPress={() => setInput(suggestion)}
+          >
+            <Text style={styles.suggestionText}>{suggestion}</Text>
+          </Pressable>
+        ))}
       </View>
     </View>
   );
@@ -230,16 +187,13 @@ export default function AIChatScreen() {
           headerRight: () => (
             <Pressable
               onPress={handleSaveAsNote}
-              disabled={isSaving || localMessages.length === 0}
+              disabled={isSaving || messages.length === 0}
               style={styles.headerButton}
             >
               {isSaving ? (
                 <ActivityIndicator size="small" color="#EF4444" />
               ) : (
-                <Save
-                  size={24}
-                  color={localMessages.length === 0 ? '#D1D5DB' : '#EF4444'}
-                />
+                <Save size={24} color={messages.length === 0 ? '#D1D5DB' : '#EF4444'} />
               )}
             </Pressable>
           ),
@@ -253,25 +207,23 @@ export default function AIChatScreen() {
       >
         <FlatList
           ref={flatListRef}
-          data={localMessages}
+          data={messages}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={renderEmpty}
           ListFooterComponent={
-            showTypingIndicator
-              ? () => <ChatTypingIndicator label={t('aiChat.thinking')} />
-              : null
+            isResponding ? () => <ChatTypingIndicator label={t('aiChat.thinking')} /> : null
           }
           contentContainerStyle={
-            localMessages.length === 0 ? styles.emptyContainer : styles.listContainer
+            messages.length === 0 ? styles.emptyContainer : styles.listContainer
           }
           showsVerticalScrollIndicator={false}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
 
-        {error && (
+        {errorText && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{t('common.errorWithMessage', { message: String(error) })}</Text>
+            <Text style={styles.errorText}>{errorText}</Text>
           </View>
         )}
 

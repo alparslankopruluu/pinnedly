@@ -8,6 +8,8 @@ import { useNoteStore } from '@/providers/OfflineProvider';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatRelativeTime } from '@/utils/date';
 import { Note, Visibility } from '@/types';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { getCategoryDef } from '@/constants/contentCategories';
 
 export default function NotesScreen() {
   const { t } = useTranslation();
@@ -42,17 +44,21 @@ export default function NotesScreen() {
     }
   };
 
-  const renderNote = ({ item }: { item: Note }) => (
+  const renderNote = ({ item }: { item: Note }) => {
+    const categoryDef = getCategoryDef(item.category);
+    return (
     <Pressable
       style={({ pressed }) => [
         styles.noteCard,
+        { borderLeftColor: categoryDef.color },
         pressed && styles.noteCardPressed
       ]}
       onPress={() => router.push(`/note/${item.id}` as any)}
     >
       <View style={styles.noteHeader}>
         <View style={styles.noteHeaderLeft}>
-          <FileText size={20} color="#6B7280" />
+          <FileText size={20} color={categoryDef.color} />
+          <CategoryBadge category={item.category} compact />
           <View style={styles.visibilityBadge}>
             {getVisibilityIcon(item.visibility)}
             <Text style={styles.visibilityLabel}>{getVisibilityLabel(item.visibility)}</Text>
@@ -77,6 +83,7 @@ export default function NotesScreen() {
       )}
     </Pressable>
   );
+  };
 
   const renderEmpty = () => (
     <EmptyState
@@ -118,6 +125,7 @@ const styles = StyleSheet.create({
   },
   noteCard: {
     backgroundColor: 'white',
+    borderLeftWidth: 4,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

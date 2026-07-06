@@ -19,6 +19,8 @@ import { useTodoStore } from '@/store/useTodoStore';
 import { TodoItem } from '@/types';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
+import { CategoryPicker } from '@/components/ui/CategoryPicker';
+import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 
 function startOfToday(): Date {
   const today = new Date();
@@ -63,6 +65,7 @@ export default function AddTodoScreen() {
   const [hasDueDate, setHasDueDate] = useState(false);
   const [dueDate, setDueDate] = useState<Date>(startOfToday());
   const [completed, setCompleted] = useState(false);
+  const [category, setCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
 
@@ -71,6 +74,7 @@ export default function AddTodoScreen() {
       setTitle(existingTodo.title);
       setDescription(existingTodo.description || '');
       setPriority(existingTodo.priority);
+      setCategory(existingTodo.category ?? DEFAULT_CONTENT_CATEGORY);
       setCompleted(existingTodo.completed);
       if (existingTodo.dueDate) {
         setHasDueDate(true);
@@ -110,6 +114,7 @@ export default function AddTodoScreen() {
           priority,
           completed,
           dueDate: parseDueDate(),
+          category,
         });
       } else {
         await createTodo({
@@ -118,6 +123,7 @@ export default function AddTodoScreen() {
           priority,
           completed: false,
           dueDate: parseDueDate(),
+          category,
         });
       }
       router.back();
@@ -128,7 +134,7 @@ export default function AddTodoScreen() {
       savingRef.current = false;
       setSaving(false);
     }
-  }, [title, description, priority, completed, hasDueDate, dueDate, isEditing, existingTodo, createTodo, updateTodo, t]);
+  }, [title, description, priority, completed, hasDueDate, dueDate, category, isEditing, existingTodo, createTodo, updateTodo, t]);
 
   return (
     <KeyboardAvoidingView
@@ -191,8 +197,15 @@ export default function AddTodoScreen() {
           maxLength={1000}
         />
 
+        {/* Category */}
+        <CategoryPicker
+          label={t('categories.label')}
+          value={category}
+          onChange={setCategory}
+        />
+
         {/* Priority */}
-        <Text style={styles.label}>{t('addTodo.priority')}</Text>
+        <Text style={[styles.label, { marginTop: 20 }]}>{t('addTodo.priority')}</Text>
         <View style={styles.priorityRow}>
           {priorityOptions.map((opt) => (
             <Pressable

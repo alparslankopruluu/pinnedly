@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/Button';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { fetchUrlMetadata, getSourceFromUrl } from '@/utils/metadata';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
+import { CategoryPicker } from '@/components/ui/CategoryPicker';
+import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 
 export default function AddBookmarkScreen() {
   useTrackFormOpen('bookmark');
@@ -41,6 +43,7 @@ export default function AddBookmarkScreen() {
   const [screenshotUri, setScreenshotUri] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [category, setCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
 
   const handleUrlChange = async (text: string) => {
     setUrl(text);
@@ -144,6 +147,7 @@ export default function AddBookmarkScreen() {
         source,
         visibility: 'private',
         status: 'inbox',
+        category,
       });
       router.back();
     } catch (error) {
@@ -217,6 +221,15 @@ export default function AddBookmarkScreen() {
                 onChangeText={setTitle}
                 placeholder={t('addBookmark.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
+              />
+            </View>
+
+            {/* Category */}
+            <View style={styles.section}>
+              <CategoryPicker
+                label={t('categories.label')}
+                value={category}
+                onChange={setCategory}
               />
             </View>
 

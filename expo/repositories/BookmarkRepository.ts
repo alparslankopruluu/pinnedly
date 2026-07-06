@@ -3,6 +3,7 @@ import { Bookmark } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, subscribeToOwnerCollection, timestampToMillis } from '@/lib/firestore';
 import { trackEntityEvent } from '@/lib/analytics';
 import { tagNamesToTags } from '@/utils/bookmark';
+import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 
 export type CreateBookmarkInput = Omit<
   Bookmark,
@@ -50,6 +51,7 @@ export class BookmarkRepository {
       readAt: bookmark.readAt ?? null,
       openCount: 0,
       lastOpenedAt: null,
+      category: bookmark.category ?? DEFAULT_CONTENT_CATEGORY,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -80,6 +82,7 @@ export class BookmarkRepository {
     if (updates.lastOpenedAt !== undefined) {
       payload.lastOpenedAt = updates.lastOpenedAt ? new Date(updates.lastOpenedAt) : null;
     }
+    if (updates.category !== undefined) payload.category = updates.category;
 
     await ref.update(payload);
     const updated = await ref.get();
@@ -134,6 +137,7 @@ export class BookmarkRepository {
       source: data.source as Bookmark['source'],
       userId: data.ownerId as string,
       visibility: (data.visibility as Bookmark['visibility']) || 'private',
+      category: normalizeCategory(data.category as string | undefined),
     };
   }
 }

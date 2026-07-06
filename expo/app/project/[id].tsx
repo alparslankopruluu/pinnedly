@@ -49,6 +49,9 @@ import { ProjectMembersModal } from '@/components/ProjectMembersModal';
 import { TaskStatusCheckbox } from '@/components/TaskStatusCheckbox';
 import { getActivityTitle } from '@/utils/activities';
 import { getNextTaskStatus } from '@/utils/taskStatus';
+import { CategoryPicker } from '@/components/ui/CategoryPicker';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 
 const { width } = Dimensions.get('window');
 
@@ -132,6 +135,7 @@ function ProjectTaskRow({
           >
             {task.title}
           </Text>
+          <CategoryBadge category={task.category} compact />
         </View>
       </Animated.View>
     </View>
@@ -154,6 +158,7 @@ export default function ProjectDetailScreen() {
   useTrackContentOpen('project', projectId);
   const [activeTab, setActiveTab] = useState<TabType>('tasks');
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+  const [newTaskCategory, setNewTaskCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
   const [swipedTaskId, setSwipedTaskId] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [shareEmail, setShareEmail] = useState<string>('');
@@ -277,8 +282,10 @@ export default function ProjectDetailScreen() {
       await addTask(project.id, {
         title: trimmedTitle,
         status: 'todo',
+        category: newTaskCategory,
       });
       setNewTaskTitle('');
+      setNewTaskCategory(DEFAULT_CONTENT_CATEGORY);
     } catch (error) {
       console.error('Failed to create task:', error);
       showAppAlert(t('common.error'), t('projectDetail.alerts.createTaskFailed'), undefined, { variant: 'error' });
@@ -553,6 +560,13 @@ export default function ProjectDetailScreen() {
                   onDelete={handleDeleteTask}
                 />
               ))}
+
+              <View style={styles.addTaskCategoryWrap}>
+                <CategoryPicker
+                  value={newTaskCategory}
+                  onChange={setNewTaskCategory}
+                />
+              </View>
 
               <View style={styles.addTaskContainer}>
                 <TextInput
@@ -1336,6 +1350,9 @@ const styles = StyleSheet.create({
     height: '80%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  addTaskCategoryWrap: {
+    marginBottom: 10,
   },
   addTaskContainer: {
     backgroundColor: '#FFFFFF',

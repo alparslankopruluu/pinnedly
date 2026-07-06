@@ -276,8 +276,8 @@
   },
   "home": {
     "aiChat": {
-      "title": "مساعد الدردشة بالذكاء الاصطناعي",
-      "description": "اسأل أي شيء واحفظ المحادثات كملاحظات"
+      "title": "Workspace Assistant",
+      "description": "Ask about your notes, projects, bookmarks, and todos"
     },
     "continue": "متابعة",
     "dueAndOverdueTasks": "المهام المستحقة والمتأخرة",
@@ -400,17 +400,16 @@
     "upgradeSubtitle": "افتح ميزات التعاون القوية"
   },
   "aiChat": {
-    "title": "دردشة الذكاء الاصطناعي",
-    "systemPrompt": "أنت مساعد Draft للذكاء الاصطناعي. أجب دائمًا بالعربية حتى لو كتب المستخدم بلغة أخرى. كن موجزًا وودودًا وعمليًا.",
-    "placeholder": "اسألني أي شيء...",
+    "title": "Workspace Assistant",
+    "placeholder": "Ask about your notes, projects, bookmarks, or todos...",
     "empty": {
-      "title": "مساعد الدردشة بالذكاء الاصطناعي",
-      "description": "اسألني أي شيء! يمكنني مساعدتك في البحث والعصف الذهني والكتابة والمزيد. يمكنك حفظ محادثتنا كملاحظة في أي وقت.",
+      "title": "Workspace Assistant",
+      "description": "Ask about your saved content — progress, remaining tasks, recent notes, and unread bookmarks.",
       "tryAsking": "جرّب السؤال:",
       "suggestions": {
-        "quantum": "اشرح الحوسبة الكمية",
-        "brainstorm": "ابتكر أفكار تطبيقات",
-        "meditation": "فوائد التأمل"
+        "savedThisMonth": "What did I save this month?",
+        "remainingTasks": "What tasks are still open?",
+        "projectProgress": "How is my project progress?"
       }
     },
     "roles": {
@@ -423,7 +422,8 @@
       "noMessagesToSave": "لا توجد رسائل للحفظ.",
       "savedAsNote": "تم حفظ المحادثة كملاحظة!",
       "sendFailed": "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.",
-      "saveFailed": "فشل حفظ المحادثة. يرجى المحاولة مرة أخرى."
+      "saveFailed": "فشل حفظ المحادثة. يرجى المحاولة مرة أخرى.",
+      "authRequired": "Please sign in to use the workspace assistant."
     },
     "thinking": "جارٍ التفكير"
   },
@@ -789,6 +789,18 @@
       "action": "Remove"
     }
   },
+  "categories": {
+    "label": "الفئة",
+    "pickCategory": "اختر فئة",
+    "general": "عام",
+    "ai": "ذكاء اصطناعي",
+    "food": "طعام",
+    "work": "عمل",
+    "personal": "شخصي",
+    "ideas": "أفكار",
+    "travel": "سفر",
+    "health": "صحة"
+  },
   "shareIntent": {
     "signInRequired": "تسجيل الدخول مطلوب",
     "signInToSaveLinks": "يرجى تسجيل الدخول لحفظ الروابط المشتركة في Draft.",
@@ -797,7 +809,8 @@
     "view": "View",
     "couldNotSave": "Could not save",
     "unableToSave": "Unable to save shared content.",
-    "saving": "جارٍ حفظ المحتوى المشترك..."
+    "saving": "جارٍ حفظ المحتوى المشترك...",
+    "saved": "تم الحفظ"
   },
   "quickAdd": {
     "addBookmark": "إضافة إشارة مرجعية",
