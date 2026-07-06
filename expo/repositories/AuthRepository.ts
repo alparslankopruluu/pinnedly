@@ -6,6 +6,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { Platform } from 'react-native';
 import { User, ID } from '@/types';
 import { COLLECTIONS, serverTimestamp } from '@/lib/firestore';
+import { shareApi } from '@/services/shareApi';
 
 class AuthRepository {
   private currentUser: User | null = null;
@@ -198,16 +199,12 @@ class AuthRepository {
   async updateProfile(updates: Partial<User>): Promise<User> {
     if (!this.currentUser) throw new Error('No user logged in');
 
-    await firestore().collection(COLLECTIONS.users).doc(this.currentUser.id).update({
-      ...(updates.handle !== undefined && { handle: updates.handle }),
-      ...(updates.displayName !== undefined && { displayName: updates.displayName }),
-      ...(updates.avatar !== undefined && { avatar: updates.avatar }),
-      ...(updates.bio !== undefined && { bio: updates.bio }),
-      updatedAt: serverTimestamp(),
+    this.currentUser = await shareApi.updateProfile({
+      displayName: updates.displayName ?? this.currentUser.displayName,
+      handle: updates.handle ?? this.currentUser.handle,
+      bio: updates.bio !== undefined ? updates.bio : this.currentUser.bio,
+      avatar: updates.avatar !== undefined ? updates.avatar : this.currentUser.avatar,
     });
-
-    const doc = await firestore().collection(COLLECTIONS.users).doc(this.currentUser.id).get();
-    this.currentUser = this.mapUserDoc(this.currentUser.id, doc.data()!, this.currentUser.email);
     return this.currentUser;
   }
 

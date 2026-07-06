@@ -97,8 +97,7 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   const getBookmarksByListId = useCallback(async (listId: ID): Promise<Bookmark[]> => {
     const bookmarkIds = await bookmarkListRepository.getBookmarksByListId(listId);
     if (bookmarkIds.length === 0) return [];
-    const allBookmarks = await bookmarkRepository.getBookmarks();
-    return allBookmarks.filter((bookmark) => bookmarkIds.includes(bookmark.id));
+    return bookmarkRepository.getByIds(bookmarkIds);
   }, []);
 
   const isFollowingList = useCallback((listId: ID): boolean => {

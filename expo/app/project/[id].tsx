@@ -41,11 +41,11 @@ import {
   Trash2,
   Users,
   X,
-  Send,
 } from 'lucide-react-native';
 import { notificationService } from '@/utils/notifications';
 import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
 import { ProjectMembersModal } from '@/components/ProjectMembersModal';
+import { ShareModal } from '@/components/ShareModal';
 import { TaskStatusCheckbox } from '@/components/TaskStatusCheckbox';
 import { getActivityTitle } from '@/utils/activities';
 import { getNextTaskStatus } from '@/utils/taskStatus';
@@ -161,8 +161,6 @@ export default function ProjectDetailScreen() {
   const [newTaskCategory, setNewTaskCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
   const [swipedTaskId, setSwipedTaskId] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
-  const [shareEmail, setShareEmail] = useState<string>('');
-  const [sharePermission, setSharePermission] = useState<'view' | 'edit'>('view');
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editTitle, setEditTitle] = useState<string>('');
   const [editDescription, setEditDescription] = useState<string>('');
@@ -173,7 +171,9 @@ export default function ProjectDetailScreen() {
   const [showNudgeModal, setShowNudgeModal] = useState(false);
   const [nudgeTime, setNudgeTime] = useState(() => new Date(Date.now() + 60 * 60 * 1000));
   const [isSchedulingNudge, setIsSchedulingNudge] = useState(false);
+  const [isHydratingProject, setIsHydratingProject] = useState(false);
   const taskInputRef = useRef<TextInput>(null);
+  const attemptedHydrationIds = useRef<Set<string>>(new Set());
 
   const { bookmarks, activities } = useAppStore();
   const { notes } = useNoteStore();
@@ -193,12 +193,26 @@ export default function ProjectDetailScreen() {
     notificationService.initialize();
   }, []);
 
-  const project = projects.find((p) => p.id === id);
+  const project = projects.find((p) => p.id === projectId);
 
   useEffect(() => {
-    if (!id || !project || project.tasks.length > 0) return;
-    void hydrateProject(id);
-  }, [id, project, hydrateProject]);
+    if (!projectId || attemptedHydrationIds.current.has(projectId)) return;
+    if (project && project.tasks.length > 0) {
+      attemptedHydrationIds.current.add(projectId);
+      return;
+    }
+
+    let isMounted = true;
+    attemptedHydrationIds.current.add(projectId);
+    setIsHydratingProject(true);
+    hydrateProject(projectId).finally(() => {
+      if (isMounted) setIsHydratingProject(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [projectId, project, hydrateProject]);
   const relatedBookmarks = bookmarks.filter((b) =>
     notes.some((n) => n.links.some((l) => l.type === 'project' && l.id === id))
   );
@@ -221,7 +235,7 @@ export default function ProjectDetailScreen() {
       .slice(0, 20);
   }, [activities, project, id]);
 
-  if (projectsLoading && !project) {
+  if ((projectsLoading || isHydratingProject) && !project) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
@@ -399,25 +413,6 @@ export default function ProjectDetailScreen() {
 
   const handleShare = () => {
     setShowShareModal(true);
-  };
-
-  const handleShareProject = async () => {
-    if (!shareEmail.trim()) {
-      showAppAlert(t('common.error'), t('projectDetail.alerts.enterEmail'), undefined, { variant: 'error' });
-      return;
-    }
-
-    try {
-      // Here you would implement the actual sharing logic with Supabase
-      console.log('Sharing project with:', shareEmail, 'permission:', sharePermission);
-      showAppAlert(t('common.success'), t('projectDetail.alerts.sharedWith', { email: shareEmail }), undefined, { variant: 'success' });
-      setShowShareModal(false);
-      setShareEmail('');
-      setSharePermission('view');
-    } catch (error) {
-      console.error('Share error:', error);
-      showAppAlert(t('common.error'), t('projectDetail.alerts.shareFailed'), undefined, { variant: 'error' });
-    }
   };
 
   const handleEdit = () => {
@@ -871,88 +866,13 @@ export default function ProjectDetailScreen() {
           <Plus size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
-        {/* Share Modal */}
-        <Modal
+        <ShareModal
           visible={showShareModal}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowShareModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{t('projectDetail.shareProject')}</Text>
-                <TouchableOpacity onPress={() => setShowShareModal(false)}>
-                  <X size={24} color="#6B7280" />
-                </TouchableOpacity>
-              </View>
-              
-              <View style={styles.modalBody}>
-                <Text style={styles.inputLabel}>{t('projectDetail.emailAddress')}</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder={t('projectDetail.emailPlaceholder')}
-                  value={shareEmail}
-                  onChangeText={setShareEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                
-                <Text style={styles.inputLabel}>{t('projectDetail.permission')}</Text>
-                <View style={styles.permissionButtons}>
-                  <TouchableOpacity
-                    style={[
-                      styles.permissionButton,
-                      sharePermission === 'view' && styles.permissionButtonActive,
-                    ]}
-                    onPress={() => setSharePermission('view')}
-                  >
-                    <Text
-                      style={[
-                        styles.permissionButtonText,
-                        sharePermission === 'view' && styles.permissionButtonTextActive,
-                      ]}
-                    >
-                      {t('projectDetail.viewOnly')}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.permissionButton,
-                      sharePermission === 'edit' && styles.permissionButtonActive,
-                    ]}
-                    onPress={() => setSharePermission('edit')}
-                  >
-                    <Text
-                      style={[
-                        styles.permissionButtonText,
-                        sharePermission === 'edit' && styles.permissionButtonTextActive,
-                      ]}
-                    >
-                      {t('projectDetail.canEdit')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.modalButtonSecondary}
-                  onPress={() => setShowShareModal(false)}
-                >
-                  <Text style={styles.modalButtonSecondaryText}>{t('common.cancel')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonPrimary}
-                  onPress={handleShareProject}
-                >
-                  <Send size={16} color="#FFFFFF" />
-                  <Text style={styles.modalButtonPrimaryText}>{t('common.share')}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+          onClose={() => setShowShareModal(false)}
+          entityId={project.id}
+          entityType="project"
+          entityTitle={project.title}
+        />
 
         {/* Edit Modal */}
         <Modal

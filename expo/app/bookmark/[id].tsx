@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   View,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Linking,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,19 +22,66 @@ import { getSourceLabel } from '@/utils/bookmark';
 import { formatRelativeTime } from '@/utils/date';
 import { BookmarkStatus } from '@/types';
 import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
+import { bookmarkRepository } from '@/repositories/BookmarkRepository';
+import { useAuth } from '@/store/useAuthStore';
 
 export default function BookmarkDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  useTrackContentOpen('bookmark', id);
+  const bookmarkId = Array.isArray(id) ? id[0] : id;
+  useTrackContentOpen('bookmark', bookmarkId);
+  const { user } = useAuth();
   const { bookmarks, openBookmark, updateBookmark, deleteBookmark } = useBookmarkStore();
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [personalNote, setPersonalNote] = useState('');
+  const [sharedBookmark, setSharedBookmark] = useState<Awaited<ReturnType<typeof bookmarkRepository.getById>>>(null);
+  const [isLoadingSharedBookmark, setIsLoadingSharedBookmark] = useState(false);
 
-  const bookmark = useMemo(
-    () => bookmarks.find((item) => item.id === id),
-    [bookmarks, id]
+  const storeBookmark = useMemo(
+    () => bookmarks.find((item) => item.id === bookmarkId),
+    [bookmarks, bookmarkId]
   );
+  const bookmark = storeBookmark ?? sharedBookmark;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!bookmarkId || storeBookmark) {
+      setSharedBookmark(null);
+      setIsLoadingSharedBookmark(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setIsLoadingSharedBookmark(true);
+    bookmarkRepository
+      .getById(bookmarkId)
+      .then((result) => {
+        if (isMounted) setSharedBookmark(result);
+      })
+      .catch((error) => {
+        console.warn(`Failed to load shared bookmark ${bookmarkId}:`, error);
+        if (isMounted) setSharedBookmark(null);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSharedBookmark(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bookmarkId, storeBookmark]);
+
+  if (!bookmark && isLoadingSharedBookmark) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#EF4444" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!bookmark) {
     return (
@@ -48,19 +96,28 @@ export default function BookmarkDetailScreen() {
       showAppAlert(t('bookmarkDetail.noUrl'), t('bookmarkDetail.noLinkToOpen'));
       return;
     }
-    await openBookmark(bookmark.id);
+    try {
+      const updated = await openBookmark(bookmark.id);
+      if (updated) setSharedBookmark(updated);
+    } catch (error) {
+      console.warn(`Failed to update bookmark open count ${bookmark.id}:`, error);
+    }
     await Linking.openURL(bookmark.url);
   };
 
   const handleStatusChange = async (status: BookmarkStatus) => {
-    await updateBookmark(bookmark.id, {
+    const updates = {
       status,
       readAt: status === 'done' ? Date.now() : bookmark.readAt,
-    });
+    };
+    await updateBookmark(bookmark.id, updates);
+    setSharedBookmark((current) => current ? { ...current, ...updates } : current);
   };
 
   const handleSaveNote = async () => {
-    await updateBookmark(bookmark.id, { personalNote: personalNote.trim() || undefined });
+    const updates = { personalNote: personalNote.trim() || undefined };
+    await updateBookmark(bookmark.id, updates);
+    setSharedBookmark((current) => current ? { ...current, ...updates } : current);
     setIsEditingNote(false);
   };
 
@@ -79,6 +136,7 @@ export default function BookmarkDetailScreen() {
   };
 
   const sourceLabel = bookmark.source ? getSourceLabel(bookmark.source) : t('sources.other');
+  const isOwner = user?.id === bookmark.userId;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -100,9 +158,11 @@ export default function BookmarkDetailScreen() {
             schedule={bookmark.reminderSchedule}
             size={20}
           />
-          <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
-            <Trash2 size={20} color="#EF4444" />
-          </TouchableOpacity>
+          {isOwner ? (
+            <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
+              <Trash2 size={20} color="#EF4444" />
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
 
@@ -232,6 +292,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     color: '#6B7280',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',

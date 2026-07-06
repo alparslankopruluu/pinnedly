@@ -176,7 +176,9 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
       if (!fullProject) return null;
       setProjects((prev) =>
         dedupeProjectsById(
-          prev.map((project) => (project.id === projectId ? fullProject : project))
+          prev.some((project) => project.id === projectId)
+            ? prev.map((project) => (project.id === projectId ? fullProject : project))
+            : [fullProject, ...prev]
         )
       );
       return fullProject;

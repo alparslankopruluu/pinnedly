@@ -67,8 +67,8 @@ export default function EditProfileScreen() {
       await updateProfile({
         displayName: trimmedName,
         handle: normalizedHandle,
-        bio: bio.trim() || undefined,
-        avatar: avatar.trim() || undefined,
+        bio: bio.trim(),
+        avatar: avatar.trim(),
       });
       showAppAlert(t('common.success'), t('editProfile.alerts.saved'), undefined, { variant: 'success' });
       router.back();

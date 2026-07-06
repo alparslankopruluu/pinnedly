@@ -1,69 +1,39 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { EntityShare, ShareRequest, SharePermission, ID } from '@/types';
-import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
-import { entityAccessRepository } from './EntityAccessRepository';
+import { COLLECTIONS, requireUserId, timestampToMillis } from '@/lib/firestore';
+import { shareApi } from '@/services/shareApi';
 
 class SharingRepository {
   async shareEntity(request: ShareRequest, currentUserId: ID): Promise<EntityShare> {
-    let targetUserId = request.targetUserId;
-
-    if (!targetUserId) {
-      const handle = request.userEmail.trim().toLowerCase().replace(/^@/, '');
-      const users = await firestore()
-        .collection(COLLECTIONS.users)
-        .where('handle', '==', handle)
-        .limit(1)
-        .get();
-
-      if (users.empty) throw new Error('User not found');
-      targetUserId = users.docs[0].id;
-    }
-
     return this.shareEntityWithUser(
       request.entityId,
       request.entityType,
-      targetUserId,
+      request.targetUserId,
       request.permission,
-      currentUserId
+      currentUserId,
+      request.userEmail
     );
   }
 
   async shareEntityWithUser(
     entityId: ID,
-    entityType: string,
-    targetUserId: ID,
+    entityType: EntityShare['entityType'],
+    targetUserId: ID | undefined,
     permission: SharePermission,
-    currentUserId: ID
+    currentUserId: ID,
+    userEmail?: string
   ): Promise<EntityShare> {
     if (targetUserId === currentUserId) {
       throw new Error('Cannot share with yourself');
     }
 
-    const existing = await firestore()
-      .collection(COLLECTIONS.shares)
-      .where('createdBy', '==', currentUserId)
-      .where('entityId', '==', entityId)
-      .where('entityType', '==', entityType)
-      .where('toUserId', '==', targetUserId)
-      .limit(1)
-      .get();
-
-    if (!existing.empty) throw new Error('Entity already shared with this user');
-
-    const ref = await firestore().collection(COLLECTIONS.shares).add({
+    return shareApi.shareEntityWithHandle({
       entityId,
       entityType,
-      toUserId: targetUserId,
+      targetUserId,
+      userEmail,
       permission,
-      createdBy: currentUserId,
-      createdAt: serverTimestamp(),
     });
-
-    await entityAccessRepository.grantAccess(entityType, entityId, targetUserId, permission);
-
-    const created = await ref.get();
-    const userDoc = await firestore().collection(COLLECTIONS.users).doc(targetUserId).get();
-    return this.mapShare(created.id, created.data()!, userDoc.data());
   }
 
   async getEntityShares(entityId: ID, entityType: string): Promise<EntityShare[]> {
@@ -100,34 +70,11 @@ class SharingRepository {
   }
 
   async updateSharePermission(shareId: ID, permission: SharePermission): Promise<EntityShare> {
-    requireUserId();
-    const ref = firestore().collection(COLLECTIONS.shares).doc(shareId);
-    const before = await ref.get();
-    if (!before.exists()) throw new Error('Share not found');
-
-    const data = before.data()!;
-    await ref.update({ permission });
-    await entityAccessRepository.updateAccessPermission(
-      data.entityType,
-      data.entityId,
-      data.toUserId,
-      permission
-    );
-
-    const updated = await ref.get();
-    const userDoc = await firestore().collection(COLLECTIONS.users).doc(updated.data()!.toUserId).get();
-    return this.mapShare(updated.id, updated.data()!, userDoc.data());
+    return shareApi.updateSharePermission(shareId, permission);
   }
 
   async revokeShare(shareId: ID): Promise<void> {
-    requireUserId();
-    const ref = firestore().collection(COLLECTIONS.shares).doc(shareId);
-    const doc = await ref.get();
-    if (!doc.exists()) return;
-
-    const data = doc.data()!;
-    await ref.delete();
-    await entityAccessRepository.revokeAccess(data.entityType, data.entityId, data.toUserId);
+    await shareApi.revokeShare(shareId);
   }
 
   async removeShare(shareId: ID): Promise<void> {

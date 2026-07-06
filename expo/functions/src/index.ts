@@ -88,3 +88,14 @@ export const aiWorkspaceChat = onRequest(
     }
   }
 );
+
+export {
+  acceptInvite,
+  createInvite,
+  removeProjectMember,
+  revokeShare,
+  shareEntityWithHandle,
+  updateProfile,
+  updateProjectMemberPermission,
+  updateSharePermission,
+} from './shareHandlers';

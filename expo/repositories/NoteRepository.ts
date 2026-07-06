@@ -32,6 +32,12 @@ export class NoteRepository {
     return snapshot.docs.map((doc) => this.mapNote(doc.id, doc.data()));
   }
 
+  async getById(id: string): Promise<Note | null> {
+    const doc = await firestore().collection(COLLECTIONS.notes).doc(id).get();
+    if (!doc.exists()) return null;
+    return this.mapNote(doc.id, doc.data()!);
+  }
+
   async createNote(
     note: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'links'> & {
       links?: Note['links'];

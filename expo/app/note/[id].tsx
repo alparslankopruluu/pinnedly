@@ -28,22 +28,58 @@ import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { MarkdownContent } from '@/components/ui/MarkdownContent';
 import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
 import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
+import { noteRepository } from '@/repositories/NoteRepository';
+import { useAuth } from '@/store/useAuthStore';
 
 export default function NoteDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const noteId = Array.isArray(id) ? id[0] : id;
   useTrackContentOpen('note', noteId);
+  const { user } = useAuth();
   const { notes, loading, updateNote, deleteNote } = useNoteStore();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>('');
   const [editedContent, setEditedContent] = useState<string>('');
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [sharedNote, setSharedNote] = useState<Awaited<ReturnType<typeof noteRepository.getById>>>(null);
+  const [isLoadingSharedNote, setIsLoadingSharedNote] = useState(false);
 
-  const note = useMemo(
+  const storeNote = useMemo(
     () => notes.find((item) => item.id === noteId),
     [notes, noteId]
   );
+  const note = storeNote ?? sharedNote;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!noteId || storeNote) {
+      setSharedNote(null);
+      setIsLoadingSharedNote(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setIsLoadingSharedNote(true);
+    noteRepository
+      .getById(noteId)
+      .then((result) => {
+        if (isMounted) setSharedNote(result);
+      })
+      .catch((error) => {
+        console.warn(`Failed to load shared note ${noteId}:`, error);
+        if (isMounted) setSharedNote(null);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSharedNote(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [noteId, storeNote]);
 
   useEffect(() => {
     if (note) {
@@ -65,6 +101,11 @@ export default function NoteDetailScreen() {
         title: editedTitle.trim(),
         markdown: editedContent.trim(),
       });
+      setSharedNote((current) =>
+        current
+          ? { ...current, title: editedTitle.trim(), markdown: editedContent.trim(), updatedAt: Date.now() }
+          : current
+      );
       setIsEditing(false);
     } catch (err) {
       console.error('Failed to update note:', err);
@@ -105,7 +146,7 @@ export default function NoteDetailScreen() {
     );
   };
 
-  if (loading) {
+  if (loading || isLoadingSharedNote) {
     return (
       <>
         <Stack.Screen options={{ title: t('noteDetail.loading', { defaultValue: 'Note' }) }} />
@@ -171,9 +212,11 @@ export default function NoteDetailScreen() {
                   <TouchableOpacity onPress={() => setShowShareModal(true)} style={styles.headerButton}>
                     <Share2 size={20} color="#6B7280" />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleDelete} style={styles.headerButton}>
-                    <Trash2 size={20} color="#EF4444" />
-                  </TouchableOpacity>
+                  {user?.id === note.userId ? (
+                    <TouchableOpacity onPress={handleDelete} style={styles.headerButton}>
+                      <Trash2 size={20} color="#EF4444" />
+                    </TouchableOpacity>
+                  ) : null}
                 </>
               )}
             </View>

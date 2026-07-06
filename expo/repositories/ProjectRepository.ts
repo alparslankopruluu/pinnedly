@@ -3,6 +3,7 @@ import { Project, Task, User, ProjectCollaborator } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { trackEntityEvent } from '@/lib/analytics';
+import { shareApi } from '@/services/shareApi';
 
 export class ProjectRepository {
   private static instance: ProjectRepository;
@@ -69,15 +70,6 @@ export class ProjectRepository {
       visibility: project.visibility || 'private',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    });
-
-    await firestore().collection(COLLECTIONS.projectMembers).add({
-      projectId: ref.id,
-      userId: uid,
-      role: 'owner',
-      permission: 'edit',
-      invitedBy: uid,
-      joinedAt: serverTimestamp(),
     });
 
     const created = await ref.get();
@@ -174,41 +166,27 @@ export class ProjectRepository {
   }
 
   async addProjectMember(projectId: string, userEmail: string, permission: 'view' | 'edit'): Promise<ProjectCollaborator> {
-    const uid = requireUserId();
-    const users = await firestore()
-      .collection(COLLECTIONS.users)
-      .where('handle', '==', userEmail.trim().toLowerCase())
-      .limit(1)
-      .get();
-    if (users.empty) throw new Error('User not found');
-
-    const target = users.docs[0];
-    const ref = await firestore().collection(COLLECTIONS.projectMembers).add({
-      projectId,
-      userId: target.id,
-      role: 'member',
+    const share = await shareApi.shareEntityWithHandle({
+      entityId: projectId,
+      entityType: 'project',
+      userEmail: userEmail.trim(),
       permission,
-      invitedBy: uid,
-      joinedAt: serverTimestamp(),
     });
 
-    const { entityAccessRepository } = await import('./EntityAccessRepository');
-    await entityAccessRepository.grantAccess('project', projectId, target.id, permission);
-
-    const created = await ref.get();
-    return this.mapMember(created.id, created.data()!, target.data());
+    return {
+      id: share.id,
+      projectId,
+      userId: share.userId,
+      role: share.permission === 'edit' ? 'editor' : 'viewer',
+      invitedAt: share.createdAt,
+      acceptedAt: share.createdAt,
+      permission: share.permission,
+      user: share.user,
+    } as ProjectCollaborator & { user?: User; permission?: 'view' | 'edit' };
   }
 
   async removeProjectMember(projectId: string, userId: string): Promise<void> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.projectMembers)
-      .where('projectId', '==', projectId)
-      .where('userId', '==', userId)
-      .get();
-    await Promise.all(snapshot.docs.map((doc) => doc.ref.delete()));
-
-    const { entityAccessRepository } = await import('./EntityAccessRepository');
-    await entityAccessRepository.revokeAccess('project', projectId, userId);
+    await shareApi.removeProjectMember({ projectId, userId });
   }
 
   async updateProjectMemberPermission(
@@ -216,21 +194,17 @@ export class ProjectRepository {
     userId: string,
     permission: 'view' | 'edit'
   ): Promise<ProjectCollaborator> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.projectMembers)
-      .where('projectId', '==', projectId)
-      .where('userId', '==', userId)
-      .limit(1)
-      .get();
-    if (snapshot.empty) throw new Error('Member not found');
-    const doc = snapshot.docs[0];
-    await doc.ref.update({ permission });
-
-    const { entityAccessRepository } = await import('./EntityAccessRepository');
-    await entityAccessRepository.updateAccessPermission('project', projectId, userId, permission);
-
-    const userDoc = await firestore().collection(COLLECTIONS.users).doc(userId).get();
-    return this.mapMember(doc.id, doc.data(), userDoc.data());
+    const share = await shareApi.updateProjectMemberPermission({ projectId, userId, permission });
+    return {
+      id: share.id,
+      projectId,
+      userId: share.userId,
+      role: share.permission === 'edit' ? 'editor' : 'viewer',
+      invitedAt: share.createdAt,
+      acceptedAt: share.createdAt,
+      permission: share.permission,
+      user: share.user,
+    } as ProjectCollaborator & { user?: User; permission?: 'view' | 'edit' };
   }
 
   async searchUsersByEmail(query: string): Promise<User[]> {
@@ -260,8 +234,17 @@ export class ProjectRepository {
 
   private async findTaskRef(taskId: string) {
     const uid = requireUserId();
-    const projects = await firestore().collection(COLLECTIONS.projects).where('ownerId', '==', uid).get();
-    for (const project of projects.docs) {
+    const ownedProjects = await firestore().collection(COLLECTIONS.projects).where('ownerId', '==', uid).get();
+    const sharedProjects = await firestore()
+      .collection(COLLECTIONS.projects)
+      .where('sharedWith', 'array-contains', uid)
+      .get();
+    const projects = [...ownedProjects.docs, ...sharedProjects.docs];
+    const seenProjectIds = new Set<string>();
+
+    for (const project of projects) {
+      if (seenProjectIds.has(project.id)) continue;
+      seenProjectIds.add(project.id);
       const taskRef = project.ref.collection('tasks').doc(taskId);
       const task = await taskRef.get();
       if (task.exists()) {

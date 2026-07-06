@@ -34,6 +34,27 @@ export class BookmarkRepository {
     return snapshot.docs.map((doc) => this.mapBookmark(doc.id, doc.data()));
   }
 
+  async getById(id: string): Promise<Bookmark | null> {
+    const doc = await firestore().collection(COLLECTIONS.bookmarks).doc(id).get();
+    if (!doc.exists()) return null;
+    return this.mapBookmark(doc.id, doc.data()!);
+  }
+
+  async getByIds(ids: string[]): Promise<Bookmark[]> {
+    const uniqueIds = Array.from(new Set(ids));
+    const results = await Promise.all(
+      uniqueIds.map(async (id) => {
+        try {
+          return await this.getById(id);
+        } catch (error) {
+          console.warn(`Failed to load bookmark ${id}:`, error);
+          return null;
+        }
+      })
+    );
+    return results.filter((bookmark): bookmark is Bookmark => Boolean(bookmark));
+  }
+
   async createBookmark(bookmark: CreateBookmarkInput): Promise<Bookmark> {
     const uid = requireUserId();
     const ref = firestore().collection(COLLECTIONS.bookmarks).doc();

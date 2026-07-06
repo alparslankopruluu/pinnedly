@@ -22,6 +22,18 @@ service cloud.firestore {
         || (isSignedIn() && request.auth.uid in resource.data.get('editors', []));
     }
 
+    function accessFieldsAreUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['ownerId', 'sharedWith', 'editors']);
+    }
+
+    function validEntityCreate() {
+      return isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.get('sharedWith', []) == []
+        && request.resource.data.get('editors', []) == [];
+    }
+
     function canReadEntity() {
       return isOwner(resource.data.ownerId)
         || isPublicVisibility(resource.data.get('visibility', 'private'))
@@ -39,6 +51,12 @@ service cloud.firestore {
         || (isSignedIn() && request.auth.uid in project.get('sharedWith', []));
     }
 
+    function canEditProject(projectId) {
+      let project = projectData(projectId);
+      return isOwner(project.ownerId)
+        || (isSignedIn() && request.auth.uid in project.get('editors', []));
+    }
+
     function canReadList() {
       return resource.data.isPublic == true
         || isPublicVisibility(resource.data.get('visibility', 'private'))
@@ -48,44 +66,53 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'avatar', 'bio', 'updatedAt']);
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /notes/{noteId} {
       allow read: if canReadEntity();
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if canEditEntity();
+      allow create: if validEntityCreate();
+      allow update: if canEditEntity() && accessFieldsAreUnchanged();
+      allow delete: if isOwner(resource.data.ownerId);
     }
 
     match /bookmarks/{bookmarkId} {
       allow read: if canReadEntity();
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if canEditEntity();
+      allow create: if validEntityCreate();
+      allow update: if canEditEntity() && accessFieldsAreUnchanged();
+      allow delete: if isOwner(resource.data.ownerId);
     }
 
     match /projects/{projectId} {
       allow read: if canReadEntity();
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if canEditEntity();
+      allow create: if validEntityCreate();
+      allow update: if canEditEntity() && accessFieldsAreUnchanged();
+      allow delete: if isOwner(resource.data.ownerId);
 
       match /tasks/{taskId} {
         allow read: if canAccessProject(projectId);
-        allow create, update, delete: if isSignedIn()
-          && projectData(projectId).ownerId == request.auth.uid;
+        allow create, update: if canEditProject(projectId);
+        allow delete: if isOwner(projectData(projectId).ownerId);
       }
     }
 
     match /todos/{todoId} {
       allow read: if canReadEntity();
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if canEditEntity();
+      allow create: if validEntityCreate();
+      allow update: if canEditEntity() && accessFieldsAreUnchanged();
+      allow delete: if isOwner(resource.data.ownerId);
     }
 
     match /bookmarkLists/{listId} {
       allow read: if canReadList();
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if canEditEntity();
+      allow create: if validEntityCreate();
+      allow update: if canEditEntity() && accessFieldsAreUnchanged();
+      allow delete: if isOwner(resource.data.ownerId);
     }
 
     match /listFollowers/{followerId} {
@@ -95,21 +122,22 @@ service cloud.firestore {
     }
 
     match /projectMembers/{memberId} {
-      allow read: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow read: if isSignedIn() && canAccessProject(resource.data.projectId);
+      allow create, update, delete: if false;
     }
 
     match /shares/{shareId} {
       allow read: if isSignedIn()
         && (resource.data.toUserId == request.auth.uid || resource.data.createdBy == request.auth.uid);
-      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow create, update, delete: if false;
     }
 
     match /invites/{inviteId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow read, create, update, delete: if false;
+    }
+
+    match /handleReservations/{handle} {
+      allow read, create, update, delete: if false;
     }
   }
 }
