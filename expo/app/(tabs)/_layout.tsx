@@ -113,14 +113,6 @@ export default function TabLayout() {
         options={{
           title: t('tabs.todos'),
           tabBarIcon: ({ color, size }) => <ListTodo size={size} color={color} />,
-          headerRight: () => (
-            <TouchableOpacity 
-              onPress={() => router.push('/add-todo')}
-              style={styles.headerButton}
-            >
-              <Plus size={24} color="#EF4444" />
-            </TouchableOpacity>
-          ),
         }}
       />
       <Tabs.Screen

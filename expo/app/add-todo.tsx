@@ -14,7 +14,7 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Calendar, Flag } from 'lucide-react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTodoStore } from '@/store/useTodoStore';
 import { TodoItem } from '@/types';
 import { DatePickerField } from '@/components/ui/DatePickerField';
@@ -141,30 +141,31 @@ export default function AddTodoScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.header}>
-        <Pressable
-          style={({ pressed }) => [styles.closeButton, pressed && styles.buttonPressed]}
-          onPress={() => router.back()}
-        >
-          <X size={24} color="#6B7280" />
-        </Pressable>
-        <Text style={styles.headerTitle}>
-          {isEditing ? t('addTodo.editTodo') : t('addTodo.newTodo')}
-        </Text>
-        <Pressable
-          style={({ pressed }) => [
-            styles.saveButton,
-            !title.trim() && styles.saveButtonDisabled,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleSave}
-          disabled={saving || !title.trim()}
-        >
-          <Text style={[styles.saveButtonText, !title.trim() && styles.saveButtonTextDisabled]}>
-            {saving ? t('common.saving') : t('common.save')}
-          </Text>
-        </Pressable>
-      </View>
+      <Stack.Screen
+        options={{
+          title: isEditing ? t('addTodo.editTodo') : t('addTodo.newTodo'),
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} hitSlop={8}>
+              <X size={24} color="#6B7280" />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <Pressable
+              style={({ pressed }) => [
+                styles.headerSaveButton,
+                !title.trim() && styles.headerSaveButtonDisabled,
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={handleSave}
+              disabled={saving || !title.trim()}
+            >
+              <Text style={[styles.headerSaveButtonText, !title.trim() && styles.headerSaveButtonTextDisabled]}>
+                {saving ? t('common.saving') : t('common.save')}
+              </Text>
+            </Pressable>
+          ),
+        }}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -299,43 +300,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    backgroundColor: '#fff',
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  saveButton: {
-    paddingHorizontal: 16,
+  headerSaveButton: {
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
     backgroundColor: '#EF4444',
+    marginRight: 4,
   },
-  saveButtonDisabled: {
+  headerSaveButtonDisabled: {
     backgroundColor: '#F3F4F6',
   },
-  saveButtonText: {
+  headerSaveButtonText: {
     fontSize: 15,
     fontWeight: '600',
     color: '#fff',
   },
-  saveButtonTextDisabled: {
+  headerSaveButtonTextDisabled: {
     color: '#9CA3AF',
   },
   buttonPressed: {
