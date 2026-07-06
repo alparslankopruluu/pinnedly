@@ -1,19 +1,22 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated, Pressable, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { 
-  User, 
   ChevronRight,
   Crown,
-  Sparkles
+  Sparkles,
+  Pencil,
 } from 'lucide-react-native';
 import { useAppStore } from '@/store/useAppStore';
+import { useAuth } from '@/store/useAuthStore';
 import { PremiumModal } from '@/components/PremiumModal';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { preferences, bookmarks, projects, notes } = useAppStore();
   const insets = useSafeAreaInsets();
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
@@ -38,6 +41,13 @@ export default function ProfileScreen() {
     pulse();
   }, [pulseAnim]);
 
+  const displayName =
+    user?.displayName?.trim() ||
+    user?.email?.split('@')[0] ||
+    t('profile.defaultName');
+  const handleLabel = user?.handle ? `@${user.handle}` : user?.email || t('profile.tagline');
+  const avatarInitial = displayName.charAt(0).toUpperCase();
+
   const stats = [
     { id: 'bookmarks', label: t('profile.stats.bookmarks'), value: bookmarks.length },
     { id: 'projects', label: t('profile.stats.projects'), value: projects.length },
@@ -51,11 +61,25 @@ export default function ProfileScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}>
         {/* Profile Section */}
         <View style={styles.profileSection}>
-          <View style={styles.avatar}>
-            <User size={32} color="#6B7280" />
-          </View>
-          <Text style={styles.profileName}>{t('profile.defaultName')}</Text>
-          <Text style={styles.profileEmail}>{t('profile.tagline')}</Text>
+          {user?.avatar ? (
+            <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatar}>
+              <Text style={styles.avatarInitial}>{avatarInitial}</Text>
+            </View>
+          )}
+          <Text style={styles.profileName}>{displayName}</Text>
+          <Text style={styles.profileEmail}>{handleLabel}</Text>
+          {user?.bio ? (
+            <Text style={styles.profileBio} numberOfLines={2}>{user.bio}</Text>
+          ) : null}
+          <Pressable
+            style={({ pressed }) => [styles.editButton, pressed && styles.editButtonPressed]}
+            onPress={() => router.push('/edit-profile')}
+          >
+            <Pencil size={14} color="#EF4444" />
+            <Text style={styles.editButtonText}>{t('profile.editProfile')}</Text>
+          </Pressable>
         </View>
         
         {/* Stats Section */}
@@ -153,10 +177,21 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#FEE2E2',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 16,
+  },
+  avatarInitial: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#B91C1C',
   },
   profileName: {
     fontSize: 20,
@@ -167,6 +202,34 @@ const styles = StyleSheet.create({
   profileEmail: {
     fontSize: 14,
     color: '#6B7280',
+  },
+  profileBio: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: 24,
+    lineHeight: 18,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  editButtonPressed: {
+    opacity: 0.85,
+  },
+  editButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#EF4444',
   },
   statsSection: {
     marginBottom: 24,

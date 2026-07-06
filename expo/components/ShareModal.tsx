@@ -8,7 +8,9 @@ import {
   Modal,
   ScrollView,
   Platform,
+  Share,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { useSharing } from '@/store/useSharingStore';
 import { useAuth } from '@/store/useAuthStore';
 import { EntityShare, SharePermission, ID } from '@/types';
+import { inviteRepository } from '@/repositories/InviteRepository';
 
 interface ShareModalProps {
   visible: boolean;
@@ -34,10 +37,15 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   const [permission, setPermission] = useState<SharePermission>('view');
   const [shares, setShares] = useState<EntityShare[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'people' | 'link'>('people');
+  const [inviteUrl, setInviteUrl] = useState<string>('');
+  const [isCreatingLink, setIsCreatingLink] = useState(false);
 
   useEffect(() => {
     if (visible) {
       loadShares();
+      setInviteUrl('');
+      setActiveTab('people');
     }
   }, [visible]);
 
@@ -111,6 +119,63 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
     setSearchResults([]);
   };
 
+  const handleCreateInviteLink = async () => {
+    setIsCreatingLink(true);
+    try {
+      const invite = await inviteRepository.createInvite(entityId, entityType, permission);
+      setInviteUrl(inviteRepository.buildInviteUrl(invite.token));
+    } catch (error) {
+      showAppAlert(
+        t('common.error'),
+        error instanceof Error ? error.message : t('share.alerts.inviteLinkFailed'),
+        undefined,
+        { variant: 'error' }
+      );
+    } finally {
+      setIsCreatingLink(false);
+    }
+  };
+
+  const handleCopyInviteLink = async () => {
+    if (!inviteUrl) return;
+    await Clipboard.setStringAsync(inviteUrl);
+    showAppAlert(t('common.success'), t('share.alerts.linkCopied'), undefined, { variant: 'success' });
+  };
+
+  const handleShareInviteLink = async () => {
+    if (!inviteUrl) return;
+    await Share.share({
+      message: t('share.inviteMessage', { title: entityTitle, url: inviteUrl }),
+      url: inviteUrl,
+    });
+  };
+
+  const renderPermissionPicker = () => (
+    <View style={styles.permissionContainer}>
+      <Text style={styles.label}>{t('share.permission')}</Text>
+      <View style={styles.permissionButtons}>
+        <TouchableOpacity
+          style={[styles.permissionButton, permission === 'view' && styles.permissionButtonActive]}
+          onPress={() => setPermission('view')}
+        >
+          <Ionicons name="eye-outline" size={16} color={permission === 'view' ? '#ffffff' : '#64748b'} />
+          <Text style={[styles.permissionButtonText, permission === 'view' && styles.permissionButtonTextActive]}>
+            {t('share.permissions.view')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.permissionButton, permission === 'edit' && styles.permissionButtonActive]}
+          onPress={() => setPermission('edit')}
+        >
+          <Ionicons name="create-outline" size={16} color={permission === 'edit' ? '#ffffff' : '#64748b'} />
+          <Text style={[styles.permissionButtonText, permission === 'edit' && styles.permissionButtonTextActive]}>
+            {t('share.permissions.edit')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <SafeAreaView style={styles.container}>
@@ -122,7 +187,27 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           <View style={styles.placeholder} />
         </View>
 
+        <View style={styles.tabRow}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === 'people' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('people')}
+          >
+            <Text style={[styles.tabText, activeTab === 'people' && styles.tabTextActive]}>
+              {t('share.tabs.people')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === 'link' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('link')}
+          >
+            <Text style={[styles.tabText, activeTab === 'link' && styles.tabTextActive]}>
+              {t('share.tabs.link')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView style={styles.content}>
+          {activeTab === 'people' ? (
           <View style={styles.shareForm}>
             <Text style={styles.sectionTitle}>{t('share.addPeople')}</Text>
             
@@ -133,7 +218,6 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
                 value={email}
                 onChangeText={handleSearch}
                 placeholder={t('share.enterEmailOrUsername')}
-                keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -163,54 +247,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
               )}
             </View>
 
-            <View style={styles.permissionContainer}>
-              <Text style={styles.label}>{t('share.permission')}</Text>
-              <View style={styles.permissionButtons}>
-                <TouchableOpacity
-                  style={[
-                    styles.permissionButton,
-                    permission === 'view' && styles.permissionButtonActive,
-                  ]}
-                  onPress={() => setPermission('view')}
-                >
-                  <Ionicons
-                    name="eye-outline"
-                    size={16}
-                    color={permission === 'view' ? '#ffffff' : '#64748b'}
-                  />
-                  <Text
-                    style={[
-                      styles.permissionButtonText,
-                      permission === 'view' && styles.permissionButtonTextActive,
-                    ]}
-                  >
-                    {t('share.permissions.view')}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.permissionButton,
-                    permission === 'edit' && styles.permissionButtonActive,
-                  ]}
-                  onPress={() => setPermission('edit')}
-                >
-                  <Ionicons
-                    name="create-outline"
-                    size={16}
-                    color={permission === 'edit' ? '#ffffff' : '#64748b'}
-                  />
-                  <Text
-                    style={[
-                      styles.permissionButtonText,
-                      permission === 'edit' && styles.permissionButtonTextActive,
-                    ]}
-                  >
-                    {t('share.permissions.edit')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            {renderPermissionPicker()}
 
             <Button
               title={isLoading ? t('common.sharing') : t('common.share')}
@@ -219,6 +256,28 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
               style={styles.shareButton}
             />
           </View>
+          ) : (
+          <View style={styles.shareForm}>
+            <Text style={styles.sectionTitle}>{t('share.shareByLink')}</Text>
+            <Text style={styles.linkHint}>{t('share.linkHint')}</Text>
+            {renderPermissionPicker()}
+            <Button
+              title={isCreatingLink ? t('common.processing') : t('share.createInviteLink')}
+              onPress={handleCreateInviteLink}
+              disabled={isCreatingLink}
+              style={styles.shareButton}
+            />
+            {inviteUrl ? (
+              <View style={styles.inviteBox}>
+                <Text style={styles.inviteUrl} selectable>{inviteUrl}</Text>
+                <View style={styles.inviteActions}>
+                  <Button title={t('share.copyLink')} onPress={handleCopyInviteLink} variant="outline" />
+                  <Button title={t('share.sendLink')} onPress={handleShareInviteLink} />
+                </View>
+              </View>
+            ) : null}
+          </View>
+          )}
 
           {shares.length > 0 && (
             <View style={styles.existingShares}>
@@ -302,6 +361,32 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 32,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    marginHorizontal: 24,
+    marginTop: 12,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 10,
+    padding: 4,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  tabButtonActive: {
+    backgroundColor: '#ffffff',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748b',
+  },
+  tabTextActive: {
+    color: '#111827',
+    fontWeight: '600',
   },
   content: {
     flex: 1,
@@ -436,6 +521,30 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     backgroundColor: '#4f46e5',
+  },
+  linkHint: {
+    fontSize: 13,
+    color: '#64748b',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  inviteBox: {
+    marginTop: 16,
+    padding: 14,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    gap: 12,
+  },
+  inviteUrl: {
+    fontSize: 13,
+    color: '#374151',
+    lineHeight: 18,
+  },
+  inviteActions: {
+    flexDirection: 'row',
+    gap: 8,
   },
   existingShares: {
     paddingBottom: 24,

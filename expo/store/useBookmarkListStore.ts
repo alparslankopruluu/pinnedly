@@ -1,7 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BookmarkList, ID } from '@/types';
+import { BookmarkList, ID, Visibility } from '@/types';
 import { bookmarkListRepository } from '@/repositories/BookmarkListRepository';
 import { bookmarkRepository } from '@/repositories/BookmarkRepository';
 import { Bookmark } from '@/types';
@@ -33,15 +33,15 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
 
   // Mutations
   const createListMutation = useMutation({
-    mutationFn: ({ name, description, isPublic }: { name: string; description?: string; isPublic?: boolean }) =>
-      bookmarkListRepository.createList(name, description, isPublic),
+    mutationFn: ({ name, description, visibility }: { name: string; description?: string; visibility?: Visibility }) =>
+      bookmarkListRepository.createList(name, description, visibility ?? 'private'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'my'] });
     },
   });
 
   const updateListMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: ID; updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic'>> }) =>
+    mutationFn: ({ id, updates }: { id: ID; updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic' | 'visibility'>> }) =>
       bookmarkListRepository.updateList(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookmark-lists'] });
@@ -70,11 +70,11 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   });
 
   // Actions
-  const createList = useCallback(async (name: string, description?: string, isPublic: boolean = false): Promise<BookmarkList> => {
-    return createListMutation.mutateAsync({ name, description, isPublic });
+  const createList = useCallback(async (name: string, description?: string, visibility: Visibility = 'private'): Promise<BookmarkList> => {
+    return createListMutation.mutateAsync({ name, description, visibility });
   }, [createListMutation]);
 
-  const updateList = useCallback(async (id: ID, updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic'>>): Promise<BookmarkList> => {
+  const updateList = useCallback(async (id: ID, updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic' | 'visibility'>>): Promise<BookmarkList> => {
     return updateListMutation.mutateAsync({ id, updates });
   }, [updateListMutation]);
 

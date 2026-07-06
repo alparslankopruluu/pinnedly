@@ -1,19 +1,45 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Switch, ScrollView } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, ScrollView, Pressable } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Lock, Globe, Users } from 'lucide-react-native';
 
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { Button } from '@/components/ui/Button';
+import { Visibility } from '@/types';
 
 export default function CreateListScreen() {
   const { t } = useTranslation();
   const { createList, isCreating } = useBookmarkLists();
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [isPublic, setIsPublic] = useState<boolean>(false);
+  const [visibility, setVisibility] = useState<Visibility>('private');
+
+  const visibilityOptions = useMemo(
+    () => [
+      {
+        value: 'private' as Visibility,
+        label: t('common.private'),
+        description: t('createList.visibilityOptions.private'),
+        icon: <Lock size={20} color="#6B7280" />,
+      },
+      {
+        value: 'shared' as Visibility,
+        label: t('common.shared'),
+        description: t('createList.visibilityOptions.shared'),
+        icon: <Users size={20} color="#6366F1" />,
+      },
+      {
+        value: 'public' as Visibility,
+        label: t('common.public'),
+        description: t('createList.visibilityOptions.public'),
+        icon: <Globe size={20} color="#10B981" />,
+      },
+    ],
+    [t]
+  );
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -22,11 +48,8 @@ export default function CreateListScreen() {
     }
 
     try {
-      const newList = await createList(name.trim(), description.trim() || undefined, isPublic);
-      
+      await createList(name.trim(), description.trim() || undefined, visibility);
       router.back();
-      // Optionally navigate to the new list
-      // router.push(`/bookmark-list/${newList.id}`);
     } catch (error) {
       console.error('Create list error:', error);
       showAppAlert(t('common.error'), t('createList.alerts.createFailed'), undefined, { variant: 'error' });
@@ -79,27 +102,28 @@ export default function CreateListScreen() {
         </View>
 
         <View style={styles.section}>
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <Text style={styles.switchLabel}>{t('createList.makePublic')}</Text>
-              <Text style={styles.switchDescription}>
-                {t('createList.makePublicDescription')}
-              </Text>
-            </View>
-            <Switch
-              value={isPublic}
-              onValueChange={setIsPublic}
-              trackColor={{ false: '#f1f5f9', true: '#ddd6fe' }}
-              thumbColor={isPublic ? '#4f46e5' : '#64748b'}
-            />
+          <Text style={styles.label}>{t('createList.visibility')}</Text>
+          <View style={styles.visibilityGrid}>
+            {visibilityOptions.map((option) => (
+              <Pressable
+                key={option.value}
+                style={[
+                  styles.visibilityCard,
+                  visibility === option.value && styles.visibilityCardActive,
+                ]}
+                onPress={() => setVisibility(option.value)}
+              >
+                {option.icon}
+                <Text style={styles.visibilityLabel}>{option.label}</Text>
+                <Text style={styles.visibilityDescription}>{option.description}</Text>
+              </Pressable>
+            ))}
           </View>
         </View>
 
-        {isPublic && (
+        {visibility === 'public' && (
           <View style={styles.publicNotice}>
-            <Text style={styles.publicNoticeText}>
-              {t('createList.publicNotice')}
-            </Text>
+            <Text style={styles.publicNoticeText}>{t('createList.publicNotice')}</Text>
           </View>
         )}
       </ScrollView>
@@ -128,76 +152,73 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600' as const,
+    fontWeight: '600',
     color: '#1e293b',
   },
   createButton: {
-    backgroundColor: '#4f46e5',
     paddingHorizontal: 16,
-    paddingVertical: 8,
   },
   content: {
     flex: 1,
-    padding: 24,
+    paddingHorizontal: 24,
   },
   section: {
-    marginBottom: 24,
+    marginTop: 24,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: '#1e293b',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
     marginBottom: 8,
   },
   input: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#e5e7eb',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#1e293b',
+    color: '#111827',
   },
   textArea: {
-    height: 100,
-    paddingTop: 12,
+    minHeight: 100,
   },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  visibilityGrid: {
+    gap: 10,
+  },
+  visibilityCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    padding: 14,
+    gap: 4,
   },
-  switchInfo: {
-    flex: 1,
-    marginRight: 16,
+  visibilityCardActive: {
+    borderColor: '#EF4444',
+    backgroundColor: '#FFF1F2',
   },
-  switchLabel: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: '#1e293b',
-    marginBottom: 4,
+  visibilityLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginTop: 4,
   },
-  switchDescription: {
-    fontSize: 14,
-    color: '#64748b',
-    lineHeight: 20,
+  visibilityDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    lineHeight: 18,
   },
   publicNotice: {
-    backgroundColor: '#eff6ff',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 10,
   },
   publicNoticeText: {
-    fontSize: 14,
-    color: '#1e40af',
-    lineHeight: 20,
+    fontSize: 13,
+    color: '#047857',
+    lineHeight: 18,
   },
 });

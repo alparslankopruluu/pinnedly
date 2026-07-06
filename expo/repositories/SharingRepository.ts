@@ -1,40 +1,69 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { EntityShare, ShareRequest, SharePermission, ID } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import { entityAccessRepository } from './EntityAccessRepository';
 
 class SharingRepository {
   async shareEntity(request: ShareRequest, currentUserId: ID): Promise<EntityShare> {
-    const users = await firestore()
-      .collection(COLLECTIONS.users)
-      .where('handle', '==', request.userEmail.trim().toLowerCase())
-      .limit(1)
-      .get();
+    let targetUserId = request.targetUserId;
 
-    if (users.empty) throw new Error('User not found');
-    const targetUser = users.docs[0];
+    if (!targetUserId) {
+      const handle = request.userEmail.trim().toLowerCase().replace(/^@/, '');
+      const users = await firestore()
+        .collection(COLLECTIONS.users)
+        .where('handle', '==', handle)
+        .limit(1)
+        .get();
+
+      if (users.empty) throw new Error('User not found');
+      targetUserId = users.docs[0].id;
+    }
+
+    return this.shareEntityWithUser(
+      request.entityId,
+      request.entityType,
+      targetUserId,
+      request.permission,
+      currentUserId
+    );
+  }
+
+  async shareEntityWithUser(
+    entityId: ID,
+    entityType: string,
+    targetUserId: ID,
+    permission: SharePermission,
+    currentUserId: ID
+  ): Promise<EntityShare> {
+    if (targetUserId === currentUserId) {
+      throw new Error('Cannot share with yourself');
+    }
 
     const existing = await firestore()
       .collection(COLLECTIONS.shares)
       .where('createdBy', '==', currentUserId)
-      .where('entityId', '==', request.entityId)
-      .where('entityType', '==', request.entityType)
-      .where('toUserId', '==', targetUser.id)
+      .where('entityId', '==', entityId)
+      .where('entityType', '==', entityType)
+      .where('toUserId', '==', targetUserId)
       .limit(1)
       .get();
 
     if (!existing.empty) throw new Error('Entity already shared with this user');
 
     const ref = await firestore().collection(COLLECTIONS.shares).add({
-      entityId: request.entityId,
-      entityType: request.entityType,
-      toUserId: targetUser.id,
-      permission: request.permission,
+      entityId,
+      entityType,
+      toUserId: targetUserId,
+      permission,
       createdBy: currentUserId,
       createdAt: serverTimestamp(),
     });
 
+    await entityAccessRepository.grantAccess(entityType, entityId, targetUserId, permission);
+
     const created = await ref.get();
-    return this.mapShare(created.id, created.data()!, targetUser.data());
+    const userDoc = await firestore().collection(COLLECTIONS.users).doc(targetUserId).get();
+    return this.mapShare(created.id, created.data()!, userDoc.data());
   }
 
   async getEntityShares(entityId: ID, entityType: string): Promise<EntityShare[]> {
@@ -73,7 +102,18 @@ class SharingRepository {
   async updateSharePermission(shareId: ID, permission: SharePermission): Promise<EntityShare> {
     requireUserId();
     const ref = firestore().collection(COLLECTIONS.shares).doc(shareId);
+    const before = await ref.get();
+    if (!before.exists()) throw new Error('Share not found');
+
+    const data = before.data()!;
     await ref.update({ permission });
+    await entityAccessRepository.updateAccessPermission(
+      data.entityType,
+      data.entityId,
+      data.toUserId,
+      permission
+    );
+
     const updated = await ref.get();
     const userDoc = await firestore().collection(COLLECTIONS.users).doc(updated.data()!.toUserId).get();
     return this.mapShare(updated.id, updated.data()!, userDoc.data());
@@ -81,7 +121,13 @@ class SharingRepository {
 
   async revokeShare(shareId: ID): Promise<void> {
     requireUserId();
-    await firestore().collection(COLLECTIONS.shares).doc(shareId).delete();
+    const ref = firestore().collection(COLLECTIONS.shares).doc(shareId);
+    const doc = await ref.get();
+    if (!doc.exists()) return;
+
+    const data = doc.data()!;
+    await ref.delete();
+    await entityAccessRepository.revokeAccess(data.entityType, data.entityId, data.toUserId);
   }
 
   async removeShare(shareId: ID): Promise<void> {

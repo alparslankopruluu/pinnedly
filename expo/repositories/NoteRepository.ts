@@ -46,6 +46,7 @@ export class NoteRepository {
       visibility: note.visibility || 'private',
       links: note.links ?? [],
       sharedWith: [],
+      editors: [],
       category: note.category ?? DEFAULT_CONTENT_CATEGORY,
       reminderSchedule: note.reminderSchedule ?? getDefaultReminderSchedule(),
       createdAt: serverTimestamp(),

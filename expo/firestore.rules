@@ -9,14 +9,23 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == ownerId;
     }
 
-    function isPublic(visibility) {
+    function isPublicVisibility(visibility) {
       return visibility == 'public';
     }
 
-    function canReadDoc() {
+    function isSharedWithUser() {
+      return isSignedIn() && request.auth.uid in resource.data.get('sharedWith', []);
+    }
+
+    function canEditEntity() {
       return isOwner(resource.data.ownerId)
-        || isPublic(resource.data.visibility)
-        || (isSignedIn() && request.auth.uid in resource.data.get('sharedWith', []));
+        || (isSignedIn() && request.auth.uid in resource.data.get('editors', []));
+    }
+
+    function canReadEntity() {
+      return isOwner(resource.data.ownerId)
+        || isPublicVisibility(resource.data.get('visibility', 'private'))
+        || isSharedWithUser();
     }
 
     function projectData(projectId) {
@@ -26,8 +35,15 @@ service cloud.firestore {
     function canAccessProject(projectId) {
       let project = projectData(projectId);
       return isOwner(project.ownerId)
-        || isPublic(project.visibility)
+        || isPublicVisibility(project.get('visibility', 'private'))
         || (isSignedIn() && request.auth.uid in project.get('sharedWith', []));
+    }
+
+    function canReadList() {
+      return resource.data.isPublic == true
+        || isPublicVisibility(resource.data.get('visibility', 'private'))
+        || isOwner(resource.data.ownerId)
+        || isSharedWithUser();
     }
 
     match /users/{userId} {
@@ -37,21 +53,21 @@ service cloud.firestore {
     }
 
     match /notes/{noteId} {
-      allow read: if canReadDoc();
+      allow read: if canReadEntity();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.ownerId);
+      allow update, delete: if canEditEntity();
     }
 
     match /bookmarks/{bookmarkId} {
-      allow read: if canReadDoc();
+      allow read: if canReadEntity();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.ownerId);
+      allow update, delete: if canEditEntity();
     }
 
     match /projects/{projectId} {
-      allow read: if canReadDoc();
+      allow read: if canReadEntity();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.ownerId);
+      allow update, delete: if canEditEntity();
 
       match /tasks/{taskId} {
         allow read: if canAccessProject(projectId);
@@ -61,15 +77,15 @@ service cloud.firestore {
     }
 
     match /todos/{todoId} {
-      allow read: if canReadDoc();
+      allow read: if canReadEntity();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.ownerId);
+      allow update, delete: if canEditEntity();
     }
 
     match /bookmarkLists/{listId} {
-      allow read: if resource.data.isPublic == true || isOwner(resource.data.ownerId);
+      allow read: if canReadList();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.ownerId);
+      allow update, delete: if canEditEntity();
     }
 
     match /listFollowers/{followerId} {
@@ -86,6 +102,12 @@ service cloud.firestore {
     match /shares/{shareId} {
       allow read: if isSignedIn()
         && (resource.data.toUserId == request.auth.uid || resource.data.createdBy == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+    }
+
+    match /invites/{inviteId} {
+      allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
     }

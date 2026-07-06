@@ -212,12 +212,17 @@ class AuthRepository {
   }
 
   async checkHandleAvailability(handle: string): Promise<boolean> {
+    const normalized = handle.toLowerCase();
+    if (this.currentUser?.handle === normalized) return true;
+
     const snapshot = await firestore()
       .collection(COLLECTIONS.users)
-      .where('handle', '==', handle.toLowerCase())
+      .where('handle', '==', normalized)
       .limit(1)
       .get();
-    return snapshot.empty;
+
+    if (snapshot.empty) return true;
+    return snapshot.docs[0].id === this.currentUser?.id;
   }
 
   async searchUsers(query: string): Promise<User[]> {

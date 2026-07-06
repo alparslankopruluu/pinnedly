@@ -65,6 +65,8 @@
     "createList": "Liste Oluştur",
     "bookmarkList": "Yer İmi Listesi",
     "profile": "Profil",
+    "editProfile": "Profili Düzenle",
+    "invite": "Davet",
     "addNote": "Not Ekle",
     "addProject": "Proje Ekle"
   },
@@ -252,6 +254,7 @@
     "title": "Ayarlar",
     "sections": {
       "account": "Hesap",
+      "collaboration": "Paylaşım ve Keşfet",
       "subscription": "Abonelik",
       "notifications": "Bildirimler",
       "appearance": "Görünüm",
@@ -262,6 +265,14 @@
     "profile": {
       "title": "Profil",
       "subtitle": "Profil bilgilerinizi yönetin"
+    },
+    "shareInbox": {
+      "title": "Paylaşım Gelen Kutusu",
+      "subtitle": "Sizinle paylaşılan içerikler"
+    },
+    "discoverLists": {
+      "title": "Listeleri Keşfet",
+      "subtitle": "Herkese açık okuma listeleri"
     },
     "appleSignIn": "Apple ile Giriş",
     "googleSignIn": {
@@ -474,7 +485,28 @@
     "weeklyGoal": "Haftalık Hedef",
     "bookmarksGoal": "{{count}} yer imi",
     "upgradePremium": "Premium'a Yükselt",
-    "upgradeSubtitle": "Güçlü iş birliği özelliklerinin kilidini açın"
+    "upgradeSubtitle": "Güçlü iş birliği özelliklerinin kilidini açın",
+    "editProfile": "Profili Düzenle"
+  },
+  "editProfile": {
+    "title": "Profili Düzenle",
+    "displayName": "Ad Soyad",
+    "displayNamePlaceholder": "Adınız ve soyadınız",
+    "handle": "Kullanıcı adı",
+    "handlePlaceholder": "kullaniciadi",
+    "handleHint": "3-30 karakter, küçük harf, rakam ve alt çizgi",
+    "bio": "Biyografi",
+    "bioPlaceholder": "Kendinizden kısaca bahsedin",
+    "avatarUrl": "Profil fotoğrafı URL",
+    "avatarPlaceholder": "https://...",
+    "email": "E-posta",
+    "alerts": {
+      "nameRequired": "Ad soyad gerekli",
+      "invalidHandle": "Geçerli bir kullanıcı adı girin",
+      "handleTaken": "Bu kullanıcı adı zaten alınmış",
+      "saved": "Profil güncellendi",
+      "saveFailed": "Profil güncellenemedi"
+    }
   },
   "aiChat": {
     "title": "Çalışma Alanı Asistanı",
@@ -548,8 +580,25 @@
       "apiAccess": "API erişimi"
     }
   },
+  "invite": {
+    "accepting": "Davet kabul ediliyor…",
+    "invalid": "Geçersiz veya süresi dolmuş davet",
+    "alerts": {
+      "acceptFailed": "Davet kabul edilemedi"
+    }
+  },
   "share": {
     "shareEntity": "{{entityTitle}} paylaş",
+    "tabs": {
+      "people": "Kullanıcı",
+      "link": "Link"
+    },
+    "shareByLink": "Link ile paylaş",
+    "linkHint": "Davet linki oluşturun. Linke tıklayan kişi uygulamada içeriğe erişebilir.",
+    "createInviteLink": "Davet linki oluştur",
+    "copyLink": "Linki kopyala",
+    "sendLink": "Paylaş",
+    "inviteMessage": "\"{{title}}\" paylaşımı: {{url}}",
     "addPeople": "Kişi Ekle",
     "emailOrUsername": "E-posta veya Kullanıcı Adı",
     "sharedWith": "Paylaşılan Kişiler",
@@ -565,6 +614,8 @@
       "enterEmailOrUsername": "Lütfen bir e-posta veya kullanıcı adı girin",
       "sharedSuccessfully": "Öğe başarıyla paylaşıldı",
       "shareFailed": "Paylaşım başarısız",
+      "inviteLinkFailed": "Davet linki oluşturulamadı",
+      "linkCopied": "Link panoya kopyalandı",
       "updatePermissionFailed": "İzin güncellenemedi",
       "removeShareFailed": "Paylaşım kaldırılamadı"
     }
@@ -693,6 +744,12 @@
     "title": "Liste Oluştur",
     "listName": "Liste Adı *",
     "description": "Açıklama",
+    "visibility": "Görünürlük",
+    "visibilityOptions": {
+      "private": "Sadece siz görebilirsiniz",
+      "shared": "Belirli kişilerle paylaşın",
+      "public": "Herkes keşfedebilir ve takip edebilir"
+    },
     "makePublic": "Herkese Açık Yap",
     "makePublicDescription": "Herkese açık listeler diğer kullanıcılar tarafından keşfedilebilir ve takip edilebilir",
     "publicNotice": "📢 Herkese açık listeler keşfet bölümünde görünür ve diğer kullanıcılar tarafından takip edilebilir.",

@@ -13,6 +13,7 @@ export const COLLECTIONS = {
   listFollowers: 'listFollowers',
   shares: 'shares',
   projectMembers: 'projectMembers',
+  invites: 'invites',
 } as const;
 
 let persistenceInitialized = false;

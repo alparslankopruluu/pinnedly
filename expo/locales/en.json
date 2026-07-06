@@ -65,6 +65,8 @@
     "createList": "Create List",
     "bookmarkList": "Bookmark List",
     "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "invite": "Invite",
     "addNote": "Add Note",
     "addProject": "Add Project"
   },
@@ -252,6 +254,7 @@
     "title": "Settings",
     "sections": {
       "account": "Account",
+      "collaboration": "Sharing & Discover",
       "subscription": "Subscription",
       "notifications": "Notifications",
       "appearance": "Appearance",
@@ -262,6 +265,14 @@
     "profile": {
       "title": "Profile",
       "subtitle": "Manage your profile information"
+    },
+    "shareInbox": {
+      "title": "Share Inbox",
+      "subtitle": "Content shared with you"
+    },
+    "discoverLists": {
+      "title": "Discover Lists",
+      "subtitle": "Public reading lists"
     },
     "appleSignIn": "Apple Sign-In",
     "googleSignIn": {
@@ -474,7 +485,28 @@
     "weeklyGoal": "Weekly Goal",
     "bookmarksGoal": "{{count}} bookmarks",
     "upgradePremium": "Upgrade to Premium",
-    "upgradeSubtitle": "Unlock powerful collaboration features"
+    "upgradeSubtitle": "Unlock powerful collaboration features",
+    "editProfile": "Edit profile"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Your name",
+    "handle": "Username",
+    "handlePlaceholder": "username",
+    "handleHint": "3-30 characters, lowercase letters, numbers, underscore",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell others a bit about yourself",
+    "avatarUrl": "Profile photo URL",
+    "avatarPlaceholder": "https://...",
+    "email": "Email",
+    "alerts": {
+      "nameRequired": "Display name is required",
+      "invalidHandle": "Enter a valid username",
+      "handleTaken": "This username is already taken",
+      "saved": "Profile updated",
+      "saveFailed": "Could not update profile"
+    }
   },
   "aiChat": {
     "title": "Workspace Assistant",
@@ -548,8 +580,25 @@
       "apiAccess": "API access"
     }
   },
+  "invite": {
+    "accepting": "Accepting invite…",
+    "invalid": "Invalid or expired invite",
+    "alerts": {
+      "acceptFailed": "Could not accept invite"
+    }
+  },
   "share": {
     "shareEntity": "Share {{entityTitle}}",
+    "tabs": {
+      "people": "User",
+      "link": "Link"
+    },
+    "shareByLink": "Share by link",
+    "linkHint": "Create an invite link. Anyone who opens it in the app gets access.",
+    "createInviteLink": "Create invite link",
+    "copyLink": "Copy link",
+    "sendLink": "Share",
+    "inviteMessage": "Shared \"{{title}}\": {{url}}",
     "addPeople": "Add People",
     "emailOrUsername": "Email or Username",
     "sharedWith": "Shared With",
@@ -565,6 +614,8 @@
       "enterEmailOrUsername": "Please enter an email or username",
       "sharedSuccessfully": "Entity shared successfully",
       "shareFailed": "Failed to share",
+      "inviteLinkFailed": "Could not create invite link",
+      "linkCopied": "Link copied to clipboard",
       "updatePermissionFailed": "Failed to update permission",
       "removeShareFailed": "Failed to remove share"
     }
@@ -693,6 +744,12 @@
     "title": "Create List",
     "listName": "List Name *",
     "description": "Description",
+    "visibility": "Visibility",
+    "visibilityOptions": {
+      "private": "Only you can see this",
+      "shared": "Share with specific people",
+      "public": "Anyone can discover and follow"
+    },
     "makePublic": "Make Public",
     "makePublicDescription": "Public lists can be discovered and followed by other users",
     "publicNotice": "📢 Public lists will appear in the discover section and can be followed by other users.",

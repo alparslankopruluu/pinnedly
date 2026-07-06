@@ -192,6 +192,18 @@ export type ShareRequest = {
   entityType: 'note' | 'bookmark' | 'list' | 'project';
   userEmail: string;
   permission: SharePermission;
+  targetUserId?: ID;
+};
+
+export type EntityInvite = {
+  id: ID;
+  token: string;
+  entityId: ID;
+  entityType: 'note' | 'bookmark' | 'list' | 'project';
+  permission: SharePermission;
+  createdBy: ID;
+  expiresAt: number;
+  createdAt: number;
 };
 
 export type OnboardingStep = {
@@ -206,6 +218,8 @@ export type BookmarkList = {
   name: string;
   description?: string;
   isPublic: boolean;
+  visibility?: Visibility;
+  sharedWith?: ID[];
   ownerId: ID;
   followerCount: number;
   bookmarks: Bookmark[];

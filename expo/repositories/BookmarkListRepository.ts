@@ -1,16 +1,24 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { BookmarkList, ID } from '@/types';
+import { BookmarkList, ID, Visibility } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
 
 class BookmarkListRepository {
-  async createList(name: string, description?: string, isPublic: boolean = false): Promise<BookmarkList> {
+  async createList(
+    name: string,
+    description?: string,
+    visibility: 'private' | 'shared' | 'public' = 'private'
+  ): Promise<BookmarkList> {
     const uid = requireUserId();
+    const isPublic = visibility === 'public';
     const ref = firestore().collection(COLLECTIONS.bookmarkLists).doc();
     await ref.set({
       ownerId: uid,
       name: name.trim(),
       description: description?.trim() ?? null,
       isPublic,
+      visibility,
+      sharedWith: [],
+      editors: [],
       followerCount: 0,
       bookmarkIds: [],
       createdAt: serverTimestamp(),
@@ -25,6 +33,15 @@ class BookmarkListRepository {
     const snapshot = await firestore()
       .collection(COLLECTIONS.bookmarkLists)
       .where('ownerId', '==', uid)
+      .get();
+    return snapshot.docs.map((doc) => this.mapList(doc.id, doc.data()));
+  }
+
+  async getSharedLists(): Promise<BookmarkList[]> {
+    const uid = requireUserId();
+    const snapshot = await firestore()
+      .collection(COLLECTIONS.bookmarkLists)
+      .where('sharedWith', 'array-contains', uid)
       .get();
     return snapshot.docs.map((doc) => this.mapList(doc.id, doc.data()));
   }
@@ -76,14 +93,25 @@ class BookmarkListRepository {
 
   async updateList(
     id: ID,
-    updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic'>>
+    updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic' | 'visibility'>>
   ): Promise<BookmarkList> {
     requireUserId();
     const ref = firestore().collection(COLLECTIONS.bookmarkLists).doc(id);
+    const visibility = updates.visibility;
+    const isPublic =
+      updates.isPublic !== undefined
+        ? updates.isPublic
+        : visibility === 'public'
+          ? true
+          : visibility !== undefined
+            ? false
+            : undefined;
+
     await ref.update({
       ...(updates.name !== undefined && { name: updates.name.trim() }),
       ...(updates.description !== undefined && { description: updates.description?.trim() }),
-      ...(updates.isPublic !== undefined && { isPublic: updates.isPublic }),
+      ...(isPublic !== undefined && { isPublic }),
+      ...(visibility !== undefined && { visibility }),
       updatedAt: serverTimestamp(),
     });
     const updated = await ref.get();
@@ -161,11 +189,15 @@ class BookmarkListRepository {
   }
 
   private mapList(id: string, data: FirebaseFirestoreTypes.DocumentData): BookmarkList {
+    const visibility = (data.visibility as BookmarkList['visibility']) ||
+      (data.isPublic ? 'public' : 'private');
     return {
       id,
       name: data.name,
       description: data.description,
-      isPublic: data.isPublic ?? false,
+      isPublic: data.isPublic ?? visibility === 'public',
+      visibility,
+      sharedWith: (data.sharedWith as string[]) || [],
       ownerId: data.ownerId,
       followerCount: data.followerCount ?? 0,
       bookmarks: [],

@@ -63,6 +63,7 @@ function RootLayoutNav() {
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ title: t('navigation.settings') }} />
+        <Stack.Screen name="edit-profile" options={{ title: t('navigation.editProfile') }} />
         <Stack.Screen name="ai-chat" options={{ title: t('navigation.aiAssistant') }} />
         <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
         <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
@@ -73,6 +74,7 @@ function RootLayoutNav() {
         <Stack.Screen name="note/[id]" />
         <Stack.Screen name="profile/[id]" options={{ title: t('navigation.profile') }} />
         <Stack.Screen name="share-inbox" options={{ title: t('navigation.shareInbox') }} />
+        <Stack.Screen name="invite/[token]" options={{ title: t('navigation.invite') }} />
         <Stack.Screen name="people-search" options={{ presentation: "modal", title: t('navigation.findPeople') }} />
         <Stack.Screen name="discover-lists" options={{ title: t('navigation.discoverLists') }} />
         <Stack.Screen name="create-list" options={{ presentation: "modal", title: t('navigation.createList') }} />

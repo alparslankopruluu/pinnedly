@@ -71,6 +71,9 @@ export default function ShareInbox() {
       case 'project':
         router.push(`/project/${share.entityId}`);
         break;
+      case 'list':
+        router.push(`/bookmark-list/${share.entityId}`);
+        break;
       default:
         console.log('Unknown entity type:', share.entityType);
     }

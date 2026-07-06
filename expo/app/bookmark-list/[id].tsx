@@ -10,9 +10,12 @@ import { BookmarkList, Bookmark } from '@/types';
 import { BookmarkCard } from '@/components/BookmarkCard';
 
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ShareModal } from '@/components/ShareModal';
+import { useAuth } from '@/store/useAuthStore';
 
 export default function BookmarkListDetailScreen() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     getListById,
@@ -27,6 +30,7 @@ export default function BookmarkListDetailScreen() {
   const [list, setList] = useState<BookmarkList | null>(null);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
 
   const loadListData = useCallback(async () => {
     if (!id) return;
@@ -93,8 +97,8 @@ export default function BookmarkListDetailScreen() {
   };
 
   const handleShare = () => {
-    // TODO: Implement sharing functionality
-    showAppAlert(t('bookmarkList.shareTitle'), t('bookmarkList.alerts.sharingComingSoon'));
+    if (!list) return;
+    setShowShareModal(true);
   };
 
   const renderBookmark = ({ item }: { item: Bookmark }) => (
@@ -114,7 +118,7 @@ export default function BookmarkListDetailScreen() {
     );
   }
 
-  const isOwner = true; // TODO: Check if current user is the owner
+  const isOwner = user?.id === list.ownerId;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -135,9 +139,11 @@ export default function BookmarkListDetailScreen() {
               />
             </TouchableOpacity>
           )}
+          {isOwner ? (
           <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
             <Share size={20} color="#64748b" />
           </TouchableOpacity>
+          ) : null}
           {isOwner && (
             <>
               <TouchableOpacity
@@ -181,6 +187,16 @@ export default function BookmarkListDetailScreen() {
           />
         )}
       />
+
+      {isOwner && list ? (
+        <ShareModal
+          visible={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          entityId={list.id}
+          entityType="list"
+          entityTitle={list.name}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

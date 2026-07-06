@@ -30,7 +30,9 @@ import {
   Moon,
   Sun,
   Monitor,
-  Globe
+  Globe,
+  Inbox,
+  Compass,
 } from 'lucide-react-native';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { PremiumModal } from '@/components/PremiumModal';
@@ -50,9 +52,11 @@ import {
   scheduleBookmarkDigest,
 } from '@/services/bookmarkDigest';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
+import { useAuth } from '@/store/useAuthStore';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const {
     theme,
@@ -187,14 +191,18 @@ export default function SettingsScreen() {
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
-                onPress={() => router.push('/(tabs)/profile')}
+                onPress={() => router.push('/edit-profile')}
               >
                 <View style={styles.settingIcon}>
                   <User size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
                   <Text style={styles.settingTitle}>{t('settings.profile.title')}</Text>
-                  <Text style={styles.settingSubtitle}>{t('settings.profile.subtitle')}</Text>
+                  <Text style={styles.settingSubtitle}>
+                    {user?.displayName
+                      ? `${user.displayName}${user.handle ? ` · @${user.handle}` : ''}`
+                      : t('settings.profile.subtitle')}
+                  </Text>
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
@@ -231,6 +239,42 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 {renderComingSoonBadge()}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Collaboration Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('settings.sections.collaboration')}</Text>
+            <View style={styles.settingsGroup}>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => router.push('/share-inbox')}
+              >
+                <View style={styles.settingIcon}>
+                  <Inbox size={20} color="#6B7280" />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>{t('settings.shareInbox.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.shareInbox.subtitle')}</Text>
+                </View>
+                <ChevronRight size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              <View style={styles.separator} />
+
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => router.push('/discover-lists')}
+              >
+                <View style={styles.settingIcon}>
+                  <Compass size={20} color="#6B7280" />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>{t('settings.discoverLists.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.discoverLists.subtitle')}</Text>
+                </View>
+                <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
           </View>

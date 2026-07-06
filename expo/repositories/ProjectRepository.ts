@@ -191,6 +191,10 @@ export class ProjectRepository {
       invitedBy: uid,
       joinedAt: serverTimestamp(),
     });
+
+    const { entityAccessRepository } = await import('./EntityAccessRepository');
+    await entityAccessRepository.grantAccess('project', projectId, target.id, permission);
+
     const created = await ref.get();
     return this.mapMember(created.id, created.data()!, target.data());
   }
@@ -202,6 +206,9 @@ export class ProjectRepository {
       .where('userId', '==', userId)
       .get();
     await Promise.all(snapshot.docs.map((doc) => doc.ref.delete()));
+
+    const { entityAccessRepository } = await import('./EntityAccessRepository');
+    await entityAccessRepository.revokeAccess('project', projectId, userId);
   }
 
   async updateProjectMemberPermission(
@@ -218,6 +225,10 @@ export class ProjectRepository {
     if (snapshot.empty) throw new Error('Member not found');
     const doc = snapshot.docs[0];
     await doc.ref.update({ permission });
+
+    const { entityAccessRepository } = await import('./EntityAccessRepository');
+    await entityAccessRepository.updateAccessPermission('project', projectId, userId, permission);
+
     const userDoc = await firestore().collection(COLLECTIONS.users).doc(userId).get();
     return this.mapMember(doc.id, doc.data(), userDoc.data());
   }
