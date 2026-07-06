@@ -894,11 +894,20 @@
     "screenshot": "Screenshot"
   },
   "clipboard": {
-    "title": "Link in clipboard",
-    "message": "Save this link to Draft?",
-    "save": "Save",
-    "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "title": "Link in Zwischenablage",
+    "message": "Diesen Link in Draft speichern?",
+    "save": "Speichern",
+    "openAddBookmark": "Prüfen & speichern",
+    "dismiss": "Ablehnen",
+    "tapToPreview": "Vorschau ↑",
+    "expandPreview": "Link anzeigen",
+    "collapsePreview": "Vorschau schließen",
+    "previewHint": "Link vor dem Speichern prüfen",
+    "previewDomain": "Website",
+    "previewUrl": "Link",
+    "previewRaw": "Zwischenablage-Text",
+    "previewTitle": "Seitentitel",
+    "loadingPreview": "Vorschau wird geladen…"
   },
   "userProfile": {
     "notFound": "Profile not found",

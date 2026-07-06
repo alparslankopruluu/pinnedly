@@ -893,7 +893,16 @@
     "message": "Save this link to Draft?",
     "save": "Save",
     "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "dismiss": "Dismiss",
+    "tapToPreview": "Preview ↑",
+    "expandPreview": "Preview link",
+    "collapsePreview": "Collapse preview",
+    "previewHint": "Check the link before saving",
+    "previewDomain": "Site",
+    "previewUrl": "Link",
+    "previewRaw": "Clipboard text",
+    "previewTitle": "Page title",
+    "loadingPreview": "Loading preview…"
   },
   "categories": {
     "label": "Category",

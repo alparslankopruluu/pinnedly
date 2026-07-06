@@ -894,11 +894,20 @@
     "screenshot": "截图"
   },
   "clipboard": {
-    "title": "Link in clipboard",
-    "message": "Save this link to Draft?",
-    "save": "Save",
-    "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "title": "剪贴板中有链接",
+    "message": "是否将此链接保存到 Draft？",
+    "save": "保存",
+    "openAddBookmark": "查看并保存",
+    "dismiss": "拒绝",
+    "tapToPreview": "预览 ↑",
+    "expandPreview": "预览链接",
+    "collapsePreview": "关闭预览",
+    "previewHint": "保存前请检查链接",
+    "previewDomain": "网站",
+    "previewUrl": "链接",
+    "previewRaw": "剪贴板文本",
+    "previewTitle": "页面标题",
+    "loadingPreview": "正在加载预览…"
   },
   "userProfile": {
     "notFound": "Profile not found",

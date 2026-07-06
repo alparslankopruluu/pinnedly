@@ -894,11 +894,20 @@
     "screenshot": "Screenshot"
   },
   "clipboard": {
-    "title": "Link in clipboard",
-    "message": "Save this link to Draft?",
-    "save": "Save",
-    "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "title": "Ссылка в буфере обмена",
+    "message": "Сохранить эту ссылку в Draft?",
+    "save": "Сохранить",
+    "openAddBookmark": "Проверить и сохранить",
+    "dismiss": "Отклонить",
+    "tapToPreview": "Просмотр ↑",
+    "expandPreview": "Просмотр ссылки",
+    "collapsePreview": "Свернуть просмотр",
+    "previewHint": "Проверьте ссылку перед сохранением",
+    "previewDomain": "Сайт",
+    "previewUrl": "Ссылка",
+    "previewRaw": "Текст из буфера",
+    "previewTitle": "Заголовок страницы",
+    "loadingPreview": "Загрузка просмотра…"
   },
   "userProfile": {
     "notFound": "Profile not found",

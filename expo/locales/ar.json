@@ -894,11 +894,20 @@
     "screenshot": "Screenshot"
   },
   "clipboard": {
-    "title": "Link in clipboard",
-    "message": "Save this link to Draft?",
-    "save": "Save",
-    "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "title": "رابط في الحافظة",
+    "message": "هل تريد حفظ هذا الرابط في Draft؟",
+    "save": "حفظ",
+    "openAddBookmark": "مراجعة وحفظ",
+    "dismiss": "رفض",
+    "tapToPreview": "معاينة ↑",
+    "expandPreview": "معاينة الرابط",
+    "collapsePreview": "إغلاق المعاينة",
+    "previewHint": "تحقق من الرابط قبل الحفظ",
+    "previewDomain": "الموقع",
+    "previewUrl": "الرابط",
+    "previewRaw": "نص الحافظة",
+    "previewTitle": "عنوان الصفحة",
+    "loadingPreview": "جارٍ تحميل المعاينة…"
   },
   "userProfile": {
     "notFound": "Profile not found",

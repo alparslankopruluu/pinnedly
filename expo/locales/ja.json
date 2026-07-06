@@ -894,11 +894,20 @@
     "screenshot": "スクリーンショット"
   },
   "clipboard": {
-    "title": "Link in clipboard",
-    "message": "Save this link to Draft?",
-    "save": "Save",
-    "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "title": "クリップボードにリンクがあります",
+    "message": "このリンクをDraftに保存しますか？",
+    "save": "保存",
+    "openAddBookmark": "確認して保存",
+    "dismiss": "拒否",
+    "tapToPreview": "プレビュー ↑",
+    "expandPreview": "リンクをプレビュー",
+    "collapsePreview": "プレビューを閉じる",
+    "previewHint": "保存前にリンクを確認してください",
+    "previewDomain": "サイト",
+    "previewUrl": "リンク",
+    "previewRaw": "クリップボードのテキスト",
+    "previewTitle": "ページタイトル",
+    "loadingPreview": "プレビューを読み込み中…"
   },
   "userProfile": {
     "notFound": "Profile not found",

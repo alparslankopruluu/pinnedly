@@ -943,6 +943,15 @@
     "message": "Bu bağlantıyı Draft'a kaydetmek ister misiniz?",
     "save": "Kaydet",
     "openAddBookmark": "İncele ve kaydet",
-    "dismiss": "Şimdi değil"
+    "dismiss": "Reddet",
+    "tapToPreview": "Önizle ↑",
+    "expandPreview": "Bağlantıyı önizle",
+    "collapsePreview": "Önizlemeyi kapat",
+    "previewHint": "Kaydetmeden önce bağlantıyı kontrol et",
+    "previewDomain": "Site",
+    "previewUrl": "Bağlantı",
+    "previewRaw": "Panodaki metin",
+    "previewTitle": "Sayfa başlığı",
+    "loadingPreview": "Önizleme yükleniyor…"
   }
 }

@@ -894,11 +894,20 @@
     "screenshot": "Captura de tela"
   },
   "clipboard": {
-    "title": "Link in clipboard",
-    "message": "Save this link to Draft?",
-    "save": "Save",
-    "openAddBookmark": "Review & save",
-    "dismiss": "Not now"
+    "title": "Link na área de transferência",
+    "message": "Salvar este link no Draft?",
+    "save": "Salvar",
+    "openAddBookmark": "Revisar e salvar",
+    "dismiss": "Recusar",
+    "tapToPreview": "Pré-visualizar ↑",
+    "expandPreview": "Pré-visualizar link",
+    "collapsePreview": "Fechar pré-visualização",
+    "previewHint": "Verifique o link antes de salvar",
+    "previewDomain": "Site",
+    "previewUrl": "Link",
+    "previewRaw": "Texto da área de transferência",
+    "previewTitle": "Título da página",
+    "loadingPreview": "Carregando pré-visualização…"
   },
   "userProfile": {
     "notFound": "Profile not found",
