@@ -41,6 +41,21 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
           return;
         }
 
+        if (data.type === 'entity_reminder' && data.entityType && data.entityId) {
+          switch (data.entityType) {
+            case 'bookmark':
+              router.push(`/bookmark/${data.entityId}` as never);
+              break;
+            case 'note':
+              router.push(`/note/${data.entityId}` as never);
+              break;
+            case 'todo':
+              router.push('/(tabs)/todos' as never);
+              break;
+          }
+          return;
+        }
+
         if (data.entityType && data.entityId) {
           switch (data.entityType) {
             case 'project':

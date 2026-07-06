@@ -228,6 +228,13 @@
       "title": "Preferenze notifiche",
       "subtitle": "Personalizza le impostazioni delle notifiche"
     },
+    "digestFrequency": {
+      "title": "Riepilogo Leggi dopo",
+      "subtitle": "Riepilogo opzionale dei segnalibri non letti",
+      "off": "Disattivo",
+      "daily": "Giornaliero",
+      "weekly": "Settimanale"
+    },
     "theme": {
       "title": "Tema",
       "light": "Chiaro",
@@ -864,7 +871,21 @@
       "title": "Promemoria Leggi dopo",
       "body_one": "Hai 1 elemento salvato non letto che ti aspetta.",
       "body_other": "Hai {{count}} elementi salvati non letti che ti aspettano."
+    },
+    "entityReminder": {
+      "bookmark": { "title": "Promemoria segnalibro", "body": "Tempo di leggere: {{title}}" },
+      "note": { "title": "Promemoria nota", "body": "Rileggi la nota: {{title}}" },
+      "todo": { "title": "Promemoria attività", "body": "Non dimenticare: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "Promemoria",
+    "enabled": "Promemoria attivi",
+    "disabled": "Promemoria disattivi",
+    "presetsLabel": "Ricordami dopo",
+    "presets": { "1d": "1 giorno", "3d": "3 giorni", "7d": "1 settimana", "30d": "1 mese" },
+    "custom": "Data personalizzata",
+    "addCustom": "Aggiungi promemoria"
   },
   "bookmarkCard": {
     "neverOpened": "Mai aperto",

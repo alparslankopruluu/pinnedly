@@ -5,6 +5,7 @@ import { Bookmark } from '@/types';
 import { formatRelativeTime } from '@/utils/date';
 import { getSourceLabel, isUnreadBookmark } from '@/utils/bookmark';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { getCategoryDef } from '@/constants/contentCategories';
 
 interface BookmarkCardProps {
@@ -50,6 +51,14 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
               {formatRelativeTime(bookmark.createdAt)}
             </Text>
           </View>
+          <EntityReminderBell
+            entityType="bookmark"
+            entityId={bookmark.id}
+            title={bookmark.title || bookmark.url || t('common.untitled')}
+            createdAt={bookmark.createdAt}
+            schedule={bookmark.reminderSchedule}
+            size={16}
+          />
         </View>
         
         <Text style={styles.title} numberOfLines={2}>

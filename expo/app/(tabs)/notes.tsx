@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { formatRelativeTime } from '@/utils/date';
 import { Note, Visibility } from '@/types';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { getCategoryDef } from '@/constants/contentCategories';
 
 export default function NotesScreen() {
@@ -64,9 +65,19 @@ export default function NotesScreen() {
             <Text style={styles.visibilityLabel}>{getVisibilityLabel(item.visibility)}</Text>
           </View>
         </View>
-        <Text style={styles.noteDate}>
-          {formatRelativeTime(item.updatedAt)}
-        </Text>
+        <View style={styles.noteHeaderRight}>
+          <EntityReminderBell
+            entityType="note"
+            entityId={item.id}
+            title={item.title}
+            createdAt={item.createdAt}
+            schedule={item.reminderSchedule}
+            size={16}
+          />
+          <Text style={styles.noteDate}>
+            {formatRelativeTime(item.updatedAt)}
+          </Text>
+        </View>
       </View>
       <Text style={styles.noteTitle} numberOfLines={1}>
         {item.title}
@@ -149,6 +160,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  noteHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   visibilityBadge: {
     flexDirection: 'row',

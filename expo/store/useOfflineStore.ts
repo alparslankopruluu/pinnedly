@@ -9,6 +9,12 @@ import { useAuth } from '@/store/useAuthStore';
 import { Project, Bookmark, Note } from '@/types';
 import { dedupeProjectsById } from '@/utils/projects';
 import { recordActivity } from '@/utils/activities';
+import {
+  cancelEntityReminders,
+  rescheduleEntityReminders,
+  scheduleEntityReminders,
+  normalizeReminderSchedule,
+} from '@/services/entityReminders';
 
 export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
   const { user, isAuthenticated } = useAuth();
@@ -295,6 +301,13 @@ export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() =>
         subtitle: transformedBookmark.title || transformedBookmark.url,
         relatedId: transformedBookmark.id,
       });
+      await scheduleEntityReminders({
+        entityType: 'bookmark',
+        entityId: transformedBookmark.id,
+        title: transformedBookmark.title || transformedBookmark.url || 'Bookmark',
+        baseTime: transformedBookmark.createdAt,
+        schedule: normalizeReminderSchedule(transformedBookmark.reminderSchedule),
+      });
       return transformedBookmark;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create bookmark';
@@ -305,6 +318,7 @@ export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() =>
   const openBookmark = useCallback(async (id: string) => {
     try {
       const updatedBookmark = await bookmarkRepository.incrementOpenCount(id);
+      await cancelEntityReminders('bookmark', id);
       setBookmarks(prev => prev.map(b => b.id === id ? updatedBookmark : b));
       return updatedBookmark;
     } catch (err) {
@@ -316,15 +330,28 @@ export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() =>
   const updateBookmark = useCallback(async (id: string, updates: Partial<Bookmark>) => {
     try {
       const updatedBookmark = await bookmarkRepository.updateBookmark(id, updates);
+      if (updates.status === 'done' || updates.status === 'archived') {
+        await cancelEntityReminders('bookmark', id);
+      } else if (updates.reminderSchedule) {
+        const existing = bookmarks.find((b) => b.id === id);
+        await rescheduleEntityReminders({
+          entityType: 'bookmark',
+          entityId: id,
+          title: updatedBookmark.title || updatedBookmark.url || 'Bookmark',
+          baseTime: existing?.createdAt ?? updatedBookmark.createdAt,
+          schedule: normalizeReminderSchedule(updates.reminderSchedule),
+        });
+      }
       setBookmarks(prev => prev.map(b => b.id === id ? updatedBookmark : b));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update bookmark';
       throw new Error(errorMessage);
     }
-  }, []);
+  }, [bookmarks]);
 
   const deleteBookmark = useCallback(async (id: string) => {
     try {
+      await cancelEntityReminders('bookmark', id);
       await bookmarkRepository.deleteBookmark(id);
       setBookmarks(prev => prev.filter(b => b.id !== id));
     } catch (err) {
@@ -404,6 +431,13 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
         subtitle: transformedNote.title,
         relatedId: transformedNote.id,
       });
+      await scheduleEntityReminders({
+        entityType: 'note',
+        entityId: transformedNote.id,
+        title: transformedNote.title,
+        baseTime: transformedNote.createdAt,
+        schedule: normalizeReminderSchedule(transformedNote.reminderSchedule),
+      });
       return transformedNote;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create note';
@@ -414,15 +448,26 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
   const updateNote = useCallback(async (id: string, updates: Partial<Note>) => {
     try {
       const updatedNote = await noteRepository.updateNote(id, updates);
+      if (updates.reminderSchedule) {
+        const existing = notes.find((n) => n.id === id);
+        await rescheduleEntityReminders({
+          entityType: 'note',
+          entityId: id,
+          title: updatedNote.title,
+          baseTime: existing?.createdAt ?? updatedNote.createdAt,
+          schedule: normalizeReminderSchedule(updates.reminderSchedule),
+        });
+      }
       setNotes(prev => prev.map(n => n.id === id ? updatedNote : n));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update note';
       throw new Error(errorMessage);
     }
-  }, []);
+  }, [notes]);
 
   const deleteNote = useCallback(async (id: string) => {
     try {
+      await cancelEntityReminders('note', id);
       await noteRepository.deleteNote(id);
       setNotes(prev => prev.filter(n => n.id !== id));
     } catch (err) {

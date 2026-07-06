@@ -4,6 +4,8 @@ import { COLLECTIONS, requireUserId, serverTimestamp, subscribeToOwnerCollection
 import { trackEntityEvent } from '@/lib/analytics';
 import { tagNamesToTags } from '@/utils/bookmark';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
+import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
+import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
 
 export type CreateBookmarkInput = Omit<
   Bookmark,
@@ -52,6 +54,7 @@ export class BookmarkRepository {
       openCount: 0,
       lastOpenedAt: null,
       category: bookmark.category ?? DEFAULT_CONTENT_CATEGORY,
+      reminderSchedule: bookmark.reminderSchedule ?? getDefaultReminderSchedule(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -83,6 +86,7 @@ export class BookmarkRepository {
       payload.lastOpenedAt = updates.lastOpenedAt ? new Date(updates.lastOpenedAt) : null;
     }
     if (updates.category !== undefined) payload.category = updates.category;
+    if (updates.reminderSchedule !== undefined) payload.reminderSchedule = updates.reminderSchedule;
 
     await ref.update(payload);
     const updated = await ref.get();
@@ -138,6 +142,7 @@ export class BookmarkRepository {
       userId: data.ownerId as string,
       visibility: (data.visibility as Bookmark['visibility']) || 'private',
       category: normalizeCategory(data.category as string | undefined),
+      reminderSchedule: mapReminderScheduleFromFirestore(data.reminderSchedule),
     };
   }
 }

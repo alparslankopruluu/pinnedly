@@ -28,6 +28,12 @@ export type BookmarkSource =
 
 export type BookmarkStatus = 'inbox' | 'reading' | 'done' | 'archived';
 
+export type ReminderSchedule = {
+  enabled: boolean;
+  intervalDays: number[];
+  customDates?: number[];
+};
+
 export type Bookmark = {
   id: ID;
   url?: string;
@@ -49,6 +55,7 @@ export type Bookmark = {
   userId: ID;
   visibility: Visibility;
   category?: ContentCategoryId;
+  reminderSchedule?: ReminderSchedule;
 };
 
 export type Task = {
@@ -87,6 +94,7 @@ export type Note = {
   visibility: Visibility;
   sharedWith?: ID[]; // User IDs this note is shared with
   category?: ContentCategoryId;
+  reminderSchedule?: ReminderSchedule;
 };
 
 export type ActivityItem = {
@@ -232,4 +240,5 @@ export type TodoItem = {
   createdAt: number;
   updatedAt: number;
   category?: ContentCategoryId;
+  reminderSchedule?: ReminderSchedule;
 };

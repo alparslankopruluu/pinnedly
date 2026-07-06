@@ -228,6 +228,13 @@
       "title": "通知偏好",
       "subtitle": "自定义通知设置"
     },
+    "digestFrequency": {
+      "title": "稍后阅读摘要",
+      "subtitle": "未读书签的可选摘要",
+      "off": "关闭",
+      "daily": "每天",
+      "weekly": "每周"
+    },
     "theme": {
       "title": "主题",
       "light": "浅色",
@@ -864,7 +871,21 @@
       "title": "稍后阅读提醒",
       "body_one": "您有 1 条未读保存等待查看。",
       "body_other": "您有 {{count}} 条未读保存等待查看。"
+    },
+    "entityReminder": {
+      "bookmark": { "title": "书签提醒", "body": "该阅读了: {{title}}" },
+      "note": { "title": "笔记提醒", "body": "回顾笔记: {{title}}" },
+      "todo": { "title": "任务提醒", "body": "别忘了: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "提醒",
+    "enabled": "提醒已开启",
+    "disabled": "提醒已关闭",
+    "presetsLabel": "在此时间后提醒",
+    "presets": { "1d": "1天", "3d": "3天", "7d": "1周", "30d": "1个月" },
+    "custom": "自定义日期",
+    "addCustom": "添加提醒"
   },
   "bookmarkCard": {
     "neverOpened": "从未打开",

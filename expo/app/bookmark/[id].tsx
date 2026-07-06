@@ -14,6 +14,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ExternalLink, Check, Archive, Trash2 } from 'lucide-react-native';
+import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';
 import { getSourceLabel } from '@/utils/bookmark';
@@ -90,9 +91,19 @@ export default function BookmarkDetailScreen() {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {bookmark.title || t('bookmarkDetail.bookmark')}
         </Text>
-        <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
-          <Trash2 size={20} color="#EF4444" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <EntityReminderBell
+            entityType="bookmark"
+            entityId={bookmark.id}
+            title={bookmark.title || bookmark.url || t('common.untitled')}
+            createdAt={bookmark.createdAt}
+            schedule={bookmark.reminderSchedule}
+            size={20}
+          />
+          <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
+            <Trash2 size={20} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -240,6 +251,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111827',
     textAlign: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   content: {
     padding: 20,

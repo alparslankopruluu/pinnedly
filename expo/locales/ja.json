@@ -228,6 +228,13 @@
       "title": "通知設定",
       "subtitle": "通知設定をカスタマイズ"
     },
+    "digestFrequency": {
+      "title": "後で読むサマリー",
+      "subtitle": "未読ブックマークの任意サマリー",
+      "off": "オフ",
+      "daily": "毎日",
+      "weekly": "毎週"
+    },
     "theme": {
       "title": "テーマ",
       "light": "ライト",
@@ -864,7 +871,21 @@
       "title": "後で読むリマインダー",
       "body_one": "未読の保存が1件あります。",
       "body_other": "未読の保存が{{count}}件あります。"
+    },
+    "entityReminder": {
+      "bookmark": { "title": "ブックマークのリマインダー", "body": "読む時間です: {{title}}" },
+      "note": { "title": "ノートのリマインダー", "body": "ノートを確認: {{title}}" },
+      "todo": { "title": "タスクのリマインダー", "body": "忘れずに: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "リマインダー",
+    "enabled": "リマインダーON",
+    "disabled": "リマインダーOFF",
+    "presetsLabel": "この期間後に通知",
+    "presets": { "1d": "1日", "3d": "3日", "7d": "1週間", "30d": "1か月" },
+    "custom": "カスタム日時",
+    "addCustom": "リマインダーを追加"
   },
   "bookmarkCard": {
     "neverOpened": "未開封",

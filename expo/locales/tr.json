@@ -93,7 +93,35 @@
       "title": "Sonra Oku hatırlatması",
       "body_one": "Sizi bekleyen 1 okunmamış kayıt var.",
       "body_other": "Sizi bekleyen {{count}} okunmamış kayıt var."
+    },
+    "entityReminder": {
+      "bookmark": {
+        "title": "Yer imi hatırlatması",
+        "body": "Okuma zamanı: {{title}}"
+      },
+      "note": {
+        "title": "Not hatırlatması",
+        "body": "Notuna göz at: {{title}}"
+      },
+      "todo": {
+        "title": "Görev hatırlatması",
+        "body": "Unutma: {{title}}"
+      }
     }
+  },
+  "reminders": {
+    "title": "Hatırlatıcılar",
+    "enabled": "Hatırlatıcılar açık",
+    "disabled": "Hatırlatıcılar kapalı",
+    "presetsLabel": "Şu süre sonra hatırlat",
+    "presets": {
+      "1d": "1 gün",
+      "3d": "3 gün",
+      "7d": "1 hafta",
+      "30d": "1 ay"
+    },
+    "custom": "Özel tarih",
+    "addCustom": "Hatırlatıcı ekle"
   },
   "bookmarkCard": {
     "neverOpened": "Hiç açılmadı",
@@ -260,6 +288,13 @@
     "notificationPreferences": {
       "title": "Bildirim Tercihleri",
       "subtitle": "Bildirim ayarlarınızı özelleştirin"
+    },
+    "digestFrequency": {
+      "title": "Sonra Oku özeti",
+      "subtitle": "Okunmamış yer imleri için isteğe bağlı özet",
+      "off": "Kapalı",
+      "daily": "Günlük",
+      "weekly": "Haftalık"
     },
     "theme": {
       "title": "Tema",

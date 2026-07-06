@@ -228,6 +228,13 @@
       "title": "Настройки уведомлений",
       "subtitle": "Настройте параметры уведомлений"
     },
+    "digestFrequency": {
+      "title": "Сводка «Прочитать позже»",
+      "subtitle": "Необязательная сводка непрочитанных закладок",
+      "off": "Выкл.",
+      "daily": "Ежедневно",
+      "weekly": "Еженедельно"
+    },
     "theme": {
       "title": "Тема",
       "light": "Светлая",
@@ -864,7 +871,21 @@
       "title": "Read Later reminder",
       "body_one": "You have 1 unread save waiting for you.",
       "body_other": "You have {{count}} unread saves waiting for you."
+    },
+    "entityReminder": {
+      "bookmark": { "title": "Напоминание о закладке", "body": "Время прочитать: {{title}}" },
+      "note": { "title": "Напоминание о заметке", "body": "Вернитесь к заметке: {{title}}" },
+      "todo": { "title": "Напоминание о задаче", "body": "Не забудьте: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "Напоминания",
+    "enabled": "Напоминания включены",
+    "disabled": "Напоминания выключены",
+    "presetsLabel": "Напомнить через",
+    "presets": { "1d": "1 день", "3d": "3 дня", "7d": "1 неделя", "30d": "1 месяц" },
+    "custom": "Своя дата",
+    "addCustom": "Добавить напоминание"
   },
   "bookmarkCard": {
     "neverOpened": "Never opened",

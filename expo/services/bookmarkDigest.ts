@@ -41,7 +41,7 @@ export function countUnreadBookmarks(bookmarks: Bookmark[]): number {
 export async function getDigestFrequency(): Promise<DigestFrequency> {
   const value = await AsyncStorage.getItem(DIGEST_FREQUENCY_KEY);
   if (value === 'daily' || value === 'weekly' || value === 'off') return value;
-  return 'weekly';
+  return 'off';
 }
 
 export async function setDigestFrequency(frequency: DigestFrequency): Promise<void> {

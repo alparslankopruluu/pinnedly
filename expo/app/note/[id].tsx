@@ -27,6 +27,7 @@ import { ShareModal } from '@/components/ShareModal';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { MarkdownContent } from '@/components/ui/MarkdownContent';
 import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
+import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 
 export default function NoteDetailScreen() {
   const { t } = useTranslation();
@@ -154,6 +155,16 @@ export default function NoteDetailScreen() {
                 </>
               ) : (
                 <>
+                  {note ? (
+                    <EntityReminderBell
+                      entityType="note"
+                      entityId={note.id}
+                      title={note.title}
+                      createdAt={note.createdAt}
+                      schedule={note.reminderSchedule}
+                      size={20}
+                    />
+                  ) : null}
                   <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.headerButton}>
                     <Edit3 size={20} color="#6B7280" />
                   </TouchableOpacity>

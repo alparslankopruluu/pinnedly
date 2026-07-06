@@ -228,6 +228,13 @@
       "title": "Preferencias de notificación",
       "subtitle": "Personaliza tus ajustes de notificación"
     },
+    "digestFrequency": {
+      "title": "Resumen Leer después",
+      "subtitle": "Resumen opcional de marcadores sin leer",
+      "off": "Desactivado",
+      "daily": "Diario",
+      "weekly": "Semanal"
+    },
     "theme": {
       "title": "Tema",
       "light": "Claro",
@@ -864,7 +871,21 @@
       "title": "Recordatorio de Leer después",
       "body_one": "Tienes 1 guardado sin leer esperándote.",
       "body_other": "Tienes {{count}} guardados sin leer esperándote."
+    },
+    "entityReminder": {
+      "bookmark": { "title": "Recordatorio de marcador", "body": "Hora de leer: {{title}}" },
+      "note": { "title": "Recordatorio de nota", "body": "Revisa tu nota: {{title}}" },
+      "todo": { "title": "Recordatorio de tarea", "body": "No olvides: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "Recordatorios",
+    "enabled": "Recordatorios activados",
+    "disabled": "Recordatorios desactivados",
+    "presetsLabel": "Recordarme después de",
+    "presets": { "1d": "1 día", "3d": "3 días", "7d": "1 semana", "30d": "1 mes" },
+    "custom": "Fecha personalizada",
+    "addCustom": "Añadir recordatorio"
   },
   "bookmarkCard": {
     "neverOpened": "Nunca abierto",

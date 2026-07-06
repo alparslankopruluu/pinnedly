@@ -93,7 +93,35 @@
       "title": "Read Later reminder",
       "body_one": "You have 1 unread save waiting for you.",
       "body_other": "You have {{count}} unread saves waiting for you."
+    },
+    "entityReminder": {
+      "bookmark": {
+        "title": "Bookmark reminder",
+        "body": "Time to read: {{title}}"
+      },
+      "note": {
+        "title": "Note reminder",
+        "body": "Revisit your note: {{title}}"
+      },
+      "todo": {
+        "title": "Task reminder",
+        "body": "Don't forget: {{title}}"
+      }
     }
+  },
+  "reminders": {
+    "title": "Reminders",
+    "enabled": "Reminders on",
+    "disabled": "Reminders off",
+    "presetsLabel": "Remind me after",
+    "presets": {
+      "1d": "1 day",
+      "3d": "3 days",
+      "7d": "1 week",
+      "30d": "1 month"
+    },
+    "custom": "Custom date",
+    "addCustom": "Add reminder"
   },
   "bookmarkCard": {
     "neverOpened": "Never opened",
@@ -260,6 +288,13 @@
     "notificationPreferences": {
       "title": "Notification Preferences",
       "subtitle": "Customize your notification settings"
+    },
+    "digestFrequency": {
+      "title": "Read Later digest",
+      "subtitle": "Optional summary of unread bookmarks",
+      "off": "Off",
+      "daily": "Daily",
+      "weekly": "Weekly"
     },
     "theme": {
       "title": "Theme",

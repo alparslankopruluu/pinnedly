@@ -4,6 +4,12 @@ import { todoRepository } from '@/repositories/TodoRepository';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useAuth } from '@/store/useAuthStore';
 import { TodoItem, ID } from '@/types';
+import {
+  cancelEntityReminders,
+  rescheduleEntityReminders,
+  scheduleEntityReminders,
+  normalizeReminderSchedule,
+} from '@/services/entityReminders';
 
 export type PriorityFilter = 'all' | 'low' | 'medium' | 'high';
 export type StatusFilter = 'all' | 'active' | 'completed';
@@ -39,20 +45,44 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
   }, [isAuthenticated]);
 
   const createTodo = useCallback(async (data: Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
-    return todoRepository.createTodo(data);
+    const created = await todoRepository.createTodo(data);
+    await scheduleEntityReminders({
+      entityType: 'todo',
+      entityId: created.id,
+      title: created.title,
+      baseTime: created.createdAt,
+      schedule: normalizeReminderSchedule(created.reminderSchedule),
+    });
+    return created;
   }, []);
 
   const updateTodo = useCallback(async (id: ID, updates: Partial<Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>) => {
-    return todoRepository.updateTodo(id, updates);
-  }, []);
+    const updated = await todoRepository.updateTodo(id, updates);
+    if (updates.reminderSchedule) {
+      const existing = todos.find((t) => t.id === id);
+      await rescheduleEntityReminders({
+        entityType: 'todo',
+        entityId: id,
+        title: updated.title,
+        baseTime: existing?.createdAt ?? updated.createdAt,
+        schedule: normalizeReminderSchedule(updates.reminderSchedule),
+      });
+    }
+    return updated;
+  }, [todos]);
 
   const toggleTodo = useCallback(async (id: ID) => {
     const todo = todos.find(t => t.id === id);
     if (!todo) return;
-    return todoRepository.toggleTodo(id, !todo.completed);
+    const updated = await todoRepository.toggleTodo(id, !todo.completed);
+    if (updated.completed) {
+      await cancelEntityReminders('todo', id);
+    }
+    return updated;
   }, [todos]);
 
   const deleteTodo = useCallback(async (id: ID) => {
+    await cancelEntityReminders('todo', id);
     await todoRepository.deleteTodo(id);
   }, []);
 

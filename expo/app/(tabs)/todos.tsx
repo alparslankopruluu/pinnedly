@@ -17,6 +17,7 @@ import { useTodoStore, PriorityFilter, StatusFilter } from '@/store/useTodoStore
 import { TodoItem, ID } from '@/types';
 import { formatRelativeTime, isOverdue } from '@/utils/date';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 
 const PRIORITY_COLORS: Record<string, string> = {
   high: '#EF4444',
@@ -100,6 +101,15 @@ function TodoRow({
           ) : null}
         </View>
       </View>
+
+      <EntityReminderBell
+        entityType="todo"
+        entityId={todo.id}
+        title={todo.title}
+        createdAt={todo.createdAt}
+        schedule={todo.reminderSchedule}
+        size={16}
+      />
 
       {/* Delete button */}
       <Pressable

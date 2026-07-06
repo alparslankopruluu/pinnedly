@@ -228,6 +228,13 @@
       "title": "Benachrichtigungseinstellungen",
       "subtitle": "Benachrichtigungen anpassen"
     },
+    "digestFrequency": {
+      "title": "Später-lesen-Zusammenfassung",
+      "subtitle": "Optionale Übersicht ungelesener Lesezeichen",
+      "off": "Aus",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich"
+    },
     "theme": {
       "title": "Design",
       "light": "Hell",
@@ -864,7 +871,21 @@
       "title": "Später-lesen-Erinnerung",
       "body_one": "Du hast 1 ungelesenes Element, das auf dich wartet.",
       "body_other": "Du hast {{count}} ungelesene Elemente, die auf dich warten."
+    },
+    "entityReminder": {
+      "bookmark": { "title": "Lesezeichen-Erinnerung", "body": "Zeit zu lesen: {{title}}" },
+      "note": { "title": "Notiz-Erinnerung", "body": "Notiz ansehen: {{title}}" },
+      "todo": { "title": "Aufgaben-Erinnerung", "body": "Nicht vergessen: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "Erinnerungen",
+    "enabled": "Erinnerungen an",
+    "disabled": "Erinnerungen aus",
+    "presetsLabel": "Erinnere mich nach",
+    "presets": { "1d": "1 Tag", "3d": "3 Tage", "7d": "1 Woche", "30d": "1 Monat" },
+    "custom": "Eigenes Datum",
+    "addCustom": "Erinnerung hinzufügen"
   },
   "bookmarkCard": {
     "neverOpened": "Nie geöffnet",

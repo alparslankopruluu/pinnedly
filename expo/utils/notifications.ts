@@ -15,11 +15,18 @@ Notifications.setNotificationHandler({
 });
 
 export interface NotificationData {
-  type: 'task_reminder' | 'project_update' | 'invitation' | 'general' | 'bookmark_digest';
+  type: 'task_reminder' | 'project_update' | 'invitation' | 'general' | 'bookmark_digest' | 'entity_reminder';
   entityId?: string;
-  entityType?: 'project' | 'task' | 'note' | 'bookmark';
+  entityType?: 'project' | 'task' | 'note' | 'bookmark' | 'todo';
   title: string;
   body: string;
+}
+
+function dateTrigger(reminderTime: Date): Notifications.DateTriggerInput {
+  return {
+    type: Notifications.SchedulableTriggerInputTypes.DATE,
+    date: reminderTime,
+  };
 }
 
 export class NotificationService {
@@ -100,7 +107,7 @@ export class NotificationService {
             entityType: data.entityType,
           },
         },
-        trigger: trigger || null,
+        trigger: trigger ?? null,
       });
 
       return notificationId;
@@ -123,9 +130,7 @@ export class NotificationService {
         title: i18n.t('notifications.taskReminder.title'),
         body: i18n.t('notifications.taskReminder.body', { taskTitle }),
       },
-      {
-        date: reminderTime,
-      } as Notifications.DateTriggerInput
+      dateTrigger(reminderTime)
     );
   }
 
@@ -142,9 +147,7 @@ export class NotificationService {
         title: i18n.t('notifications.projectNudge.title'),
         body: i18n.t('notifications.projectNudge.body', { projectTitle }),
       },
-      {
-        date: nudgeTime,
-      } as Notifications.DateTriggerInput
+      dateTrigger(nudgeTime)
     );
   }
 
@@ -157,9 +160,27 @@ export class NotificationService {
         title: i18n.t('notifications.bookmarkDigest.title'),
         body: i18n.t('notifications.bookmarkDigest.body', { count: unreadCount, defaultValue: '' }),
       },
+      dateTrigger(triggerTime)
+    );
+  }
+
+  async scheduleEntityReminder(
+    entityType: 'bookmark' | 'note' | 'todo',
+    entityId: string,
+    entityTitle: string,
+    triggerTime: Date
+  ): Promise<string | null> {
+    return this.scheduleLocalNotification(
       {
-        date: triggerTime,
-      } as Notifications.DateTriggerInput
+        type: 'entity_reminder',
+        entityId,
+        entityType,
+        title: i18n.t(`notifications.entityReminder.${entityType}.title`),
+        body: i18n.t(`notifications.entityReminder.${entityType}.body`, {
+          title: entityTitle,
+        }),
+      },
+      dateTrigger(triggerTime)
     );
   }
 

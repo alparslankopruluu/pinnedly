@@ -228,6 +228,13 @@
       "title": "Preferências de notificação",
       "subtitle": "Personalize suas configurações de notificação"
     },
+    "digestFrequency": {
+      "title": "Resumo Ler depois",
+      "subtitle": "Resumo opcional de favoritos não lidos",
+      "off": "Desativado",
+      "daily": "Diário",
+      "weekly": "Semanal"
+    },
     "theme": {
       "title": "Tema",
       "light": "Claro",
@@ -864,7 +871,21 @@
       "title": "Lembrete de Ler depois",
       "body_one": "Você tem 1 item salvo não lido esperando por você.",
       "body_other": "Você tem {{count}} itens salvos não lidos esperando por você."
+    },
+    "entityReminder": {
+      "bookmark": { "title": "Lembrete de favorito", "body": "Hora de ler: {{title}}" },
+      "note": { "title": "Lembrete de nota", "body": "Reveja sua nota: {{title}}" },
+      "todo": { "title": "Lembrete de tarefa", "body": "Não esqueça: {{title}}" }
     }
+  },
+  "reminders": {
+    "title": "Lembretes",
+    "enabled": "Lembretes ativos",
+    "disabled": "Lembretes desativados",
+    "presetsLabel": "Lembrar após",
+    "presets": { "1d": "1 dia", "3d": "3 dias", "7d": "1 semana", "30d": "1 mês" },
+    "custom": "Data personalizada",
+    "addCustom": "Adicionar lembrete"
   },
   "bookmarkCard": {
     "neverOpened": "Nunca aberto",

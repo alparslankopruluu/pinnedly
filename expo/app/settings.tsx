@@ -43,6 +43,13 @@ import {
   getCurrentLanguage,
   getDeviceLanguage,
 } from '@/lib/i18n';
+import {
+  DigestFrequency,
+  getDigestFrequency,
+  setDigestFrequency,
+  scheduleBookmarkDigest,
+} from '@/services/bookmarkDigest';
+import { useBookmarkStore } from '@/providers/OfflineProvider';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -63,16 +70,38 @@ export default function SettingsScreen() {
     deleteAccount,
     loadSettings
   } = useSettingsStore();
+  const { bookmarks } = useBookmarkStore();
 
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
   const [showThemeSelector, setShowThemeSelector] = useState<boolean>(false);
   const [showLanguageSelector, setShowLanguageSelector] = useState<boolean>(false);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(getCurrentLanguage());
+  const [digestFrequency, setDigestFrequencyState] = useState<DigestFrequency>('off');
 
   useEffect(() => {
     loadSettings();
     setCurrentLanguage(getCurrentLanguage());
+    void getDigestFrequency().then(setDigestFrequencyState);
   }, [loadSettings]);
+
+  const getDigestFrequencyLabel = () => {
+    switch (digestFrequency) {
+      case 'daily':
+        return t('settings.digestFrequency.daily');
+      case 'weekly':
+        return t('settings.digestFrequency.weekly');
+      default:
+        return t('settings.digestFrequency.off');
+    }
+  };
+
+  const cycleDigestFrequency = async () => {
+    const next: DigestFrequency =
+      digestFrequency === 'off' ? 'daily' : digestFrequency === 'daily' ? 'weekly' : 'off';
+    await setDigestFrequency(next);
+    setDigestFrequencyState(next);
+    await scheduleBookmarkDigest(bookmarks, next);
+  };
 
   const getLanguageLabel = (language: SupportedLanguage | 'system') => {
     if (language === 'system') {
@@ -283,20 +312,20 @@ export default function SettingsScreen() {
               
               <View style={styles.separator} />
               
-              <View style={[styles.settingItem, styles.settingItemDisabled]}>
+              <TouchableOpacity style={styles.settingItem} onPress={cycleDigestFrequency}>
                 <View style={styles.settingIcon}>
                   <Bell size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>
-                    {t('settings.notificationPreferences.title')}
+                  <Text style={styles.settingTitle}>
+                    {t('settings.digestFrequency.title')}
                   </Text>
-                  <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
-                    {t('settings.notificationPreferences.subtitle')}
+                  <Text style={styles.settingSubtitle}>
+                    {t('settings.digestFrequency.subtitle')}
                   </Text>
                 </View>
-                {renderComingSoonBadge()}
-              </View>
+                <Text style={styles.settingValue}>{getDigestFrequencyLabel()}</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -665,6 +694,12 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     color: '#6B7280',
+  },
+  settingValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4F46E5',
+    marginLeft: 8,
   },
   settingSubtitleDisabled: {
     color: '#D1D5DB',

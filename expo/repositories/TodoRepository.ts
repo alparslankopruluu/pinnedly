@@ -2,6 +2,8 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 import { TodoItem, ID } from '@/types';
 import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
+import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
+import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
 import { trackEntityEvent } from '@/lib/analytics';
 
 export class TodoRepository {
@@ -44,6 +46,7 @@ export class TodoRepository {
       projectId: todo.projectId ?? null,
       noteId: todo.noteId ?? null,
       category: todo.category ?? DEFAULT_CONTENT_CATEGORY,
+      reminderSchedule: todo.reminderSchedule ?? getDefaultReminderSchedule(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -65,6 +68,7 @@ export class TodoRepository {
       ...(updates.projectId !== undefined && { projectId: updates.projectId || null }),
       ...(updates.noteId !== undefined && { noteId: updates.noteId || null }),
       ...(updates.category !== undefined && { category: updates.category }),
+      ...(updates.reminderSchedule !== undefined && { reminderSchedule: updates.reminderSchedule }),
       updatedAt: serverTimestamp(),
     });
     const updated = await ref.get();
@@ -101,6 +105,7 @@ export class TodoRepository {
       createdAt: timestampToMillis(data.createdAt),
       updatedAt: timestampToMillis(data.updatedAt),
       category: normalizeCategory(data.category as string | undefined),
+      reminderSchedule: mapReminderScheduleFromFirestore(data.reminderSchedule),
     };
   }
 }
