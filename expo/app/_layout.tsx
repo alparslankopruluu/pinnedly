@@ -9,6 +9,7 @@ import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { OfflineProvider } from "@/providers/OfflineProvider";
 import { DialogProvider } from "@/providers/DialogProvider";
 import { AuthProvider, useAuth } from "@/store/useAuthStore";
+import { PremiumProvider } from "@/providers/PremiumProvider";
 import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
 import { SharingProvider } from "@/store/useSharingStore";
 import { initializeFirestore } from "@/lib/firestore";
@@ -134,17 +135,19 @@ export default function RootLayout() {
         <ShareIntentProviderBoundary>
           <GestureHandlerRootView style={styles.container}>
             <AuthProvider>
-              <OnboardingProvider>
-                <SharingProvider>
-                  <OfflineProvider>
-                    <DialogProvider>
-                      <ShareIntentHandler />
-                      <ClipboardUrlBanner />
-                      <RootLayoutNav />
-                    </DialogProvider>
-                  </OfflineProvider>
-                </SharingProvider>
-              </OnboardingProvider>
+              <PremiumProvider>
+                <OnboardingProvider>
+                  <SharingProvider>
+                    <OfflineProvider>
+                      <DialogProvider>
+                        <ShareIntentHandler />
+                        <ClipboardUrlBanner />
+                        <RootLayoutNav />
+                      </DialogProvider>
+                    </OfflineProvider>
+                  </SharingProvider>
+                </OnboardingProvider>
+              </PremiumProvider>
             </AuthProvider>
           </GestureHandlerRootView>
         </ShareIntentProviderBoundary>

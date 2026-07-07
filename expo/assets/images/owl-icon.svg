@@ -1,0 +1,16 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="200" fill="#6366F1"/>
+  <!-- Owl Body -->
+  <path d="M512 250C380 250 280 350 280 550C280 750 380 850 512 850C644 850 744 750 744 550C744 350 644 250 512 250Z" fill="white"/>
+  <!-- Eyes -->
+  <circle cx="410" cy="500" r="80" fill="#F3F4F6"/>
+  <circle cx="614" cy="500" r="80" fill="#F3F4F6"/>
+  <!-- Pupils -->
+  <circle cx="410" cy="500" r="35" fill="#1F2937"/>
+  <circle cx="614" cy="500" r="35" fill="#1F2937"/>
+  <!-- Beak -->
+  <path d="M512 580L482 630H542L512 580Z" fill="#F59E0B"/>
+  <!-- Wings (Subtle) -->
+  <path d="M280 550C280 450 320 400 350 380" stroke="#E5E7EB" stroke-width="20" stroke-linecap="round"/>
+  <path d="M744 550C744 450 704 400 674 380" stroke="#E5E7EB" stroke-width="20" stroke-linecap="round"/>
+</svg>

@@ -52,17 +52,18 @@ import {
 } from '@/services/bookmarkDigest';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { useAuth } from '@/store/useAuthStore';
+import { usePremium } from '@/providers/PremiumProvider';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { isPremium, presentPaywall, presentCustomerCenter } = usePremium();
   const {
     theme,
     fontSize,
     pushNotifications,
     emailNotifications,
     linkedAccounts,
-    currentPlan,
     dataExportInProgress,
     updateTheme,
     updateFontSize,
@@ -74,7 +75,6 @@ export default function SettingsScreen() {
   } = useSettingsStore();
   const { bookmarks } = useBookmarkStore();
 
-  const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
   const [showThemeSelector, setShowThemeSelector] = useState<boolean>(false);
   const [showLanguageSelector, setShowLanguageSelector] = useState<boolean>(false);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(getCurrentLanguage());
@@ -283,34 +283,37 @@ export default function SettingsScreen() {
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
-                onPress={currentPlan === 'free' ? () => setShowPremiumModal(true) : undefined}
+                onPress={() => presentPaywall()}
               >
                 <View style={styles.settingIcon}>
-                  <Crown size={20} color="#6B7280" />
+                  <Crown size={20} color="#6366F1" />
                 </View>
                 <View style={styles.settingContent}>
                   <Text style={styles.settingTitle}>{t('settings.currentPlan.title')}</Text>
                   <Text style={styles.settingSubtitle}>
-                    {currentPlan === 'free' ? t('settings.currentPlan.free') : t('settings.currentPlan.plan', { plan: currentPlan })}
+                    {isPremium ? t('settings.currentPlan.plan', { plan: 'Pro' }) : t('settings.currentPlan.free')}
                   </Text>
                 </View>
-                {currentPlan === 'free' && <ChevronRight size={20} color="#9CA3AF" />}
+                <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
               
               <View style={styles.separator} />
               
-              <View style={[styles.settingItem, styles.settingItemDisabled]}>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => presentCustomerCenter()}
+              >
                 <View style={styles.settingIcon}>
                   <Shield size={20} color="#6B7280" />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>{t('settings.billingHistory.title')}</Text>
-                  <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
+                  <Text style={styles.settingTitle}>{t('settings.billingHistory.title')}</Text>
+                  <Text style={styles.settingSubtitle}>
                     {t('settings.billingHistory.subtitle')}
                   </Text>
                 </View>
-                {renderComingSoonBadge()}
-              </View>
+                <ChevronRight size={20} color="#9CA3AF" />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -569,12 +572,6 @@ export default function SettingsScreen() {
 
           <View style={styles.bottomSpacing} />
         </ScrollView>
-
-        {/* Premium Modal */}
-        <PremiumModal
-          visible={showPremiumModal}
-          onClose={() => setShowPremiumModal(false)}
-        />
 
         {/* Theme Selector Modal */}
         {showThemeSelector && (
