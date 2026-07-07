@@ -9,7 +9,7 @@ import {
   Switch,
   ScrollView,
 } from 'react-native';
-import { X, Bell } from 'lucide-react-native';
+import { X, Bell } from '@/components/icons/lucide';
 import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
 import { ReminderSchedule } from '@/types';
 import { REMINDER_PRESET_DAYS } from '@/constants/reminderDefaults';

@@ -17,7 +17,7 @@ import {
   Lightbulb,
   Plane,
   Heart,
-} from 'lucide-react-native';
+} from '@/components/icons/lucide';
 import {
   ContentCategoryId,
   CONTENT_CATEGORIES,

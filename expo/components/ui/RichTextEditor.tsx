@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,8 @@ import {
   TextInput,
   Platform,
 } from 'react-native';
-import { Bold, Italic, List, Link as LinkIcon, Strikethrough } from 'lucide-react-native';
+import { Bold, Italic, List, Link as LinkIcon, Strikethrough } from '@/components/icons/lucide';
 import { NOTE_EDITOR_TEXT_STYLE, NOTE_MARKDOWN_STYLE } from '@/utils/markdownEditor';
-
-declare const require: <T = unknown>(moduleName: string) => T;
 
 interface RichTextEditorProps {
   value: string;
@@ -23,6 +21,7 @@ interface RichTextEditorProps {
 }
 
 type StyleType = 'bold' | 'italic' | 'strikethrough' | 'list' | 'link';
+type LiveMarkdownModule = typeof import('@expensify/react-native-live-markdown');
 
 const EDITOR_PADDING = 16;
 
@@ -58,19 +57,6 @@ function hasMarkers(selected: string, open: string, close: string): boolean {
   return selected.startsWith(open) && selected.endsWith(close);
 }
 
-function getLiveMarkdownModule() {
-  if (Platform.OS === 'web' && typeof window === 'undefined') return null;
-
-  try {
-    return require<typeof import('@expensify/react-native-live-markdown')>(
-      '@expensify/react-native-live-markdown'
-    );
-  } catch (error) {
-    console.warn('Live markdown module unavailable:', error);
-    return null;
-  }
-}
-
 export function RichTextEditor({
   value,
   onChangeText,
@@ -83,10 +69,28 @@ export function RichTextEditor({
   const [text, setText] = useState(value);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [activeStyles, setActiveStyles] = useState<Set<string>>(new Set());
+  const [liveMarkdown, setLiveMarkdown] = useState<LiveMarkdownModule | null>(null);
   const inputRef = useRef<TextInput>(null);
-  const liveMarkdown = getLiveMarkdownModule();
   const MarkdownTextInput = liveMarkdown?.MarkdownTextInput;
   const parseExpensiMark = liveMarkdown?.parseExpensiMark;
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window === 'undefined') return;
+
+    let isMounted = true;
+    import('@expensify/react-native-live-markdown')
+      .then((module) => {
+        if (isMounted) setLiveMarkdown(module);
+      })
+      .catch((error) => {
+        console.warn('Live markdown module unavailable:', error);
+        if (isMounted) setLiveMarkdown(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   React.useEffect(() => {
     if (value !== text) {

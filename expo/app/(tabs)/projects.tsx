@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { List, Grid3X3, X } from 'lucide-react-native';
+import { List, Grid3X3, X } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useProjectStore } from '@/providers/OfflineProvider';
 import { FilterChips } from '@/components/ui/FilterChips';

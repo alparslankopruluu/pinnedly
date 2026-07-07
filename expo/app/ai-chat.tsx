@@ -14,7 +14,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { X, Send, Save, Sparkles } from 'lucide-react-native';
+import { X, Send, Save, Sparkles } from '@/components/icons/lucide';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { ChatTypingIndicator } from '@/components/ChatTypingIndicator';
 import { sendWorkspaceChat, WorkspaceChatError } from '@/services/aiWorkspaceChat';

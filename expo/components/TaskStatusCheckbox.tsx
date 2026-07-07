@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
-import { Check, Minus } from 'lucide-react-native';
+import { Check, Minus } from '@/components/icons/lucide';
 import { Task } from '@/types';
 
 interface TaskStatusCheckboxProps {

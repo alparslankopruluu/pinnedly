@@ -11,11 +11,11 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getFabBottomOffset, getScrollBottomPadding } from '@/utils/layout';
-import { Check, Circle, Plus, Search, Trash2, Flag, ChevronRight, ListTodo } from 'lucide-react-native';
+import { Check, Circle, Plus, Search, Trash2, Flag, ChevronRight, ListTodo } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useTodoStore, PriorityFilter, StatusFilter } from '@/store/useTodoStore';
 import { TodoItem, ID } from '@/types';
-import { formatRelativeTime, isOverdue } from '@/utils/date';
+import { isOverdue } from '@/utils/date';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 

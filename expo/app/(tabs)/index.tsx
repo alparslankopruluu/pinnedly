@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react-native';
+import { CheckCircle, Clock, TrendingUp, Sparkles } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { useBookmarkStore, useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
@@ -24,7 +24,7 @@ function HomeContent() {
     loadData();
   }, [loadData]);
 
-  const getContinueItems = (): Array<Bookmark | Note> => {
+  const getContinueItems = (): (Bookmark | Note)[] => {
     const neverOpenedBookmarks = bookmarks
       .filter((b) => b.openCount === 0)
       .slice(0, 2);

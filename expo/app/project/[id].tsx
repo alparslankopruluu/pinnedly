@@ -14,7 +14,6 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getOverlayFabBottomOffset } from '@/utils/layout';
@@ -23,24 +22,21 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
 import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
-import { Task, ID } from '@/types';
+import { Task } from '@/types';
 import {
   ArrowLeft,
   Share,
-  Archive,
   Edit,
   Bell,
   Plus,
   Check,
   Bookmark,
   FileText,
-  Calendar,
   Clock,
-  MoreHorizontal,
   Trash2,
   Users,
   X,
-} from 'lucide-react-native';
+} from '@/components/icons/lucide';
 import { notificationService } from '@/utils/notifications';
 import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
 import { ProjectMembersModal } from '@/components/ProjectMembersModal';
@@ -360,6 +356,7 @@ export default function ProjectDetailScreen() {
   const handleUploadGalleryImage = async () => {
     if (!project || isUploadingGallery) return;
 
+    const ImagePicker = await import('expo-image-picker');
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       showAppAlert(
@@ -466,25 +463,6 @@ export default function ProjectDetailScreen() {
       console.error('Failed to delete project:', error);
       showAppAlert(t('common.error'), t('projectDetail.alerts.deleteFailed'), undefined, { variant: 'error' });
     }
-  };
-
-  const handleArchive = () => {
-    showAppAlert(
-      t('projectDetail.archiveProject.title'),
-      t('projectDetail.archiveProject.message'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('projectDetail.archiveProject.action'),
-          style: 'destructive',
-          onPress: () => {
-            // Here you would implement archiving logic
-            console.log('Archiving project:', project.id);
-            showAppAlert(t('common.success'), t('projectDetail.alerts.archived'), undefined, { variant: 'success' });
-          },
-        },
-      ]
-    );
   };
 
   const handleNudgeMe = () => {
@@ -832,6 +810,11 @@ export default function ProjectDetailScreen() {
               )}
               
               <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+                  <Edit size={16} color="#6B7280" />
+                  <Text style={styles.editButtonText}>{t('common.edit')}</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity style={styles.editButton} onPress={handleShowMembers}>
                   <Users size={16} color="#6B7280" />
                   <Text style={styles.editButtonText}>{t('projectDetail.members')}</Text>

@@ -7,7 +7,7 @@ import { useAuth } from '@/store/useAuthStore';
 import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Eye, EyeOff, Phone } from '@/components/icons/lucide';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 
 export default function SignIn() {
@@ -27,7 +27,7 @@ export default function SignIn() {
       await trackButtonPress('sign_in', 'email_sign_in');
       await signIn(email.trim(), password);
       router.replace('/(tabs)');
-    } catch (error) {
+    } catch {
       showAppAlert(t('auth.errors.signInFailed'), t('auth.errors.checkCredentials'));
     }
   };
@@ -56,7 +56,7 @@ export default function SignIn() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1e293b" />
+          <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.signIn')}</Text>
       </View>
@@ -92,11 +92,11 @@ export default function SignIn() {
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeButton}
               >
-                <Ionicons
-                  name={showPassword ? 'eye-off' : 'eye'}
-                  size={20}
-                  color="#64748b"
-                />
+                {showPassword ? (
+                  <EyeOff size={20} color="#64748b" />
+                ) : (
+                  <Eye size={20} color="#64748b" />
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -133,7 +133,7 @@ export default function SignIn() {
             router.push('./phone-sign-in');
           }}
         >
-          <Ionicons name="call-outline" size={18} color="#4f46e5" />
+          <Phone size={18} color="#4f46e5" />
           <Text style={styles.phoneLinkText}>{t('auth.signInWithPhone')}</Text>
         </TouchableOpacity>
 

@@ -8,7 +8,7 @@ import {
   PanResponder,
   LayoutChangeEvent,
 } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import { Plus } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Project, Task } from '@/types';

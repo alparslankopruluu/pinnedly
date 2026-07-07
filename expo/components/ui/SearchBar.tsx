@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
-import { Search } from 'lucide-react-native';
+import { Search } from '@/components/icons/lucide';
 
 interface SearchBarProps {
   value: string;

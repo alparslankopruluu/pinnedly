@@ -5,14 +5,13 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  ScrollView,
 } from 'react-native';
 import {
   AlertCircle,
   CheckCircle2,
   Info,
   TriangleAlert,
-} from 'lucide-react-native';
+} from '@/components/icons/lucide';
 
 export type DialogVariant = 'default' | 'success' | 'error' | 'info' | 'warning';
 export type DialogButtonStyle = 'default' | 'cancel' | 'destructive';

@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
   withDelay,
 } from 'react-native-reanimated';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles } from '@/components/icons/lucide';
 
 function TypingDot({ delay }: { delay: number }) {
   const opacity = useSharedValue(0.35);

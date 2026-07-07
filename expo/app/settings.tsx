@@ -10,7 +10,6 @@ import {
   Platform,
   Linking
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, Stack } from 'expo-router';
 import { 
   User, 
@@ -33,7 +32,7 @@ import {
   Globe,
   Inbox,
   Compass,
-} from 'lucide-react-native';
+} from '@/components/icons/lucide';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { PremiumModal } from '@/components/PremiumModal';
 import { forceTestCrash } from '@/lib/crashlytics';
@@ -57,7 +56,6 @@ import { useAuth } from '@/store/useAuthStore';
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const insets = useSafeAreaInsets();
   const {
     theme,
     fontSize,

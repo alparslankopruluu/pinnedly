@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, Calendar, Flag } from 'lucide-react-native';
+import { X, Calendar, Flag } from '@/components/icons/lucide';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTodoStore } from '@/store/useTodoStore';
 import { TodoItem } from '@/types';
@@ -83,11 +83,6 @@ export default function AddTodoScreen() {
     }
   }, [existingTodo]);
 
-  const parseDueDate = (): number | undefined => {
-    if (!hasDueDate) return undefined;
-    return dueDateToTimestamp(dueDate);
-  };
-
   const handleDueDateToggle = useCallback((enabled: boolean) => {
     setHasDueDate(enabled);
     if (enabled) {
@@ -107,13 +102,15 @@ export default function AddTodoScreen() {
     savingRef.current = true;
     setSaving(true);
     try {
+      const parsedDueDate = hasDueDate ? dueDateToTimestamp(dueDate) : undefined;
+
       if (isEditing && existingTodo) {
         await updateTodo(existingTodo.id, {
           title: trimmedTitle,
           description: description.trim() || undefined,
           priority,
           completed,
-          dueDate: parseDueDate(),
+          dueDate: parsedDueDate,
           category,
         });
       } else {
@@ -122,7 +119,7 @@ export default function AddTodoScreen() {
           description: description.trim() || undefined,
           priority,
           completed: false,
-          dueDate: parseDueDate(),
+          dueDate: parsedDueDate,
           category,
         });
       }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  ArrowLeft,
+  Bookmark,
+  ChevronRight,
+  FileText,
+  Folder,
+  List,
+  Search,
+} from '@/components/icons/lucide';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useSharing } from '@/store/useSharingStore';
 import { EntityShare } from '@/types';
@@ -21,18 +29,18 @@ export default function ShareInbox() {
   const [shares, setShares] = useState<EntityShare[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  useEffect(() => {
-    loadShares();
-  }, []);
-
-  const loadShares = async () => {
+  const loadShares = useCallback(async () => {
     try {
       const userShares = await getUserShares();
       setShares(userShares);
     } catch (error) {
       console.error('Failed to load shares:', error);
     }
-  };
+  }, [getUserShares]);
+
+  useEffect(() => {
+    loadShares();
+  }, [loadShares]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -43,15 +51,15 @@ export default function ShareInbox() {
   const getEntityIcon = (entityType: string) => {
     switch (entityType) {
       case 'bookmark':
-        return 'bookmark-outline';
+        return <Bookmark size={20} color="#4f46e5" />;
       case 'note':
-        return 'document-text-outline';
+        return <FileText size={20} color="#4f46e5" />;
       case 'project':
-        return 'folder-outline';
+        return <Folder size={20} color="#4f46e5" />;
       case 'list':
-        return 'list-outline';
+        return <List size={20} color="#4f46e5" />;
       default:
-        return 'document-outline';
+        return <FileText size={20} color="#4f46e5" />;
     }
   };
 
@@ -86,11 +94,7 @@ export default function ShareInbox() {
     >
       <View style={styles.shareHeader}>
         <View style={styles.entityInfo}>
-          <Ionicons
-            name={getEntityIcon(item.entityType) as any}
-            size={20}
-            color="#4f46e5"
-          />
+          {getEntityIcon(item.entityType)}
           <Text style={styles.entityType}>
             {t(`entityTypes.${item.entityType}` as 'entityTypes.bookmark')}
           </Text>
@@ -113,7 +117,7 @@ export default function ShareInbox() {
       </View>
 
       <View style={styles.shareFooter}>
-        <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
+        <ChevronRight size={16} color="#9ca3af" />
       </View>
     </TouchableOpacity>
   );
@@ -122,11 +126,11 @@ export default function ShareInbox() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1e293b" />
+          <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('shareInbox.title')}</Text>
         <TouchableOpacity onPress={() => router.push('/people-search')} style={styles.searchButton}>
-          <Ionicons name="search" size={24} color="#1e293b" />
+          <Search size={24} color="#1e293b" />
         </TouchableOpacity>
       </View>
 

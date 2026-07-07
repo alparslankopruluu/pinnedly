@@ -13,7 +13,7 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
-import { X } from 'lucide-react-native';
+import { X } from '@/components/icons/lucide';
 import { useProjectStore } from '@/providers/OfflineProvider';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';

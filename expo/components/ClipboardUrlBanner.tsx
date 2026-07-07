@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown, ChevronUp, Link2, X } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, Link2, X } from '@/components/icons/lucide';
 import { useAuth } from '@/store/useAuthStore';
 import { extractUrlFromText, getSourceLabel } from '@/utils/bookmark';
 import { getSourceFromUrl, fetchUrlMetadata } from '@/utils/metadata';

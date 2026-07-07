@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import * as Clipboard from 'expo-clipboard';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+import { Eye, Pencil, Trash2, X } from '@/components/icons/lucide';
 import { Button } from '@/components/ui/Button';
 import { useSharing } from '@/store/useSharingStore';
 import { useAuth } from '@/store/useAuthStore';
@@ -41,22 +41,22 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   const [inviteUrl, setInviteUrl] = useState<string>('');
   const [isCreatingLink, setIsCreatingLink] = useState(false);
 
-  useEffect(() => {
-    if (visible) {
-      loadShares();
-      setInviteUrl('');
-      setActiveTab('people');
-    }
-  }, [visible]);
-
-  const loadShares = async () => {
+  const loadShares = useCallback(async () => {
     try {
       const entityShares = await getEntityShares(entityId, entityType);
       setShares(entityShares);
     } catch (error) {
       console.error('Failed to load shares:', error);
     }
-  };
+  }, [entityId, entityType, getEntityShares]);
+
+  useEffect(() => {
+    if (visible) {
+      loadShares();
+      setInviteUrl('');
+      setActiveTab('people');
+    }
+  }, [visible, loadShares]);
 
   const handleSearch = async (query: string) => {
     setEmail(query);
@@ -100,7 +100,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
     try {
       await updateSharePermission(shareId, newPermission, entityId, entityType);
       await loadShares();
-    } catch (error) {
+    } catch {
       showAppAlert(t('common.error'), t('share.alerts.updatePermissionFailed'), undefined, { variant: 'error' });
     }
   };
@@ -109,7 +109,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
     try {
       await removeShare(shareId, entityId, entityType);
       await loadShares();
-    } catch (error) {
+    } catch {
       showAppAlert(t('common.error'), t('share.alerts.removeShareFailed'), undefined, { variant: 'error' });
     }
   };
@@ -158,7 +158,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           style={[styles.permissionButton, permission === 'view' && styles.permissionButtonActive]}
           onPress={() => setPermission('view')}
         >
-          <Ionicons name="eye-outline" size={16} color={permission === 'view' ? '#ffffff' : '#64748b'} />
+          <Eye size={16} color={permission === 'view' ? '#ffffff' : '#64748b'} />
           <Text style={[styles.permissionButtonText, permission === 'view' && styles.permissionButtonTextActive]}>
             {t('share.permissions.view')}
           </Text>
@@ -167,7 +167,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           style={[styles.permissionButton, permission === 'edit' && styles.permissionButtonActive]}
           onPress={() => setPermission('edit')}
         >
-          <Ionicons name="create-outline" size={16} color={permission === 'edit' ? '#ffffff' : '#64748b'} />
+          <Pencil size={16} color={permission === 'edit' ? '#ffffff' : '#64748b'} />
           <Text style={[styles.permissionButtonText, permission === 'edit' && styles.permissionButtonTextActive]}>
             {t('share.permissions.edit')}
           </Text>
@@ -181,7 +181,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#1e293b" />
+            <X size={24} color="#1e293b" />
           </TouchableOpacity>
           <Text style={styles.title}>{t('share.shareEntity', { entityTitle })}</Text>
           <View style={styles.placeholder} />
@@ -324,7 +324,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
                       style={styles.removeButton}
                       onPress={() => handleRemoveShare(share.id)}
                     >
-                      <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                      <Trash2 size={16} color="#ef4444" />
                     </TouchableOpacity>
                   </View>
                 </View>

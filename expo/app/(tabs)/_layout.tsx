@@ -1,5 +1,5 @@
 import { Tabs, router } from 'expo-router';
-import { Home, Bookmark, FolderOpen, FileText, User, Settings, Plus, ListTodo } from 'lucide-react-native';
+import { Home, Bookmark, FolderOpen, FileText, User, Settings, Plus, ListTodo } from '@/components/icons/lucide';
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';

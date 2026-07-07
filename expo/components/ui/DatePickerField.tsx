@@ -9,7 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { Calendar } from 'lucide-react-native';
+import { Calendar } from '@/components/icons/lucide';
 
 interface DatePickerFieldProps {
   value: Date | null;

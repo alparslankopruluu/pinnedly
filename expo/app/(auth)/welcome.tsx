@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronRight, FileText, Bookmark, FolderOpen, Users } from 'lucide-react-native';
+import { ChevronRight, FileText, Bookmark, FolderOpen, Users } from '@/components/icons/lucide';
 
 export default function Welcome() {
   const { t } = useTranslation();

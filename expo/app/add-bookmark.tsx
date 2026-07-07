@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   View, 
@@ -14,8 +14,7 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { X, Camera, Plus } from 'lucide-react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { X, Camera, Plus } from '@/components/icons/lucide';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
@@ -45,7 +44,7 @@ export default function AddBookmarkScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [category, setCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
 
-  const handleUrlChange = async (text: string) => {
+  const handleUrlChange = useCallback(async (text: string) => {
     setUrl(text);
     
     // Clear previous metadata when URL changes
@@ -76,15 +75,16 @@ export default function AddBookmarkScreen() {
         setIsLoading(false);
       }
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     if (typeof initialUrl === 'string' && initialUrl.trim()) {
       handleUrlChange(decodeURIComponent(initialUrl.trim()));
     }
-  }, [initialUrl]);
+  }, [initialUrl, handleUrlChange]);
 
   const pickImage = async () => {
+    const ImagePicker = await import('expo-image-picker');
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       showAppAlert(t('addBookmark.alerts.permissionNeeded'), t('addBookmark.alerts.cameraPermission'));

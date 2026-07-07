@@ -9,7 +9,7 @@ import {
   Crown,
   Sparkles,
   Pencil,
-} from 'lucide-react-native';
+} from '@/components/icons/lucide';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/store/useAuthStore';
 import { PremiumModal } from '@/components/PremiumModal';

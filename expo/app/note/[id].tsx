@@ -21,7 +21,7 @@ import {
   X,
   Calendar,
   User
-} from 'lucide-react-native';
+} from '@/components/icons/lucide';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { ShareModal } from '@/components/ShareModal';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';

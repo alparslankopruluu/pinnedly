@@ -13,7 +13,7 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { X, Lock, Globe, Users } from 'lucide-react-native';
+import { X, Lock, Globe, Users } from '@/components/icons/lucide';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';

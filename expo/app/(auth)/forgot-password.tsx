@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Mail } from '@/components/icons/lucide';
 
 export default function ForgotPassword() {
   const { t } = useTranslation();
@@ -24,7 +24,7 @@ export default function ForgotPassword() {
     try {
       await resetPassword(email.trim());
       setIsEmailSent(true);
-    } catch (err) {
+    } catch {
       setError(t('auth.errors.resetEmailFailed'));
     }
   };
@@ -34,7 +34,7 @@ export default function ForgotPassword() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#1e293b" />
+            <ArrowLeft size={24} color="#1e293b" />
           </TouchableOpacity>
           <Text style={styles.title}>{t('auth.checkYourEmail')}</Text>
         </View>
@@ -42,7 +42,7 @@ export default function ForgotPassword() {
         <View style={styles.content}>
           <View style={styles.successContainer}>
             <View style={styles.iconContainer}>
-              <Ionicons name="mail-outline" size={64} color="#4f46e5" />
+              <Mail size={64} color="#4f46e5" />
             </View>
             
             <Text style={styles.successTitle}>{t('auth.emailSent')}</Text>
@@ -69,7 +69,7 @@ export default function ForgotPassword() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1e293b" />
+          <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.resetPassword')}</Text>
       </View>

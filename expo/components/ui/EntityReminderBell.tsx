@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import { Bell } from 'lucide-react-native';
+import { Bell } from '@/components/icons/lucide';
 import { ReminderPickerModal } from '@/components/ui/ReminderPickerModal';
 import { ReminderSchedule } from '@/types';
 import { useBookmarkStore, useNoteStore } from '@/providers/OfflineProvider';

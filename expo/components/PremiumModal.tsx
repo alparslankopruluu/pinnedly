@@ -8,7 +8,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import { X, Crown, Check, Zap, Users, Bell, Mic } from 'lucide-react-native';
+import { X, Crown, Check, Zap, Users, Bell, Mic } from '@/components/icons/lucide';
 import { useTranslation } from 'react-i18next';
 import { trackSubscriptionEvent } from '@/lib/analytics';
 import { logCrashlytics } from '@/lib/crashlytics';

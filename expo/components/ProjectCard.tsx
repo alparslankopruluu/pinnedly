@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from 'react
 import { Project } from '@/types';
 import { ProgressRing } from './ui/ProgressRing';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
-import { Edit3 } from 'lucide-react-native';
+import { Edit3 } from '@/components/icons/lucide';
 import { useTranslation } from 'react-i18next';
 
 interface ProjectCardProps {

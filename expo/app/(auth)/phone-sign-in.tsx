@@ -7,7 +7,7 @@ import { useAuth } from '@/store/useAuthStore';
 import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft } from '@/components/icons/lucide';
 
 export default function PhoneSignIn() {
   const { t } = useTranslation();
@@ -52,7 +52,7 @@ export default function PhoneSignIn() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1e293b" />
+          <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.phoneSignIn')}</Text>
       </View>

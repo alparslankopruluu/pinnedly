@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Modal, Text, Pressable } from 'react-native';
-import { Plus, Bookmark, FolderPlus, FileText } from 'lucide-react-native';
+import { Plus, Bookmark, FolderPlus, FileText } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

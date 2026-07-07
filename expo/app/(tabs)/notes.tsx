@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileText, Globe, Lock, Users } from 'lucide-react-native';
+import { FileText, Globe, Lock, Users } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { EmptyState } from '@/components/ui/EmptyState';

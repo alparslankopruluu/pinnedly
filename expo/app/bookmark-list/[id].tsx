@@ -4,7 +4,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Heart, Share, Users, Edit3, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Heart, Share, Users, Edit3, Trash2 } from '@/components/icons/lucide';
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { BookmarkList, Bookmark } from '@/types';
 import { BookmarkCard } from '@/components/BookmarkCard';
@@ -46,7 +46,7 @@ export default function BookmarkListDetailScreen() {
       console.error('Error loading list data:', error);
       showAppAlert(t('common.error'), t('bookmarkList.alerts.loadFailed'), undefined, { variant: 'error' });
     }
-  }, [id, getListById, getBookmarksByListId, isFollowingList]);
+  }, [id, getListById, getBookmarksByListId, isFollowingList, t]);
 
   useEffect(() => {
     if (id) {

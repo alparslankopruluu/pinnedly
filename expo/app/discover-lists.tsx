@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Search, Users, Heart, ArrowLeft, Plus } from 'lucide-react-native';
+import { Search, Users, Heart, ArrowLeft, Plus } from '@/components/icons/lucide';
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { BookmarkList } from '@/types';
 import { Button } from '@/components/ui/Button';

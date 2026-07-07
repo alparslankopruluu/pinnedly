@@ -14,7 +14,7 @@ import {
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ExternalLink, Check, Archive, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, ExternalLink, Check, Archive, Trash2 } from '@/components/icons/lucide';
 import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { Button } from '@/components/ui/Button';

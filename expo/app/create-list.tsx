@@ -4,7 +4,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Lock, Globe, Users } from 'lucide-react-native';
+import { Lock, Globe, Users } from '@/components/icons/lucide';
 
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { Button } from '@/components/ui/Button';

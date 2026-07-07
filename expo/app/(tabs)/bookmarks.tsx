@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown } from 'lucide-react-native';
+import { ChevronDown } from '@/components/icons/lucide';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { SearchBar } from '@/components/ui/SearchBar';

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { showAppAlert } from '@/providers/DialogProvider';
-import { X, Users, Plus, Trash2, UserCheck, UserX } from 'lucide-react-native';
+import { X, Users, Plus, Trash2, UserCheck, UserX } from '@/components/icons/lucide';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/store/useProjectStore';
 import { ProjectCollaborator, User } from '@/types';

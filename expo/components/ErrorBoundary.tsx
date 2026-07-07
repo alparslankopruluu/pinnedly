@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { AlertTriangle, RefreshCw } from 'lucide-react-native';
-import i18n from '@/lib/i18n';
+import { AlertTriangle, RefreshCw } from '@/components/icons/lucide';
+import { t } from '@/lib/i18n';
 import { recordError } from '@/lib/crashlytics';
 
 interface Props {
@@ -38,13 +38,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <View style={styles.container}>
           <View style={styles.content}>
             <AlertTriangle size={48} color="#ef4444" />
-            <Text style={styles.title}>{i18n.t('errorBoundary.title')}</Text>
+            <Text style={styles.title}>{t('errorBoundary.title')}</Text>
             <Text style={styles.message}>
-              {this.state.error?.message || i18n.t('errorBoundary.message')}
+              {this.state.error?.message || t('errorBoundary.message')}
             </Text>
             <TouchableOpacity style={styles.retryButton} onPress={this.handleRetry}>
               <RefreshCw size={20} color="#ffffff" />
-              <Text style={styles.retryText}>{i18n.t('errorBoundary.tryAgain')}</Text>
+              <Text style={styles.retryText}>{t('errorBoundary.tryAgain')}</Text>
             </TouchableOpacity>
           </View>
         </View>

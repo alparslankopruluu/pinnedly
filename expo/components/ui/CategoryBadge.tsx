@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ContentCategoryId } from '@/constants/contentCategories';
-import { getCategoryDef } from '@/constants/contentCategories';
+import { ContentCategoryId, getCategoryDef } from '@/constants/contentCategories';
 
 interface CategoryBadgeProps {
   category?: ContentCategoryId | null;
