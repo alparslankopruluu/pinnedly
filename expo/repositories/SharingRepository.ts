@@ -1,6 +1,18 @@
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { EntityShare, ShareRequest, SharePermission, ID } from '@/types';
-import { COLLECTIONS, requireUserId, timestampToMillis } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  collection,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  limit,
+  query,
+  requireUserId,
+  timestampToMillis,
+  where,
+} from '@/lib/firestore';
 import { shareApi } from '@/services/shareApi';
 
 class SharingRepository {
@@ -38,33 +50,34 @@ class SharingRepository {
 
   async getEntityShares(entityId: ID, entityType: string): Promise<EntityShare[]> {
     const uid = requireUserId();
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.shares)
-      .where('createdBy', '==', uid)
-      .where('entityId', '==', entityId)
-      .where('entityType', '==', entityType)
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(getDb(), COLLECTIONS.shares),
+        where('createdBy', '==', uid),
+        where('entityId', '==', entityId),
+        where('entityType', '==', entityType)
+      )
+    );
 
     const shares: EntityShare[] = [];
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const userDoc = await firestore().collection(COLLECTIONS.users).doc(data.toUserId).get();
-      shares.push(this.mapShare(doc.id, data, userDoc.data()));
+    for (const shareDoc of snapshot.docs) {
+      const data = shareDoc.data();
+      const userDoc = await getDoc(doc(getDb(), COLLECTIONS.users, data.toUserId));
+      shares.push(this.mapShare(shareDoc.id, data, userDoc.data()));
     }
     return shares;
   }
 
   async getReceivedShares(userId: ID): Promise<EntityShare[]> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.shares)
-      .where('toUserId', '==', userId)
-      .get();
+    const snapshot = await getDocs(
+      query(collection(getDb(), COLLECTIONS.shares), where('toUserId', '==', userId))
+    );
 
     const shares: EntityShare[] = [];
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const creator = await firestore().collection(COLLECTIONS.users).doc(data.createdBy).get();
-      shares.push(this.mapShare(doc.id, data, creator.data()));
+    for (const shareDoc of snapshot.docs) {
+      const data = shareDoc.data();
+      const creator = await getDoc(doc(getDb(), COLLECTIONS.users, data.createdBy));
+      shares.push(this.mapShare(shareDoc.id, data, creator.data()));
     }
     return shares;
   }
@@ -90,13 +103,15 @@ class SharingRepository {
     entityType: string,
     userId: ID
   ): Promise<SharePermission | null> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.shares)
-      .where('entityId', '==', entityId)
-      .where('entityType', '==', entityType)
-      .where('toUserId', '==', userId)
-      .limit(1)
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(getDb(), COLLECTIONS.shares),
+        where('entityId', '==', entityId),
+        where('entityType', '==', entityType),
+        where('toUserId', '==', userId),
+        limit(1)
+      )
+    );
 
     if (snapshot.empty) return null;
     return snapshot.docs[0].data().permission as SharePermission;

@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import { randomUUID } from 'crypto';
 import { onRequest } from 'firebase-functions/v2/https';
 import { buildWorkspaceContext } from './contextBuilder';
 import { ChatMessage, generateWorkspaceAnswer, openaiApiKey } from './openai';
@@ -20,9 +21,20 @@ function setCors(res: { set: (key: string, value: string) => void }) {
   res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 }
 
+function sendError(
+  res: { status: (status: number) => { json: (body: unknown) => void } },
+  status: number,
+  code: string,
+  error: string,
+  requestId: string
+) {
+  res.status(status).json({ error, code, requestId });
+}
+
 export const aiWorkspaceChat = onRequest(
   { secrets: [openaiApiKey], cors: true, timeoutSeconds: 60 },
   async (req, res) => {
+    const requestId = randomUUID();
     setCors(res);
 
     if (req.method === 'OPTIONS') {
@@ -31,28 +43,28 @@ export const aiWorkspaceChat = onRequest(
     }
 
     if (req.method !== 'POST') {
-      res.status(405).json({ error: 'Method not allowed' });
+      sendError(res, 405, 'METHOD_NOT_ALLOWED', 'Method not allowed', requestId);
       return;
     }
 
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Missing authorization token' });
+      sendError(res, 401, 'AUTH_REQUIRED', 'Missing authorization token', requestId);
       return;
     }
 
-    let uid: string;
+    let uid: string | undefined;
     try {
       const decoded = await admin.auth().verifyIdToken(authHeader.slice(7));
       uid = decoded.uid;
     } catch {
-      res.status(401).json({ error: 'Invalid authorization token' });
+      sendError(res, 401, 'AUTH_REQUIRED', 'Invalid authorization token', requestId);
       return;
     }
 
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!message) {
-      res.status(400).json({ error: 'Message is required' });
+      sendError(res, 400, 'MESSAGE_REQUIRED', 'Message is required', requestId);
       return;
     }
 
@@ -83,8 +95,20 @@ export const aiWorkspaceChat = onRequest(
 
       res.status(200).json(result);
     } catch (error) {
-      console.error('aiWorkspaceChat failed:', error);
-      res.status(500).json({ error: 'Failed to generate workspace answer' });
+      console.error('aiWorkspaceChat failed:', {
+        requestId,
+        uid,
+        messageLength: message.length,
+        errorName: error instanceof Error ? error.name : undefined,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+      sendError(
+        res,
+        500,
+        'WORKSPACE_ANSWER_FAILED',
+        'Failed to generate workspace answer',
+        requestId
+      );
     }
   }
 );

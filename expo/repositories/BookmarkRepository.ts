@@ -1,6 +1,21 @@
-import firestore from '@react-native-firebase/firestore';
 import { Bookmark } from '@/types';
-import { COLLECTIONS, requireUserId, serverTimestamp, subscribeToOwnerCollection, timestampToMillis } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  collection,
+  deleteDoc,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  query,
+  requireUserId,
+  serverTimestamp,
+  setDoc,
+  subscribeToOwnerCollection,
+  timestampToMillis,
+  updateDoc,
+  where,
+} from '@/lib/firestore';
 import { trackEntityEvent } from '@/lib/analytics';
 import { tagNamesToTags } from '@/utils/bookmark';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
@@ -30,14 +45,16 @@ export class BookmarkRepository {
 
   async getBookmarks(): Promise<Bookmark[]> {
     const uid = requireUserId();
-    const snapshot = await firestore().collection(COLLECTIONS.bookmarks).where('ownerId', '==', uid).get();
-    return snapshot.docs.map((doc) => this.mapBookmark(doc.id, doc.data()));
+    const snapshot = await getDocs(
+      query(collection(getDb(), COLLECTIONS.bookmarks), where('ownerId', '==', uid))
+    );
+    return snapshot.docs.map((snapshotDoc) => this.mapBookmark(snapshotDoc.id, snapshotDoc.data()));
   }
 
   async getById(id: string): Promise<Bookmark | null> {
-    const doc = await firestore().collection(COLLECTIONS.bookmarks).doc(id).get();
-    if (!doc.exists()) return null;
-    return this.mapBookmark(doc.id, doc.data()!);
+    const bookmarkDoc = await getDoc(doc(getDb(), COLLECTIONS.bookmarks, id));
+    if (!bookmarkDoc.exists()) return null;
+    return this.mapBookmark(bookmarkDoc.id, bookmarkDoc.data());
   }
 
   async getByIds(ids: string[]): Promise<Bookmark[]> {
@@ -57,8 +74,8 @@ export class BookmarkRepository {
 
   async createBookmark(bookmark: CreateBookmarkInput): Promise<Bookmark> {
     const uid = requireUserId();
-    const ref = firestore().collection(COLLECTIONS.bookmarks).doc();
-    await ref.set({
+    const ref = doc(collection(getDb(), COLLECTIONS.bookmarks));
+    await setDoc(ref, {
       ownerId: uid,
       url: bookmark.url ?? null,
       title: bookmark.title ?? null,
@@ -79,7 +96,7 @@ export class BookmarkRepository {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    const created = await ref.get();
+    const created = await getDoc(ref);
     const mapped = this.mapBookmark(created.id, created.data()!);
     await trackEntityEvent('bookmark', 'created', mapped.id);
     return mapped;
@@ -87,7 +104,7 @@ export class BookmarkRepository {
 
   async updateBookmark(id: string, updates: Partial<Bookmark>): Promise<Bookmark> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.bookmarks).doc(id);
+    const ref = doc(getDb(), COLLECTIONS.bookmarks, id);
     const payload: Record<string, unknown> = { updatedAt: serverTimestamp() };
 
     if (updates.url !== undefined) payload.url = updates.url;
@@ -109,8 +126,8 @@ export class BookmarkRepository {
     if (updates.category !== undefined) payload.category = updates.category;
     if (updates.reminderSchedule !== undefined) payload.reminderSchedule = updates.reminderSchedule;
 
-    await ref.update(payload);
-    const updated = await ref.get();
+    await updateDoc(ref, payload);
+    const updated = await getDoc(ref);
     const mapped = this.mapBookmark(updated.id, updated.data()!);
     await trackEntityEvent('bookmark', 'updated', mapped.id);
     return mapped;
@@ -118,25 +135,25 @@ export class BookmarkRepository {
 
   async incrementOpenCount(id: string): Promise<Bookmark> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.bookmarks).doc(id);
-    const doc = await ref.get();
-    if (!doc.exists) throw new Error('Bookmark not found');
+    const ref = doc(getDb(), COLLECTIONS.bookmarks, id);
+    const bookmarkDoc = await getDoc(ref);
+    if (!bookmarkDoc.exists()) throw new Error('Bookmark not found');
 
-    const current = (doc.data()?.openCount as number) ?? 0;
-    await ref.update({
+    const current = (bookmarkDoc.data()?.openCount as number) ?? 0;
+    await updateDoc(ref, {
       openCount: current + 1,
       lastOpenedAt: serverTimestamp(),
       status: 'reading',
       updatedAt: serverTimestamp(),
     });
 
-    const updated = await ref.get();
+    const updated = await getDoc(ref);
     return this.mapBookmark(updated.id, updated.data()!);
   }
 
   async deleteBookmark(id: string): Promise<void> {
     requireUserId();
-    await firestore().collection(COLLECTIONS.bookmarks).doc(id).delete();
+    await deleteDoc(doc(getDb(), COLLECTIONS.bookmarks, id));
     await trackEntityEvent('bookmark', 'deleted', id);
   }
 

@@ -533,7 +533,12 @@
       "savedAsNote": "Conversation saved as a note!",
       "sendFailed": "Failed to send message. Please try again.",
       "saveFailed": "Failed to save conversation. Please try again.",
-      "authRequired": "Please sign in to use the workspace assistant."
+      "authRequired": "Please sign in to use the workspace assistant.",
+      "messageRequired": "Enter a message before sending.",
+      "networkError": "Could not reach the workspace assistant. Check your connection and try again.",
+      "timeout": "The workspace assistant took too long to respond. Please try again.",
+      "invalidResponse": "The workspace assistant returned an unexpected response. Please try again.",
+      "requestId": "Request ID: {{requestId}}"
     }
   },
   "premium": {

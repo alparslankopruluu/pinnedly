@@ -1,6 +1,22 @@
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { TodoItem, ID } from '@/types';
-import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  collection,
+  deleteDoc,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  onQuerySnapshot,
+  query,
+  requireUserId,
+  serverTimestamp,
+  setDoc,
+  timestampToMillis,
+  updateDoc,
+  where,
+} from '@/lib/firestore';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
 import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
@@ -16,8 +32,10 @@ export class TodoRepository {
 
   async getTodos(): Promise<TodoItem[]> {
     const uid = requireUserId();
-    const snapshot = await firestore().collection(COLLECTIONS.todos).where('ownerId', '==', uid).get();
-    return snapshot.docs.map((doc) => this.mapTodo(doc.id, doc.data()));
+    const snapshot = await getDocs(
+      query(collection(getDb(), COLLECTIONS.todos), where('ownerId', '==', uid))
+    );
+    return snapshot.docs.map((snapshotDoc) => this.mapTodo(snapshotDoc.id, snapshotDoc.data()));
   }
 
   subscribeToTodos(ownerId: string | null, onTodos: (todos: TodoItem[]) => void): () => void {
@@ -25,18 +43,20 @@ export class TodoRepository {
       onTodos([]);
       return () => undefined;
     }
-    return firestore()
-      .collection(COLLECTIONS.todos)
-      .where('ownerId', '==', ownerId)
-      .onSnapshot((snapshot) => {
-        onTodos(snapshot.docs.map((doc) => this.mapTodo(doc.id, doc.data())));
-      });
+    const todosQuery = query(
+      collection(getDb(), COLLECTIONS.todos),
+      where('ownerId', '==', ownerId)
+    );
+
+    return onQuerySnapshot(todosQuery, (snapshot) => {
+      onTodos(snapshot.docs.map((snapshotDoc) => this.mapTodo(snapshotDoc.id, snapshotDoc.data())));
+    });
   }
 
   async createTodo(todo: Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<TodoItem> {
     const uid = requireUserId();
-    const ref = firestore().collection(COLLECTIONS.todos).doc();
-    await ref.set({
+    const ref = doc(collection(getDb(), COLLECTIONS.todos));
+    await setDoc(ref, {
       ownerId: uid,
       title: todo.title,
       description: todo.description ?? null,
@@ -50,7 +70,7 @@ export class TodoRepository {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    const created = await ref.get();
+    const created = await getDoc(ref);
     const mapped = this.mapTodo(created.id, created.data()!);
     await trackEntityEvent('todo', 'created', mapped.id);
     return mapped;
@@ -58,8 +78,8 @@ export class TodoRepository {
 
   async updateTodo(id: ID, updates: Partial<Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>): Promise<TodoItem> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.todos).doc(id);
-    await ref.update({
+    const ref = doc(getDb(), COLLECTIONS.todos, id);
+    await updateDoc(ref, {
       ...(updates.title !== undefined && { title: updates.title }),
       ...(updates.description !== undefined && { description: updates.description }),
       ...(updates.completed !== undefined && { completed: updates.completed }),
@@ -71,7 +91,7 @@ export class TodoRepository {
       ...(updates.reminderSchedule !== undefined && { reminderSchedule: updates.reminderSchedule }),
       updatedAt: serverTimestamp(),
     });
-    const updated = await ref.get();
+    const updated = await getDoc(ref);
     const mapped = this.mapTodo(updated.id, updated.data()!);
     await trackEntityEvent('todo', 'updated', mapped.id);
     return mapped;
@@ -79,7 +99,7 @@ export class TodoRepository {
 
   async deleteTodo(id: ID): Promise<void> {
     requireUserId();
-    await firestore().collection(COLLECTIONS.todos).doc(id).delete();
+    await deleteDoc(doc(getDb(), COLLECTIONS.todos, id));
     await trackEntityEvent('todo', 'deleted', id);
   }
 

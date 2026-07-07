@@ -1,4 +1,4 @@
-import auth from '@react-native-firebase/auth';
+import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
 import { EntityInvite, EntityShare, SharePermission, User } from '@/types';
 
@@ -42,10 +42,10 @@ function getFunctionsBaseUrl(): string {
 }
 
 async function callFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
-  const user = auth().currentUser;
+  const user = getAuth().currentUser;
   if (!user) throw new ShareApiError('User not authenticated', 401, 'AUTH_REQUIRED');
 
-  const token = await user.getIdToken();
+  const token = await getIdToken(user);
   const response = await fetch(`${getFunctionsBaseUrl()}/${name}`, {
     method: 'POST',
     headers: {

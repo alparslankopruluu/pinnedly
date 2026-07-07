@@ -1,9 +1,19 @@
-import crashlytics from '@react-native-firebase/crashlytics';
+import {
+  crash,
+  getCrashlytics,
+  log,
+  recordError as recordCrashlyticsError,
+  setAttribute,
+  setCrashlyticsCollectionEnabled,
+  setUserId,
+} from '@react-native-firebase/crashlytics';
+
+const crashlytics = getCrashlytics();
 
 export async function initializeCrashlytics(): Promise<void> {
   try {
-    await crashlytics().setCrashlyticsCollectionEnabled(true);
-    crashlytics().log('Crashlytics initialized');
+    await setCrashlyticsCollectionEnabled(crashlytics, true);
+    log(crashlytics, 'Crashlytics initialized');
   } catch (error) {
     console.warn('Crashlytics init failed:', error);
   }
@@ -11,7 +21,7 @@ export async function initializeCrashlytics(): Promise<void> {
 
 export async function setCrashlyticsUser(userId: string | null): Promise<void> {
   try {
-    await crashlytics().setUserId(userId ?? '');
+    await setUserId(crashlytics, userId ?? '');
   } catch (error) {
     console.warn('Crashlytics setUserId failed:', error);
   }
@@ -20,7 +30,7 @@ export async function setCrashlyticsUser(userId: string | null): Promise<void> {
 export function setCrashlyticsAttributes(attrs: Record<string, string>): void {
   try {
     Object.entries(attrs).forEach(([key, value]) => {
-      crashlytics().setAttribute(key, value);
+      setAttribute(crashlytics, key, value);
     });
   } catch (error) {
     console.warn('Crashlytics setAttribute failed:', error);
@@ -29,7 +39,7 @@ export function setCrashlyticsAttributes(attrs: Record<string, string>): void {
 
 export function logCrashlytics(message: string): void {
   try {
-    crashlytics().log(message);
+    log(crashlytics, message);
   } catch (error) {
     console.warn('Crashlytics log failed:', error);
   }
@@ -37,8 +47,8 @@ export function logCrashlytics(message: string): void {
 
 export function recordError(error: Error, context?: string): void {
   try {
-    if (context) crashlytics().log(context);
-    crashlytics().recordError(error);
+    if (context) log(crashlytics, context);
+    recordCrashlyticsError(crashlytics, error);
   } catch (e) {
     console.warn('Crashlytics recordError failed:', e);
   }
@@ -46,6 +56,6 @@ export function recordError(error: Error, context?: string): void {
 
 /** Forces a native crash to verify Crashlytics setup (dev/testing only). */
 export function forceTestCrash(): void {
-  crashlytics().log('Test crash triggered from settings');
-  crashlytics().crash();
+  log(crashlytics, 'Test crash triggered from settings');
+  crash(crashlytics);
 }

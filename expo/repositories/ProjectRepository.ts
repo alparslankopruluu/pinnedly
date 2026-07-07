@@ -1,6 +1,24 @@
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Project, Task, User, ProjectCollaborator } from '@/types';
-import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  collection,
+  deleteDoc,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  limit,
+  onQuerySnapshot,
+  query as firestoreQuery,
+  requireUserId,
+  serverTimestamp,
+  setDoc,
+  timestampToMillis,
+  updateDoc,
+  where,
+  writeBatch,
+} from '@/lib/firestore';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { trackEntityEvent } from '@/lib/analytics';
 import { shareApi } from '@/services/shareApi';
@@ -15,8 +33,10 @@ export class ProjectRepository {
 
   async getProjects(): Promise<Project[]> {
     const uid = requireUserId();
-    const snapshot = await firestore().collection(COLLECTIONS.projects).where('ownerId', '==', uid).get();
-    return snapshot.docs.map((doc) => this.mapProjectSummary(doc.id, doc.data()));
+    const snapshot = await getDocs(
+      firestoreQuery(collection(getDb(), COLLECTIONS.projects), where('ownerId', '==', uid))
+    );
+    return snapshot.docs.map((snapshotDoc) => this.mapProjectSummary(snapshotDoc.id, snapshotDoc.data()));
   }
 
   subscribeToProjects(
@@ -29,38 +49,43 @@ export class ProjectRepository {
       return () => undefined;
     }
 
-    return firestore()
-      .collection(COLLECTIONS.projects)
-      .where('ownerId', '==', ownerId)
-      .onSnapshot(
-        (snapshot) => {
-          try {
-            const projects = snapshot.docs.map((doc) => this.mapProjectSummary(doc.id, doc.data()));
-            onProjects(projects);
-          } catch (error) {
-            console.error('Project subscription mapping error:', error);
-            onError?.(error instanceof Error ? error : new Error('Failed to map projects'));
-          }
-        },
-        (error) => {
-          console.error('Project subscription error:', error);
-          onError?.(error);
+    const projectsQuery = firestoreQuery(
+      collection(getDb(), COLLECTIONS.projects),
+      where('ownerId', '==', ownerId)
+    );
+
+    return onQuerySnapshot(
+      projectsQuery,
+      (snapshot) => {
+        try {
+          const projects = snapshot.docs.map((snapshotDoc) =>
+            this.mapProjectSummary(snapshotDoc.id, snapshotDoc.data())
+          );
+          onProjects(projects);
+        } catch (error) {
+          console.error('Project subscription mapping error:', error);
+          onError?.(error instanceof Error ? error : new Error('Failed to map projects'));
         }
-      );
+      },
+      (error) => {
+        console.error('Project subscription error:', error);
+        onError?.(error);
+      }
+    );
   }
 
   async getProject(id: string): Promise<Project | null> {
-    const doc = await firestore().collection(COLLECTIONS.projects).doc(id).get();
-    if (!doc.exists()) return null;
-    return this.mapProjectDoc(doc.id, doc.data()!);
+    const projectDoc = await getDoc(doc(getDb(), COLLECTIONS.projects, id));
+    if (!projectDoc.exists()) return null;
+    return this.mapProjectDoc(projectDoc.id, projectDoc.data());
   }
 
   async createProject(
     project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'tasks' | 'collaborators'>
   ): Promise<Project> {
     const uid = requireUserId();
-    const ref = firestore().collection(COLLECTIONS.projects).doc();
-    await ref.set({
+    const ref = doc(collection(getDb(), COLLECTIONS.projects));
+    await setDoc(ref, {
       ownerId: uid,
       title: project.title,
       description: project.description ?? null,
@@ -72,7 +97,7 @@ export class ProjectRepository {
       updatedAt: serverTimestamp(),
     });
 
-    const created = await ref.get();
+    const created = await getDoc(ref);
     const mapped = await this.mapProjectDoc(created.id, created.data()!);
     await trackEntityEvent('project', 'created', mapped.id);
     return mapped;
@@ -80,8 +105,8 @@ export class ProjectRepository {
 
   async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.projects).doc(id);
-    await ref.update({
+    const ref = doc(getDb(), COLLECTIONS.projects, id);
+    await updateDoc(ref, {
       ...(updates.title !== undefined && { title: updates.title }),
       ...(updates.description !== undefined && { description: updates.description }),
       ...(updates.coverImage !== undefined && { coverImage: updates.coverImage }),
@@ -90,7 +115,7 @@ export class ProjectRepository {
       ...(updates.visibility !== undefined && { visibility: updates.visibility }),
       updatedAt: serverTimestamp(),
     });
-    const updated = await ref.get();
+    const updated = await getDoc(ref);
     const mapped = await this.mapProjectDoc(updated.id, updated.data()!);
     await trackEntityEvent('project', 'updated', mapped.id);
     return mapped;
@@ -98,18 +123,19 @@ export class ProjectRepository {
 
   async deleteProject(id: string): Promise<void> {
     requireUserId();
-    const tasks = await firestore().collection(COLLECTIONS.projects).doc(id).collection('tasks').get();
-    const batch = firestore().batch();
-    tasks.docs.forEach((doc) => batch.delete(doc.ref));
-    batch.delete(firestore().collection(COLLECTIONS.projects).doc(id));
+    const projectRef = doc(getDb(), COLLECTIONS.projects, id);
+    const tasks = await getDocs(collection(projectRef, 'tasks'));
+    const batch = writeBatch(getDb());
+    tasks.docs.forEach((taskDoc) => batch.delete(taskDoc.ref));
+    batch.delete(projectRef);
     await batch.commit();
     await trackEntityEvent('project', 'deleted', id);
   }
 
   async createTask(projectId: string, task: Omit<Task, 'id' | 'projectId'>): Promise<Task> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.projects).doc(projectId).collection('tasks').doc();
-    await ref.set({
+    const ref = doc(collection(doc(getDb(), COLLECTIONS.projects, projectId), 'tasks'));
+    await setDoc(ref, {
       title: task.title,
       status: task.status || 'todo',
       dueDate: task.dueDate ? new Date(task.dueDate) : null,
@@ -118,14 +144,14 @@ export class ProjectRepository {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    const created = await ref.get();
+    const created = await getDoc(ref);
     return this.mapTask(created.id, projectId, created.data()!);
   }
 
   async updateTask(taskId: string, updates: Partial<Task>): Promise<Task> {
     requireUserId();
     const { projectId, ref } = await this.findTaskRef(taskId);
-    await ref.update({
+    await updateDoc(ref, {
       ...(updates.title !== undefined && { title: updates.title }),
       ...(updates.status !== undefined && { status: updates.status }),
       ...(updates.dueDate !== undefined && { dueDate: updates.dueDate ? new Date(updates.dueDate) : null }),
@@ -133,34 +159,36 @@ export class ProjectRepository {
       ...(updates.category !== undefined && { category: updates.category }),
       updatedAt: serverTimestamp(),
     });
-    const updated = await ref.get();
+    const updated = await getDoc(ref);
     return this.mapTask(updated.id, projectId, updated.data()!);
   }
 
   async deleteTask(taskId: string): Promise<void> {
     requireUserId();
     const { ref } = await this.findTaskRef(taskId);
-    await ref.delete();
+    await deleteDoc(ref);
   }
 
   async assignTask(taskId: string, userId: string | null): Promise<Task> {
     const { projectId, ref } = await this.findTaskRef(taskId);
-    await ref.update({ assignedTo: userId, updatedAt: serverTimestamp() });
-    const updated = await ref.get();
+    await updateDoc(ref, { assignedTo: userId, updatedAt: serverTimestamp() });
+    const updated = await getDoc(ref);
     return this.mapTask(updated.id, projectId, updated.data()!);
   }
 
   async getProjectMembers(projectId: string): Promise<ProjectCollaborator[]> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.projectMembers)
-      .where('projectId', '==', projectId)
-      .get();
+    const snapshot = await getDocs(
+      firestoreQuery(
+        collection(getDb(), COLLECTIONS.projectMembers),
+        where('projectId', '==', projectId)
+      )
+    );
 
     const members: ProjectCollaborator[] = [];
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const userDoc = await firestore().collection(COLLECTIONS.users).doc(data.userId).get();
-      members.push(this.mapMember(doc.id, data, userDoc.exists() ? userDoc.data() : undefined));
+    for (const memberDoc of snapshot.docs) {
+      const data = memberDoc.data();
+      const userDoc = await getDoc(doc(getDb(), COLLECTIONS.users, data.userId));
+      members.push(this.mapMember(memberDoc.id, data, userDoc.exists() ? userDoc.data() : undefined));
     }
     return members;
   }
@@ -208,23 +236,25 @@ export class ProjectRepository {
   }
 
   async searchUsersByEmail(query: string): Promise<User[]> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.users)
-      .where('handle', '>=', query.toLowerCase())
-      .where('handle', '<=', query.toLowerCase() + '\uf8ff')
-      .limit(10)
-      .get();
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      handle: doc.data().handle,
-      email: doc.data().email || '',
-      displayName: doc.data().displayName,
-      avatar: doc.data().avatar,
-      bio: doc.data().bio,
-      isVerified: doc.data().isVerified,
-      followerCount: doc.data().followerCount ?? 0,
-      followingCount: doc.data().followingCount ?? 0,
-      createdAt: timestampToMillis(doc.data().createdAt),
+    const snapshot = await getDocs(
+      firestoreQuery(
+        collection(getDb(), COLLECTIONS.users),
+        where('handle', '>=', query.toLowerCase()),
+        where('handle', '<=', query.toLowerCase() + '\uf8ff'),
+        limit(10)
+      )
+    );
+    return snapshot.docs.map((snapshotDoc) => ({
+      id: snapshotDoc.id,
+      handle: snapshotDoc.data().handle,
+      email: snapshotDoc.data().email || '',
+      displayName: snapshotDoc.data().displayName,
+      avatar: snapshotDoc.data().avatar,
+      bio: snapshotDoc.data().bio,
+      isVerified: snapshotDoc.data().isVerified,
+      followerCount: snapshotDoc.data().followerCount ?? 0,
+      followingCount: snapshotDoc.data().followingCount ?? 0,
+      createdAt: timestampToMillis(snapshotDoc.data().createdAt),
     }));
   }
 
@@ -234,21 +264,22 @@ export class ProjectRepository {
 
   private async findTaskRef(taskId: string) {
     const uid = requireUserId();
-    const ownedProjects = await firestore().collection(COLLECTIONS.projects).where('ownerId', '==', uid).get();
-    const sharedProjects = await firestore()
-      .collection(COLLECTIONS.projects)
-      .where('sharedWith', 'array-contains', uid)
-      .get();
+    const ownedProjects = await getDocs(
+      firestoreQuery(collection(getDb(), COLLECTIONS.projects), where('ownerId', '==', uid))
+    );
+    const sharedProjects = await getDocs(
+      firestoreQuery(collection(getDb(), COLLECTIONS.projects), where('sharedWith', 'array-contains', uid))
+    );
     const projects = [...ownedProjects.docs, ...sharedProjects.docs];
     const seenProjectIds = new Set<string>();
 
-    for (const project of projects) {
-      if (seenProjectIds.has(project.id)) continue;
-      seenProjectIds.add(project.id);
-      const taskRef = project.ref.collection('tasks').doc(taskId);
-      const task = await taskRef.get();
+    for (const projectDoc of projects) {
+      if (seenProjectIds.has(projectDoc.id)) continue;
+      seenProjectIds.add(projectDoc.id);
+      const taskRef = doc(collection(projectDoc.ref, 'tasks'), taskId);
+      const task = await getDoc(taskRef);
       if (task.exists()) {
-        return { projectId: project.id, ref: taskRef };
+        return { projectId: projectDoc.id, ref: taskRef };
       }
     }
     throw new Error('Task not found');
@@ -274,19 +305,24 @@ export class ProjectRepository {
   private async mapProjectDoc(id: string, data: FirebaseFirestoreTypes.DocumentData): Promise<Project> {
     let tasks: Task[] = [];
     try {
-      const tasksSnap = await firestore().collection(COLLECTIONS.projects).doc(id).collection('tasks').get();
-      tasks = tasksSnap.docs.map((doc) => this.mapTask(doc.id, id, doc.data()));
+      const tasksSnap = await getDocs(collection(doc(getDb(), COLLECTIONS.projects, id), 'tasks'));
+      tasks = tasksSnap.docs.map((taskDoc) => this.mapTask(taskDoc.id, id, taskDoc.data()));
     } catch (error) {
       console.warn(`Failed to load tasks for project ${id}:`, error);
     }
 
     const members: ProjectCollaborator[] = [];
     try {
-      const membersSnap = await firestore().collection(COLLECTIONS.projectMembers).where('projectId', '==', id).get();
+      const membersSnap = await getDocs(
+        firestoreQuery(
+          collection(getDb(), COLLECTIONS.projectMembers),
+          where('projectId', '==', id)
+        )
+      );
       for (const memberDoc of membersSnap.docs) {
         const memberData = memberDoc.data();
         try {
-          const userDoc = await firestore().collection(COLLECTIONS.users).doc(memberData.userId).get();
+          const userDoc = await getDoc(doc(getDb(), COLLECTIONS.users, memberData.userId));
           members.push(this.mapMember(memberDoc.id, memberData, userDoc.data()));
         } catch (error) {
           console.warn(`Failed to load member profile for project ${id}:`, error);

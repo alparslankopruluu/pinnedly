@@ -1,7 +1,22 @@
-import firestore from '@react-native-firebase/firestore';
 import { Note } from '@/types';
 import { DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
-import { COLLECTIONS, requireUserId, serverTimestamp, subscribeToOwnerCollection, timestampToMillis } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  collection,
+  deleteDoc,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  query,
+  requireUserId,
+  serverTimestamp,
+  setDoc,
+  subscribeToOwnerCollection,
+  timestampToMillis,
+  updateDoc,
+  where,
+} from '@/lib/firestore';
 import { normalizeCategory } from '@/constants/contentCategories';
 import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
 import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
@@ -25,17 +40,16 @@ export class NoteRepository {
 
   async getNotes(): Promise<Note[]> {
     const uid = requireUserId();
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.notes)
-      .where('ownerId', '==', uid)
-      .get();
-    return snapshot.docs.map((doc) => this.mapNote(doc.id, doc.data()));
+    const snapshot = await getDocs(
+      query(collection(getDb(), COLLECTIONS.notes), where('ownerId', '==', uid))
+    );
+    return snapshot.docs.map((snapshotDoc) => this.mapNote(snapshotDoc.id, snapshotDoc.data()));
   }
 
   async getById(id: string): Promise<Note | null> {
-    const doc = await firestore().collection(COLLECTIONS.notes).doc(id).get();
-    if (!doc.exists()) return null;
-    return this.mapNote(doc.id, doc.data()!);
+    const noteDoc = await getDoc(doc(getDb(), COLLECTIONS.notes, id));
+    if (!noteDoc.exists()) return null;
+    return this.mapNote(noteDoc.id, noteDoc.data());
   }
 
   async createNote(
@@ -44,7 +58,7 @@ export class NoteRepository {
     }
   ): Promise<Note> {
     const uid = requireUserId();
-    const ref = firestore().collection(COLLECTIONS.notes).doc();
+    const ref = doc(collection(getDb(), COLLECTIONS.notes));
     const data = {
       ownerId: uid,
       title: note.title,
@@ -58,8 +72,8 @@ export class NoteRepository {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    await ref.set(data);
-    const created = await ref.get();
+    await setDoc(ref, data);
+    const created = await getDoc(ref);
     const mapped = this.mapNote(created.id, created.data()!);
     await trackNoteEvent('note_created', mapped.id);
     return mapped;
@@ -67,8 +81,8 @@ export class NoteRepository {
 
   async updateNote(id: string, updates: Partial<Note>): Promise<Note> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.notes).doc(id);
-    await ref.update({
+    const ref = doc(getDb(), COLLECTIONS.notes, id);
+    await updateDoc(ref, {
       ...(updates.title !== undefined && { title: updates.title }),
       ...(updates.markdown !== undefined && { markdown: updates.markdown }),
       ...(updates.visibility !== undefined && { visibility: updates.visibility }),
@@ -77,7 +91,7 @@ export class NoteRepository {
       ...(updates.reminderSchedule !== undefined && { reminderSchedule: updates.reminderSchedule }),
       updatedAt: serverTimestamp(),
     });
-    const updated = await ref.get();
+    const updated = await getDoc(ref);
     const mapped = this.mapNote(updated.id, updated.data()!);
     await trackNoteEvent('note_updated', mapped.id);
     return mapped;
@@ -85,7 +99,7 @@ export class NoteRepository {
 
   async deleteNote(id: string): Promise<void> {
     requireUserId();
-    await firestore().collection(COLLECTIONS.notes).doc(id).delete();
+    await deleteDoc(doc(getDb(), COLLECTIONS.notes, id));
     await trackNoteEvent('note_deleted', id);
   }
 

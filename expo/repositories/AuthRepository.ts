@@ -1,11 +1,36 @@
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import {
+  AppleAuthProvider,
+  createUserWithEmailAndPassword,
+  FirebaseAuthTypes,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+  signInWithPhoneNumber,
+  signOut as firebaseSignOut,
+} from '@react-native-firebase/auth';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import Constants from 'expo-constants';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Platform } from 'react-native';
 import { User, ID } from '@/types';
-import { COLLECTIONS, serverTimestamp } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  collection,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  limit,
+  query as firestoreQuery,
+  serverTimestamp,
+  setDoc,
+  timestampToMillis,
+  where,
+} from '@/lib/firestore';
 import { shareApi } from '@/services/shareApi';
 
 class AuthRepository {
@@ -18,14 +43,14 @@ class AuthRepository {
       GoogleSignin.configure({ webClientId });
     }
 
-    const firebaseUser = auth().currentUser;
+    const firebaseUser = getAuth().currentUser;
     if (firebaseUser) {
       this.currentUser = await this.loadOrCreateProfile(firebaseUser);
     }
   }
 
   onAuthStateChanged(listener: (user: User | null) => void): () => void {
-    return auth().onAuthStateChanged(async (firebaseUser) => {
+    return onAuthStateChanged(getAuth(), async (firebaseUser) => {
       if (!firebaseUser) {
         this.currentUser = null;
         listener(null);
@@ -37,11 +62,11 @@ class AuthRepository {
   }
 
   private async loadOrCreateProfile(firebaseUser: FirebaseAuthTypes.User): Promise<User> {
-    const docRef = firestore().collection(COLLECTIONS.users).doc(firebaseUser.uid);
-    const doc = await docRef.get();
+    const docRef = doc(getDb(), COLLECTIONS.users, firebaseUser.uid);
+    const userDoc = await getDoc(docRef);
 
-    if (doc.exists()) {
-      return this.mapUserDoc(firebaseUser.uid, doc.data()!, firebaseUser.email);
+    if (userDoc.exists()) {
+      return this.mapUserDoc(firebaseUser.uid, userDoc.data(), firebaseUser.email);
     }
 
     const handle = (firebaseUser.email?.split('@')[0] || 'user')
@@ -62,8 +87,8 @@ class AuthRepository {
       updatedAt: serverTimestamp(),
     };
 
-    await docRef.set(profile);
-    const created = await docRef.get();
+    await setDoc(docRef, profile);
+    const created = await getDoc(docRef);
     return this.mapUserDoc(firebaseUser.uid, created.data()!, firebaseUser.email);
   }
 
@@ -78,21 +103,21 @@ class AuthRepository {
       isVerified: (data.isVerified as boolean) ?? false,
       followerCount: (data.followerCount as number) ?? 0,
       followingCount: (data.followingCount as number) ?? 0,
-      createdAt: data.createdAt?.toMillis?.() ?? Date.now(),
+      createdAt: timestampToMillis(data.createdAt),
     };
   }
 
   async signIn(email: string, password: string): Promise<User> {
-    const credential = await auth().signInWithEmailAndPassword(email, password);
+    const credential = await signInWithEmailAndPassword(getAuth(), email, password);
     this.currentUser = await this.loadOrCreateProfile(credential.user);
     return this.currentUser;
   }
 
   async signUp(email: string, password: string, displayName: string): Promise<User> {
-    const credential = await auth().createUserWithEmailAndPassword(email, password);
+    const credential = await createUserWithEmailAndPassword(getAuth(), email, password);
     const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
 
-    await firestore().collection(COLLECTIONS.users).doc(credential.user.uid).set({
+    await setDoc(doc(getDb(), COLLECTIONS.users, credential.user.uid), {
       handle,
       displayName,
       email,
@@ -115,14 +140,14 @@ class AuthRepository {
     const idToken = signInResult.data?.idToken;
     if (!idToken) throw new Error('No Google ID token received');
 
-    const credential = auth.GoogleAuthProvider.credential(idToken);
-    const result = await auth().signInWithCredential(credential);
+    const credential = GoogleAuthProvider.credential(idToken);
+    const result = await signInWithCredential(getAuth(), credential);
     this.currentUser = await this.loadOrCreateProfile(result.user);
     return this.currentUser;
   }
 
   async sendPhoneVerification(phoneNumber: string): Promise<void> {
-    this.phoneConfirmation = await auth().signInWithPhoneNumber(phoneNumber);
+    this.phoneConfirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
   }
 
   async confirmPhoneCode(code: string): Promise<User> {
@@ -152,8 +177,8 @@ class AuthRepository {
       throw new Error('No identity token received from Apple');
     }
 
-    const appleCredential = auth.AppleAuthProvider.credential(credential.identityToken);
-    const result = await auth().signInWithCredential(appleCredential);
+    const appleCredential = AppleAuthProvider.credential(credential.identityToken);
+    const result = await signInWithCredential(getAuth(), appleCredential);
 
     if (!result.additionalUserInfo?.isNewUser) {
       this.currentUser = await this.loadOrCreateProfile(result.user);
@@ -164,7 +189,7 @@ class AuthRepository {
       ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
       : result.user.email?.split('@')[0] || 'User';
 
-    await firestore().collection(COLLECTIONS.users).doc(result.user.uid).set({
+    await setDoc(doc(getDb(), COLLECTIONS.users, result.user.uid), {
       handle: (result.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).slice(2, 4),
       displayName,
       email: result.user.email || '',
@@ -187,7 +212,7 @@ class AuthRepository {
     } catch {
       // User may not have signed in with Google
     }
-    await auth().signOut();
+    await firebaseSignOut(getAuth());
     this.currentUser = null;
     this.phoneConfirmation = null;
   }
@@ -212,11 +237,13 @@ class AuthRepository {
     const normalized = handle.toLowerCase();
     if (this.currentUser?.handle === normalized) return true;
 
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.users)
-      .where('handle', '==', normalized)
-      .limit(1)
-      .get();
+    const snapshot = await getDocs(
+      firestoreQuery(
+        collection(getDb(), COLLECTIONS.users),
+        where('handle', '==', normalized),
+        limit(1)
+      )
+    );
 
     if (snapshot.empty) return true;
     return snapshot.docs[0].id === this.currentUser?.id;
@@ -225,12 +252,14 @@ class AuthRepository {
   async searchUsers(query: string): Promise<User[]> {
     if (!query.trim()) return [];
 
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.users)
-      .where('handle', '>=', query.toLowerCase())
-      .where('handle', '<=', query.toLowerCase() + '\uf8ff')
-      .limit(10)
-      .get();
+    const snapshot = await getDocs(
+      firestoreQuery(
+        collection(getDb(), COLLECTIONS.users),
+        where('handle', '>=', query.toLowerCase()),
+        where('handle', '<=', query.toLowerCase() + '\uf8ff'),
+        limit(10)
+      )
+    );
 
     return snapshot.docs.map((doc) =>
       this.mapUserDoc(doc.id, doc.data(), doc.data().email)
@@ -238,10 +267,10 @@ class AuthRepository {
   }
 
   async getUserById(id: ID): Promise<User | null> {
-    const doc = await firestore().collection(COLLECTIONS.users).doc(id).get();
-    const data = doc.data();
-    if (!doc.exists() || !data) return null;
-    return this.mapUserDoc(doc.id, data, data.email);
+    const userDoc = await getDoc(doc(getDb(), COLLECTIONS.users, id));
+    const data = userDoc.data();
+    if (!userDoc.exists() || !data) return null;
+    return this.mapUserDoc(userDoc.id, data, data.email);
   }
 
   async searchUsersByEmail(email: string): Promise<User[]> {
@@ -249,7 +278,7 @@ class AuthRepository {
   }
 
   async resetPassword(email: string): Promise<void> {
-    await auth().sendPasswordResetEmail(email);
+    await sendPasswordResetEmail(getAuth(), email);
   }
 }
 

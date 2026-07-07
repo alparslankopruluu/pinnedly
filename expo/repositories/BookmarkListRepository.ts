@@ -1,6 +1,26 @@
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { BookmarkList, ID, Visibility } from '@/types';
-import { COLLECTIONS, requireUserId, serverTimestamp, timestampToMillis } from '@/lib/firestore';
+import {
+  COLLECTIONS,
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getDb,
+  getDoc,
+  getDocs,
+  increment,
+  limit as limitQuery,
+  query,
+  requireUserId,
+  serverTimestamp,
+  setDoc,
+  timestampToMillis,
+  updateDoc,
+  where,
+} from '@/lib/firestore';
 
 class BookmarkListRepository {
   async createList(
@@ -10,8 +30,8 @@ class BookmarkListRepository {
   ): Promise<BookmarkList> {
     const uid = requireUserId();
     const isPublic = visibility === 'public';
-    const ref = firestore().collection(COLLECTIONS.bookmarkLists).doc();
-    await ref.set({
+    const ref = doc(collection(getDb(), COLLECTIONS.bookmarkLists));
+    await setDoc(ref, {
       ownerId: uid,
       name: name.trim(),
       description: description?.trim() ?? null,
@@ -24,71 +44,68 @@ class BookmarkListRepository {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    const created = await ref.get();
+    const created = await getDoc(ref);
     return this.mapList(created.id, created.data()!);
   }
 
   async getMyLists(): Promise<BookmarkList[]> {
     const uid = requireUserId();
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .where('ownerId', '==', uid)
-      .get();
-    return snapshot.docs.map((doc) => this.mapList(doc.id, doc.data()));
+    const snapshot = await getDocs(
+      query(collection(getDb(), COLLECTIONS.bookmarkLists), where('ownerId', '==', uid))
+    );
+    return snapshot.docs.map((snapshotDoc) => this.mapList(snapshotDoc.id, snapshotDoc.data()));
   }
 
   async getSharedLists(): Promise<BookmarkList[]> {
     const uid = requireUserId();
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .where('sharedWith', 'array-contains', uid)
-      .get();
-    return snapshot.docs.map((doc) => this.mapList(doc.id, doc.data()));
+    const snapshot = await getDocs(
+      query(
+        collection(getDb(), COLLECTIONS.bookmarkLists),
+        where('sharedWith', 'array-contains', uid)
+      )
+    );
+    return snapshot.docs.map((snapshotDoc) => this.mapList(snapshotDoc.id, snapshotDoc.data()));
   }
 
   async getPublicLists(limit: number = 20): Promise<BookmarkList[]> {
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .where('isPublic', '==', true)
-      .limit(limit)
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(getDb(), COLLECTIONS.bookmarkLists),
+        where('isPublic', '==', true),
+        limitQuery(limit)
+      )
+    );
     return snapshot.docs
-      .map((doc) => this.mapList(doc.id, doc.data()))
+      .map((snapshotDoc) => this.mapList(snapshotDoc.id, snapshotDoc.data()))
       .sort((a, b) => b.followerCount - a.followerCount);
   }
 
   async getListById(id: ID): Promise<BookmarkList | null> {
-    const doc = await firestore().collection(COLLECTIONS.bookmarkLists).doc(id).get();
-    if (!doc.exists()) return null;
-    return this.mapList(doc.id, doc.data()!);
+    const listDoc = await getDoc(doc(getDb(), COLLECTIONS.bookmarkLists, id));
+    if (!listDoc.exists()) return null;
+    return this.mapList(listDoc.id, listDoc.data());
   }
 
   async getBookmarksByListId(listId: ID): Promise<string[]> {
-    const doc = await firestore().collection(COLLECTIONS.bookmarkLists).doc(listId).get();
-    if (!doc.exists()) return [];
-    return (doc.data()?.bookmarkIds as string[]) || [];
+    const listDoc = await getDoc(doc(getDb(), COLLECTIONS.bookmarkLists, listId));
+    if (!listDoc.exists()) return [];
+    return (listDoc.data()?.bookmarkIds as string[]) || [];
   }
 
   async addBookmarkToList(listId: ID, bookmarkId: ID): Promise<void> {
     requireUserId();
-    await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .doc(listId)
-      .update({
-        bookmarkIds: firestore.FieldValue.arrayUnion(bookmarkId),
-        updatedAt: serverTimestamp(),
-      });
+    await updateDoc(doc(getDb(), COLLECTIONS.bookmarkLists, listId), {
+      bookmarkIds: arrayUnion(bookmarkId),
+      updatedAt: serverTimestamp(),
+    });
   }
 
   async removeBookmarkFromList(listId: ID, bookmarkId: ID): Promise<void> {
     requireUserId();
-    await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .doc(listId)
-      .update({
-        bookmarkIds: firestore.FieldValue.arrayRemove(bookmarkId),
-        updatedAt: serverTimestamp(),
-      });
+    await updateDoc(doc(getDb(), COLLECTIONS.bookmarkLists, listId), {
+      bookmarkIds: arrayRemove(bookmarkId),
+      updatedAt: serverTimestamp(),
+    });
   }
 
   async updateList(
@@ -96,7 +113,7 @@ class BookmarkListRepository {
     updates: Partial<Pick<BookmarkList, 'name' | 'description' | 'isPublic' | 'visibility'>>
   ): Promise<BookmarkList> {
     requireUserId();
-    const ref = firestore().collection(COLLECTIONS.bookmarkLists).doc(id);
+    const ref = doc(getDb(), COLLECTIONS.bookmarkLists, id);
     const visibility = updates.visibility;
     const isPublic =
       updates.isPublic !== undefined
@@ -107,66 +124,67 @@ class BookmarkListRepository {
             ? false
             : undefined;
 
-    await ref.update({
+    await updateDoc(ref, {
       ...(updates.name !== undefined && { name: updates.name.trim() }),
       ...(updates.description !== undefined && { description: updates.description?.trim() }),
       ...(isPublic !== undefined && { isPublic }),
       ...(visibility !== undefined && { visibility }),
       updatedAt: serverTimestamp(),
     });
-    const updated = await ref.get();
+    const updated = await getDoc(ref);
     return this.mapList(updated.id, updated.data()!);
   }
 
   async deleteList(id: ID): Promise<void> {
     requireUserId();
-    await firestore().collection(COLLECTIONS.bookmarkLists).doc(id).delete();
+    await deleteDoc(doc(getDb(), COLLECTIONS.bookmarkLists, id));
   }
 
   async followList(listId: ID): Promise<void> {
     const uid = requireUserId();
-    await firestore().collection(COLLECTIONS.listFollowers).add({
+    await addDoc(collection(getDb(), COLLECTIONS.listFollowers), {
       listId,
       userId: uid,
       createdAt: serverTimestamp(),
     });
-    await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .doc(listId)
-      .update({ followerCount: firestore.FieldValue.increment(1) });
+    await updateDoc(doc(getDb(), COLLECTIONS.bookmarkLists, listId), {
+      followerCount: increment(1),
+    });
   }
 
   async unfollowList(listId: ID): Promise<void> {
     const uid = requireUserId();
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.listFollowers)
-      .where('listId', '==', listId)
-      .where('userId', '==', uid)
-      .get();
-    await Promise.all(snapshot.docs.map((doc) => doc.ref.delete()));
-    await firestore()
-      .collection(COLLECTIONS.bookmarkLists)
-      .doc(listId)
-      .update({ followerCount: firestore.FieldValue.increment(-1) });
+    const snapshot = await getDocs(
+      query(
+        collection(getDb(), COLLECTIONS.listFollowers),
+        where('listId', '==', listId),
+        where('userId', '==', uid)
+      )
+    );
+    await Promise.all(snapshot.docs.map((snapshotDoc) => deleteDoc(snapshotDoc.ref)));
+    await updateDoc(doc(getDb(), COLLECTIONS.bookmarkLists, listId), {
+      followerCount: increment(-1),
+    });
   }
 
   async isFollowingList(listId: ID): Promise<boolean> {
     const uid = requireUserId();
-    const snapshot = await firestore()
-      .collection(COLLECTIONS.listFollowers)
-      .where('listId', '==', listId)
-      .where('userId', '==', uid)
-      .limit(1)
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(getDb(), COLLECTIONS.listFollowers),
+        where('listId', '==', listId),
+        where('userId', '==', uid),
+        limitQuery(1)
+      )
+    );
     return !snapshot.empty;
   }
 
   async getFollowedLists(): Promise<BookmarkList[]> {
     const uid = requireUserId();
-    const followers = await firestore()
-      .collection(COLLECTIONS.listFollowers)
-      .where('userId', '==', uid)
-      .get();
+    const followers = await getDocs(
+      query(collection(getDb(), COLLECTIONS.listFollowers), where('userId', '==', uid))
+    );
 
     const lists: BookmarkList[] = [];
     for (const follower of followers.docs) {

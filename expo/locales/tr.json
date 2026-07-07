@@ -533,7 +533,12 @@
       "savedAsNote": "Sohbet not olarak kaydedildi!",
       "sendFailed": "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
       "saveFailed": "Sohbet kaydedilemedi. Lütfen tekrar deneyin.",
-      "authRequired": "Çalışma alanı asistanını kullanmak için lütfen giriş yapın."
+      "authRequired": "Çalışma alanı asistanını kullanmak için lütfen giriş yapın.",
+      "messageRequired": "Göndermeden önce bir mesaj yazın.",
+      "networkError": "Çalışma alanı asistanına ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+      "timeout": "Çalışma alanı asistanı çok geç yanıt verdi. Lütfen tekrar deneyin.",
+      "invalidResponse": "Çalışma alanı asistanı beklenmeyen bir yanıt döndürdü. Lütfen tekrar deneyin.",
+      "requestId": "İstek ID: {{requestId}}"
     }
   },
   "premium": {

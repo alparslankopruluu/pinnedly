@@ -1,5 +1,4 @@
-import firestore from '@react-native-firebase/firestore';
-import { COLLECTIONS } from '@/lib/firestore';
+import { COLLECTIONS, doc, getDb, getDoc, updateDoc } from '@/lib/firestore';
 import { SharePermission } from '@/types';
 
 const ENTITY_COLLECTIONS: Record<string, string> = {
@@ -23,11 +22,11 @@ class EntityAccessRepository {
     permission: SharePermission
   ): Promise<void> {
     const collection = this.getCollection(entityType);
-    const ref = firestore().collection(collection).doc(entityId);
-    const doc = await ref.get();
-    if (!doc.exists()) throw new Error('Entity not found');
+    const ref = doc(getDb(), collection, entityId);
+    const entityDoc = await getDoc(ref);
+    if (!entityDoc.exists()) throw new Error('Entity not found');
 
-    const data = doc.data()!;
+    const data = entityDoc.data();
     const sharedWith: string[] = Array.from(new Set([...(data.sharedWith ?? []), userId]));
     const editors: string[] = [...(data.editors ?? [])];
 
@@ -51,16 +50,16 @@ class EntityAccessRepository {
       updates.visibility = 'shared';
     }
 
-    await ref.update(updates);
+    await updateDoc(ref, updates);
   }
 
   async revokeAccess(entityType: string, entityId: string, userId: string): Promise<void> {
     const collection = this.getCollection(entityType);
-    const ref = firestore().collection(collection).doc(entityId);
-    const doc = await ref.get();
-    if (!doc.exists()) return;
+    const ref = doc(getDb(), collection, entityId);
+    const entityDoc = await getDoc(ref);
+    if (!entityDoc.exists()) return;
 
-    const data = doc.data()!;
+    const data = entityDoc.data();
     const sharedWith = (data.sharedWith ?? []).filter((id: string) => id !== userId);
     const editors = (data.editors ?? []).filter((id: string) => id !== userId);
 
@@ -76,7 +75,7 @@ class EntityAccessRepository {
       }
     }
 
-    await ref.update(updates);
+    await updateDoc(ref, updates);
   }
 
   async updateAccessPermission(

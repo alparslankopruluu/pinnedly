@@ -37,6 +37,36 @@ export default function AIChatScreen() {
   const flatListRef = useRef<FlatList>(null);
   const savingNoteRef = useRef(false);
 
+  const getSendErrorMessage = useCallback((err: unknown) => {
+    if (!(err instanceof WorkspaceChatError)) {
+      return t('aiChat.alerts.sendFailed');
+    }
+
+    const messageKey = (() => {
+      switch (err.code) {
+        case 'AUTH_REQUIRED':
+          return 'aiChat.alerts.authRequired';
+        case 'MESSAGE_REQUIRED':
+          return 'aiChat.alerts.messageRequired';
+        case 'NETWORK_ERROR':
+          return 'aiChat.alerts.networkError';
+        case 'TIMEOUT':
+          return 'aiChat.alerts.timeout';
+        case 'EMPTY_RESPONSE':
+        case 'INVALID_RESPONSE':
+          return 'aiChat.alerts.invalidResponse';
+        case 'REQUEST_FAILED':
+        default:
+          return 'aiChat.alerts.sendFailed';
+      }
+    })();
+
+    const baseMessage = t(messageKey);
+    return err.requestId
+      ? `${baseMessage}\n${t('aiChat.alerts.requestId', { requestId: err.requestId })}`
+      : baseMessage;
+  }, [t]);
+
   const handleSend = useCallback(async () => {
     const userMessage = input.trim();
     if (!userMessage || isResponding) return;
@@ -71,16 +101,25 @@ export default function AIChatScreen() {
       setMessages((prev) => [...prev, assistantEntry]);
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (err) {
-      if (err instanceof WorkspaceChatError && err.message === 'AUTH_REQUIRED') {
-        setErrorText(t('aiChat.alerts.authRequired'));
+      const message = getSendErrorMessage(err);
+      setErrorText(message);
+
+      if (err instanceof WorkspaceChatError) {
+        console.warn('Workspace chat send failed:', {
+          code: err.code,
+          status: err.status,
+          requestId: err.requestId,
+          serverMessage: err.serverMessage,
+        });
       } else {
-        setErrorText(t('aiChat.alerts.sendFailed'));
+        console.warn('Workspace chat send failed:', err);
       }
-      showAppAlert(t('common.error'), t('aiChat.alerts.sendFailed'), undefined, { variant: 'error' });
+
+      showAppAlert(t('common.error'), message, undefined, { variant: 'error' });
     } finally {
       setIsResponding(false);
     }
-  }, [input, isResponding, messages, t]);
+  }, [getSendErrorMessage, input, isResponding, messages, t]);
 
   const handleSaveAsNote = async () => {
     if (savingNoteRef.current || messages.length === 0) {

@@ -67,7 +67,9 @@ export class NotificationService {
 
       const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
       if (!projectId) {
-        console.log('Project ID not found');
+        if (__DEV__) {
+          console.debug('Skipping push token registration: EAS project ID not configured.');
+        }
         return;
       }
 

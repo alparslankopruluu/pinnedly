@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useBookmarkStore } from '@/providers/OfflineProvider';
+import { useBookmarkStore } from '@/store/useOfflineStore';
 import { useAuth } from '@/store/useAuthStore';
 import { getDigestFrequency, scheduleBookmarkDigest, DigestFrequency } from '@/services/bookmarkDigest';
 

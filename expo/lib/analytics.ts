@@ -2,7 +2,6 @@ import {
   getAnalytics,
   logEvent,
   logLogin,
-  logScreenView,
   logSignUp,
   setAnalyticsCollectionEnabled,
   setUserId,
@@ -78,7 +77,7 @@ export async function initializeAnalytics(): Promise<void> {
 export async function logAnalyticsScreenView(segments: string[]): Promise<void> {
   const screenName = resolveAnalyticsScreen(segments);
   try {
-    await logScreenView(analytics, {
+    await logEvent(analytics, 'screen_view', {
       screen_name: screenName,
       screen_class: screenName,
     });
@@ -90,7 +89,7 @@ export async function logAnalyticsScreenView(segments: string[]): Promise<void> 
 /** @deprecated Use logAnalyticsScreenView with segments */
 export async function logScreenViewLegacy(screenName: string, screenClass?: string): Promise<void> {
   try {
-    await logScreenView(analytics, {
+    await logEvent(analytics, 'screen_view', {
       screen_name: screenName,
       screen_class: screenClass ?? screenName,
     });

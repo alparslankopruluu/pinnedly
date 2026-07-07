@@ -1,4 +1,4 @@
-import auth from '@react-native-firebase/auth';
+import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
 
 export interface WorkspaceChatMessage {
@@ -17,6 +17,23 @@ export interface WorkspaceChatResponse {
   citedItems?: WorkspaceChatCitation[];
 }
 
+export type WorkspaceChatErrorCode =
+  | 'AUTH_REQUIRED'
+  | 'MESSAGE_REQUIRED'
+  | 'NETWORK_ERROR'
+  | 'REQUEST_FAILED'
+  | 'INVALID_RESPONSE'
+  | 'EMPTY_RESPONSE'
+  | 'TIMEOUT';
+
+interface WorkspaceChatErrorBody {
+  error?: string;
+  code?: string;
+  requestId?: string;
+}
+
+const REQUEST_TIMEOUT_MS = 65_000;
+
 function getFunctionsUrl(): string {
   const extra = Constants.expoConfig?.extra as { aiFunctionsUrl?: string } | undefined;
   return (
@@ -28,10 +45,32 @@ function getFunctionsUrl(): string {
 export class WorkspaceChatError extends Error {
   constructor(
     message: string,
-    public readonly status?: number
+    public readonly code: WorkspaceChatErrorCode,
+    public readonly status?: number,
+    public readonly requestId?: string,
+    public readonly serverMessage?: string,
+    public readonly cause?: unknown
   ) {
     super(message);
     this.name = 'WorkspaceChatError';
+  }
+}
+
+async function readJsonBody<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+  if (!text.trim()) return null;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch (error) {
+    throw new WorkspaceChatError(
+      'Invalid response from workspace assistant',
+      'INVALID_RESPONSE',
+      response.status,
+      undefined,
+      text.slice(0, 200),
+      error
+    );
   }
 }
 
@@ -39,32 +78,70 @@ export async function sendWorkspaceChat(
   message: string,
   conversation: WorkspaceChatMessage[] = []
 ): Promise<WorkspaceChatResponse> {
-  const user = auth().currentUser;
+  const user = getAuth().currentUser;
   if (!user) {
-    throw new WorkspaceChatError('AUTH_REQUIRED', 401);
+    throw new WorkspaceChatError('Authentication required', 'AUTH_REQUIRED', 401);
   }
 
-  const token = await user.getIdToken();
-  const response = await fetch(getFunctionsUrl(), {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ message, conversation }),
-  });
+  const token = await getIdToken(user);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new WorkspaceChatError('AUTH_REQUIRED', 401);
+  try {
+    const response = await fetch(getFunctionsUrl(), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, conversation }),
+      signal: controller.signal,
+    });
+
+    const data = await readJsonBody<WorkspaceChatResponse & WorkspaceChatErrorBody>(response);
+
+    if (!response.ok) {
+      const code =
+        response.status === 401
+          ? 'AUTH_REQUIRED'
+          : response.status === 400
+            ? 'MESSAGE_REQUIRED'
+            : 'REQUEST_FAILED';
+
+      throw new WorkspaceChatError(
+        data?.error || 'Workspace assistant request failed',
+        code,
+        response.status,
+        data?.requestId,
+        data?.error
+      );
     }
-    throw new WorkspaceChatError('REQUEST_FAILED', response.status);
-  }
 
-  const data = (await response.json()) as WorkspaceChatResponse;
-  if (!data.answer?.trim()) {
-    throw new WorkspaceChatError('EMPTY_RESPONSE');
-  }
+    if (!data?.answer?.trim()) {
+      throw new WorkspaceChatError(
+        'Workspace assistant returned an empty response',
+        'EMPTY_RESPONSE',
+        response.status,
+        data?.requestId
+      );
+    }
 
-  return data;
+    return data;
+  } catch (error) {
+    if (error instanceof WorkspaceChatError) {
+      throw error;
+    }
+
+    const isAbort = error instanceof Error && error.name === 'AbortError';
+    throw new WorkspaceChatError(
+      isAbort ? 'Workspace assistant request timed out' : 'Network request failed',
+      isAbort ? 'TIMEOUT' : 'NETWORK_ERROR',
+      undefined,
+      undefined,
+      undefined,
+      error
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
