@@ -1,25 +1,21 @@
-import {
-  AppleAuthProvider,
-  createUserWithEmailAndPassword,
-  FirebaseAuthTypes,
-  getAuth,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  signInWithCredential,
-  signInWithEmailAndPassword,
-  signInWithPhoneNumber,
-  signOut as firebaseSignOut,
-} from '@react-native-firebase/auth';
-import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import Constants from 'expo-constants';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import { Platform } from 'react-native';
 import { User, ID } from '@/types';
+import {
+  configureAuthProviders,
+  createEmailUser,
+  getCurrentFirebaseUser,
+  onFirebaseAuthStateChanged,
+  sendPasswordReset,
+  sendPhoneVerificationCode,
+  signInWithAppleProvider,
+  signInWithEmail,
+  signInWithGoogleProvider,
+  signOutFromAuth,
+  type FirebaseUserLike,
+} from '@/lib/auth';
 import {
   COLLECTIONS,
   collection,
+  type DocumentData,
   doc,
   getDb,
   getDoc,
@@ -35,22 +31,21 @@ import { shareApi } from '@/services/shareApi';
 
 class AuthRepository {
   private currentUser: User | null = null;
-  private phoneConfirmation: FirebaseAuthTypes.ConfirmationResult | null = null;
+  private phoneConfirmation: {
+    confirm: (code: string) => Promise<{ user: FirebaseUserLike } | null>;
+  } | null = null;
 
   async initialize(): Promise<void> {
-    const webClientId = Constants.expoConfig?.extra?.googleWebClientId as string | undefined;
-    if (webClientId) {
-      GoogleSignin.configure({ webClientId });
-    }
+    configureAuthProviders();
 
-    const firebaseUser = getAuth().currentUser;
+    const firebaseUser = getCurrentFirebaseUser();
     if (firebaseUser) {
       this.currentUser = await this.loadOrCreateProfile(firebaseUser);
     }
   }
 
   onAuthStateChanged(listener: (user: User | null) => void): () => void {
-    return onAuthStateChanged(getAuth(), async (firebaseUser) => {
+    return onFirebaseAuthStateChanged(async (firebaseUser) => {
       if (!firebaseUser) {
         this.currentUser = null;
         listener(null);
@@ -61,7 +56,7 @@ class AuthRepository {
     });
   }
 
-  private async loadOrCreateProfile(firebaseUser: FirebaseAuthTypes.User): Promise<User> {
+  private async loadOrCreateProfile(firebaseUser: FirebaseUserLike): Promise<User> {
     const docRef = doc(getDb(), COLLECTIONS.users, firebaseUser.uid);
     const userDoc = await getDoc(docRef);
 
@@ -92,7 +87,7 @@ class AuthRepository {
     return this.mapUserDoc(firebaseUser.uid, created.data()!, firebaseUser.email);
   }
 
-  private mapUserDoc(id: string, data: FirebaseFirestoreTypes.DocumentData, email?: string | null): User {
+  private mapUserDoc(id: string, data: DocumentData, email?: string | null): User {
     return {
       id,
       handle: data.handle as string,
@@ -108,13 +103,13 @@ class AuthRepository {
   }
 
   async signIn(email: string, password: string): Promise<User> {
-    const credential = await signInWithEmailAndPassword(getAuth(), email, password);
+    const credential = await signInWithEmail(email, password);
     this.currentUser = await this.loadOrCreateProfile(credential.user);
     return this.currentUser;
   }
 
   async signUp(email: string, password: string, displayName: string): Promise<User> {
-    const credential = await createUserWithEmailAndPassword(getAuth(), email, password);
+    const credential = await createEmailUser(email, password);
     const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
 
     await setDoc(doc(getDb(), COLLECTIONS.users, credential.user.uid), {
@@ -135,19 +130,13 @@ class AuthRepository {
   }
 
   async signInWithGoogle(): Promise<User> {
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    const signInResult = await GoogleSignin.signIn();
-    const idToken = signInResult.data?.idToken;
-    if (!idToken) throw new Error('No Google ID token received');
-
-    const credential = GoogleAuthProvider.credential(idToken);
-    const result = await signInWithCredential(getAuth(), credential);
+    const result = await signInWithGoogleProvider();
     this.currentUser = await this.loadOrCreateProfile(result.user);
     return this.currentUser;
   }
 
   async sendPhoneVerification(phoneNumber: string): Promise<void> {
-    this.phoneConfirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
+    this.phoneConfirmation = await sendPhoneVerificationCode(phoneNumber);
   }
 
   async confirmPhoneCode(code: string): Promise<User> {
@@ -162,32 +151,14 @@ class AuthRepository {
   }
 
   async signInWithApple(): Promise<User> {
-    if (Platform.OS !== 'ios') {
-      throw new Error('Apple Sign-In is only available on iOS');
-    }
-
-    const credential = await AppleAuthentication.signInAsync({
-      requestedScopes: [
-        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-        AppleAuthentication.AppleAuthenticationScope.EMAIL,
-      ],
-    });
-
-    if (!credential.identityToken) {
-      throw new Error('No identity token received from Apple');
-    }
-
-    const appleCredential = AppleAuthProvider.credential(credential.identityToken);
-    const result = await signInWithCredential(getAuth(), appleCredential);
+    const result = await signInWithAppleProvider();
 
     if (!result.additionalUserInfo?.isNewUser) {
       this.currentUser = await this.loadOrCreateProfile(result.user);
       return this.currentUser;
     }
 
-    const displayName = credential.fullName
-      ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
-      : result.user.email?.split('@')[0] || 'User';
+    const displayName = result.displayName || result.user.email?.split('@')[0] || 'User';
 
     await setDoc(doc(getDb(), COLLECTIONS.users, result.user.uid), {
       handle: (result.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).slice(2, 4),
@@ -207,12 +178,7 @@ class AuthRepository {
   }
 
   async signOut(): Promise<void> {
-    try {
-      await GoogleSignin.signOut();
-    } catch {
-      // User may not have signed in with Google
-    }
-    await firebaseSignOut(getAuth());
+    await signOutFromAuth();
     this.currentUser = null;
     this.phoneConfirmation = null;
   }
@@ -278,7 +244,7 @@ class AuthRepository {
   }
 
   async resetPassword(email: string): Promise<void> {
-    await sendPasswordResetEmail(getAuth(), email);
+    await sendPasswordReset(email);
   }
 }
 

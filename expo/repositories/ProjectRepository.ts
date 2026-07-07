@@ -1,9 +1,9 @@
-import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Project, Task, User, ProjectCollaborator } from '@/types';
 import {
   COLLECTIONS,
   collection,
   deleteDoc,
+  type DocumentData,
   doc,
   getDb,
   getDoc,
@@ -285,7 +285,7 @@ export class ProjectRepository {
     throw new Error('Task not found');
   }
 
-  private mapProjectSummary(id: string, data: FirebaseFirestoreTypes.DocumentData): Project {
+  private mapProjectSummary(id: string, data: DocumentData): Project {
     return {
       id,
       title: data.title,
@@ -302,7 +302,7 @@ export class ProjectRepository {
     };
   }
 
-  private async mapProjectDoc(id: string, data: FirebaseFirestoreTypes.DocumentData): Promise<Project> {
+  private async mapProjectDoc(id: string, data: DocumentData): Promise<Project> {
     let tasks: Task[] = [];
     try {
       const tasksSnap = await getDocs(collection(doc(getDb(), COLLECTIONS.projects, id), 'tasks'));
@@ -349,7 +349,7 @@ export class ProjectRepository {
     };
   }
 
-  private mapTask(id: string, projectId: string, data: FirebaseFirestoreTypes.DocumentData): Task {
+  private mapTask(id: string, projectId: string, data: DocumentData): Task {
     return {
       id,
       title: data.title,
@@ -363,8 +363,8 @@ export class ProjectRepository {
 
   private mapMember(
     id: string,
-    data: FirebaseFirestoreTypes.DocumentData,
-    profile?: FirebaseFirestoreTypes.DocumentData
+    data: DocumentData,
+    profile?: DocumentData
   ): ProjectCollaborator & { user?: User; permission?: 'view' | 'edit' } {
     return {
       id,

@@ -1,8 +1,7 @@
-import '@/lib/i18n';
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -15,12 +14,25 @@ import { SharingProvider } from "@/store/useSharingStore";
 import { initializeFirestore } from "@/lib/firestore";
 import { initializeAnalytics } from "@/lib/analytics";
 import { initializeCrashlytics, recordError } from "@/lib/crashlytics";
-import { ShareIntentProvider } from "expo-share-intent";
-import { ShareIntentHandler } from "@/components/ShareIntentHandler";
+import { ShareIntentHandler, ShareIntentProviderBoundary } from "@/components/ShareIntentHandler";
 import { ClipboardUrlBanner } from "@/components/ClipboardUrlBanner";
 import { loadSavedLanguage } from "@/lib/i18n";
 
 SplashScreen.preventAutoHideAsync();
+
+function WebHydrationGate({ children }: { children: React.ReactNode }) {
+  const [isMounted, setIsMounted] = React.useState(Platform.OS !== "web");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <View style={styles.container} />;
+  }
+
+  return <>{children}</>;
+}
 
 function NavigationGuard() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -118,23 +130,25 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <ShareIntentProvider>
-        <GestureHandlerRootView style={styles.container}>
-          <AuthProvider>
-            <OnboardingProvider>
-              <SharingProvider>
-                <OfflineProvider>
-                  <DialogProvider>
-                    <ShareIntentHandler />
-                    <ClipboardUrlBanner />
-                    <RootLayoutNav />
-                  </DialogProvider>
-                </OfflineProvider>
-              </SharingProvider>
-            </OnboardingProvider>
-          </AuthProvider>
-        </GestureHandlerRootView>
-      </ShareIntentProvider>
+      <WebHydrationGate>
+        <ShareIntentProviderBoundary>
+          <GestureHandlerRootView style={styles.container}>
+            <AuthProvider>
+              <OnboardingProvider>
+                <SharingProvider>
+                  <OfflineProvider>
+                    <DialogProvider>
+                      <ShareIntentHandler />
+                      <ClipboardUrlBanner />
+                      <RootLayoutNav />
+                    </DialogProvider>
+                  </OfflineProvider>
+                </SharingProvider>
+              </OnboardingProvider>
+            </AuthProvider>
+          </GestureHandlerRootView>
+        </ShareIntentProviderBoundary>
+      </WebHydrationGate>
     </ErrorBoundary>
   );
 }

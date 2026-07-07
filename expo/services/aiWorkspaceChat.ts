@@ -1,5 +1,5 @@
-import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
+import { getCurrentUserToken } from '@/lib/auth';
 
 export interface WorkspaceChatMessage {
   role: 'user' | 'assistant';
@@ -78,12 +78,11 @@ export async function sendWorkspaceChat(
   message: string,
   conversation: WorkspaceChatMessage[] = []
 ): Promise<WorkspaceChatResponse> {
-  const user = getAuth().currentUser;
-  if (!user) {
+  const token = await getCurrentUserToken();
+  if (!token) {
     throw new WorkspaceChatError('Authentication required', 'AUTH_REQUIRED', 401);
   }
 
-  const token = await getIdToken(user);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { platformCapabilities } from '@/utils/platform';
+
+declare const require: <T = unknown>(moduleName: string) => T;
 
 type SocialAuthButtonsProps = {
   mode: 'signIn' | 'signUp';
@@ -18,18 +20,25 @@ export function SocialAuthButtons({
   disabled = false,
 }: SocialAuthButtonsProps) {
   const { t } = useTranslation();
-  const [appleAvailable, setAppleAvailable] = useState(Platform.OS === 'ios');
+  const [appleAvailable, setAppleAvailable] = useState(platformCapabilities.supportsAppleSignIn);
 
   useEffect(() => {
     if (Platform.OS !== 'ios') return;
+    const AppleAuthentication = require<typeof import('expo-apple-authentication')>(
+      'expo-apple-authentication'
+    );
     AppleAuthentication.isAvailableAsync().then(setAppleAvailable);
   }, []);
 
   const googleLabel = t(mode === 'signIn' ? 'auth.signInWithGoogle' : 'auth.signUpWithGoogle');
+  const AppleAuthentication =
+    appleAvailable && Platform.OS === 'ios'
+      ? require<typeof import('expo-apple-authentication')>('expo-apple-authentication')
+      : null;
 
   return (
     <View style={styles.container}>
-      {appleAvailable && (
+      {AppleAuthentication && (
         <View
           style={[styles.appleButtonWrapper, disabled && styles.buttonWrapperDisabled]}
           pointerEvents={disabled ? 'none' : 'auto'}

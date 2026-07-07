@@ -1,18 +1,11 @@
-import * as Notifications from 'expo-notifications';
+import type * as NotificationsTypes from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import i18n from '@/lib/i18n';
+import { platformCapabilities } from '@/utils/platform';
 
-// Configure notification behavior
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+declare const require: <T = unknown>(moduleName: string) => T;
 
 export interface NotificationData {
   type: 'task_reminder' | 'project_update' | 'invitation' | 'general' | 'bookmark_digest' | 'entity_reminder';
@@ -22,9 +15,32 @@ export interface NotificationData {
   body: string;
 }
 
-function dateTrigger(reminderTime: Date): Notifications.DateTriggerInput {
+type NotificationSubscription = {
+  remove: () => void;
+};
+
+function notifications() {
+  return require<typeof import('expo-notifications')>('expo-notifications');
+}
+
+function configureNotificationHandler(): void {
+  if (!platformCapabilities.supportsLocalNotifications) return;
+
+  notifications().setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
+
+configureNotificationHandler();
+
+function dateTrigger(reminderTime: Date): NotificationsTypes.DateTriggerInput {
   return {
-    type: Notifications.SchedulableTriggerInputTypes.DATE,
+    type: notifications().SchedulableTriggerInputTypes.DATE,
     date: reminderTime,
   };
 }
@@ -42,21 +58,23 @@ export class NotificationService {
 
   async initialize(): Promise<void> {
     try {
-      if (Platform.OS === 'web') {
-        console.log('Notifications not supported on web');
+      if (!platformCapabilities.supportsPushNotifications) {
+        if (__DEV__) console.debug('Notifications not supported on this platform');
         return;
       }
+
+      const notificationModule = notifications();
 
       if (!Device.isDevice) {
         console.log('Must use physical device for Push Notifications');
         return;
       }
 
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } = await notificationModule.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
+        const { status } = await notificationModule.requestPermissionsAsync();
         finalStatus = status;
       }
 
@@ -73,13 +91,13 @@ export class NotificationService {
         return;
       }
 
-      this.expoPushToken = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+      this.expoPushToken = (await notificationModule.getExpoPushTokenAsync({ projectId })).data;
       console.log('Expo push token:', this.expoPushToken);
 
       if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
+        await notificationModule.setNotificationChannelAsync('default', {
           name: 'default',
-          importance: Notifications.AndroidImportance.MAX,
+          importance: notificationModule.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
           lightColor: '#FF231F7C',
         });
@@ -91,15 +109,15 @@ export class NotificationService {
 
   async scheduleLocalNotification(
     data: NotificationData,
-    trigger?: Notifications.NotificationTriggerInput
+    trigger?: NotificationsTypes.NotificationTriggerInput
   ): Promise<string | null> {
     try {
-      if (Platform.OS === 'web') {
-        console.log('Local notifications not supported on web');
+      if (!platformCapabilities.supportsLocalNotifications) {
+        if (__DEV__) console.debug('Local notifications not supported on this platform');
         return null;
       }
 
-      const notificationId = await Notifications.scheduleNotificationAsync({
+      const notificationId = await notifications().scheduleNotificationAsync({
         content: {
           title: data.title,
           body: data.body,
@@ -188,7 +206,8 @@ export class NotificationService {
 
   async cancelNotification(notificationId: string): Promise<void> {
     try {
-      await Notifications.cancelScheduledNotificationAsync(notificationId);
+      if (!platformCapabilities.supportsLocalNotifications) return;
+      await notifications().cancelScheduledNotificationAsync(notificationId);
     } catch (error) {
       console.error('Error canceling notification:', error);
     }
@@ -196,7 +215,8 @@ export class NotificationService {
 
   async cancelAllNotifications(): Promise<void> {
     try {
-      await Notifications.cancelAllScheduledNotificationsAsync();
+      if (!platformCapabilities.supportsLocalNotifications) return;
+      await notifications().cancelAllScheduledNotificationsAsync();
     } catch (error) {
       console.error('Error canceling all notifications:', error);
     }
@@ -207,21 +227,23 @@ export class NotificationService {
   }
 
   addNotificationReceivedListener(
-    listener: (notification: Notifications.Notification) => void
-  ): Notifications.Subscription {
+    listener: (notification: NotificationsTypes.Notification) => void
+  ): NotificationSubscription {
     if (!listener || typeof listener !== 'function') {
       throw new Error('Listener must be a valid function');
     }
-    return Notifications.addNotificationReceivedListener(listener);
+    if (!platformCapabilities.supportsLocalNotifications) return { remove: () => undefined };
+    return notifications().addNotificationReceivedListener(listener);
   }
 
   addNotificationResponseReceivedListener(
-    listener: (response: Notifications.NotificationResponse) => void
-  ): Notifications.Subscription {
+    listener: (response: NotificationsTypes.NotificationResponse) => void
+  ): NotificationSubscription {
     if (!listener || typeof listener !== 'function') {
       throw new Error('Listener must be a valid function');
     }
-    return Notifications.addNotificationResponseReceivedListener(listener);
+    if (!platformCapabilities.supportsLocalNotifications) return { remove: () => undefined };
+    return notifications().addNotificationResponseReceivedListener(listener);
   }
 }
 

@@ -4,11 +4,13 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  TextInput,
+  Platform,
 } from 'react-native';
-import { MarkdownTextInput, parseExpensiMark } from '@expensify/react-native-live-markdown';
-import type { MarkdownTextInput as MarkdownTextInputType } from '@expensify/react-native-live-markdown';
 import { Bold, Italic, List, Link as LinkIcon, Strikethrough } from 'lucide-react-native';
 import { NOTE_EDITOR_TEXT_STYLE, NOTE_MARKDOWN_STYLE } from '@/utils/markdownEditor';
+
+declare const require: <T = unknown>(moduleName: string) => T;
 
 interface RichTextEditorProps {
   value: string;
@@ -56,6 +58,19 @@ function hasMarkers(selected: string, open: string, close: string): boolean {
   return selected.startsWith(open) && selected.endsWith(close);
 }
 
+function getLiveMarkdownModule() {
+  if (Platform.OS === 'web' && typeof window === 'undefined') return null;
+
+  try {
+    return require<typeof import('@expensify/react-native-live-markdown')>(
+      '@expensify/react-native-live-markdown'
+    );
+  } catch (error) {
+    console.warn('Live markdown module unavailable:', error);
+    return null;
+  }
+}
+
 export function RichTextEditor({
   value,
   onChangeText,
@@ -68,7 +83,10 @@ export function RichTextEditor({
   const [text, setText] = useState(value);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [activeStyles, setActiveStyles] = useState<Set<string>>(new Set());
-  const inputRef = useRef<MarkdownTextInputType>(null);
+  const inputRef = useRef<TextInput>(null);
+  const liveMarkdown = getLiveMarkdownModule();
+  const MarkdownTextInput = liveMarkdown?.MarkdownTextInput;
+  const parseExpensiMark = liveMarkdown?.parseExpensiMark;
 
   React.useEffect(() => {
     if (value !== text) {
@@ -282,24 +300,43 @@ export function RichTextEditor({
         </View>
       ) : null}
 
-      <MarkdownTextInput
-        ref={inputRef}
-        style={[styles.input, !editable && styles.readOnlyInput]}
-        value={text}
-        onChangeText={handleTextChange}
-        onSelectionChange={(e) => updateSelection(e.nativeEvent.selection)}
-        parser={parseExpensiMark}
-        markdownStyle={NOTE_MARKDOWN_STYLE}
-        multiline
-        editable={editable}
-        autoFocus={autoFocus}
-        placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
-        textAlignVertical="top"
-        selectionColor="#EF4444"
-        cursorColor="#EF4444"
-        scrollEnabled={editable}
-      />
+      {MarkdownTextInput && parseExpensiMark ? (
+        <MarkdownTextInput
+          ref={inputRef as never}
+          style={[styles.input, !editable && styles.readOnlyInput]}
+          value={text}
+          onChangeText={handleTextChange}
+          onSelectionChange={(e) => updateSelection(e.nativeEvent.selection)}
+          parser={parseExpensiMark}
+          markdownStyle={NOTE_MARKDOWN_STYLE}
+          multiline
+          editable={editable}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
+          placeholderTextColor="#9CA3AF"
+          textAlignVertical="top"
+          selectionColor="#EF4444"
+          cursorColor="#EF4444"
+          scrollEnabled={editable}
+        />
+      ) : (
+        <TextInput
+          ref={inputRef}
+          style={[styles.input, !editable && styles.readOnlyInput]}
+          value={text}
+          onChangeText={handleTextChange}
+          onSelectionChange={(e) => updateSelection(e.nativeEvent.selection)}
+          multiline
+          editable={editable}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
+          placeholderTextColor="#9CA3AF"
+          textAlignVertical="top"
+          selectionColor="#EF4444"
+          cursorColor="#EF4444"
+          scrollEnabled={editable}
+        />
+      )}
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { I18nManager } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import i18n from 'i18next';
@@ -70,7 +70,7 @@ function applyRtl(language: SupportedLanguage): void {
   }
 }
 
-const deviceLanguage = getDeviceLanguage();
+const deviceLanguage = Platform.OS === 'web' ? 'en' : getDeviceLanguage();
 applyRtl(deviceLanguage);
 
 i18n.use(initReactI18next).init({

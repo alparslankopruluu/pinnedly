@@ -3,7 +3,7 @@
     "name": "Draft",
     "slug": "draft",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "draft",
     "userInterfaceStyle": "automatic",
@@ -43,7 +43,13 @@
       ]
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro",
+      "output": "static",
+      "name": "Draft",
+      "shortName": "Draft",
+      "backgroundColor": "#ffffff",
+      "themeColor": "#EF4444"
     },
     "plugins": [
       [
@@ -111,7 +117,14 @@
     "extra": {
       "googleWebClientId": "36179904713-taogn2iie8n5u4amrkq5cp2rquckbhef.apps.googleusercontent.com",
       "aiFunctionsUrl": "https://us-central1-pinnedly-48c49.cloudfunctions.net/aiWorkspaceChat",
-      "functionsBaseUrl": "https://europe-west1-pinnedly-48c49.cloudfunctions.net"
+      "functionsBaseUrl": "https://europe-west1-pinnedly-48c49.cloudfunctions.net",
+      "firebaseWeb": {
+        "apiKey": "AIzaSyAMRSrAaduMS643iVZ2OAxEc_pgD1MXyZg",
+        "authDomain": "pinnedly-48c49.firebaseapp.com",
+        "projectId": "pinnedly-48c49",
+        "storageBucket": "pinnedly-48c49.firebasestorage.app",
+        "messagingSenderId": "36179904713"
+      }
     }
   }
 }

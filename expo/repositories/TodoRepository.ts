@@ -1,9 +1,9 @@
-import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { TodoItem, ID } from '@/types';
 import {
   COLLECTIONS,
   collection,
   deleteDoc,
+  type DocumentData,
   doc,
   getDb,
   getDoc,
@@ -111,7 +111,7 @@ export class TodoRepository {
     // Firestore handles sync automatically with offline persistence
   }
 
-  private mapTodo(id: string, data: FirebaseFirestoreTypes.DocumentData): TodoItem {
+  private mapTodo(id: string, data: DocumentData): TodoItem {
     return {
       id,
       title: data.title,

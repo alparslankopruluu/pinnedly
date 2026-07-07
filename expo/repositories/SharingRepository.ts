@@ -1,8 +1,8 @@
-import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { EntityShare, ShareRequest, SharePermission, ID } from '@/types';
 import {
   COLLECTIONS,
   collection,
+  type DocumentData,
   doc,
   getDb,
   getDoc,
@@ -119,8 +119,8 @@ class SharingRepository {
 
   private mapShare(
     id: string,
-    data: FirebaseFirestoreTypes.DocumentData,
-    profile?: FirebaseFirestoreTypes.DocumentData
+    data: DocumentData,
+    profile?: DocumentData
   ): EntityShare {
     return {
       id,

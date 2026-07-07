@@ -1,61 +1,88 @@
-import {
-  crash,
-  getCrashlytics,
-  log,
-  recordError as recordCrashlyticsError,
-  setAttribute,
-  setCrashlyticsCollectionEnabled,
-  setUserId,
-} from '@react-native-firebase/crashlytics';
+import { Platform } from 'react-native';
 
-const crashlytics = getCrashlytics();
+declare const require: <T = unknown>(moduleName: string) => T;
+
+function crashlyticsModule() {
+  return require<typeof import('@react-native-firebase/crashlytics')>(
+    '@react-native-firebase/crashlytics'
+  );
+}
+
+function getNativeCrashlytics() {
+  return crashlyticsModule().getCrashlytics();
+}
+
+function withNativeCrashlytics(action: (
+  module: ReturnType<typeof crashlyticsModule>,
+  crashlytics: unknown
+) => void): void {
+  if (Platform.OS === 'web') return;
+
+  try {
+    action(crashlyticsModule(), getNativeCrashlytics());
+  } catch (error) {
+    console.warn('Crashlytics event failed:', error);
+  }
+}
 
 export async function initializeCrashlytics(): Promise<void> {
+  if (Platform.OS === 'web') return;
+
   try {
-    await setCrashlyticsCollectionEnabled(crashlytics, true);
-    log(crashlytics, 'Crashlytics initialized');
+    const module = crashlyticsModule();
+    const crashlytics = getNativeCrashlytics();
+    await module.setCrashlyticsCollectionEnabled(crashlytics as never, true);
+    module.log(crashlytics as never, 'Crashlytics initialized');
   } catch (error) {
     console.warn('Crashlytics init failed:', error);
   }
 }
 
 export async function setCrashlyticsUser(userId: string | null): Promise<void> {
+  if (Platform.OS === 'web') return;
+
   try {
-    await setUserId(crashlytics, userId ?? '');
+    await crashlyticsModule().setUserId(getNativeCrashlytics() as never, userId ?? '');
   } catch (error) {
     console.warn('Crashlytics setUserId failed:', error);
   }
 }
 
 export function setCrashlyticsAttributes(attrs: Record<string, string>): void {
-  try {
+  withNativeCrashlytics((module, crashlytics) => {
     Object.entries(attrs).forEach(([key, value]) => {
-      setAttribute(crashlytics, key, value);
+      module.setAttribute(crashlytics as never, key, value);
     });
-  } catch (error) {
-    console.warn('Crashlytics setAttribute failed:', error);
-  }
+  });
 }
 
 export function logCrashlytics(message: string): void {
-  try {
-    log(crashlytics, message);
-  } catch (error) {
-    console.warn('Crashlytics log failed:', error);
-  }
+  withNativeCrashlytics((module, crashlytics) => {
+    module.log(crashlytics as never, message);
+  });
 }
 
 export function recordError(error: Error, context?: string): void {
-  try {
-    if (context) log(crashlytics, context);
-    recordCrashlyticsError(crashlytics, error);
-  } catch (e) {
-    console.warn('Crashlytics recordError failed:', e);
+  if (Platform.OS === 'web') {
+    if (__DEV__) console.warn(context ? `${context}:` : 'Captured error:', error);
+    return;
   }
+
+  withNativeCrashlytics((module, crashlytics) => {
+    if (context) module.log(crashlytics as never, context);
+    module.recordError(crashlytics as never, error);
+  });
 }
 
 /** Forces a native crash to verify Crashlytics setup (dev/testing only). */
 export function forceTestCrash(): void {
-  log(crashlytics, 'Test crash triggered from settings');
-  crash(crashlytics);
+  if (Platform.OS === 'web') {
+    console.warn('Crashlytics test crash is only available on native builds.');
+    return;
+  }
+
+  withNativeCrashlytics((module, crashlytics) => {
+    module.log(crashlytics as never, 'Test crash triggered from settings');
+    module.crash(crashlytics as never);
+  });
 }

@@ -8,7 +8,6 @@ import {
   TextInput,
   ImageBackground,
   Image,
-  Dimensions,
   Animated,
   PanResponder,
   Modal,
@@ -52,8 +51,7 @@ import { getNextTaskStatus } from '@/utils/taskStatus';
 import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
-
-const { width } = Dimensions.get('window');
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 
 type TabType = 'tasks' | 'timeline' | 'gallery';
 
@@ -153,6 +151,7 @@ interface ActivityItem {
 export default function ProjectDetailScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { width: viewportWidth, readableWidth, isTabletOrLarger } = useResponsiveLayout();
   const { id } = useLocalSearchParams<{ id: string }>();
   const projectId = Array.isArray(id) ? id[0] : id;
   useTrackContentOpen('project', projectId);
@@ -174,6 +173,14 @@ export default function ProjectDetailScreen() {
   const [isHydratingProject, setIsHydratingProject] = useState(false);
   const taskInputRef = useRef<TextInput>(null);
   const attemptedHydrationIds = useRef<Set<string>>(new Set());
+  const contentWidth = typeof readableWidth === 'number' ? readableWidth : undefined;
+  const galleryColumns = isTabletOrLarger ? 3 : 2;
+  const galleryGap = 8;
+  const galleryAvailableWidth = (contentWidth ?? viewportWidth) - 32;
+  const galleryItemSize = Math.max(
+    120,
+    Math.floor((galleryAvailableWidth - galleryGap * (galleryColumns - 1)) / galleryColumns)
+  );
 
   const { bookmarks, activities } = useAppStore();
   const { notes } = useNoteStore();
@@ -684,7 +691,10 @@ export default function ProjectDetailScreen() {
                     <Image
                       key={`${uri}-${index}`}
                       source={{ uri }}
-                      style={styles.galleryImage}
+                      style={[
+                        styles.galleryImage,
+                        { width: galleryItemSize, height: galleryItemSize },
+                      ]}
                       resizeMode="cover"
                     />
                   ))}
@@ -771,7 +781,14 @@ export default function ProjectDetailScreen() {
           </ImageBackground>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={[
+            styles.contentContainer,
+            contentWidth ? { width: contentWidth } : null,
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Project Overview Card */}
           <View style={styles.overviewCard}>
             <Text style={styles.projectTitle}>{project.title}</Text>
@@ -1092,6 +1109,10 @@ const styles = StyleSheet.create({
     marginTop: -60,
     paddingHorizontal: 16,
   },
+  contentContainer: {
+    alignSelf: 'center',
+    width: '100%',
+  },
   overviewCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -1318,8 +1339,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   galleryImage: {
-    width: (width - 48) / 2,
-    height: (width - 48) / 2,
     borderRadius: 12,
     backgroundColor: '#E5E7EB',
   },

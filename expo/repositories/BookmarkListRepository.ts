@@ -1,4 +1,3 @@
-import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { BookmarkList, ID, Visibility } from '@/types';
 import {
   COLLECTIONS,
@@ -7,6 +6,7 @@ import {
   arrayUnion,
   collection,
   deleteDoc,
+  type DocumentData,
   doc,
   getDb,
   getDoc,
@@ -206,7 +206,7 @@ class BookmarkListRepository {
     );
   }
 
-  private mapList(id: string, data: FirebaseFirestoreTypes.DocumentData): BookmarkList {
+  private mapList(id: string, data: DocumentData): BookmarkList {
     const visibility = (data.visibility as BookmarkList['visibility']) ||
       (data.isPublic ? 'public' : 'private');
     return {

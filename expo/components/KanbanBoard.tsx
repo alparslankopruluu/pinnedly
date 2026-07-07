@@ -8,7 +8,6 @@ import {
   PanResponder,
   LayoutChangeEvent,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,8 @@ import { Project, Task } from '@/types';
 import { isOverdue } from '@/utils/date';
 import { getNextTaskStatus } from '@/utils/taskStatus';
 import { TaskStatusCheckbox } from '@/components/TaskStatusCheckbox';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import { hapticError, hapticImpactMedium, hapticSelection, hapticSuccess } from '@/utils/haptics';
 
 type KanbanTask = Task & { projectTitle: string; projectId: string };
 
@@ -117,6 +118,7 @@ export function KanbanBoard({
   onUpdateTask,
 }: KanbanBoardProps) {
   const { t } = useTranslation();
+  const { width, readableWidth, isDesktop, isTabletOrLarger } = useResponsiveLayout();
   const [draggingTask, setDraggingTask] = useState<KanbanTask | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [activeColumnId, setActiveColumnId] = useState<Task['status'] | null>(null);
@@ -136,6 +138,14 @@ export function KanbanBoard({
     ],
     [t]
   );
+  const boardWidth = typeof readableWidth === 'number' ? readableWidth : width;
+  const columnWidth = useMemo(() => {
+    if (isDesktop) {
+      return Math.max(280, Math.min(360, Math.floor((boardWidth - 96) / 3)));
+    }
+    if (isTabletOrLarger) return 320;
+    return Math.max(260, Math.min(300, width - 48));
+  }, [boardWidth, isDesktop, isTabletOrLarger, width]);
 
   const getTasksByStatus = useCallback(
     (status: Task['status']) => {
@@ -178,9 +188,9 @@ export function KanbanBoard({
       if (targetStatus && targetStatus !== task.status) {
         try {
           await onUpdateTask(task.id, targetStatus);
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          hapticSuccess();
         } catch {
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          hapticError();
         }
       }
 
@@ -213,7 +223,7 @@ export function KanbanBoard({
       setDraggingTask(task);
       setDragPosition({ x, y });
       setActiveColumnId(task.status);
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      hapticImpactMedium();
     },
     [measureColumns]
   );
@@ -223,9 +233,9 @@ export function KanbanBoard({
       const nextStatus = getNextTaskStatus(task.status);
       try {
         await onUpdateTask(task.id, nextStatus);
-        void Haptics.selectionAsync();
+        hapticSelection();
       } catch {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        hapticError();
       }
     },
     [onUpdateTask]
@@ -246,7 +256,11 @@ export function KanbanBoard({
           columnRefs.current.set(column.id, ref);
         }}
         onLayout={handleColumnLayout(column.id)}
-        style={[styles.kanbanColumn, isDropTarget && styles.kanbanColumnActive]}
+        style={[
+          styles.kanbanColumn,
+          { width: columnWidth },
+          isDropTarget && styles.kanbanColumnActive,
+        ]}
       >
         <View style={[styles.kanbanHeader, { borderTopColor: column.color }]}>
           <Text style={styles.kanbanTitle}>{column.title}</Text>
@@ -300,7 +314,11 @@ export function KanbanBoard({
         horizontal
         style={styles.kanbanContainer}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[styles.kanbanContent, { paddingBottom: bottomPadding }]}
+        contentContainerStyle={[
+          styles.kanbanContent,
+          isDesktop && { alignSelf: 'center', width: boardWidth },
+          { paddingBottom: bottomPadding },
+        ]}
         scrollEnabled={!draggingTask}
         onScrollEndDrag={measureColumns}
         onMomentumScrollEnd={measureColumns}
@@ -344,7 +362,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   kanbanColumn: {
-    width: 280,
     marginRight: 16,
     backgroundColor: 'white',
     borderRadius: 12,

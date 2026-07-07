@@ -1,12 +1,6 @@
-import {
-  getAnalytics,
-  logEvent,
-  logLogin,
-  logSignUp,
-  setAnalyticsCollectionEnabled,
-  setUserId,
-  setUserProperty,
-} from '@react-native-firebase/analytics';
+import { Platform } from 'react-native';
+
+declare const require: <T = unknown>(moduleName: string) => T;
 
 export type AuthMethod = 'email' | 'google' | 'apple' | 'phone';
 
@@ -19,8 +13,6 @@ export type SubscriptionAction =
   | 'subscribe_completed'
   | 'subscribe_failed'
   | 'subscribe_cancelled';
-
-const analytics = getAnalytics();
 
 const SCREEN_MAP: Record<string, string> = {
   '(auth)/welcome': 'Welcome',
@@ -49,6 +41,28 @@ const SCREEN_MAP: Record<string, string> = {
   '+not-found': 'Not Found',
 };
 
+function analyticsModule() {
+  return require<typeof import('@react-native-firebase/analytics')>(
+    '@react-native-firebase/analytics'
+  );
+}
+
+function getNativeAnalytics() {
+  return analyticsModule().getAnalytics();
+}
+
+async function withNativeAnalytics(
+  action: (module: ReturnType<typeof analyticsModule>, analytics: unknown) => Promise<void>
+): Promise<void> {
+  if (Platform.OS === 'web') return;
+
+  try {
+    await action(analyticsModule(), getNativeAnalytics());
+  } catch (error) {
+    console.warn('Analytics event failed:', error);
+  }
+}
+
 export function resolveAnalyticsScreen(segments: string[]): string {
   const path = segments.filter(Boolean);
   if (path.length === 0) return 'Home';
@@ -67,35 +81,29 @@ export function resolveAnalyticsScreen(segments: string[]): string {
 }
 
 export async function initializeAnalytics(): Promise<void> {
-  try {
-    await setAnalyticsCollectionEnabled(analytics, true);
-  } catch (error) {
-    console.warn('Analytics init failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.setAnalyticsCollectionEnabled(instance as never, true);
+  });
 }
 
 export async function logAnalyticsScreenView(segments: string[]): Promise<void> {
   const screenName = resolveAnalyticsScreen(segments);
-  try {
-    await logEvent(analytics, 'screen_view', {
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, 'screen_view', {
       screen_name: screenName,
       screen_class: screenName,
     });
-  } catch (error) {
-    console.warn('Analytics screen view failed:', error);
-  }
+  });
 }
 
 /** @deprecated Use logAnalyticsScreenView with segments */
 export async function logScreenViewLegacy(screenName: string, screenClass?: string): Promise<void> {
-  try {
-    await logEvent(analytics, 'screen_view', {
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, 'screen_view', {
       screen_name: screenName,
       screen_class: screenClass ?? screenName,
     });
-  } catch (error) {
-    console.warn('Analytics screen view failed:', error);
-  }
+  });
 }
 
 export async function trackButtonPress(
@@ -103,15 +111,13 @@ export async function trackButtonPress(
   buttonId: string,
   action?: string
 ): Promise<void> {
-  try {
-    await logEvent(analytics, 'button_press', {
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, 'button_press', {
       screen,
       button_id: buttonId,
       action: action ?? 'press',
     });
-  } catch (error) {
-    console.warn('Analytics button event failed:', error);
-  }
+  });
 }
 
 export async function trackAuthEvent(
@@ -119,56 +125,48 @@ export async function trackAuthEvent(
   method?: AuthMethod,
   extra?: Record<string, string>
 ): Promise<void> {
-  try {
+  await withNativeAnalytics(async (analytics, instance) => {
     if (event === 'login' && method) {
-      await logLogin(analytics, { method });
+      await analytics.logLogin(instance as never, { method });
       return;
     }
     if (event === 'sign_up' && method) {
-      await logSignUp(analytics, { method });
+      await analytics.logSignUp(instance as never, { method });
       return;
     }
     const customEvent = event as 'logout' | 'password_reset' | 'phone_code_sent' | 'auth_failed';
-    await logEvent(analytics, customEvent, {
+    await analytics.logEvent(instance as never, customEvent, {
       ...(method ? { method } : {}),
       ...extra,
     });
-  } catch (error) {
-    console.warn('Analytics auth event failed:', error);
-  }
+  });
 }
 
 export async function trackAccountEvent(
   event: 'account_deleted' | 'profile_updated' | 'data_exported',
   extra?: Record<string, string>
 ): Promise<void> {
-  try {
-    await logEvent(analytics, event, extra ?? {});
-  } catch (error) {
-    console.warn('Analytics account event failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, event, extra ?? {});
+  });
 }
 
 export async function trackOnboardingEvent(
   event: 'onboarding_started' | 'onboarding_step' | 'onboarding_completed' | 'onboarding_skipped',
   extra?: Record<string, string | number>
 ): Promise<void> {
-  try {
-    await logEvent(analytics, event, extra ?? {});
-  } catch (error) {
-    console.warn('Analytics onboarding event failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, event, extra ?? {});
+  });
 }
 
 export async function trackSubscriptionEvent(
   action: SubscriptionAction,
   extra?: Record<string, string>
 ): Promise<void> {
-  try {
-    await logEvent(analytics, `subscription_${action}`, extra ?? {});
-  } catch (error) {
-    console.warn('Analytics subscription event failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, `subscription_${action}`, extra ?? {});
+  });
 }
 
 export async function trackContentOpen(
@@ -176,22 +174,21 @@ export async function trackContentOpen(
   contentId?: string,
   source?: string
 ): Promise<void> {
-  try {
-    await logEvent(analytics, 'content_opened', {
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, 'content_opened', {
       content_type: contentType,
       ...(contentId ? { content_id: contentId } : {}),
       ...(source ? { source } : {}),
     });
-    if (contentType === 'note' && contentId) {
-      await trackNoteEvent('note_opened', contentId);
-    } else if (
-      (contentType === 'bookmark' || contentType === 'project' || contentType === 'todo') &&
-      contentId
-    ) {
-      await trackEntityEvent(contentType, 'opened', contentId);
-    }
-  } catch (error) {
-    console.warn('Analytics content open failed:', error);
+  });
+
+  if (contentType === 'note' && contentId) {
+    await trackNoteEvent('note_opened', contentId);
+  } else if (
+    (contentType === 'bookmark' || contentType === 'project' || contentType === 'todo') &&
+    contentId
+  ) {
+    await trackEntityEvent(contentType, 'opened', contentId);
   }
 }
 
@@ -199,25 +196,21 @@ export async function trackFormOpen(
   form: 'bookmark' | 'note' | 'project' | 'todo' | 'list',
   source?: string
 ): Promise<void> {
-  try {
-    await logEvent(analytics, 'form_opened', {
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, 'form_opened', {
       form_type: form,
       ...(source ? { source } : {}),
     });
-  } catch (error) {
-    console.warn('Analytics form open failed:', error);
-  }
+  });
 }
 
 export async function trackNoteEvent(
   event: 'note_created' | 'note_updated' | 'note_deleted' | 'note_opened',
   noteId?: string
 ): Promise<void> {
-  try {
-    await logEvent(analytics, event, noteId ? { note_id: noteId } : {});
-  } catch (error) {
-    console.warn('Analytics note event failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(instance as never, event, noteId ? { note_id: noteId } : {});
+  });
 }
 
 export async function trackEntityEvent(
@@ -225,29 +218,27 @@ export async function trackEntityEvent(
   action: 'created' | 'updated' | 'deleted' | 'opened',
   entityId?: string
 ): Promise<void> {
-  try {
-    await logEvent(analytics, `${entity}_${action}`, entityId ? { entity_id: entityId } : {});
-  } catch (error) {
-    console.warn('Analytics entity event failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.logEvent(
+      instance as never,
+      `${entity}_${action}`,
+      entityId ? { entity_id: entityId } : {}
+    );
+  });
 }
 
 export async function setAnalyticsUserId(userId: string | null): Promise<void> {
-  try {
-    await setUserId(analytics, userId);
-  } catch (error) {
-    console.warn('Analytics setUserId failed:', error);
-  }
+  await withNativeAnalytics(async (analytics, instance) => {
+    await analytics.setUserId(instance as never, userId);
+  });
 }
 
 export async function setAnalyticsUserProperties(props: Record<string, string | null>): Promise<void> {
-  try {
+  await withNativeAnalytics(async (analytics, instance) => {
     await Promise.all(
       Object.entries(props).map(([key, value]) =>
-        setUserProperty(analytics, key, value)
+        analytics.setUserProperty(instance as never, key, value)
       )
     );
-  } catch (error) {
-    console.warn('Analytics setUserProperty failed:', error);
-  }
+  });
 }

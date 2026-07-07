@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { List, Grid3X3, Plus, X } from 'lucide-react-native';
+import { List, Grid3X3, X } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useProjectStore } from '@/providers/OfflineProvider';
 import { FilterChips } from '@/components/ui/FilterChips';
@@ -25,16 +25,19 @@ import { Project, Task } from '@/types';
 import { isOverdue } from '@/utils/date';
 import { dedupeProjectsById } from '@/utils/projects';
 import { KanbanBoard } from '@/components/KanbanBoard';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 
 type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
 
 export default function ProjectsScreen() {
   const { t } = useTranslation();
-  const { projects, loading, error, addTask, deleteTask, updateTask, hydrateProjectTasks } = useProjectStore();
+  const { projects, loading, error, addTask, updateTask, hydrateProjectTasks } = useProjectStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('on-track');
   const insets = useSafeAreaInsets();
+  const { readableWidth, isTabletOrLarger } = useResponsiveLayout();
+  const contentWidth = typeof readableWidth === 'number' ? readableWidth : undefined;
 
   // Inline task creation state
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
@@ -95,7 +98,7 @@ export default function ProjectsScreen() {
       setShowAddTaskModal(false);
       setNewTaskTitle('');
       setNewTaskProjectId(null);
-    } catch (err) {
+    } catch {
       showAppAlert(t('common.error'), t('projects.addTask.createFailed'), undefined, { variant: 'error' });
     }
   }, [newTaskTitle, newTaskProjectId, newTaskStatus, addTask, t]);
@@ -180,7 +183,9 @@ export default function ProjectsScreen() {
 
   return (
     <View style={styles.container}>
-      {renderHeader()}
+      <View style={[styles.contentShell, contentWidth ? { width: contentWidth } : null]}>
+        {renderHeader()}
+      </View>
 
       {viewMode === 'kanban' ? (
         <KanbanBoard
@@ -191,6 +196,7 @@ export default function ProjectsScreen() {
         />
       ) : (
         <FlatList
+          style={[styles.contentShell, contentWidth ? { width: contentWidth } : null]}
           data={filteredProjects}
           renderItem={renderProject}
           keyExtractor={(item) => item.id}
@@ -218,7 +224,7 @@ export default function ProjectsScreen() {
             style={styles.modalBackdrop}
             onPress={() => setShowAddTaskModal(false)}
           />
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, isTabletOrLarger && styles.modalContentWide]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('projects.addTask.title')}</Text>
               <Pressable onPress={() => setShowAddTaskModal(false)}>
@@ -306,6 +312,10 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
+  },
+  contentShell: {
+    alignSelf: 'center',
+    width: '100%',
   },
   viewToggle: {
     flexDirection: 'row',
@@ -466,6 +476,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 40,
+  },
+  modalContentWide: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    borderRadius: 20,
+    paddingBottom: 24,
   },
   modalHeader: {
     flexDirection: 'row',

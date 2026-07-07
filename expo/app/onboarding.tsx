@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Dimensions,
   Image,
   TouchableOpacity,
   StatusBar,
@@ -17,8 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useOnboarding } from '@/store/useOnboardingStore';
 import { useAuth } from '@/store/useAuthStore';
 import { trackOnboardingEvent } from '@/lib/analytics';
-
-const { width: screenWidth } = Dimensions.get('window');
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 
 type OnboardingScreen = {
   id: string;
@@ -32,6 +30,7 @@ export default function Onboarding() {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const { completeOnboarding, skipOnboarding } = useOnboarding();
+  const { width: screenWidth, readableWidth, isTabletOrLarger } = useResponsiveLayout();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const flatListRef = useRef<FlatList<OnboardingScreen>>(null);
 
@@ -115,15 +114,21 @@ export default function Onboarding() {
   const onMomentumScrollEnd = useCallback((event: { nativeEvent: { contentOffset: { x: number } } }) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
     setCurrentIndex(index);
-  }, []);
+  }, [screenWidth]);
 
   const renderScreen = ({ item }: { item: OnboardingScreen }) => (
-    <View style={styles.screenContainer}>
+    <View style={[styles.screenContainer, { width: screenWidth }]}>
       <View style={styles.illustrationContainer}>
-        <Image source={{ uri: item.illustration }} style={styles.illustration} />
+        <Image
+          source={{ uri: item.illustration }}
+          style={[
+            styles.illustration,
+            isTabletOrLarger && styles.illustrationLarge,
+          ]}
+        />
       </View>
       
-      <View style={styles.contentContainer}>
+      <View style={[styles.contentContainer, { maxWidth: typeof readableWidth === 'number' ? readableWidth : 560 }]}>
         <Text style={styles.headline}>{item.headline}</Text>
         <Text style={styles.body}>{item.body}</Text>
       </View>
@@ -162,6 +167,12 @@ export default function Onboarding() {
           data={onboardingScreens}
           renderItem={renderScreen}
           keyExtractor={(item) => item.id}
+          extraData={screenWidth}
+          getItemLayout={(_, index) => ({
+            length: screenWidth,
+            offset: screenWidth * index,
+            index,
+          })}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
@@ -169,7 +180,7 @@ export default function Onboarding() {
           style={styles.flatList}
         />
 
-        <View style={styles.bottomSection}>
+        <View style={[styles.bottomSection, { maxWidth: typeof readableWidth === 'number' ? readableWidth : 560 }]}>
           {renderPaginationDots()}
           
           <Button
@@ -210,10 +221,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   screenContainer: {
-    width: screenWidth,
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   illustrationContainer: {
     alignItems: 'center',
@@ -225,9 +236,15 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
+  illustrationLarge: {
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+  },
   contentContainer: {
     alignItems: 'center',
     paddingHorizontal: 20,
+    width: '100%',
   },
   headline: {
     fontSize: 28,
@@ -248,6 +265,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 32,
     alignItems: 'center',
+    alignSelf: 'center',
+    width: '100%',
   },
   paginationContainer: {
     flexDirection: 'row',

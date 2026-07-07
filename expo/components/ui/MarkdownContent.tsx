@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { MarkdownTextInput, parseExpensiMark } from '@expensify/react-native-live-markdown';
+import { Platform, StyleSheet, Text } from 'react-native';
 import { NOTE_EDITOR_TEXT_STYLE, NOTE_MARKDOWN_STYLE } from '@/utils/markdownEditor';
+
+declare const require: <T = unknown>(moduleName: string) => T;
 
 interface MarkdownContentProps {
   value: string;
@@ -9,6 +10,26 @@ interface MarkdownContentProps {
 }
 
 export function MarkdownContent({ value, style }: MarkdownContentProps) {
+  if (Platform.OS === 'web' && typeof window === 'undefined') {
+    return <Text style={[styles.content, style]}>{value}</Text>;
+  }
+
+  const liveMarkdown = (() => {
+    try {
+      return require<typeof import('@expensify/react-native-live-markdown')>(
+        '@expensify/react-native-live-markdown'
+      );
+    } catch {
+      return null;
+    }
+  })();
+
+  if (!liveMarkdown) {
+    return <Text style={[styles.content, style]}>{value}</Text>;
+  }
+
+  const { MarkdownTextInput, parseExpensiMark } = liveMarkdown;
+
   return (
     <MarkdownTextInput
       style={[styles.content, style]}
