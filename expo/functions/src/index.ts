@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { onRequest } from 'firebase-functions/v2/https';
 import { buildWorkspaceContext } from './contextBuilder';
 import { ChatMessage, generateWorkspaceAnswer, openaiApiKey } from './openai';
+import { reserveAiUsage, revenueCatApiKey } from './subscription';
 
 admin.initializeApp();
 
@@ -32,7 +33,7 @@ function sendError(
 }
 
 export const aiWorkspaceChat = onRequest(
-  { secrets: [openaiApiKey], cors: true, timeoutSeconds: 60 },
+  { secrets: [openaiApiKey, revenueCatApiKey], cors: true, timeoutSeconds: 60 },
   async (req, res) => {
     const requestId = randomUUID();
     setCors(res);
@@ -77,7 +78,10 @@ export const aiWorkspaceChat = onRequest(
         )
       : [];
 
+    let releaseAiUsage: (() => Promise<void>) | undefined;
     try {
+      const reservation = await reserveAiUsage(uid);
+      releaseAiUsage = reservation.release;
       const context = await buildWorkspaceContext(admin.firestore(), uid, message);
 
       if (context.isEmpty) {
@@ -95,6 +99,21 @@ export const aiWorkspaceChat = onRequest(
 
       res.status(200).json(result);
     } catch (error) {
+      if (releaseAiUsage) await releaseAiUsage().catch(() => undefined);
+      const entitlementCode =
+        error && typeof error === 'object' && 'code' in error
+          ? String((error as { code?: unknown }).code)
+          : undefined;
+      if (entitlementCode === 'PREMIUM_REQUIRED' || entitlementCode === 'AI_QUOTA_EXHAUSTED') {
+        sendError(
+          res,
+          entitlementCode === 'PREMIUM_REQUIRED' ? 402 : 429,
+          entitlementCode,
+          entitlementCode === 'PREMIUM_REQUIRED' ? 'Premium required' : 'AI quota exhausted',
+          requestId
+        );
+        return;
+      }
       console.error('aiWorkspaceChat failed:', {
         requestId,
         uid,
@@ -123,3 +142,6 @@ export {
   updateProjectMemberPermission,
   updateSharePermission,
 } from './shareHandlers';
+
+export { syncEntitlement, revenueCatWebhook } from './subscription';
+export { mutateContent, deleteAccount } from './contentAccess';

@@ -22,12 +22,14 @@ import { Visibility } from '@/types';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
 import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 
 export default function AddNoteScreen() {
   useTrackFormOpen('note');
   const { t } = useTranslation();
   const { projectId } = useLocalSearchParams<{ projectId?: string }>();
-  const { createNote } = useNoteStore();
+  const { createNote, notes } = useNoteStore();
+  const { ensureCreate, ensure, handleAccessError } = useSubscriptionGate();
 
   const visibilityOptions = useMemo(
     () => [
@@ -65,6 +67,8 @@ export default function AddNoteScreen() {
       showAppAlert(t('common.error'), t('addNote.alerts.enterTitle'), undefined, { variant: 'error' });
       return;
     }
+    if (!ensureCreate('notes', notes.length)) return;
+    if (visibility !== 'private' && !ensure('sharing')) return;
 
     try {
       await createNote({
@@ -78,6 +82,7 @@ export default function AddNoteScreen() {
       });
     } catch (err) {
       console.error('Failed to create note:', err);
+      if (handleAccessError(err)) return;
       showAppAlert(t('common.error'), t('addNote.alerts.createFailed'), undefined, { variant: 'error' });
       return;
     }
@@ -91,7 +96,7 @@ export default function AddNoteScreen() {
         options={{ 
           title: t('addNote.title'),
           headerLeft: () => (
-            <Pressable onPress={() => router.back()}>
+            <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('common.close')}>
               <X size={24} color="#111827" />
             </Pressable>
           ),
@@ -113,6 +118,7 @@ export default function AddNoteScreen() {
                 onChangeText={setTitle}
                 placeholder={t('addNote.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
+                accessibilityLabel={t('addNote.noteTitle')}
               />
             </View>
 
@@ -139,6 +145,10 @@ export default function AddNoteScreen() {
                       pressed && styles.visibilityCardPressed
                     ]}
                     onPress={() => setVisibility(option.value)}
+                    accessibilityRole="radio"
+                    accessibilityLabel={option.label}
+                    accessibilityHint={option.description}
+                    accessibilityState={{ checked: visibility === option.value }}
                   >
                     <View style={[
                       styles.visibilityIconContainer,

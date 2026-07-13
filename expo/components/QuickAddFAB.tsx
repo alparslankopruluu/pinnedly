@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trackButtonPress } from '@/lib/analytics';
 import { getFabBottomOffset } from '@/utils/layout';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 export function QuickAddFAB() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [isVisible, setIsVisible] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   const options = useMemo(
     () => [
@@ -54,6 +56,10 @@ export function QuickAddFAB() {
           setIsVisible(true);
         }}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.quickAdd')}
+        accessibilityHint={t('accessibility.quickAddHint')}
+        accessibilityState={{ expanded: isVisible }}
       >
         <Plus size={24} color="white" />
       </TouchableOpacity>
@@ -61,16 +67,24 @@ export function QuickAddFAB() {
       <Modal
         visible={isVisible}
         transparent
-        animationType="fade"
+        animationType={reduceMotion ? "none" : "fade"}
         onRequestClose={() => setIsVisible(false)}
+        accessibilityViewIsModal
       >
-        <Pressable style={styles.overlay} onPress={() => setIsVisible(false)}>
-          <View style={styles.menu}>
+        <Pressable
+          style={styles.overlay}
+          onPress={() => setIsVisible(false)}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+        >
+          <View style={styles.menu} accessible={false}>
             {options.map((option, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.menuItem}
                 onPress={option.onPress}
+                accessibilityRole="button"
+                accessibilityLabel={option.label}
               >
                 <View style={styles.menuIcon}>{option.icon}</View>
                 <Text style={styles.menuLabel}>{option.label}</Text>
@@ -117,6 +131,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderRadius: 12,
+    minHeight: 56,
   },
   menuIcon: {
     width: 40,

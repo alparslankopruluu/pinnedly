@@ -11,6 +11,7 @@ import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
 import { getScrollBottomPadding } from '@/utils/layout';
 import { getActivityRoute, getActivityTitle } from '@/utils/activities';
 import { Bookmark, Note } from '@/types';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 
 function HomeContent() {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ function HomeContent() {
   const { bookmarks } = useBookmarkStore();
   const { notes } = useNoteStore();
   const { projects } = useProjectStore();
+  const { can, showPaywall } = useSubscriptionAccess();
 
   useEffect(() => {
     loadData();
@@ -82,7 +84,14 @@ function HomeContent() {
         {/* AI Chat Card */}
         <TouchableOpacity
           style={styles.aiChatCard}
-          onPress={() => router.push('/ai-chat')}
+          onPress={() => {
+            if (!can('ai').allowed) {
+              showPaywall();
+              return;
+            }
+            router.push('/ai-chat');
+          }}
+          accessibilityRole="button"
         >
           <View style={styles.aiIconContainer}>
             <Sparkles size={24} color="#EF4444" />
@@ -111,6 +120,7 @@ function HomeContent() {
                     }
                     router.push(`/note/${item.id}` as never);
                   }}
+                  accessibilityRole="button"
                 >
                   <View style={styles.continueImage}>
                     <Text style={styles.continueImageText}>
@@ -188,6 +198,8 @@ function HomeContent() {
                   style={[styles.activityRow, !route && styles.activityRowDisabled]}
                   disabled={!route}
                   onPress={() => route && router.push(route as never)}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: !route }}
                 >
                   <View style={styles.activityIcon}>
                     <CheckCircle size={16} color="#059669" />

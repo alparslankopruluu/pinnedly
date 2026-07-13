@@ -2,7 +2,6 @@ import { TodoItem, ID } from '@/types';
 import {
   COLLECTIONS,
   collection,
-  deleteDoc,
   type DocumentData,
   doc,
   getDb,
@@ -12,7 +11,6 @@ import {
   query,
   requireUserId,
   serverTimestamp,
-  setDoc,
   timestampToMillis,
   updateDoc,
   where,
@@ -21,6 +19,7 @@ import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/content
 import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
 import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
 import { trackEntityEvent } from '@/lib/analytics';
+import { contentAccessApi } from '@/services/contentAccessApi';
 
 export class TodoRepository {
   private static instance: TodoRepository;
@@ -54,10 +53,9 @@ export class TodoRepository {
   }
 
   async createTodo(todo: Omit<TodoItem, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<TodoItem> {
-    const uid = requireUserId();
-    const ref = doc(collection(getDb(), COLLECTIONS.todos));
-    await setDoc(ref, {
-      ownerId: uid,
+    requireUserId();
+    const ref = doc(collection(getDb(), COLLECTIONS.todos)) as { id: string };
+    await contentAccessApi.create('todos', ref.id, {
       title: todo.title,
       description: todo.description ?? null,
       completed: todo.completed ?? false,
@@ -67,8 +65,6 @@ export class TodoRepository {
       noteId: todo.noteId ?? null,
       category: todo.category ?? DEFAULT_CONTENT_CATEGORY,
       reminderSchedule: todo.reminderSchedule ?? getDefaultReminderSchedule(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
     });
     const created = await getDoc(ref);
     const mapped = this.mapTodo(created.id, created.data()!);
@@ -99,7 +95,7 @@ export class TodoRepository {
 
   async deleteTodo(id: ID): Promise<void> {
     requireUserId();
-    await deleteDoc(doc(getDb(), COLLECTIONS.todos, id));
+    await contentAccessApi.delete('todos', id);
     await trackEntityEvent('todo', 'deleted', id);
   }
 

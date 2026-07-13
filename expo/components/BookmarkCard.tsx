@@ -34,8 +34,22 @@ export function BookmarkCard({ bookmark, onPress }: BookmarkCardProps) {
     return t('bookmarkCard.screenshot');
   };
 
+  const accessibilitySummary = [
+    bookmark.title || bookmark.url || t('common.untitled'),
+    getDomainLabel(),
+    isUnreadBookmark(bookmark) && bookmark.status !== 'done'
+      ? t('bookmarkCard.readLater')
+      : getOpenCountText(),
+  ].join(', ');
+
   return (
-    <TouchableOpacity style={[styles.container, { borderLeftColor: categoryDef.color }]} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.container, { borderLeftColor: categoryDef.color }]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilitySummary}
+      accessibilityHint={t('accessibility.openBookmark')}
+    >
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.favicon}>

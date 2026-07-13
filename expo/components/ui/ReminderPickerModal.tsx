@@ -14,6 +14,8 @@ import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
 import { ReminderSchedule } from '@/types';
 import { REMINDER_PRESET_DAYS } from '@/constants/reminderDefaults';
 import { normalizeReminderSchedule } from '@/services/entityReminders';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface ReminderPickerModalProps {
   visible: boolean;
@@ -36,6 +38,8 @@ export function ReminderPickerModal({
   const [customDates, setCustomDates] = useState<number[]>([]);
   const [customPickerDate, setCustomPickerDate] = useState(new Date(Date.now() + 24 * 60 * 60 * 1000));
   const [saving, setSaving] = useState(false);
+  const { isPremium, showPaywall } = useSubscriptionAccess();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (!visible) return;
@@ -57,12 +61,20 @@ export function ReminderPickerModal({
   );
 
   const toggleDay = (day: number) => {
+    if (!isPremium) {
+      setSelectedDays([day]);
+      return;
+    }
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)
     );
   };
 
   const addCustomDate = () => {
+    if (!isPremium) {
+      showPaywall();
+      return;
+    }
     const ts = customPickerDate.getTime();
     if (ts <= Date.now()) return;
     setCustomDates((prev) => (prev.includes(ts) ? prev : [...prev, ts].sort((a, b) => a - b)));
@@ -73,8 +85,12 @@ export function ReminderPickerModal({
       setSaving(true);
       await onSave({
         enabled,
-        intervalDays: selectedDays.length > 0 ? selectedDays : [...REMINDER_PRESET_DAYS],
-        customDates,
+        intervalDays: isPremium
+          ? selectedDays.length > 0
+            ? selectedDays
+            : [...REMINDER_PRESET_DAYS]
+          : [selectedDays[0] ?? REMINDER_PRESET_DAYS[0]],
+        customDates: isPremium ? customDates : [],
       });
       onClose();
     } finally {
@@ -83,15 +99,15 @@ export function ReminderPickerModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.sheet}>
+        <View style={styles.sheet} accessibilityViewIsModal>
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
               <Bell size={20} color="#4F46E5" />
               <Text style={styles.headerTitle}>{t('reminders.title')}</Text>
             </View>
-            <Pressable onPress={onClose} hitSlop={8}>
+            <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('common.close')}>
               <X size={24} color="#6B7280" />
             </Pressable>
           </View>

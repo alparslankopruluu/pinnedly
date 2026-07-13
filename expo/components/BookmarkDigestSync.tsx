@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useBookmarkStore } from '@/store/useOfflineStore';
 import { useAuth } from '@/store/useAuthStore';
-import { getDigestFrequency, scheduleBookmarkDigest, DigestFrequency } from '@/services/bookmarkDigest';
+import { getDigestFrequency, setDigestFrequency, scheduleBookmarkDigest, DigestFrequency } from '@/services/bookmarkDigest';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 
 export function BookmarkDigestSync() {
   const { bookmarks } = useBookmarkStore();
   const { isAuthenticated } = useAuth();
+  const { isPremium, snapshot } = useSubscriptionAccess();
   const frequencyRef = useRef<DigestFrequency>('off');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -16,6 +18,12 @@ export function BookmarkDigestSync() {
 
     const syncDigest = async () => {
       const frequency = await getDigestFrequency();
+      if (!isPremium) {
+        if (frequency !== 'off') await setDigestFrequency('off');
+        await scheduleBookmarkDigest(bookmarks, 'off');
+        frequencyRef.current = 'off';
+        return;
+      }
       frequencyRef.current = frequency;
       if (cancelled || frequency === 'off') return;
       await scheduleBookmarkDigest(bookmarks, frequency);
@@ -35,7 +43,7 @@ export function BookmarkDigestSync() {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [bookmarks, isAuthenticated]);
+  }, [bookmarks, isAuthenticated, isPremium, snapshot.status]);
 
   return null;
 }

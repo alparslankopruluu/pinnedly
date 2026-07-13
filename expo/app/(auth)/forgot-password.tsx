@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
@@ -33,13 +33,13 @@ export default function ForgotPassword() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton} accessibilityRole="button" accessibilityLabel={t('common.back')}>
             <ArrowLeft size={24} color="#1e293b" />
           </TouchableOpacity>
           <Text style={styles.title}>{t('auth.checkYourEmail')}</Text>
         </View>
 
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.successContainer}>
             <View style={styles.iconContainer}>
               <Mail size={64} color="#4f46e5" />
@@ -56,11 +56,11 @@ export default function ForgotPassword() {
               style={styles.backToSignInButton}
             />
             
-            <TouchableOpacity onPress={() => setIsEmailSent(false)}>
+            <TouchableOpacity onPress={() => setIsEmailSent(false)} accessibilityRole="button">
               <Text style={styles.resendText}>{t('auth.resendEmail')}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -68,20 +68,20 @@ export default function ForgotPassword() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} accessibilityRole="button" accessibilityLabel={t('common.back')}>
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.resetPassword')}</Text>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.form}>
           <Text style={styles.description}>
             {t('auth.resetDescription')}
           </Text>
           
           {error ? (
-            <View style={styles.errorContainer}>
+            <View style={styles.errorContainer} accessibilityRole="alert" accessibilityLiveRegion="assertive">
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -96,6 +96,7 @@ export default function ForgotPassword() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel={t('auth.email')}
             />
           </View>
 
@@ -118,7 +119,7 @@ export default function ForgotPassword() {
             </Text>
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -136,6 +137,10 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -143,8 +148,9 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
+    paddingBottom: 24,
     justifyContent: 'center',
   },
   form: {

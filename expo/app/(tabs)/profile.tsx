@@ -13,6 +13,7 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/store/useAuthStore';
 import { PremiumModal } from '@/components/PremiumModal';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -20,11 +21,16 @@ export default function ProfileScreen() {
   const { preferences, bookmarks, projects, notes } = useAppStore();
   const insets = useSafeAreaInsets();
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
+  const reduceMotion = useReducedMotion();
   
   const pulseAnim = useMemo(() => new Animated.Value(1), []);
   
   React.useEffect(() => {
-    const pulse = () => {
+    if (reduceMotion) {
+      pulseAnim.setValue(1);
+      return;
+    }
+    const animation = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1.05,
@@ -36,10 +42,11 @@ export default function ProfileScreen() {
           duration: 1000,
           useNativeDriver: true,
         }),
-      ]).start(() => pulse());
-    };
-    pulse();
-  }, [pulseAnim]);
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [pulseAnim, reduceMotion]);
 
   const displayName =
     user?.displayName?.trim() ||

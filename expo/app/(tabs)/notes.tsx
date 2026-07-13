@@ -55,6 +55,9 @@ export default function NotesScreen() {
         pressed && styles.noteCardPressed
       ]}
       onPress={() => router.push(`/note/${item.id}` as any)}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.title}. ${getVisibilityLabel(item.visibility)}`}
+      accessibilityHint={t('accessibility.openNote')}
     >
       <View style={styles.noteHeader}>
         <View style={styles.noteHeaderLeft}>

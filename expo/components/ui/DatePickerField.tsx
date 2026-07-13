@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Calendar } from '@/components/icons/lucide';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface DatePickerFieldProps {
   value: Date | null;
@@ -34,6 +35,7 @@ export function DatePickerField({
 }: DatePickerFieldProps) {
   const { t, i18n } = useTranslation();
   const [showPicker, setShowPicker] = useState(false);
+  const reduceMotion = useReducedMotion();
   const [iosDraft, setIosDraft] = useState(value ?? new Date());
 
   const openPicker = useCallback(() => {
@@ -77,6 +79,8 @@ export function DatePickerField({
         onPress={openPicker}
         accessibilityRole="button"
         accessibilityLabel={t('common.selectDate')}
+        accessibilityValue={{ text: displayText }}
+        accessibilityState={{ expanded: showPicker }}
       >
         <Calendar size={18} color="#6B7280" />
         <Text style={[styles.fieldText, !value && styles.placeholderText]}>{displayText}</Text>
@@ -93,15 +97,15 @@ export function DatePickerField({
       )}
 
       {Platform.OS === 'ios' && (
-        <Modal visible={showPicker} transparent animationType="slide" onRequestClose={cancelIos}>
-          <Pressable style={styles.modalOverlay} onPress={cancelIos}>
-            <Pressable style={styles.iosSheet} onPress={(e) => e.stopPropagation()}>
+        <Modal visible={showPicker} transparent animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={cancelIos}>
+          <Pressable style={styles.modalOverlay} onPress={cancelIos} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+            <Pressable style={styles.iosSheet} onPress={(e) => e.stopPropagation()} accessibilityViewIsModal>
               <View style={styles.iosHeader}>
-                <Pressable onPress={cancelIos} hitSlop={8}>
+                <Pressable onPress={cancelIos} hitSlop={8} accessibilityRole="button">
                   <Text style={styles.iosCancel}>{t('common.cancel')}</Text>
                 </Pressable>
                 <Text style={styles.iosTitle}>{t('common.selectDate')}</Text>
-                <Pressable onPress={confirmIos} hitSlop={8}>
+                <Pressable onPress={confirmIos} hitSlop={8} accessibilityRole="button">
                   <Text style={styles.iosDone}>{t('common.ok')}</Text>
                 </Pressable>
               </View>

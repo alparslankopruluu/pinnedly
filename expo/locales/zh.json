@@ -45,7 +45,29 @@
     "noContent": "无内容",
     "unknownUser": "未知用户",
     "selectDate": "选择日期",
-    "selectDateTime": "选择日期和时间"
+    "selectDateTime": "选择日期和时间",
+    "close": "关闭"
+  },
+  "accessibility": {
+    "progress": "进度",
+    "changeTaskStatus": "将任务切换到下一个状态",
+    "reminderFor": "{{title}}的提醒",
+    "configureReminder": "打开提醒设置",
+    "quickAdd": "新建项目",
+    "quickAddHint": "打开书签、项目和笔记选项",
+    "openBookmark": "打开书签详情",
+    "openProject": "打开项目详情",
+    "editProject": "编辑{{title}}",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "formatBold": "粗体",
+    "formatItalic": "斜体",
+    "formatStrikethrough": "删除线",
+    "formatList": "列表",
+    "insertLink": "插入链接",
+    "openTodo": "打开任务详情",
+    "toggleTodo": "更改完成状态",
+    "openNote": "打开笔记详情"
   },
   "tabs": {
     "home": "首页",
@@ -434,6 +456,7 @@
     },
     "thinking": "思考中"
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "查看 Premium", "errors": { "premiumRequired": "此功能需要 Premium 订阅。", "limitReached": "免费额度为 {{limit}} 项，你已使用 {{current}} 项。升级 Premium 后可继续创建。", "aiQuotaExhausted": "你已用完本月的 AI 使用额度。", "unavailable": "暂时无法验证订阅状态，请稍后重试。" } },
   "premium": {
     "title": "升级到 Premium",
     "subtitle": "解锁强大功能",
@@ -475,7 +498,14 @@
       "customThemes": "自定义主题",
       "exportFormats": "导出为多种格式",
       "teamManagement": "团队管理工具",
-      "apiAccess": "API 访问"
+      "apiAccess": "API 访问",
+      "unlimitedContent": "书签、笔记、待办、项目和列表不限量",
+      "aiAssistant": "每月 100 条消息的 AI 助手",
+      "kanban": "看板和新的项目任务",
+      "fullExport": "完整导出 JSON 数据",
+      "ai": { "title": "工作区 AI", "description": "随时询问你保存的任何内容" },
+      "reminders": { "title": "自定义提醒", "description": "可设置多个间隔和指定日期" },
+      "organization": { "title": "整理不设限", "description": "所有想法和项目都能安心保存" }
     }
   },
   "share": {
@@ -688,19 +718,19 @@
       "galleryPermissionDenied": "需要相册访问权限",
       "uploadImageFailed": "上传图片失败"
     },
-    "notFound": "Project not found",
-    "progress": "Progress",
-    "members": "Members",
-    "nudgeMe": "Nudge Me",
+    "notFound": "未找到项目",
+    "progress": "进度",
+    "members": "成员",
+    "nudgeMe": "提醒我",
     "tabs": {
-      "tasks": "Tasks",
-      "timeline": "Timeline",
-      "gallery": "Gallery"
+      "tasks": "任务",
+      "timeline": "时间线",
+      "gallery": "图库"
     },
     "deadline": {
-      "overdue": "Overdue",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left"
+      "overdue": "已逾期",
+      "daysLeft_one": "剩余{{count}}天",
+      "daysLeft_other": "剩余{{count}}天"
     },
     "quickAdd": {
       "title": "Quick Add",
@@ -741,8 +771,8 @@
       "pastDate": "请选择未来的日期和时间。"
     },
     "adding": "Adding...",
-    "swipeHint": "Swipe left on a task for more options",
-    "relatedContent": "Related Content",
+    "swipeHint": "向左滑动任务查看更多操作",
+    "relatedContent": "相关内容",
     "created": "Created {{relative}}",
     "empty": {
       "activityTitle": "No Activity Yet",
@@ -782,18 +812,18 @@
       "permissionUpdated": "权限更新成功",
       "updatePermissionFailed": "更新权限失败，请重试。"
     },
-    "title": "Project Members",
-    "currentMembers": "Current Members",
-    "addMember": "Add Member",
-    "canView": "Can View",
-    "canEdit": "Can Edit",
-    "permissionLabel": "Permission:",
-    "adding": "Adding...",
-    "dismiss": "Dismiss",
+    "title": "项目成员",
+    "currentMembers": "当前成员",
+    "addMember": "添加成员",
+    "canView": "可查看",
+    "canEdit": "可编辑",
+    "permissionLabel": "权限：",
+    "adding": "正在添加...",
+    "dismiss": "关闭",
     "removeMember": {
-      "title": "Remove Member",
-      "message": "Are you sure you want to remove {{email}} from this project?",
-      "action": "Remove"
+      "title": "移除成员",
+      "message": "确定要将{{email}}移出此项目吗？",
+      "action": "移除"
     }
   },
   "categories": {
@@ -873,9 +903,18 @@
       "body_other": "您有 {{count}} 条未读保存等待查看。"
     },
     "entityReminder": {
-      "bookmark": { "title": "书签提醒", "body": "该阅读了: {{title}}" },
-      "note": { "title": "笔记提醒", "body": "回顾笔记: {{title}}" },
-      "todo": { "title": "任务提醒", "body": "别忘了: {{title}}" }
+      "bookmark": {
+        "title": "书签提醒",
+        "body": "该阅读了: {{title}}"
+      },
+      "note": {
+        "title": "笔记提醒",
+        "body": "回顾笔记: {{title}}"
+      },
+      "todo": {
+        "title": "任务提醒",
+        "body": "别忘了: {{title}}"
+      }
     }
   },
   "reminders": {
@@ -883,7 +922,12 @@
     "enabled": "提醒已开启",
     "disabled": "提醒已关闭",
     "presetsLabel": "在此时间后提醒",
-    "presets": { "1d": "1天", "3d": "3天", "7d": "1周", "30d": "1个月" },
+    "presets": {
+      "1d": "1天",
+      "3d": "3天",
+      "7d": "1周",
+      "30d": "1个月"
+    },
     "custom": "自定义日期",
     "addCustom": "添加提醒"
   },
@@ -915,15 +959,15 @@
     "following": "Following"
   },
   "projectCard": {
-    "overdue": "Overdue",
-    "dueToday": "Due Today",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
-    "weeksLeft_one": "{{count}} week left",
-    "weeksLeft_other": "{{count}} weeks left",
-    "monthsLeft_one": "{{count}} month left",
-    "monthsLeft_other": "{{count}} months left",
-    "tasksDone": "{{completed}}/{{total}} tasks done"
+    "overdue": "已逾期",
+    "dueToday": "今天到期",
+    "daysLeft_one": "剩余{{count}}天",
+    "daysLeft_other": "剩余{{count}}天",
+    "weeksLeft_one": "剩余{{count}}周",
+    "weeksLeft_other": "剩余{{count}}周",
+    "monthsLeft_one": "剩余{{count}}个月",
+    "monthsLeft_other": "剩余{{count}}个月",
+    "tasksDone": "已完成{{completed}}/{{total}}项任务"
   },
   "entityTypes": {
     "bookmark": "Bookmark",

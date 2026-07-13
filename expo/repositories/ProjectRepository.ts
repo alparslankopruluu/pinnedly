@@ -2,7 +2,6 @@ import { Project, Task, User, ProjectCollaborator } from '@/types';
 import {
   COLLECTIONS,
   collection,
-  deleteDoc,
   type DocumentData,
   doc,
   getDb,
@@ -13,15 +12,14 @@ import {
   query as firestoreQuery,
   requireUserId,
   serverTimestamp,
-  setDoc,
   timestampToMillis,
   updateDoc,
   where,
-  writeBatch,
 } from '@/lib/firestore';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { trackEntityEvent } from '@/lib/analytics';
 import { shareApi } from '@/services/shareApi';
+import { contentAccessApi } from '@/services/contentAccessApi';
 
 export class ProjectRepository {
   private static instance: ProjectRepository;
@@ -83,18 +81,15 @@ export class ProjectRepository {
   async createProject(
     project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'tasks' | 'collaborators'>
   ): Promise<Project> {
-    const uid = requireUserId();
-    const ref = doc(collection(getDb(), COLLECTIONS.projects));
-    await setDoc(ref, {
-      ownerId: uid,
+    requireUserId();
+    const ref = doc(collection(getDb(), COLLECTIONS.projects)) as { id: string };
+    await contentAccessApi.create('projects', ref.id, {
       title: project.title,
       description: project.description ?? null,
       coverImage: project.coverImage ?? null,
       gallery: project.gallery ?? [],
       deadline: project.deadline ? new Date(project.deadline) : null,
       visibility: project.visibility || 'private',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
     });
 
     const created = await getDoc(ref);
@@ -123,26 +118,19 @@ export class ProjectRepository {
 
   async deleteProject(id: string): Promise<void> {
     requireUserId();
-    const projectRef = doc(getDb(), COLLECTIONS.projects, id);
-    const tasks = await getDocs(collection(projectRef, 'tasks'));
-    const batch = writeBatch(getDb());
-    tasks.docs.forEach((taskDoc) => batch.delete(taskDoc.ref));
-    batch.delete(projectRef);
-    await batch.commit();
+    await contentAccessApi.delete('projects', id);
     await trackEntityEvent('project', 'deleted', id);
   }
 
   async createTask(projectId: string, task: Omit<Task, 'id' | 'projectId'>): Promise<Task> {
     requireUserId();
-    const ref = doc(collection(doc(getDb(), COLLECTIONS.projects, projectId), 'tasks'));
-    await setDoc(ref, {
+    const ref = doc(collection(doc(getDb(), COLLECTIONS.projects, projectId), 'tasks')) as { id: string };
+    await contentAccessApi.createProjectTask(projectId, ref.id, {
       title: task.title,
       status: task.status || 'todo',
       dueDate: task.dueDate ? new Date(task.dueDate) : null,
       notes: task.notes ?? null,
       category: task.category ?? DEFAULT_CONTENT_CATEGORY,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
     });
     const created = await getDoc(ref);
     return this.mapTask(created.id, projectId, created.data()!);
@@ -165,8 +153,8 @@ export class ProjectRepository {
 
   async deleteTask(taskId: string): Promise<void> {
     requireUserId();
-    const { ref } = await this.findTaskRef(taskId);
-    await deleteDoc(ref);
+    const { projectId } = await this.findTaskRef(taskId);
+    await contentAccessApi.deleteProjectTask(projectId, taskId);
   }
 
   async assignTask(taskId: string, userId: string | null): Promise<Task> {

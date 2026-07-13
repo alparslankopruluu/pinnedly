@@ -9,6 +9,7 @@ import {
   type AuthMethod,
 } from '@/lib/analytics';
 import { setCrashlyticsUser, recordError, logCrashlytics } from '@/lib/crashlytics';
+import { logOutRevenueCat } from '@/lib/revenuecat';
 
 function handleAuthFailure(method: AuthMethod, error: unknown): void {
   const message = error instanceof Error ? error.message : 'Unknown auth error';
@@ -134,6 +135,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const signOut = useCallback(async (): Promise<void> => {
     try {
       await trackAuthEvent('logout');
+      await logOutRevenueCat();
       await authRepository.signOut();
       await setAnalyticsUserId(null);
       await setCrashlyticsUser(null);

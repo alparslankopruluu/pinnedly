@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -65,13 +65,18 @@ export default function SignUp() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.createAccount')}</Text>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>{t('auth.fullName')}</Text>
@@ -82,6 +87,7 @@ export default function SignUp() {
               placeholder={t('auth.placeholders.fullName')}
               autoCapitalize="words"
               autoCorrect={false}
+              accessibilityLabel={t('auth.fullName')}
             />
           </View>
 
@@ -95,6 +101,7 @@ export default function SignUp() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel={t('auth.email')}
             />
           </View>
 
@@ -109,10 +116,14 @@ export default function SignUp() {
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
+                accessibilityLabel={t('auth.password')}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeButton}
+                accessibilityRole="button"
+                accessibilityLabel={t(showPassword ? 'accessibility.hidePassword' : 'accessibility.showPassword')}
+                accessibilityState={{ expanded: showPassword }}
               >
                 {showPassword ? (
                   <EyeOff size={20} color="#64748b" />
@@ -134,10 +145,14 @@ export default function SignUp() {
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
+                accessibilityLabel={t('auth.confirmPassword')}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 style={styles.eyeButton}
+                accessibilityRole="button"
+                accessibilityLabel={t(showConfirmPassword ? 'accessibility.hidePassword' : 'accessibility.showPassword')}
+                accessibilityState={{ expanded: showConfirmPassword }}
               >
                 {showConfirmPassword ? (
                   <EyeOff size={20} color="#64748b" />
@@ -180,7 +195,7 @@ export default function SignUp() {
             </Text>
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -198,6 +213,10 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -205,8 +224,9 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   form: {
     marginBottom: 32,
@@ -267,6 +287,10 @@ const styles = StyleSheet.create({
   },
   eyeButton: {
     paddingHorizontal: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   signUpButton: {
     backgroundColor: '#4f46e5',

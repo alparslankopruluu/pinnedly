@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -55,13 +55,18 @@ export default function SignIn() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.signIn')}</Text>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>{t('auth.email')}</Text>
@@ -73,6 +78,7 @@ export default function SignIn() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel={t('auth.email')}
             />
           </View>
 
@@ -87,10 +93,14 @@ export default function SignIn() {
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
+                accessibilityLabel={t('auth.password')}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeButton}
+                accessibilityRole="button"
+                accessibilityLabel={t(showPassword ? 'accessibility.hidePassword' : 'accessibility.showPassword')}
+                accessibilityState={{ expanded: showPassword }}
               >
                 {showPassword ? (
                   <EyeOff size={20} color="#64748b" />
@@ -101,7 +111,7 @@ export default function SignIn() {
             </View>
           </View>
 
-          <TouchableOpacity onPress={() => router.push('./forgot-password')}>
+          <TouchableOpacity onPress={() => router.push('./forgot-password')} accessibilityRole="button">
             <Text style={styles.forgotPassword}>{t('auth.forgotPassword')}</Text>
           </TouchableOpacity>
 
@@ -132,6 +142,7 @@ export default function SignIn() {
             trackButtonPress('sign_in', 'phone_sign_in_link');
             router.push('./phone-sign-in');
           }}
+          accessibilityRole="button"
         >
           <Phone size={18} color="#4f46e5" />
           <Text style={styles.phoneLinkText}>{t('auth.signInWithPhone')}</Text>
@@ -148,7 +159,7 @@ export default function SignIn() {
             </Text>
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -166,6 +177,10 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -173,8 +188,9 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   form: {
     marginBottom: 32,
@@ -235,6 +251,10 @@ const styles = StyleSheet.create({
   },
   eyeButton: {
     paddingHorizontal: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   forgotPassword: {
     fontSize: 14,

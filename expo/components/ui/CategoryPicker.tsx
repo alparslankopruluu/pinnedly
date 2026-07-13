@@ -23,6 +23,7 @@ import {
   CONTENT_CATEGORIES,
   getCategoryDef,
 } from '@/constants/contentCategories';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 const CATEGORY_ICONS: Record<ContentCategoryId, React.ComponentType<{ size?: number; color?: string }>> = {
   general: LayoutGrid,
@@ -44,6 +45,7 @@ interface CategoryPickerProps {
 export function CategoryPicker({ value, onChange, label }: CategoryPickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const selected = useMemo(() => getCategoryDef(value), [value]);
   const SelectedIcon = CATEGORY_ICONS[value];
 
@@ -59,6 +61,8 @@ export function CategoryPicker({ value, onChange, label }: CategoryPickerProps) 
           ]}
           onPress={() => setOpen(true)}
           accessibilityRole="button"
+          accessibilityLabel={`${label ?? t('categories.label')}: ${t(`categories.${value}`)}`}
+          accessibilityState={{ expanded: open }}
         >
           <View style={[styles.iconWrap, { backgroundColor: selected.color + '22' }]}>
             <SelectedIcon size={18} color={selected.color} />
@@ -70,9 +74,9 @@ export function CategoryPicker({ value, onChange, label }: CategoryPickerProps) 
         </Pressable>
       </View>
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
-          <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+      <Modal visible={open} transparent animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={() => setOpen(false)}>
+        <Pressable style={styles.overlay} onPress={() => setOpen(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+          <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()} accessibilityViewIsModal>
             <Text style={styles.sheetTitle}>{t('categories.pickCategory')}</Text>
             <View style={styles.grid}>
               {CONTENT_CATEGORIES.map((cat) => {
@@ -90,6 +94,9 @@ export function CategoryPicker({ value, onChange, label }: CategoryPickerProps) 
                       onChange(cat.id);
                       setOpen(false);
                     }}
+                    accessibilityRole="radio"
+                    accessibilityLabel={t(`categories.${cat.id}`)}
+                    accessibilityState={{ checked: isSelected }}
                   >
                     <View style={[styles.optionIcon, { backgroundColor: cat.color + '20' }]}>
                       <Icon size={20} color={cat.color} />

@@ -2,7 +2,6 @@ import { Bookmark } from '@/types';
 import {
   COLLECTIONS,
   collection,
-  deleteDoc,
   doc,
   getDb,
   getDoc,
@@ -10,7 +9,6 @@ import {
   query,
   requireUserId,
   serverTimestamp,
-  setDoc,
   subscribeToOwnerCollection,
   timestampToMillis,
   updateDoc,
@@ -21,6 +19,7 @@ import { tagNamesToTags } from '@/utils/bookmark';
 import { DEFAULT_CONTENT_CATEGORY, normalizeCategory } from '@/constants/contentCategories';
 import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
 import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
+import { contentAccessApi } from '@/services/contentAccessApi';
 
 export type CreateBookmarkInput = Omit<
   Bookmark,
@@ -73,10 +72,9 @@ export class BookmarkRepository {
   }
 
   async createBookmark(bookmark: CreateBookmarkInput): Promise<Bookmark> {
-    const uid = requireUserId();
-    const ref = doc(collection(getDb(), COLLECTIONS.bookmarks));
-    await setDoc(ref, {
-      ownerId: uid,
+    requireUserId();
+    const ref = doc(collection(getDb(), COLLECTIONS.bookmarks)) as { id: string };
+    await contentAccessApi.create('bookmarks', ref.id, {
       url: bookmark.url ?? null,
       title: bookmark.title ?? null,
       description: bookmark.description ?? null,
@@ -93,8 +91,6 @@ export class BookmarkRepository {
       lastOpenedAt: null,
       category: bookmark.category ?? DEFAULT_CONTENT_CATEGORY,
       reminderSchedule: bookmark.reminderSchedule ?? getDefaultReminderSchedule(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
     });
     const created = await getDoc(ref);
     const mapped = this.mapBookmark(created.id, created.data()!);
@@ -153,7 +149,7 @@ export class BookmarkRepository {
 
   async deleteBookmark(id: string): Promise<void> {
     requireUserId();
-    await deleteDoc(doc(getDb(), COLLECTIONS.bookmarks, id));
+    await contentAccessApi.delete('bookmarks', id);
     await trackEntityEvent('bookmark', 'deleted', id);
   }
 

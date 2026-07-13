@@ -34,7 +34,6 @@ import {
   Compass,
 } from '@/components/icons/lucide';
 import { useSettingsStore } from '@/store/useSettingsStore';
-import { PremiumModal } from '@/components/PremiumModal';
 import { forceTestCrash } from '@/lib/crashlytics';
 import { trackButtonPress } from '@/lib/analytics';
 import {
@@ -53,6 +52,9 @@ import {
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { useAuth } from '@/store/useAuthStore';
 import { usePremium } from '@/providers/PremiumProvider';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/lib/legal';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { showAppAlert } from '@/providers/DialogProvider';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -73,6 +75,7 @@ export default function SettingsScreen() {
     deleteAccount,
     loadSettings
   } = useSettingsStore();
+  const { snapshot, can, showPaywall } = useSubscriptionAccess();
   const { bookmarks } = useBookmarkStore();
 
   const [showThemeSelector, setShowThemeSelector] = useState<boolean>(false);
@@ -98,6 +101,10 @@ export default function SettingsScreen() {
   };
 
   const cycleDigestFrequency = async () => {
+    if (!can('bookmarkDigest').allowed) {
+      showPaywall();
+      return;
+    }
     const next: DigestFrequency =
       digestFrequency === 'off' ? 'daily' : digestFrequency === 'daily' ? 'weekly' : 'off';
     await setDigestFrequency(next);
@@ -120,6 +127,11 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = async () => {
+    const access = can('dataExport');
+    if (!access.allowed) {
+      showPaywall();
+      return;
+    }
     try {
       await exportData();
       console.log('Export completed successfully');
@@ -132,13 +144,27 @@ export default function SettingsScreen() {
     console.log('Import data feature coming soon');
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      await deleteAccount();
-      console.log('Account deleted successfully');
-    } catch (deleteError) {
-      console.error('Account deletion failed:', deleteError);
-    }
+  const handleDeleteAccount = () => {
+    showAppAlert(
+      t('settings.deleteAccount.title'),
+      t('settings.deleteAccount.subtitle'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteAccount();
+            } catch (deleteError) {
+              console.error('Account deletion failed:', deleteError);
+              showAppAlert(t('common.error'), t('common.tryAgain'), undefined, { variant: 'error' });
+            }
+          },
+        },
+      ],
+      { variant: 'error' }
+    );
   };
 
   const handleGoogleSignIn = () => {
@@ -283,7 +309,7 @@ export default function SettingsScreen() {
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
-                onPress={() => presentPaywall()}
+                onPress={snapshot.plan === 'free' ? showPaywall : undefined}
               >
                 <View style={styles.settingIcon}>
                   <Crown size={20} color="#6366F1" />
@@ -291,10 +317,10 @@ export default function SettingsScreen() {
                 <View style={styles.settingContent}>
                   <Text style={styles.settingTitle}>{t('settings.currentPlan.title')}</Text>
                   <Text style={styles.settingSubtitle}>
-                    {isPremium ? t('settings.currentPlan.plan', { plan: 'Pro' }) : t('settings.currentPlan.free')}
+                    {snapshot.plan === 'free' ? t('settings.currentPlan.free') : t('settings.currentPlan.plan', { plan: 'Premium' })}
                   </Text>
                 </View>
-                <ChevronRight size={20} color="#9CA3AF" />
+                {snapshot.plan === 'free' && <ChevronRight size={20} color="#9CA3AF" />}
               </TouchableOpacity>
               
               <View style={styles.separator} />
@@ -514,7 +540,7 @@ export default function SettingsScreen() {
               
               <TouchableOpacity 
                 style={styles.settingItem}
-                onPress={() => openExternalLink('https://pinnedly.com/terms')}
+                onPress={() => openExternalLink(TERMS_OF_SERVICE_URL)}
               >
                 <View style={styles.settingIcon}>
                   <ExternalLink size={20} color="#6B7280" />
@@ -530,7 +556,7 @@ export default function SettingsScreen() {
               
               <TouchableOpacity 
                 style={styles.settingItem}
-                onPress={() => openExternalLink('https://pinnedly.com/privacy')}
+                onPress={() => openExternalLink(PRIVACY_POLICY_URL)}
               >
                 <View style={styles.settingIcon}>
                   <ExternalLink size={20} color="#6B7280" />

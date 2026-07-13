@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 
 function startOfToday(): Date {
   const today = new Date();
@@ -42,7 +43,8 @@ function deadlineToTimestamp(date: Date): number {
 export default function AddProjectScreen() {
   useTrackFormOpen('project');
   const { t } = useTranslation();
-  const { createProject } = useProjectStore();
+  const { createProject, projects } = useProjectStore();
+  const { ensureCreate, handleAccessError } = useSubscriptionGate();
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState('');
@@ -54,6 +56,7 @@ export default function AddProjectScreen() {
       showAppAlert(t('common.error'), t('addProject.alerts.enterTitle'), undefined, { variant: 'error' });
       return;
     }
+    if (!ensureCreate('projects', projects.length)) return;
 
     setIsSaving(true);
     try {
@@ -67,6 +70,7 @@ export default function AddProjectScreen() {
       router.back();
     } catch (err) {
       console.error('Failed to create project:', err);
+      if (handleAccessError(err)) return;
       showAppAlert(t('common.error'), t('addProject.alerts.createFailed'), undefined, { variant: 'error' });
     } finally {
       setIsSaving(false);
@@ -83,7 +87,7 @@ export default function AddProjectScreen() {
         options={{ 
           title: t('addProject.title'),
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('common.close')}>
               <X size={24} color="#111827" />
             </TouchableOpacity>
           ),
@@ -105,6 +109,7 @@ export default function AddProjectScreen() {
                 onChangeText={setTitle}
                 placeholder={t('addProject.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
+                accessibilityLabel={t('addProject.projectTitle')}
               />
             </View>
 
@@ -119,6 +124,7 @@ export default function AddProjectScreen() {
                 placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={4}
+                accessibilityLabel={t('addProject.descriptionOptional')}
               />
             </View>
 
@@ -137,18 +143,21 @@ export default function AddProjectScreen() {
                   <TouchableOpacity
                     style={styles.quickDeadlineButton}
                     onPress={() => setQuickDeadline(7)}
+                    accessibilityRole="button"
                   >
                     <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.oneWeek')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.quickDeadlineButton}
                     onPress={() => setQuickDeadline(30)}
+                    accessibilityRole="button"
                   >
                     <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.oneMonth')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.quickDeadlineButton}
                     onPress={() => setQuickDeadline(90)}
+                    accessibilityRole="button"
                   >
                     <Text style={styles.quickDeadlineText}>{t('addProject.deadlines.threeMonths')}</Text>
                   </TouchableOpacity>
@@ -156,6 +165,7 @@ export default function AddProjectScreen() {
                     <TouchableOpacity
                       style={styles.quickDeadlineButton}
                       onPress={() => setDeadline(null)}
+                      accessibilityRole="button"
                     >
                       <Text style={styles.quickDeadlineText}>{t('addTodo.quickDates.clear')}</Text>
                     </TouchableOpacity>

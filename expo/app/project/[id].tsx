@@ -48,6 +48,9 @@ import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 type TabType = 'tasks' | 'timeline' | 'gallery';
 
@@ -66,7 +69,9 @@ function ProjectTaskRow({
   onToggle,
   onDelete,
 }: ProjectTaskRowProps) {
+  const { t } = useTranslation();
   const translateX = useRef(new Animated.Value(0)).current;
+  const reduceMotion = useReducedMotion();
 
   const panResponder = useRef(
     PanResponder.create({
@@ -79,12 +84,22 @@ function ProjectTaskRow({
       },
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dx < -50) {
+          if (reduceMotion) {
+            translateX.setValue(-80);
+            onSwipe(task.id);
+            return;
+          }
           Animated.spring(translateX, {
             toValue: -80,
             useNativeDriver: true,
           }).start();
           onSwipe(task.id);
         } else {
+          if (reduceMotion) {
+            translateX.setValue(0);
+            onSwipe(null);
+            return;
+          }
           Animated.spring(translateX, {
             toValue: 0,
             useNativeDriver: true,
@@ -108,6 +123,8 @@ function ProjectTaskRow({
           <TouchableOpacity
             style={styles.deleteAction}
             onPress={() => onDelete(task.id)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('common.delete')}: ${task.title}`}
           >
             <Trash2 size={20} color="#FFFFFF" />
           </TouchableOpacity>
@@ -120,7 +137,12 @@ function ProjectTaskRow({
           size={20}
           style={styles.checkbox}
         />
-        <View style={styles.taskTitleContainer} {...panResponder.panHandlers}>
+        <View
+          style={styles.taskTitleContainer}
+          {...panResponder.panHandlers}
+          accessible
+          accessibilityLabel={task.title}
+        >
           <Text
             style={[
               styles.taskTitle,
@@ -170,6 +192,8 @@ export default function ProjectDetailScreen() {
   const taskInputRef = useRef<TextInput>(null);
   const attemptedHydrationIds = useRef<Set<string>>(new Set());
   const contentWidth = typeof readableWidth === 'number' ? readableWidth : undefined;
+  const { can, showPaywall } = useSubscriptionAccess();
+  const { handleAccessError } = useSubscriptionGate();
   const galleryColumns = isTabletOrLarger ? 3 : 2;
   const galleryGap = 8;
   const galleryAvailableWidth = (contentWidth ?? viewportWidth) - 32;
@@ -287,6 +311,10 @@ export default function ProjectDetailScreen() {
 
   const handleAddTask = async () => {
     if (!project || isAddingTask) return;
+    if (!can('projectTaskCreate').allowed) {
+      showPaywall();
+      return;
+    }
 
     const trimmedTitle = newTaskTitle.trim();
     if (!trimmedTitle) {
@@ -305,6 +333,7 @@ export default function ProjectDetailScreen() {
       setNewTaskCategory(DEFAULT_CONTENT_CATEGORY);
     } catch (error) {
       console.error('Failed to create task:', error);
+      if (handleAccessError(error)) return;
       showAppAlert(t('common.error'), t('projectDetail.alerts.createTaskFailed'), undefined, { variant: 'error' });
     } finally {
       setIsAddingTask(false);
@@ -355,6 +384,10 @@ export default function ProjectDetailScreen() {
 
   const handleUploadGalleryImage = async () => {
     if (!project || isUploadingGallery) return;
+    if (!can('projectGallery').allowed) {
+      showPaywall();
+      return;
+    }
 
     const ImagePicker = await import('expo-image-picker');
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -840,7 +873,13 @@ export default function ProjectDetailScreen() {
                   styles.tab,
                   activeTab === tab && styles.activeTab,
                 ]}
-                onPress={() => setActiveTab(tab)}
+                onPress={() => {
+                  if (tab === 'gallery' && !can('projectGallery').allowed) {
+                    showPaywall();
+                    return;
+                  }
+                  setActiveTab(tab);
+                }}
               >
                 <Text
                   style={[

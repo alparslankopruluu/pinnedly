@@ -45,7 +45,29 @@
     "sortLabel": "Sırala: {{sort}}",
     "errorWithMessage": "Hata: {{message}}",
     "noContent": "İçerik yok",
-    "unknownUser": "Bilinmeyen Kullanıcı"
+    "unknownUser": "Bilinmeyen Kullanıcı",
+    "close": "Kapat"
+  },
+  "accessibility": {
+    "progress": "İlerleme",
+    "changeTaskStatus": "Görevi bir sonraki duruma geçirir",
+    "reminderFor": "{{title}} için hatırlatıcı",
+    "configureReminder": "Hatırlatıcı ayarlarını açar",
+    "quickAdd": "Yeni öğe oluştur",
+    "quickAddHint": "Yer imi, proje ve not seçeneklerini açar",
+    "openBookmark": "Yer imi ayrıntılarını açar",
+    "openProject": "Proje ayrıntılarını açar",
+    "editProject": "{{title}} projesini düzenle",
+    "showPassword": "Parolayı göster",
+    "hidePassword": "Parolayı gizle",
+    "formatBold": "Kalın",
+    "formatItalic": "İtalik",
+    "formatStrikethrough": "Üstü çizili",
+    "formatList": "Liste",
+    "insertLink": "Bağlantı ekle",
+    "openTodo": "Görev ayrıntılarını aç",
+    "toggleTodo": "Tamamlanma durumunu değiştir",
+    "openNote": "Not ayrıntılarını aç"
   },
   "tabs": {
     "home": "Ana Sayfa",
@@ -541,12 +563,24 @@
       "requestId": "İstek ID: {{requestId}}"
     }
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "Premium'u İncele", "errors": { "premiumRequired": "Bu özellik Premium üyelikle kullanılabilir.", "limitReached": "Ücretsiz {{limit}} hakkınızın {{current}} tanesini kullanıyorsunuz. Daha fazlası için Premium'a geçin.", "aiQuotaExhausted": "Bu ayki yapay zekâ kullanım hakkınızı doldurdunuz.", "unavailable": "Abonelik durumunuz doğrulanamadı. Lütfen tekrar deneyin." } },
   "premium": {
     "title": "Premium'a Yükselt",
     "subtitle": "Güçlü özelliklerin kilidini açın",
     "choosePlan": "Planınızı Seçin",
     "mostPopular": "En Popüler",
     "startFreeTrial": "Ücretsiz Denemeyi Başlat",
+    "restorePurchases": "Satın Alımları Geri Yükle",
+    "purchaseUnavailableTitle": "Satın alma kullanılamıyor",
+    "purchaseUnavailableMessage": "Planlar App Store'dan yüklenemedi. Lütfen tekrar deneyin.",
+    "purchaseFailedTitle": "Satın alma başarısız",
+    "purchaseFailedMessage": "Satın alma tamamlanamadı.",
+    "restoreSuccessTitle": "Satın alımlar geri yüklendi",
+    "restoreSuccessMessage": "Premium erişiminiz geri yüklendi.",
+    "restoreEmptyTitle": "Satın alma bulunamadı",
+    "restoreEmptyMessage": "Bu Apple Kimliği için etkin bir Premium satın alımı bulunamadı.",
+    "restoreFailedTitle": "Geri yükleme başarısız",
+    "restoreFailedMessage": "Satın alımlar geri yüklenemedi. Lütfen tekrar deneyin.",
     "terms": "7 günlük ücretsiz deneme, ardından {{price}}{{period}}. İstediğiniz zaman iptal edin.",
     "plans": {
       "monthly": "Aylık",
@@ -582,7 +616,14 @@
       "customThemes": "Özel temalar",
       "exportFormats": "Birden fazla formata dışa aktarma",
       "teamManagement": "Ekip yönetim araçları",
-      "apiAccess": "API erişimi"
+      "apiAccess": "API erişimi",
+      "unlimitedContent": "Sınırsız yer imi, not, görev, proje ve liste",
+      "aiAssistant": "Ayda 100 mesajlık yapay zekâ asistanı",
+      "kanban": "Kanban panoları ve yeni proje görevleri",
+      "fullExport": "Eksiksiz JSON veri dışa aktarımı",
+      "ai": { "title": "Çalışma Alanı Asistanı", "description": "Kaydettiğiniz tüm içerikler hakkında sorular sorun" },
+      "reminders": { "title": "Özel hatırlatıcılar", "description": "Birden fazla aralık ve özel tarih belirleyin" },
+      "organization": { "title": "Sınırsız düzen", "description": "Tüm fikir ve projelerinizi sınır olmadan saklayın" }
     }
   },
   "invite": {

@@ -28,6 +28,9 @@ export function FilterChips({ chips, selectedId, onSelect }: FilterChipsProps) {
             selectedId === chip.id && styles.selectedChip,
           ]}
           onPress={() => onSelect(chip.id)}
+          accessibilityRole="radio"
+          accessibilityLabel={chip.count !== undefined ? `${chip.label}, ${chip.count}` : chip.label}
+          accessibilityState={{ checked: selectedId === chip.id }}
         >
           <Text
             style={[

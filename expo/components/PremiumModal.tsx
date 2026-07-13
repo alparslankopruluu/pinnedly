@@ -7,15 +7,29 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
+  Alert,
+  Platform,
+  Linking,
 } from 'react-native';
-import { X, Crown, Check, Zap, Users, Bell, Mic } from '@/components/icons/lucide';
+import { X, Crown, Check, Zap, Users, Bell } from '@/components/icons/lucide';
 import { useTranslation } from 'react-i18next';
 import { trackSubscriptionEvent } from '@/lib/analytics';
 import { logCrashlytics } from '@/lib/crashlytics';
+import type { PurchasesPackage } from 'react-native-purchases';
+import {
+  getPremiumPackages,
+  hasPremiumEntitlement,
+  isPurchaseCancelled,
+  purchasePremiumPackage,
+  restorePremiumPurchases,
+} from '@/lib/revenuecat';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/lib/legal';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface PremiumModalProps {
   visible: boolean;
   onClose: () => void;
+  onEntitlementChanged?: () => Promise<unknown>;
 }
 
 interface SubscriptionPlan {
@@ -27,47 +41,98 @@ interface SubscriptionPlan {
   savings?: string;
   features: string[];
   popular?: boolean;
+  package?: PurchasesPackage;
 }
 
-export function PremiumModal({ visible, onClose }: PremiumModalProps) {
+export function PremiumModal({ visible, onClose, onEntitlementChanged }: PremiumModalProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const [selectedPlan, setSelectedPlan] = useState<string>('yearly');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [packages, setPackages] = useState<PurchasesPackage[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const nativePaywallOpen = React.useRef(false);
+
+  React.useEffect(() => {
+    if (Platform.OS !== 'ios' || !visible || nativePaywallOpen.current) return;
+
+    nativePaywallOpen.current = true;
+    const showRevenueCatPaywall = async () => {
+      try {
+        const { default: RevenueCatUI, PAYWALL_RESULT } = await import('react-native-purchases-ui');
+        const result = await RevenueCatUI.presentPaywall();
+
+        if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
+          await onEntitlementChanged?.();
+          await trackSubscriptionEvent('subscribe_completed', { source: 'revenuecat_paywall' });
+        } else if (result === PAYWALL_RESULT.CANCELLED) {
+          await trackSubscriptionEvent('subscribe_cancelled', { source: 'revenuecat_paywall' });
+        }
+      } catch (error) {
+        logCrashlytics(`RevenueCat paywall failed: ${String(error)}`);
+        Alert.alert(
+          t('premium.purchaseUnavailableTitle'),
+          error instanceof Error ? error.message : t('premium.purchaseUnavailableMessage')
+        );
+      } finally {
+        nativePaywallOpen.current = false;
+        onClose();
+      }
+    };
+
+    showRevenueCatPaywall();
+  }, [visible, onClose, onEntitlementChanged, t]);
+
+  React.useEffect(() => {
+    if (!visible || Platform.OS !== 'ios') return;
+    setLoadError(null);
+    getPremiumPackages()
+      .then(setPackages)
+      .catch((error) => {
+        setLoadError(error instanceof Error ? error.message : String(error));
+        logCrashlytics(`RevenueCat offerings failed: ${String(error)}`);
+      });
+  }, [visible]);
+
+  const monthlyPackage = packages.find((item) => item.identifier === '$rc_monthly');
+  const yearlyPackage = packages.find((item) => item.identifier === '$rc_annual');
 
   const subscriptionPlans: SubscriptionPlan[] = useMemo(
     () => [
       {
         id: 'monthly',
         name: t('premium.plans.monthly'),
-        price: '$9.99',
+        price: monthlyPackage?.product.priceString ?? '—',
         period: t('premium.plans.perMonth'),
         features: [
-          t('premium.features.unlimitedLists'),
+          t('premium.features.unlimitedContent'),
+          t('premium.features.aiAssistant'),
           t('premium.features.collaborativeProjects'),
-          t('premium.features.voiceNotesFeature'),
+          t('premium.features.kanban'),
           t('premium.features.advancedReminders'),
-          t('premium.features.prioritySupport'),
+          t('premium.features.fullExport'),
         ],
+        package: monthlyPackage,
       },
       {
         id: 'yearly',
         name: t('premium.plans.yearly'),
-        price: '$79.99',
+        price: yearlyPackage?.product.priceString ?? '—',
         period: t('premium.plans.perYear'),
-        originalPrice: '$119.88',
         savings: t('premium.plans.savePercent'),
         popular: true,
         features: [
-          t('premium.features.everythingMonthly'),
-          t('premium.features.advancedAnalytics'),
-          t('premium.features.customThemes'),
-          t('premium.features.exportFormats'),
-          t('premium.features.teamManagement'),
-          t('premium.features.apiAccess'),
+          t('premium.features.unlimitedContent'),
+          t('premium.features.aiAssistant'),
+          t('premium.features.collaborativeProjects'),
+          t('premium.features.kanban'),
+          t('premium.features.advancedReminders'),
+          t('premium.features.fullExport'),
         ],
+        package: yearlyPackage,
       },
     ],
-    [t]
+    [t, monthlyPackage, yearlyPackage]
   );
 
   const premiumFeatures = useMemo(
@@ -78,19 +143,19 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
         description: t('premium.features.teamCollaboration.description'),
       },
       {
-        icon: <Mic size={24} color="#6366F1" />,
-        title: t('premium.features.voiceNotes.title'),
-        description: t('premium.features.voiceNotes.description'),
+        icon: <Zap size={24} color="#6366F1" />,
+        title: t('premium.features.ai.title'),
+        description: t('premium.features.ai.description'),
       },
       {
         icon: <Bell size={24} color="#6366F1" />,
-        title: t('premium.features.smartReminders.title'),
-        description: t('premium.features.smartReminders.description'),
+        title: t('premium.features.reminders.title'),
+        description: t('premium.features.reminders.description'),
       },
       {
-        icon: <Zap size={24} color="#6366F1" />,
-        title: t('premium.features.advancedFeatures.title'),
-        description: t('premium.features.advancedFeatures.description'),
+        icon: <Crown size={24} color="#6366F1" />,
+        title: t('premium.features.organization.title'),
+        description: t('premium.features.organization.description'),
       },
     ],
     [t]
@@ -103,6 +168,11 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
     if (visible) {
       trackSubscriptionEvent('modal_viewed');
       logCrashlytics('Premium modal opened');
+      if (reduceMotion) {
+        scaleAnim.setValue(1);
+        opacityAnim.setValue(1);
+        return;
+      }
       Animated.parallel([
         Animated.spring(scaleAnim, {
           toValue: 1,
@@ -120,7 +190,7 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
       scaleAnim.setValue(0.9);
       opacityAnim.setValue(0);
     }
-  }, [visible, scaleAnim, opacityAnim]);
+  }, [visible, scaleAnim, opacityAnim, reduceMotion]);
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
@@ -128,15 +198,53 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
   };
 
   const handleSubscribe = async () => {
+    const plan = subscriptionPlans.find((item) => item.id === selectedPlan);
+    if (!plan?.package) {
+      Alert.alert(t('premium.purchaseUnavailableTitle'), t('premium.purchaseUnavailableMessage'));
+      return;
+    }
     setIsProcessing(true);
     await trackSubscriptionEvent('subscribe_started', { plan_id: selectedPlan });
-
-    setTimeout(async () => {
-      setIsProcessing(false);
+    try {
+      const customerInfo = await purchasePremiumPackage(plan.package);
+      if (!hasPremiumEntitlement(customerInfo)) {
+        throw new Error('Premium entitlement was not granted after purchase');
+      }
+      await onEntitlementChanged?.();
       await trackSubscriptionEvent('subscribe_completed', { plan_id: selectedPlan });
       logCrashlytics(`Subscription completed: ${selectedPlan}`);
       onClose();
-    }, 2000);
+    } catch (error) {
+      if (isPurchaseCancelled(error)) {
+        await trackSubscriptionEvent('subscribe_cancelled', { plan_id: selectedPlan });
+      } else {
+        await trackSubscriptionEvent('subscribe_failed', { plan_id: selectedPlan });
+        Alert.alert(t('premium.purchaseFailedTitle'), error instanceof Error ? error.message : t('premium.purchaseFailedMessage'));
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setIsProcessing(true);
+    await trackSubscriptionEvent('restore_started');
+    try {
+      const customerInfo = await restorePremiumPurchases();
+      const isPremium = hasPremiumEntitlement(customerInfo);
+      await onEntitlementChanged?.();
+      await trackSubscriptionEvent('restore_completed', { result: isPremium ? 'premium' : 'empty' });
+      Alert.alert(
+        t(isPremium ? 'premium.restoreSuccessTitle' : 'premium.restoreEmptyTitle'),
+        t(isPremium ? 'premium.restoreSuccessMessage' : 'premium.restoreEmptyMessage')
+      );
+      if (isPremium) onClose();
+    } catch (error) {
+      await trackSubscriptionEvent('restore_failed');
+      Alert.alert(t('premium.restoreFailedTitle'), error instanceof Error ? error.message : t('premium.restoreFailedMessage'));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const renderPlanCard = (plan: SubscriptionPlan) => (
@@ -181,12 +289,17 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
     </TouchableOpacity>
   );
 
+  // iOS uses the remotely configured and published RevenueCat paywall.
+  // Keep the custom modal below as the non-iOS fallback.
+  if (Platform.OS === 'ios') return null;
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="none"
       onRequestClose={onClose}
+      accessibilityViewIsModal
     >
       <Animated.View style={[styles.overlay, { opacity: opacityAnim }]}>
         <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
@@ -200,7 +313,12 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
                   <Text style={styles.subtitle}>{t('premium.subtitle')}</Text>
                 </View>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeButton}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.close')}
+              >
                 <X size={24} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -238,6 +356,11 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
               </Text>
             </TouchableOpacity>
 
+            {loadError ? <Text style={styles.purchaseError}>{t('premium.purchaseUnavailableMessage')}</Text> : null}
+            <TouchableOpacity onPress={handleRestore} disabled={isProcessing} style={styles.restoreButton}>
+              <Text style={styles.restoreButtonText}>{t('premium.restorePurchases')}</Text>
+            </TouchableOpacity>
+
             {/* Terms */}
             <Text style={styles.termsText}>
               {t('premium.terms', {
@@ -245,6 +368,15 @@ export function PremiumModal({ visible, onClose }: PremiumModalProps) {
                 period: subscriptionPlans.find((p) => p.id === selectedPlan)?.period ?? '',
               })}
             </Text>
+            <View style={styles.legalLinks}>
+              <TouchableOpacity onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)}>
+                <Text style={styles.legalLink}>{t('settings.termsOfService.title')}</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalSeparator}>•</Text>
+              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+                <Text style={styles.legalLink}>{t('settings.privacyPolicy.title')}</Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </Animated.View>
       </Animated.View>
@@ -470,7 +602,41 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: 10,
     lineHeight: 16,
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  legalLink: {
+    color: '#4F46E5',
+    fontSize: 12,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    color: '#9CA3AF',
+    fontSize: 12,
+  },
+  purchaseError: {
+    color: '#DC2626',
+    fontSize: 12,
+    textAlign: 'center',
+    paddingHorizontal: 24,
+    marginBottom: 10,
+  },
+  restoreButton: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  restoreButtonText: {
+    color: '#6366F1',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

@@ -27,6 +27,34 @@ service cloud.firestore {
         .hasAny(['ownerId', 'sharedWith', 'editors']);
     }
 
+    function isPremium(userId) {
+      let path = /databases/$(database)/documents/subscriptionEntitlements/$(userId);
+      return exists(path)
+        && get(path).data.active == true
+        && get(path).data.status in ['active', 'grace']
+        && (get(path).data.get('expiresAtServer', null) == null
+          || get(path).data.expiresAtServer > request.time);
+    }
+
+    function premiumVisibilityIsValid() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'isPublic'])
+        || isPremium(resource.data.ownerId)
+        || (request.resource.data.get('visibility', 'private') == 'private'
+          && request.resource.data.get('isPublic', false) == false);
+    }
+
+    function premiumReminderIsValid() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['reminderSchedule'])
+        || isPremium(resource.data.ownerId)
+        || (request.resource.data.reminderSchedule.intervalDays.size() <= 1
+          && request.resource.data.reminderSchedule.get('customDates', []).size() == 0);
+    }
+
+    function premiumGalleryIsValid() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['gallery'])
+        || isPremium(resource.data.ownerId);
+    }
+
     function validEntityCreate() {
       return isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
@@ -76,43 +104,51 @@ service cloud.firestore {
 
     match /notes/{noteId} {
       allow read: if canReadEntity();
-      allow create: if validEntityCreate();
-      allow update: if canEditEntity() && accessFieldsAreUnchanged();
-      allow delete: if isOwner(resource.data.ownerId);
+      allow create, delete: if false;
+      allow update: if canEditEntity()
+        && accessFieldsAreUnchanged()
+        && premiumVisibilityIsValid()
+        && premiumReminderIsValid();
     }
 
     match /bookmarks/{bookmarkId} {
       allow read: if canReadEntity();
-      allow create: if validEntityCreate();
-      allow update: if canEditEntity() && accessFieldsAreUnchanged();
-      allow delete: if isOwner(resource.data.ownerId);
+      allow create, delete: if false;
+      allow update: if canEditEntity()
+        && accessFieldsAreUnchanged()
+        && premiumVisibilityIsValid()
+        && premiumReminderIsValid();
     }
 
     match /projects/{projectId} {
       allow read: if canReadEntity();
-      allow create: if validEntityCreate();
-      allow update: if canEditEntity() && accessFieldsAreUnchanged();
-      allow delete: if isOwner(resource.data.ownerId);
+      allow create, delete: if false;
+      allow update: if canEditEntity()
+        && accessFieldsAreUnchanged()
+        && premiumVisibilityIsValid()
+        && premiumGalleryIsValid();
 
       match /tasks/{taskId} {
         allow read: if canAccessProject(projectId);
-        allow create, update: if canEditProject(projectId);
-        allow delete: if isOwner(projectData(projectId).ownerId);
+        allow update: if canEditProject(projectId);
+        allow create, delete: if false;
       }
     }
 
     match /todos/{todoId} {
       allow read: if canReadEntity();
-      allow create: if validEntityCreate();
-      allow update: if canEditEntity() && accessFieldsAreUnchanged();
-      allow delete: if isOwner(resource.data.ownerId);
+      allow create, delete: if false;
+      allow update: if canEditEntity()
+        && accessFieldsAreUnchanged()
+        && premiumReminderIsValid();
     }
 
     match /bookmarkLists/{listId} {
       allow read: if canReadList();
-      allow create: if validEntityCreate();
-      allow update: if canEditEntity() && accessFieldsAreUnchanged();
-      allow delete: if isOwner(resource.data.ownerId);
+      allow create, delete: if false;
+      allow update: if canEditEntity()
+        && accessFieldsAreUnchanged()
+        && premiumVisibilityIsValid();
     }
 
     match /listFollowers/{followerId} {
@@ -137,6 +173,20 @@ service cloud.firestore {
     }
 
     match /handleReservations/{handle} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /subscriptionEntitlements/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
+    }
+
+    match /subscriptionUsage/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
+    }
+
+    match /revenueCatWebhookEvents/{eventId} {
       allow read, create, update, delete: if false;
     }
   }

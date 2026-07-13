@@ -45,7 +45,29 @@
     "noContent": "Нет содержимого",
     "unknownUser": "Неизвестный пользователь",
     "selectDate": "Выбрать дату",
-    "selectDateTime": "Выбрать дату и время"
+    "selectDateTime": "Выбрать дату и время",
+    "close": "Закрыть"
+  },
+  "accessibility": {
+    "progress": "Прогресс",
+    "changeTaskStatus": "Переводит задачу в следующий статус",
+    "reminderFor": "Напоминание для {{title}}",
+    "configureReminder": "Открывает настройки напоминания",
+    "quickAdd": "Создать новый элемент",
+    "quickAddHint": "Открывает варианты для закладок, проектов и заметок",
+    "openBookmark": "Открывает сведения о закладке",
+    "openProject": "Открывает сведения о проекте",
+    "editProject": "Изменить {{title}}",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль",
+    "formatBold": "Полужирный",
+    "formatItalic": "Курсив",
+    "formatStrikethrough": "Зачёркнутый",
+    "formatList": "Список",
+    "insertLink": "Вставить ссылку",
+    "openTodo": "Открыть сведения о задаче",
+    "toggleTodo": "Изменить статус выполнения",
+    "openNote": "Открыть сведения о заметке"
   },
   "tabs": {
     "home": "Главная",
@@ -356,12 +378,12 @@
     "addTask": {
       "placeholder": "Введите название задачи...",
       "button": "Создать задачу",
-      "title": "Add Task",
-      "status": "Status",
-      "taskTitle": "Task Title",
-      "createFailed": "Failed to create task."
+      "title": "Добавить задачу",
+      "status": "Статус",
+      "taskTitle": "Название задачи",
+      "createFailed": "Не удалось создать задачу."
     },
-    "due": "Due: "
+    "due": "Срок: "
   },
   "todos": {
     "searchPlaceholder": "Поиск задач...",
@@ -434,6 +456,7 @@
     },
     "thinking": "Думаю"
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "Посмотреть Premium", "errors": { "premiumRequired": "Эта функция доступна в Premium.", "limitReached": "Использовано {{current}} из {{limit}} бесплатных элементов. Оформите Premium, чтобы создавать больше.", "aiQuotaExhausted": "Лимит ИИ на этот месяц исчерпан.", "unavailable": "Не удалось проверить подписку. Попробуйте ещё раз." } },
   "premium": {
     "title": "Перейти на Premium",
     "subtitle": "Откройте мощные функции",
@@ -475,7 +498,14 @@
       "customThemes": "Пользовательские темы",
       "exportFormats": "Экспорт в несколько форматов",
       "teamManagement": "Инструменты управления командой",
-      "apiAccess": "Доступ к API"
+      "apiAccess": "Доступ к API",
+      "unlimitedContent": "Неограниченные закладки, заметки, задачи, проекты и списки",
+      "aiAssistant": "ИИ-помощник: 100 сообщений в месяц",
+      "kanban": "Канбан-доски и новые задачи проектов",
+      "fullExport": "Полный экспорт данных в JSON",
+      "ai": { "title": "ИИ для рабочего пространства", "description": "Задавайте вопросы по всем сохранённым материалам" },
+      "reminders": { "title": "Гибкие напоминания", "description": "Настраивайте несколько интервалов и свои даты" },
+      "organization": { "title": "Без ограничений", "description": "Храните все идеи и проекты в одном месте" }
     }
   },
   "share": {
@@ -565,17 +595,17 @@
       "enterTitle": "Пожалуйста, введите название заметки.",
       "createFailed": "Не удалось создать заметку. Попробуйте снова."
     },
-    "title": "Add Note",
-    "noteTitle": "Note Title",
-    "visibility": "Visibility",
-    "content": "Content",
+    "title": "Добавить заметку",
+    "noteTitle": "Название заметки",
+    "visibility": "Видимость",
+    "content": "Содержание",
     "visibilityOptions": {
-      "private": "Only you can see this note",
-      "shared": "Share with specific people",
-      "public": "Anyone can view this note"
+      "private": "Эту заметку видите только вы",
+      "shared": "Поделиться с выбранными людьми",
+      "public": "Заметку могут видеть все"
     },
-    "editorHint": "Select text and use the toolbar to apply formatting. The text appears styled as you type.",
-    "toolbarHint": "Select text to format"
+    "editorHint": "Выделите текст и используйте панель инструментов. Форматирование отображается по мере ввода.",
+    "toolbarHint": "Выделите текст для форматирования"
   },
   "addProject": {
     "titlePlaceholder": "Введите название проекта...",
@@ -688,19 +718,21 @@
       "galleryPermissionDenied": "Требуется доступ к фотогалерее",
       "uploadImageFailed": "Не удалось загрузить изображение"
     },
-    "notFound": "Project not found",
-    "progress": "Progress",
-    "members": "Members",
-    "nudgeMe": "Nudge Me",
+    "notFound": "Проект не найден",
+    "progress": "Прогресс",
+    "members": "Участники",
+    "nudgeMe": "Напомнить",
     "tabs": {
-      "tasks": "Tasks",
-      "timeline": "Timeline",
-      "gallery": "Gallery"
+      "tasks": "Задачи",
+      "timeline": "Хронология",
+      "gallery": "Галерея"
     },
     "deadline": {
-      "overdue": "Overdue",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left"
+      "overdue": "Просрочено",
+      "daysLeft_one": "Остался {{count}} день",
+      "daysLeft_other": "Осталось {{count}} дня",
+      "daysLeft_few": "Осталось {{count}} дня",
+      "daysLeft_many": "Осталось {{count}} дней"
     },
     "quickAdd": {
       "title": "Quick Add",
@@ -741,8 +773,8 @@
       "pastDate": "Please choose a future date and time."
     },
     "adding": "Adding...",
-    "swipeHint": "Swipe left on a task for more options",
-    "relatedContent": "Related Content",
+    "swipeHint": "Смахните задачу влево, чтобы увидеть больше действий",
+    "relatedContent": "Связанные материалы",
     "created": "Created {{relative}}",
     "empty": {
       "activityTitle": "No Activity Yet",
@@ -782,18 +814,18 @@
       "permissionUpdated": "Разрешение успешно обновлено",
       "updatePermissionFailed": "Не удалось обновить разрешение. Попробуйте снова."
     },
-    "title": "Project Members",
-    "currentMembers": "Current Members",
-    "addMember": "Add Member",
-    "canView": "Can View",
-    "canEdit": "Can Edit",
-    "permissionLabel": "Permission:",
-    "adding": "Adding...",
-    "dismiss": "Dismiss",
+    "title": "Участники проекта",
+    "currentMembers": "Текущие участники",
+    "addMember": "Добавить участника",
+    "canView": "Только просмотр",
+    "canEdit": "Может редактировать",
+    "permissionLabel": "Доступ:",
+    "adding": "Добавление...",
+    "dismiss": "Закрыть",
     "removeMember": {
-      "title": "Remove Member",
-      "message": "Are you sure you want to remove {{email}} from this project?",
-      "action": "Remove"
+      "title": "Удалить участника",
+      "message": "Удалить {{email}} из проекта?",
+      "action": "Удалить"
     }
   },
   "categories": {
@@ -873,9 +905,18 @@
       "body_other": "You have {{count}} unread saves waiting for you."
     },
     "entityReminder": {
-      "bookmark": { "title": "Напоминание о закладке", "body": "Время прочитать: {{title}}" },
-      "note": { "title": "Напоминание о заметке", "body": "Вернитесь к заметке: {{title}}" },
-      "todo": { "title": "Напоминание о задаче", "body": "Не забудьте: {{title}}" }
+      "bookmark": {
+        "title": "Напоминание о закладке",
+        "body": "Время прочитать: {{title}}"
+      },
+      "note": {
+        "title": "Напоминание о заметке",
+        "body": "Вернитесь к заметке: {{title}}"
+      },
+      "todo": {
+        "title": "Напоминание о задаче",
+        "body": "Не забудьте: {{title}}"
+      }
     }
   },
   "reminders": {
@@ -883,7 +924,12 @@
     "enabled": "Напоминания включены",
     "disabled": "Напоминания выключены",
     "presetsLabel": "Напомнить через",
-    "presets": { "1d": "1 день", "3d": "3 дня", "7d": "1 неделя", "30d": "1 месяц" },
+    "presets": {
+      "1d": "1 день",
+      "3d": "3 дня",
+      "7d": "1 неделя",
+      "30d": "1 месяц"
+    },
     "custom": "Своя дата",
     "addCustom": "Добавить напоминание"
   },
@@ -915,15 +961,21 @@
     "following": "Following"
   },
   "projectCard": {
-    "overdue": "Overdue",
-    "dueToday": "Due Today",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
-    "weeksLeft_one": "{{count}} week left",
-    "weeksLeft_other": "{{count}} weeks left",
-    "monthsLeft_one": "{{count}} month left",
-    "monthsLeft_other": "{{count}} months left",
-    "tasksDone": "{{completed}}/{{total}} tasks done"
+    "overdue": "Просрочено",
+    "dueToday": "Срок сегодня",
+    "daysLeft_one": "Остался {{count}} день",
+    "daysLeft_other": "Осталось {{count}} дня",
+    "weeksLeft_one": "Осталась {{count}} неделя",
+    "weeksLeft_other": "Осталось {{count}} недели",
+    "monthsLeft_one": "Остался {{count}} месяц",
+    "monthsLeft_other": "Осталось {{count}} месяца",
+    "tasksDone": "{{completed}}/{{total}} задач выполнено",
+    "daysLeft_few": "Осталось {{count}} дня",
+    "daysLeft_many": "Осталось {{count}} дней",
+    "weeksLeft_few": "Осталось {{count}} недели",
+    "weeksLeft_many": "Осталось {{count}} недель",
+    "monthsLeft_few": "Осталось {{count}} месяца",
+    "monthsLeft_many": "Осталось {{count}} месяцев"
   },
   "entityTypes": {
     "bookmark": "Bookmark",

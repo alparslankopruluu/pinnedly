@@ -23,12 +23,14 @@ import { fetchUrlMetadata, getSourceFromUrl } from '@/utils/metadata';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
 import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 
 export default function AddBookmarkScreen() {
   useTrackFormOpen('bookmark');
   const { t } = useTranslation();
   const { url: initialUrl } = useLocalSearchParams<{ url?: string }>();
   const { createBookmark, bookmarks } = useBookmarkStore();
+  const { ensureCreate, handleAccessError } = useSubscriptionGate();
   const { isAuthenticated } = useAuth();
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -131,6 +133,7 @@ export default function AddBookmarkScreen() {
       showAppAlert(t('common.error'), t('addBookmark.alerts.provideUrlOrScreenshot'), undefined, { variant: 'error' });
       return;
     }
+    if (!ensureCreate('bookmarks', bookmarks.length)) return;
 
     const source = url ? getSourceFromUrl(url) : 'other';
 
@@ -151,6 +154,7 @@ export default function AddBookmarkScreen() {
       });
       router.back();
     } catch (error) {
+      if (handleAccessError(error)) return;
       showAppAlert(t('addBookmark.alerts.saveFailed'), error instanceof Error ? error.message : t('addBookmark.alerts.couldNotSave'));
     } finally {
       setIsSaving(false);
@@ -163,7 +167,7 @@ export default function AddBookmarkScreen() {
         options={{ 
           title: t('addBookmark.title'),
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('common.close')}>
               <X size={24} color="#111827" />
             </TouchableOpacity>
           ),
@@ -187,6 +191,7 @@ export default function AddBookmarkScreen() {
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 keyboardType="url"
+                accessibilityLabel={t('addBookmark.labels.url')}
               />
             </View>
 
@@ -199,7 +204,7 @@ export default function AddBookmarkScreen() {
 
             {/* Screenshot Upload */}
             <View style={styles.section}>
-              <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
+              <TouchableOpacity style={styles.uploadButton} onPress={pickImage} accessibilityRole="button">
                 <Camera size={24} color="#6B7280" />
                 <Text style={styles.uploadText}>{t('addBookmark.labels.uploadScreenshot')}</Text>
               </TouchableOpacity>
@@ -221,6 +226,7 @@ export default function AddBookmarkScreen() {
                 onChangeText={setTitle}
                 placeholder={t('addBookmark.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
+                accessibilityLabel={t('addBookmark.labels.title')}
               />
             </View>
 
@@ -244,6 +250,7 @@ export default function AddBookmarkScreen() {
                 placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={3}
+                accessibilityLabel={t('addBookmark.labels.description')}
               />
             </View>
 
@@ -258,6 +265,7 @@ export default function AddBookmarkScreen() {
                 placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={2}
+                accessibilityLabel={t('addBookmark.labels.commentOptional')}
               />
             </View>
 
@@ -273,6 +281,9 @@ export default function AddBookmarkScreen() {
                       selectedTags.includes(tagName) && styles.selectedTag,
                     ]}
                     onPress={() => toggleTag(tagName)}
+                    accessibilityRole="checkbox"
+                    accessibilityLabel={tagName}
+                    accessibilityState={{ checked: selectedTags.includes(tagName) }}
                   >
                     <Text
                       style={[
@@ -297,8 +308,14 @@ export default function AddBookmarkScreen() {
                   onChangeText={setNewTag}
                   placeholder={t('addBookmark.tagsPlaceholder')}
                   placeholderTextColor="#9CA3AF"
+                  accessibilityLabel={t('addBookmark.tagsPlaceholder')}
                 />
-                <TouchableOpacity style={styles.addTagButton} onPress={handleAddTag}>
+                <TouchableOpacity
+                  style={styles.addTagButton}
+                  onPress={handleAddTag}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('addBookmark.tagsPlaceholder')}
+                >
                   <Plus size={20} color="#EF4444" />
                 </TouchableOpacity>
               </View>

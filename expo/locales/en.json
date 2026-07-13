@@ -45,7 +45,29 @@
     "sortLabel": "Sort: {{sort}}",
     "errorWithMessage": "Error: {{message}}",
     "noContent": "No content",
-    "unknownUser": "Unknown User"
+    "unknownUser": "Unknown User",
+    "close": "Close"
+  },
+  "accessibility": {
+    "progress": "Progress",
+    "changeTaskStatus": "Changes the task to the next status",
+    "reminderFor": "Reminder for {{title}}",
+    "configureReminder": "Opens reminder settings",
+    "quickAdd": "Create new item",
+    "quickAddHint": "Opens bookmark, project, and note options",
+    "openBookmark": "Opens bookmark details",
+    "openProject": "Opens project details",
+    "editProject": "Edit {{title}}",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "formatBold": "Bold",
+    "formatItalic": "Italic",
+    "formatStrikethrough": "Strikethrough",
+    "formatList": "List",
+    "insertLink": "Insert link",
+    "openTodo": "Open task details",
+    "toggleTodo": "Change completion status",
+    "openNote": "Open note details"
   },
   "tabs": {
     "home": "Home",
@@ -541,12 +563,24 @@
       "requestId": "Request ID: {{requestId}}"
     }
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "View Premium", "errors": { "premiumRequired": "This feature is available with Premium.", "limitReached": "You are using {{current}} of {{limit}} free items. Upgrade to create more.", "aiQuotaExhausted": "You have used this month's AI allowance.", "unavailable": "Your subscription status could not be verified. Please try again." } },
   "premium": {
     "title": "Upgrade to Premium",
     "subtitle": "Unlock powerful features",
     "choosePlan": "Choose Your Plan",
     "mostPopular": "Most Popular",
     "startFreeTrial": "Start Free Trial",
+    "restorePurchases": "Restore Purchases",
+    "purchaseUnavailableTitle": "Purchase unavailable",
+    "purchaseUnavailableMessage": "Plans could not be loaded from the App Store. Please try again.",
+    "purchaseFailedTitle": "Purchase failed",
+    "purchaseFailedMessage": "The purchase could not be completed.",
+    "restoreSuccessTitle": "Purchases restored",
+    "restoreSuccessMessage": "Your Premium access has been restored.",
+    "restoreEmptyTitle": "No purchases found",
+    "restoreEmptyMessage": "No active Premium purchase was found for this Apple ID.",
+    "restoreFailedTitle": "Restore failed",
+    "restoreFailedMessage": "Purchases could not be restored. Please try again.",
     "terms": "7-day free trial, then {{price}}{{period}}. Cancel anytime.",
     "plans": {
       "monthly": "Monthly",
@@ -582,7 +616,14 @@
       "customThemes": "Custom themes",
       "exportFormats": "Export to multiple formats",
       "teamManagement": "Team management tools",
-      "apiAccess": "API access"
+      "apiAccess": "API access",
+      "unlimitedContent": "Unlimited bookmarks, notes, todos, projects, and lists",
+      "aiAssistant": "AI assistant with 100 messages per month",
+      "kanban": "Kanban boards and new project tasks",
+      "fullExport": "Complete JSON data export",
+      "ai": { "title": "Workspace AI", "description": "Ask questions across your saved work" },
+      "reminders": { "title": "Custom reminders", "description": "Use multiple intervals and custom dates" },
+      "organization": { "title": "Unlimited organization", "description": "Keep every idea and project without limits" }
     }
   },
   "invite": {

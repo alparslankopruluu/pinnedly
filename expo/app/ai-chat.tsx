@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { X, Send, Save, Sparkles } from '@/components/icons/lucide';
 import { useNoteStore } from '@/providers/OfflineProvider';
 import { ChatTypingIndicator } from '@/components/ChatTypingIndicator';
 import { sendWorkspaceChat, WorkspaceChatError } from '@/services/aiWorkspaceChat';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 
 interface Message {
   id: string;
@@ -36,6 +37,12 @@ export default function AIChatScreen() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const savingNoteRef = useRef(false);
+  const { snapshot, can, refresh, showPaywall } = useSubscriptionAccess();
+
+  useEffect(() => {
+    if (snapshot.status === 'loading' || snapshot.status === 'error') return;
+    if (!can('ai').allowed) showPaywall();
+  }, [can, showPaywall, snapshot.status]);
 
   const getSendErrorMessage = useCallback((err: unknown) => {
     if (!(err instanceof WorkspaceChatError)) {
@@ -55,6 +62,12 @@ export default function AIChatScreen() {
         case 'EMPTY_RESPONSE':
         case 'INVALID_RESPONSE':
           return 'aiChat.alerts.invalidResponse';
+        case 'PREMIUM_REQUIRED':
+          return 'subscription.errors.premiumRequired';
+        case 'AI_QUOTA_EXHAUSTED':
+          return 'subscription.errors.aiQuotaExhausted';
+        case 'ENTITLEMENT_UNAVAILABLE':
+          return 'subscription.errors.unavailable';
         case 'REQUEST_FAILED':
         default:
           return 'aiChat.alerts.sendFailed';
@@ -99,12 +112,16 @@ export default function AIChatScreen() {
       };
 
       setMessages((prev) => [...prev, assistantEntry]);
+      await refresh().catch(() => undefined);
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (err) {
       const message = getSendErrorMessage(err);
       setErrorText(message);
 
       if (err instanceof WorkspaceChatError) {
+        if (err.code === 'PREMIUM_REQUIRED' || err.code === 'AI_QUOTA_EXHAUSTED') {
+          showPaywall();
+        }
         console.warn('Workspace chat send failed:', {
           code: err.code,
           status: err.status,
@@ -119,7 +136,7 @@ export default function AIChatScreen() {
     } finally {
       setIsResponding(false);
     }
-  }, [getSendErrorMessage, input, isResponding, messages, t]);
+  }, [getSendErrorMessage, input, isResponding, messages, refresh, showPaywall, t]);
 
   const handleSaveAsNote = async () => {
     if (savingNoteRef.current || messages.length === 0) {

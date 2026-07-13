@@ -156,7 +156,12 @@ export default function BookmarksScreen() {
 
       <View style={styles.sortContainer}>
         <Text style={styles.sortLabel}>{t('bookmarks.yourSaves')}</Text>
-        <TouchableOpacity style={styles.sortButton} onPress={cycleSort}>
+        <TouchableOpacity
+          style={styles.sortButton}
+          onPress={cycleSort}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.sortLabel', { sort: sortLabel })}
+        >
           <Text style={styles.sortButtonText}>{t('common.sortLabel', { sort: sortLabel })}</Text>
           <ChevronDown size={16} color="#6B7280" />
         </TouchableOpacity>

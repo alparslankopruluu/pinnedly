@@ -57,6 +57,8 @@ export default function TabLayout() {
             <TouchableOpacity 
               onPress={() => router.push('/settings')}
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('navigation.settings')}
             >
               <Settings size={24} color="#6B7280" />
             </TouchableOpacity>
@@ -72,6 +74,8 @@ export default function TabLayout() {
             <TouchableOpacity 
               onPress={() => router.push('/add-bookmark')}
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('quickAdd.addBookmark')}
             >
               <Plus size={24} color="#EF4444" />
             </TouchableOpacity>
@@ -87,6 +91,8 @@ export default function TabLayout() {
             <TouchableOpacity 
               onPress={() => router.push('/add-project')}
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('quickAdd.addProject')}
             >
               <Plus size={24} color="#EF4444" />
             </TouchableOpacity>
@@ -102,6 +108,8 @@ export default function TabLayout() {
             <TouchableOpacity 
               onPress={() => router.push('/add-note')}
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('quickAdd.addNote')}
             >
               <Plus size={24} color="#EF4444" />
             </TouchableOpacity>
@@ -124,6 +132,8 @@ export default function TabLayout() {
             <TouchableOpacity 
               onPress={() => router.push('/settings')}
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('navigation.settings')}
             >
               <Settings size={24} color="#6B7280" />
             </TouchableOpacity>
@@ -137,5 +147,9 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   headerButton: {
     marginRight: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -51,13 +51,13 @@ export default function PhoneSignIn() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} accessibilityRole="button" accessibilityLabel={t('common.back')}>
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('auth.phoneSignIn')}</Text>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Text style={styles.hint}>
           {t('auth.phoneHint')}
         </Text>
@@ -71,6 +71,7 @@ export default function PhoneSignIn() {
             placeholder={t('auth.placeholders.phone')}
             keyboardType="phone-pad"
             editable={!codeSent}
+            accessibilityLabel={t('auth.phoneNumber')}
           />
         </View>
 
@@ -84,6 +85,7 @@ export default function PhoneSignIn() {
               placeholder={t('auth.placeholders.verificationCode')}
               keyboardType="number-pad"
               maxLength={6}
+              accessibilityLabel={t('auth.verificationCode')}
             />
           </View>
         )}
@@ -108,7 +110,7 @@ export default function PhoneSignIn() {
             </TouchableOpacity>
           </>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -126,6 +128,10 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 16,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -133,8 +139,9 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   hint: {
     fontSize: 14,

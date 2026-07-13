@@ -6,6 +6,7 @@ import { ReminderSchedule } from '@/types';
 import { useBookmarkStore, useNoteStore } from '@/providers/OfflineProvider';
 import { useTodoStore } from '@/store/useTodoStore';
 import { normalizeReminderSchedule } from '@/services/entityReminders';
+import { useTranslation } from 'react-i18next';
 
 interface EntityReminderBellProps {
   entityType: 'bookmark' | 'note' | 'todo';
@@ -26,6 +27,7 @@ export function EntityReminderBell({
   size = 18,
   hitSlop = 8,
 }: EntityReminderBellProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { updateBookmark } = useBookmarkStore();
   const { updateNote } = useNoteStore();
@@ -58,7 +60,9 @@ export function EntityReminderBell({
           setOpen(true);
         }}
         accessibilityRole="button"
-        accessibilityLabel="Reminder"
+        accessibilityLabel={t('accessibility.reminderFor', { title })}
+        accessibilityHint={t('accessibility.configureReminder')}
+        accessibilityState={{ selected: isActive }}
       >
         <Bell size={size} color={isActive ? '#4F46E5' : '#9CA3AF'} fill={isActive ? '#4F46E5' : 'transparent'} />
       </Pressable>

@@ -9,10 +9,12 @@ import { Lock, Globe, Users } from '@/components/icons/lucide';
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { Button } from '@/components/ui/Button';
 import { Visibility } from '@/types';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 
 export default function CreateListScreen() {
   const { t } = useTranslation();
-  const { createList, isCreating } = useBookmarkLists();
+  const { createList, isCreating, myLists } = useBookmarkLists();
+  const { ensureCreate, ensure, handleAccessError } = useSubscriptionGate();
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [visibility, setVisibility] = useState<Visibility>('private');
@@ -46,12 +48,15 @@ export default function CreateListScreen() {
       showAppAlert(t('common.error'), t('createList.alerts.enterName'), undefined, { variant: 'error' });
       return;
     }
+    if (!ensureCreate('bookmarkLists', myLists.length)) return;
+    if (visibility !== 'private' && !ensure('sharing')) return;
 
     try {
       await createList(name.trim(), description.trim() || undefined, visibility);
       router.back();
     } catch (error) {
       console.error('Create list error:', error);
+      if (handleAccessError(error)) return;
       showAppAlert(t('common.error'), t('createList.alerts.createFailed'), undefined, { variant: 'error' });
     }
   };

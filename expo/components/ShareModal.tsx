@@ -20,6 +20,8 @@ import { useSharing } from '@/store/useSharingStore';
 import { useAuth } from '@/store/useAuthStore';
 import { EntityShare, SharePermission, ID } from '@/types';
 import { inviteRepository } from '@/repositories/InviteRepository';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface ShareModalProps {
   visible: boolean;
@@ -33,6 +35,8 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   const { t } = useTranslation();
   const { shareEntity, getEntityShares, updateSharePermission, removeShare, isLoading } = useSharing();
   const { searchUsersByEmail } = useAuth();
+  const { can, showPaywall } = useSubscriptionAccess();
+  const reduceMotion = useReducedMotion();
   const [email, setEmail] = useState<string>('');
   const [permission, setPermission] = useState<SharePermission>('view');
   const [shares, setShares] = useState<EntityShare[]>([]);
@@ -74,6 +78,10 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   };
 
   const handleShare = async () => {
+    if (!can('sharing').allowed) {
+      showPaywall();
+      return;
+    }
     if (!email.trim()) {
       showAppAlert(t('common.error'), t('share.alerts.enterEmailOrUsername'), undefined, { variant: 'error' });
       return;
@@ -97,6 +105,10 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   };
 
   const handleUpdatePermission = async (shareId: ID, newPermission: SharePermission) => {
+    if (!can('memberManagement').allowed) {
+      showPaywall();
+      return;
+    }
     try {
       await updateSharePermission(shareId, newPermission, entityId, entityType);
       await loadShares();
@@ -120,6 +132,10 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   };
 
   const handleCreateInviteLink = async () => {
+    if (!can('sharing').allowed) {
+      showPaywall();
+      return;
+    }
     setIsCreatingLink(true);
     try {
       const invite = await inviteRepository.createInvite(entityId, entityType, permission);
@@ -177,10 +193,10 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
   );
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <SafeAreaView style={styles.container}>
+    <Modal visible={visible} animationType={reduceMotion ? 'none' : 'slide'} presentationStyle="pageSheet" onRequestClose={onClose}>
+      <SafeAreaView style={styles.container} accessibilityViewIsModal>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel={t('common.close')}>
             <X size={24} color="#1e293b" />
           </TouchableOpacity>
           <Text style={styles.title}>{t('share.shareEntity', { entityTitle })}</Text>
@@ -191,6 +207,8 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           <TouchableOpacity
             style={[styles.tabButton, activeTab === 'people' && styles.tabButtonActive]}
             onPress={() => setActiveTab('people')}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: activeTab === 'people' }}
           >
             <Text style={[styles.tabText, activeTab === 'people' && styles.tabTextActive]}>
               {t('share.tabs.people')}
@@ -199,6 +217,8 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           <TouchableOpacity
             style={[styles.tabButton, activeTab === 'link' && styles.tabButtonActive]}
             onPress={() => setActiveTab('link')}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: activeTab === 'link' }}
           >
             <Text style={[styles.tabText, activeTab === 'link' && styles.tabTextActive]}>
               {t('share.tabs.link')}

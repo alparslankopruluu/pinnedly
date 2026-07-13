@@ -45,7 +45,29 @@
     "noContent": "لا يوجد محتوى",
     "unknownUser": "مستخدم غير معروف",
     "selectDate": "اختر التاريخ",
-    "selectDateTime": "اختر التاريخ والوقت"
+    "selectDateTime": "اختر التاريخ والوقت",
+    "close": "إغلاق"
+  },
+  "accessibility": {
+    "progress": "التقدم",
+    "changeTaskStatus": "ينقل المهمة إلى الحالة التالية",
+    "reminderFor": "تذكير لـ {{title}}",
+    "configureReminder": "يفتح إعدادات التذكير",
+    "quickAdd": "إنشاء عنصر جديد",
+    "quickAddHint": "يفتح خيارات الإشارات المرجعية والمشاريع والملاحظات",
+    "openBookmark": "يفتح تفاصيل الإشارة المرجعية",
+    "openProject": "يفتح تفاصيل المشروع",
+    "editProject": "تعديل {{title}}",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "formatBold": "عريض",
+    "formatItalic": "مائل",
+    "formatStrikethrough": "يتوسطه خط",
+    "formatList": "قائمة",
+    "insertLink": "إدراج رابط",
+    "openTodo": "فتح تفاصيل المهمة",
+    "toggleTodo": "تغيير حالة الإكمال",
+    "openNote": "فتح تفاصيل الملاحظة"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -356,12 +378,12 @@
     "addTask": {
       "placeholder": "أدخل عنوان المهمة...",
       "button": "إنشاء مهمة",
-      "title": "Add Task",
-      "status": "Status",
-      "taskTitle": "Task Title",
-      "createFailed": "Failed to create task."
+      "title": "إضافة مهمة",
+      "status": "الحالة",
+      "taskTitle": "عنوان المهمة",
+      "createFailed": "تعذّر إنشاء المهمة."
     },
-    "due": "Due: "
+    "due": "موعد الاستحقاق: "
   },
   "todos": {
     "searchPlaceholder": "ابحث في المهام...",
@@ -434,6 +456,7 @@
     },
     "thinking": "جارٍ التفكير"
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "عرض Premium", "errors": { "premiumRequired": "هذه الميزة متاحة مع اشتراك Premium.", "limitReached": "استخدمت {{current}} من أصل {{limit}} عناصر مجانية. اشترك في Premium لإنشاء المزيد.", "aiQuotaExhausted": "لقد استهلكت رصيد الذكاء الاصطناعي لهذا الشهر.", "unavailable": "تعذّر التحقق من اشتراكك. حاول مرة أخرى." } },
   "premium": {
     "title": "الترقية إلى Premium",
     "subtitle": "افتح الميزات القوية",
@@ -475,7 +498,14 @@
       "customThemes": "سمات مخصصة",
       "exportFormats": "تصدير إلى صيغ متعددة",
       "teamManagement": "أدوات إدارة الفريق",
-      "apiAccess": "وصول إلى API"
+      "apiAccess": "وصول إلى API",
+      "unlimitedContent": "إشارات مرجعية وملاحظات ومهام ومشاريع وقوائم بلا حدود",
+      "aiAssistant": "مساعد ذكي مع 100 رسالة شهرياً",
+      "kanban": "لوحات كانبان ومهام مشاريع جديدة",
+      "fullExport": "تصدير كامل للبيانات بصيغة JSON",
+      "ai": { "title": "مساعد مساحة العمل", "description": "اسأل عن كل ما حفظته في Draft" },
+      "reminders": { "title": "تذكيرات مخصّصة", "description": "استخدم فترات متعددة وتواريخ تختارها" },
+      "organization": { "title": "تنظيم بلا حدود", "description": "احتفظ بكل أفكارك ومشاريعك من دون قيود" }
     }
   },
   "share": {
@@ -565,17 +595,17 @@
       "enterTitle": "يرجى إدخال عنوان الملاحظة.",
       "createFailed": "فشل إنشاء الملاحظة. يرجى المحاولة مرة أخرى."
     },
-    "title": "Add Note",
-    "noteTitle": "Note Title",
-    "visibility": "Visibility",
-    "content": "Content",
+    "title": "إضافة ملاحظة",
+    "noteTitle": "عنوان الملاحظة",
+    "visibility": "إمكانية العرض",
+    "content": "المحتوى",
     "visibilityOptions": {
-      "private": "Only you can see this note",
-      "shared": "Share with specific people",
-      "public": "Anyone can view this note"
+      "private": "أنت فقط تستطيع رؤية هذه الملاحظة",
+      "shared": "شاركها مع أشخاص محددين",
+      "public": "يمكن للجميع رؤية هذه الملاحظة"
     },
-    "editorHint": "Select text and use the toolbar to apply formatting. The text appears styled as you type.",
-    "toolbarHint": "Select text to format"
+    "editorHint": "حدّد النص واستخدم شريط الأدوات لتنسيقه. سيظهر التنسيق أثناء الكتابة.",
+    "toolbarHint": "حدّد النص لتنسيقه"
   },
   "addProject": {
     "titlePlaceholder": "أدخل عنوان المشروع...",
@@ -688,19 +718,19 @@
       "galleryPermissionDenied": "مطلوب إذن الوصول إلى مكتبة الصور",
       "uploadImageFailed": "فشل تحميل الصورة"
     },
-    "notFound": "Project not found",
-    "progress": "Progress",
-    "members": "Members",
-    "nudgeMe": "Nudge Me",
+    "notFound": "لم يتم العثور على المشروع",
+    "progress": "التقدّم",
+    "members": "الأعضاء",
+    "nudgeMe": "ذكّرني",
     "tabs": {
-      "tasks": "Tasks",
-      "timeline": "Timeline",
-      "gallery": "Gallery"
+      "tasks": "المهام",
+      "timeline": "الجدول الزمني",
+      "gallery": "المعرض"
     },
     "deadline": {
-      "overdue": "Overdue",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left"
+      "overdue": "متأخر",
+      "daysLeft_one": "متبقٍ يوم واحد",
+      "daysLeft_other": "متبقي {{count}} أيام"
     },
     "quickAdd": {
       "title": "Quick Add",
@@ -741,8 +771,8 @@
       "pastDate": "Please choose a future date and time."
     },
     "adding": "Adding...",
-    "swipeHint": "Swipe left on a task for more options",
-    "relatedContent": "Related Content",
+    "swipeHint": "اسحب المهمة لليسار لعرض المزيد من الخيارات",
+    "relatedContent": "محتوى مرتبط",
     "created": "Created {{relative}}",
     "empty": {
       "activityTitle": "No Activity Yet",
@@ -782,18 +812,18 @@
       "permissionUpdated": "تم تحديث الإذن بنجاح",
       "updatePermissionFailed": "فشل تحديث الإذن. يرجى المحاولة مرة أخرى."
     },
-    "title": "Project Members",
-    "currentMembers": "Current Members",
-    "addMember": "Add Member",
-    "canView": "Can View",
-    "canEdit": "Can Edit",
-    "permissionLabel": "Permission:",
-    "adding": "Adding...",
-    "dismiss": "Dismiss",
+    "title": "أعضاء المشروع",
+    "currentMembers": "الأعضاء الحاليون",
+    "addMember": "إضافة عضو",
+    "canView": "يمكنه العرض",
+    "canEdit": "يمكنه التعديل",
+    "permissionLabel": "الصلاحية:",
+    "adding": "جارٍ الإضافة...",
+    "dismiss": "إغلاق",
     "removeMember": {
-      "title": "Remove Member",
-      "message": "Are you sure you want to remove {{email}} from this project?",
-      "action": "Remove"
+      "title": "إزالة العضو",
+      "message": "هل تريد بالتأكيد إزالة {{email}} من هذا المشروع؟",
+      "action": "إزالة"
     }
   },
   "categories": {
@@ -873,9 +903,18 @@
       "body_other": "You have {{count}} unread saves waiting for you."
     },
     "entityReminder": {
-      "bookmark": { "title": "تذكير إشارة", "body": "حان وقت القراءة: {{title}}" },
-      "note": { "title": "تذكير ملاحظة", "body": "راجع ملاحظتك: {{title}}" },
-      "todo": { "title": "تذكير مهمة", "body": "لا تنسَ: {{title}}" }
+      "bookmark": {
+        "title": "تذكير إشارة",
+        "body": "حان وقت القراءة: {{title}}"
+      },
+      "note": {
+        "title": "تذكير ملاحظة",
+        "body": "راجع ملاحظتك: {{title}}"
+      },
+      "todo": {
+        "title": "تذكير مهمة",
+        "body": "لا تنسَ: {{title}}"
+      }
     }
   },
   "reminders": {
@@ -883,7 +922,12 @@
     "enabled": "التذكيرات مفعّلة",
     "disabled": "التذكيرات معطّلة",
     "presetsLabel": "ذكّرني بعد",
-    "presets": { "1d": "يوم", "3d": "3 أيام", "7d": "أسبوع", "30d": "شهر" },
+    "presets": {
+      "1d": "يوم",
+      "3d": "3 أيام",
+      "7d": "أسبوع",
+      "30d": "شهر"
+    },
     "custom": "تاريخ مخصص",
     "addCustom": "إضافة تذكير"
   },
@@ -915,15 +959,15 @@
     "following": "Following"
   },
   "projectCard": {
-    "overdue": "Overdue",
-    "dueToday": "Due Today",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
-    "weeksLeft_one": "{{count}} week left",
-    "weeksLeft_other": "{{count}} weeks left",
-    "monthsLeft_one": "{{count}} month left",
-    "monthsLeft_other": "{{count}} months left",
-    "tasksDone": "{{completed}}/{{total}} tasks done"
+    "overdue": "متأخر",
+    "dueToday": "موعده اليوم",
+    "daysLeft_one": "متبقٍ يوم واحد",
+    "daysLeft_other": "متبقي {{count}} أيام",
+    "weeksLeft_one": "متبقٍ أسبوع واحد",
+    "weeksLeft_other": "متبقي {{count}} أسابيع",
+    "monthsLeft_one": "متبقٍ شهر واحد",
+    "monthsLeft_other": "متبقي {{count}} أشهر",
+    "tasksDone": "{{completed}}/{{total}} مهام مكتملة"
   },
   "entityTypes": {
     "bookmark": "Bookmark",

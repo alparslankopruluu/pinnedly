@@ -24,7 +24,10 @@ export type WorkspaceChatErrorCode =
   | 'REQUEST_FAILED'
   | 'INVALID_RESPONSE'
   | 'EMPTY_RESPONSE'
-  | 'TIMEOUT';
+  | 'TIMEOUT'
+  | 'PREMIUM_REQUIRED'
+  | 'AI_QUOTA_EXHAUSTED'
+  | 'ENTITLEMENT_UNAVAILABLE';
 
 interface WorkspaceChatErrorBody {
   error?: string;
@@ -100,12 +103,17 @@ export async function sendWorkspaceChat(
     const data = await readJsonBody<WorkspaceChatResponse & WorkspaceChatErrorBody>(response);
 
     if (!response.ok) {
-      const code =
-        response.status === 401
-          ? 'AUTH_REQUIRED'
-          : response.status === 400
-            ? 'MESSAGE_REQUIRED'
-            : 'REQUEST_FAILED';
+      const serverCode = data?.code;
+      const code: WorkspaceChatErrorCode =
+        serverCode === 'PREMIUM_REQUIRED' ||
+        serverCode === 'AI_QUOTA_EXHAUSTED' ||
+        serverCode === 'ENTITLEMENT_UNAVAILABLE'
+          ? serverCode
+          : response.status === 401
+            ? 'AUTH_REQUIRED'
+            : response.status === 400
+              ? 'MESSAGE_REQUIRED'
+              : 'REQUEST_FAILED';
 
       throw new WorkspaceChatError(
         data?.error || 'Workspace assistant request failed',

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 interface ProgressRingProps {
   progress: number; // 0-1
@@ -15,13 +16,20 @@ export function ProgressRing({
   strokeWidth = 3,
   color = '#EF4444',
 }: ProgressRingProps) {
+  const { t } = useTranslation();
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - progress * circumference;
 
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
+    <View
+      style={[styles.container, { width: size, height: size }]}
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={t('accessibility.progress')}
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
+    >
       <Svg width={size} height={size}>
         <Circle
           cx={size / 2}

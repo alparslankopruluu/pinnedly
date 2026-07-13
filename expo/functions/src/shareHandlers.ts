@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { randomBytes, createHash } from 'crypto';
 import { onRequest } from 'firebase-functions/v2/https';
+import { getAuthoritativeEntitlement, revenueCatApiKey } from './subscription';
 
 type EntityType = 'note' | 'bookmark' | 'project' | 'list';
 type SharePermission = 'view' | 'edit';
@@ -82,7 +83,7 @@ async function requireAuth(req: RequestLike): Promise<string> {
 function httpEndpoint(
   handler: (uid: string, body: Record<string, unknown>) => Promise<unknown>
 ) {
-  return onRequest({ region: REGION, cors: true }, async (req, res) => {
+  return onRequest({ region: REGION, cors: true, secrets: [revenueCatApiKey] }, async (req, res) => {
     const response = res as ResponseLike;
     setCors(response);
 
@@ -110,6 +111,13 @@ function httpEndpoint(
       response.status(500).json({ error: 'Internal server error', code: 'INTERNAL' });
     }
   });
+}
+
+async function requirePremium(uid: string): Promise<void> {
+  const entitlement = await getAuthoritativeEntitlement(uid);
+  if (!entitlement.active) {
+    throw new HttpError(402, 'Premium required', 'PREMIUM_REQUIRED');
+  }
 }
 
 function readRequiredString(body: Record<string, unknown>, key: string): string {
@@ -460,6 +468,7 @@ function inviteResponse(id: string, data: admin.firestore.DocumentData): Record<
 }
 
 export const createInvite = httpEndpoint(async (uid, body) => {
+  await requirePremium(uid);
   const entityType = readEntityType(body);
   const entityId = readRequiredString(body, 'entityId');
   const permission = readPermission(body);
@@ -523,6 +532,7 @@ export const acceptInvite = httpEndpoint(async (uid, body) => {
 });
 
 export const shareEntityWithHandle = httpEndpoint(async (uid, body) => {
+  await requirePremium(uid);
   const entityType = readEntityType(body);
   const entityId = readRequiredString(body, 'entityId');
   const permission = readPermission(body);
@@ -532,6 +542,7 @@ export const shareEntityWithHandle = httpEndpoint(async (uid, body) => {
 });
 
 export const updateSharePermission = httpEndpoint(async (uid, body) => {
+  await requirePremium(uid);
   const shareId = readRequiredString(body, 'shareId');
   const permission = readPermission(body);
   const db = admin.firestore();
@@ -590,6 +601,7 @@ export const revokeShare = httpEndpoint(async (uid, body) => {
 });
 
 export const updateProjectMemberPermission = httpEndpoint(async (uid, body) => {
+  await requirePremium(uid);
   const projectId = readRequiredString(body, 'projectId');
   const userId = readRequiredString(body, 'userId');
   const permission = readPermission(body);

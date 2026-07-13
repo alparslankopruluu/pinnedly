@@ -9,6 +9,7 @@ interface ButtonProps {
   disabled?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  accessibilityHint?: string;
 }
 
 export function Button({
@@ -19,6 +20,7 @@ export function Button({
   disabled = false,
   style,
   textStyle,
+  accessibilityHint,
 }: ButtonProps) {
   return (
     <TouchableOpacity
@@ -32,6 +34,10 @@ export function Button({
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
     >
       <Text style={[styles.text, styles[`${variant}Text`], textStyle]}>
         {title}
@@ -45,6 +51,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 44,
   },
   primary: {
     backgroundColor: '#EF4444',

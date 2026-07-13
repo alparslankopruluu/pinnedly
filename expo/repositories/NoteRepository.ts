@@ -3,7 +3,6 @@ import { DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 import {
   COLLECTIONS,
   collection,
-  deleteDoc,
   doc,
   getDb,
   getDoc,
@@ -11,7 +10,6 @@ import {
   query,
   requireUserId,
   serverTimestamp,
-  setDoc,
   subscribeToOwnerCollection,
   timestampToMillis,
   updateDoc,
@@ -21,6 +19,7 @@ import { normalizeCategory } from '@/constants/contentCategories';
 import { getDefaultReminderSchedule } from '@/constants/reminderDefaults';
 import { mapReminderScheduleFromFirestore } from '@/services/entityReminders';
 import { trackNoteEvent } from '@/lib/analytics';
+import { contentAccessApi } from '@/services/contentAccessApi';
 
 export class NoteRepository {
   private static instance: NoteRepository;
@@ -57,10 +56,9 @@ export class NoteRepository {
       links?: Note['links'];
     }
   ): Promise<Note> {
-    const uid = requireUserId();
-    const ref = doc(collection(getDb(), COLLECTIONS.notes));
+    requireUserId();
+    const ref = doc(collection(getDb(), COLLECTIONS.notes)) as { id: string };
     const data = {
-      ownerId: uid,
       title: note.title,
       markdown: note.markdown,
       visibility: note.visibility || 'private',
@@ -69,10 +67,8 @@ export class NoteRepository {
       editors: [],
       category: note.category ?? DEFAULT_CONTENT_CATEGORY,
       reminderSchedule: note.reminderSchedule ?? getDefaultReminderSchedule(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
     };
-    await setDoc(ref, data);
+    await contentAccessApi.create('notes', ref.id, data);
     const created = await getDoc(ref);
     const mapped = this.mapNote(created.id, created.data()!);
     await trackNoteEvent('note_created', mapped.id);
@@ -99,7 +95,7 @@ export class NoteRepository {
 
   async deleteNote(id: string): Promise<void> {
     requireUserId();
-    await deleteDoc(doc(getDb(), COLLECTIONS.notes, id));
+    await contentAccessApi.delete('notes', id);
     await trackNoteEvent('note_deleted', id);
   }
 

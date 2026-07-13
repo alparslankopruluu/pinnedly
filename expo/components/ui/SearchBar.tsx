@@ -18,6 +18,10 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search...' }: Se
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
+        accessibilityLabel={placeholder}
+        accessibilityRole="search"
+        clearButtonMode="while-editing"
+        returnKeyType="search"
       />
     </View>
   );
@@ -33,6 +37,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: 16,
     marginBottom: 16,
+    minHeight: 48,
   },
   icon: {
     marginRight: 12,

@@ -16,11 +16,11 @@ import {
   query,
   requireUserId,
   serverTimestamp,
-  setDoc,
   timestampToMillis,
   updateDoc,
   where,
 } from '@/lib/firestore';
+import { contentAccessApi } from '@/services/contentAccessApi';
 
 class BookmarkListRepository {
   async createList(
@@ -28,11 +28,10 @@ class BookmarkListRepository {
     description?: string,
     visibility: 'private' | 'shared' | 'public' = 'private'
   ): Promise<BookmarkList> {
-    const uid = requireUserId();
+    requireUserId();
     const isPublic = visibility === 'public';
-    const ref = doc(collection(getDb(), COLLECTIONS.bookmarkLists));
-    await setDoc(ref, {
-      ownerId: uid,
+    const ref = doc(collection(getDb(), COLLECTIONS.bookmarkLists)) as { id: string };
+    await contentAccessApi.create('bookmarkLists', ref.id, {
       name: name.trim(),
       description: description?.trim() ?? null,
       isPublic,
@@ -41,8 +40,6 @@ class BookmarkListRepository {
       editors: [],
       followerCount: 0,
       bookmarkIds: [],
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
     });
     const created = await getDoc(ref);
     return this.mapList(created.id, created.data()!);
@@ -137,7 +134,7 @@ class BookmarkListRepository {
 
   async deleteList(id: ID): Promise<void> {
     requireUserId();
-    await deleteDoc(doc(getDb(), COLLECTIONS.bookmarkLists, id));
+    await contentAccessApi.delete('bookmarkLists', id);
   }
 
   async followList(listId: ID): Promise<void> {

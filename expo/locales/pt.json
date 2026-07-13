@@ -45,7 +45,29 @@
     "noContent": "Sem conteúdo",
     "unknownUser": "Usuário desconhecido",
     "selectDate": "Selecionar data",
-    "selectDateTime": "Selecionar data e hora"
+    "selectDateTime": "Selecionar data e hora",
+    "close": "Fechar"
+  },
+  "accessibility": {
+    "progress": "Progresso",
+    "changeTaskStatus": "Muda a tarefa para o estado seguinte",
+    "reminderFor": "Lembrete para {{title}}",
+    "configureReminder": "Abre as definições do lembrete",
+    "quickAdd": "Criar novo item",
+    "quickAddHint": "Abre opções para marcadores, projetos e notas",
+    "openBookmark": "Abre os detalhes do marcador",
+    "openProject": "Abre os detalhes do projeto",
+    "editProject": "Editar {{title}}",
+    "showPassword": "Mostrar palavra-passe",
+    "hidePassword": "Ocultar palavra-passe",
+    "formatBold": "Negrito",
+    "formatItalic": "Itálico",
+    "formatStrikethrough": "Rasurado",
+    "formatList": "Lista",
+    "insertLink": "Inserir ligação",
+    "openTodo": "Abrir detalhes da tarefa",
+    "toggleTodo": "Alterar estado de conclusão",
+    "openNote": "Abrir detalhes da nota"
   },
   "tabs": {
     "home": "Início",
@@ -434,6 +456,7 @@
     },
     "thinking": "Pensando"
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "Ver Premium", "errors": { "premiumRequired": "Esta funcionalidade está disponível com o Premium.", "limitReached": "Já utilizou {{current}} dos {{limit}} itens gratuitos. Adira ao Premium para criar mais.", "aiQuotaExhausted": "Já utilizou o limite de IA deste mês.", "unavailable": "Não foi possível verificar a subscrição. Tente novamente." } },
   "premium": {
     "title": "Atualizar para Premium",
     "subtitle": "Desbloqueie recursos poderosos",
@@ -475,7 +498,14 @@
       "customThemes": "Temas personalizados",
       "exportFormats": "Exportar para vários formatos",
       "teamManagement": "Ferramentas de gestão de equipe",
-      "apiAccess": "Acesso à API"
+      "apiAccess": "Acesso à API",
+      "unlimitedContent": "Marcadores, notas, tarefas, projetos e listas ilimitados",
+      "aiAssistant": "Assistente de IA com 100 mensagens por mês",
+      "kanban": "Quadros Kanban e novas tarefas de projeto",
+      "fullExport": "Exportação completa de dados em JSON",
+      "ai": { "title": "IA do espaço de trabalho", "description": "Faça perguntas sobre tudo o que guardou" },
+      "reminders": { "title": "Lembretes personalizados", "description": "Use vários intervalos e datas personalizadas" },
+      "organization": { "title": "Organização sem limites", "description": "Guarde todas as suas ideias e projetos" }
     }
   },
   "share": {
@@ -688,19 +718,19 @@
       "galleryPermissionDenied": "É necessária permissão para a galeria de fotos",
       "uploadImageFailed": "Falha ao enviar a imagem"
     },
-    "notFound": "Project not found",
-    "progress": "Progress",
-    "members": "Members",
-    "nudgeMe": "Nudge Me",
+    "notFound": "Projeto não encontrado",
+    "progress": "Progresso",
+    "members": "Membros",
+    "nudgeMe": "Lembrar-me",
     "tabs": {
-      "tasks": "Tasks",
-      "timeline": "Timeline",
-      "gallery": "Gallery"
+      "tasks": "Tarefas",
+      "timeline": "Cronologia",
+      "gallery": "Galeria"
     },
     "deadline": {
-      "overdue": "Overdue",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left"
+      "overdue": "Atrasado",
+      "daysLeft_one": "Falta {{count}} dia",
+      "daysLeft_other": "Faltam {{count}} dias"
     },
     "quickAdd": {
       "title": "Quick Add",
@@ -741,8 +771,8 @@
       "pastDate": "Escolha uma data e hora futuras."
     },
     "adding": "Adding...",
-    "swipeHint": "Swipe left on a task for more options",
-    "relatedContent": "Related Content",
+    "swipeHint": "Deslize a tarefa para a esquerda para ver mais opções",
+    "relatedContent": "Conteúdo relacionado",
     "created": "Created {{relative}}",
     "empty": {
       "activityTitle": "No Activity Yet",
@@ -782,18 +812,18 @@
       "permissionUpdated": "Permissão atualizada com sucesso",
       "updatePermissionFailed": "Falha ao atualizar permissão. Tente novamente."
     },
-    "title": "Project Members",
-    "currentMembers": "Current Members",
-    "addMember": "Add Member",
-    "canView": "Can View",
-    "canEdit": "Can Edit",
-    "permissionLabel": "Permission:",
-    "adding": "Adding...",
-    "dismiss": "Dismiss",
+    "title": "Membros do projeto",
+    "currentMembers": "Membros atuais",
+    "addMember": "Adicionar membro",
+    "canView": "Pode ver",
+    "canEdit": "Pode editar",
+    "permissionLabel": "Permissão:",
+    "adding": "A adicionar...",
+    "dismiss": "Fechar",
     "removeMember": {
-      "title": "Remove Member",
-      "message": "Are you sure you want to remove {{email}} from this project?",
-      "action": "Remove"
+      "title": "Remover membro",
+      "message": "Pretende remover {{email}} deste projeto?",
+      "action": "Remover"
     }
   },
   "categories": {
@@ -873,9 +903,18 @@
       "body_other": "Você tem {{count}} itens salvos não lidos esperando por você."
     },
     "entityReminder": {
-      "bookmark": { "title": "Lembrete de favorito", "body": "Hora de ler: {{title}}" },
-      "note": { "title": "Lembrete de nota", "body": "Reveja sua nota: {{title}}" },
-      "todo": { "title": "Lembrete de tarefa", "body": "Não esqueça: {{title}}" }
+      "bookmark": {
+        "title": "Lembrete de favorito",
+        "body": "Hora de ler: {{title}}"
+      },
+      "note": {
+        "title": "Lembrete de nota",
+        "body": "Reveja sua nota: {{title}}"
+      },
+      "todo": {
+        "title": "Lembrete de tarefa",
+        "body": "Não esqueça: {{title}}"
+      }
     }
   },
   "reminders": {
@@ -883,7 +922,12 @@
     "enabled": "Lembretes ativos",
     "disabled": "Lembretes desativados",
     "presetsLabel": "Lembrar após",
-    "presets": { "1d": "1 dia", "3d": "3 dias", "7d": "1 semana", "30d": "1 mês" },
+    "presets": {
+      "1d": "1 dia",
+      "3d": "3 dias",
+      "7d": "1 semana",
+      "30d": "1 mês"
+    },
     "custom": "Data personalizada",
     "addCustom": "Adicionar lembrete"
   },
@@ -915,15 +959,15 @@
     "following": "Following"
   },
   "projectCard": {
-    "overdue": "Overdue",
-    "dueToday": "Due Today",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
-    "weeksLeft_one": "{{count}} week left",
-    "weeksLeft_other": "{{count}} weeks left",
-    "monthsLeft_one": "{{count}} month left",
-    "monthsLeft_other": "{{count}} months left",
-    "tasksDone": "{{completed}}/{{total}} tasks done"
+    "overdue": "Atrasado",
+    "dueToday": "Termina hoje",
+    "daysLeft_one": "Falta {{count}} dia",
+    "daysLeft_other": "Faltam {{count}} dias",
+    "weeksLeft_one": "Falta {{count}} semana",
+    "weeksLeft_other": "Faltam {{count}} semanas",
+    "monthsLeft_one": "Falta {{count}} mês",
+    "monthsLeft_other": "Faltam {{count}} meses",
+    "tasksDone": "{{completed}}/{{total}} tarefas concluídas"
   },
   "entityTypes": {
     "bookmark": "Bookmark",

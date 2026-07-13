@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Calendar, Flag } from '@/components/icons/lucide';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTodoStore } from '@/store/useTodoStore';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 import { TodoItem } from '@/types';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
@@ -55,6 +56,7 @@ export default function AddTodoScreen() {
   );
   const params = useLocalSearchParams<{ id?: string }>();
   const { allTodos, createTodo, updateTodo } = useTodoStore();
+  const { ensureCreate, handleAccessError } = useSubscriptionGate();
 
   const isEditing = !!params.id;
   const existingTodo = isEditing ? allTodos.find((t: TodoItem) => t.id === params.id) : undefined;
@@ -98,6 +100,7 @@ export default function AddTodoScreen() {
       showAppAlert(t('common.required'), t('addTodo.alerts.enterTitle'));
       return;
     }
+    if (!isEditing && !ensureCreate('todos', allTodos.length)) return;
 
     savingRef.current = true;
     setSaving(true);
@@ -125,13 +128,14 @@ export default function AddTodoScreen() {
       }
       router.back();
     } catch (err) {
+      if (handleAccessError(err)) return;
       const msg = err instanceof Error ? err.message : t('addTodo.saveFailed');
       showAppAlert(t('common.error'), msg, undefined, { variant: 'error' });
     } finally {
       savingRef.current = false;
       setSaving(false);
     }
-  }, [title, description, priority, completed, hasDueDate, dueDate, category, isEditing, existingTodo, createTodo, updateTodo, t]);
+  }, [title, description, priority, completed, hasDueDate, dueDate, category, isEditing, existingTodo, createTodo, updateTodo, allTodos.length, ensureCreate, handleAccessError, t]);
 
   return (
     <KeyboardAvoidingView
@@ -142,7 +146,7 @@ export default function AddTodoScreen() {
         options={{
           title: isEditing ? t('addTodo.editTodo') : t('addTodo.newTodo'),
           headerLeft: () => (
-            <Pressable onPress={() => router.back()} hitSlop={8}>
+            <Pressable onPress={() => router.back()} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('common.close')}>
               <X size={24} color="#6B7280" />
             </Pressable>
           ),
@@ -155,6 +159,8 @@ export default function AddTodoScreen() {
               ]}
               onPress={handleSave}
               disabled={saving || !title.trim()}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: saving || !title.trim() }}
             >
               <Text style={[styles.headerSaveButtonText, !title.trim() && styles.headerSaveButtonTextDisabled]}>
                 {saving ? t('common.saving') : t('common.save')}
@@ -179,6 +185,7 @@ export default function AddTodoScreen() {
           placeholderTextColor="#9CA3AF"
           autoFocus={!isEditing}
           maxLength={200}
+          accessibilityLabel={t('addTodo.title')}
         />
 
         {/* Description */}
@@ -193,6 +200,7 @@ export default function AddTodoScreen() {
           numberOfLines={4}
           textAlignVertical="top"
           maxLength={1000}
+          accessibilityLabel={t('addTodo.descriptionOptional')}
         />
 
         {/* Category */}
@@ -214,6 +222,8 @@ export default function AddTodoScreen() {
                 pressed && styles.buttonPressed,
               ]}
               onPress={() => setPriority(opt.id)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: priority === opt.id }}
             >
               <Flag size={14} color={priority === opt.id ? opt.color : '#9CA3AF'} />
               <Text style={[styles.priorityText, priority === opt.id && { color: opt.color, fontWeight: '600' }]}>

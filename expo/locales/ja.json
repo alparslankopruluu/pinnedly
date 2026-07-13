@@ -45,7 +45,29 @@
     "noContent": "コンテンツなし",
     "unknownUser": "不明なユーザー",
     "selectDate": "日付を選択",
-    "selectDateTime": "日付と時刻を選択"
+    "selectDateTime": "日付と時刻を選択",
+    "close": "閉じる"
+  },
+  "accessibility": {
+    "progress": "進捗",
+    "changeTaskStatus": "タスクを次の状態に変更します",
+    "reminderFor": "{{title}}のリマインダー",
+    "configureReminder": "リマインダー設定を開きます",
+    "quickAdd": "新しい項目を作成",
+    "quickAddHint": "ブックマーク、プロジェクト、ノートの選択肢を開きます",
+    "openBookmark": "ブックマークの詳細を開きます",
+    "openProject": "プロジェクトの詳細を開きます",
+    "editProject": "{{title}}を編集",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを隠す",
+    "formatBold": "太字",
+    "formatItalic": "斜体",
+    "formatStrikethrough": "取り消し線",
+    "formatList": "リスト",
+    "insertLink": "リンクを挿入",
+    "openTodo": "タスクの詳細を開く",
+    "toggleTodo": "完了状態を変更",
+    "openNote": "ノートの詳細を開く"
   },
   "tabs": {
     "home": "ホーム",
@@ -434,6 +456,7 @@
     },
     "thinking": "考え中"
   },
+  "subscription": { "title": "Draft Premium", "upgrade": "Premiumを見る", "errors": { "premiumRequired": "この機能はPremiumで利用できます。", "limitReached": "無料枠{{limit}}件のうち{{current}}件を使用中です。さらに作成するにはPremiumへアップグレードしてください。", "aiQuotaExhausted": "今月分のAI利用枠を使い切りました。", "unavailable": "サブスクリプションを確認できませんでした。もう一度お試しください。" } },
   "premium": {
     "title": "Premiumにアップグレード",
     "subtitle": "強力な機能を解放",
@@ -475,7 +498,14 @@
       "customThemes": "カスタムテーマ",
       "exportFormats": "複数形式へのエクスポート",
       "teamManagement": "チーム管理ツール",
-      "apiAccess": "APIアクセス"
+      "apiAccess": "APIアクセス",
+      "unlimitedContent": "ブックマーク、ノート、タスク、プロジェクト、リストが無制限",
+      "aiAssistant": "月100メッセージのAIアシスタント",
+      "kanban": "カンバンボードとプロジェクトタスク",
+      "fullExport": "すべてのデータをJSONで書き出し",
+      "ai": { "title": "ワークスペースAI", "description": "保存した内容を横断して質問できます" },
+      "reminders": { "title": "カスタムリマインダー", "description": "複数の間隔や指定日を設定できます" },
+      "organization": { "title": "整理を無制限に", "description": "アイデアもプロジェクトも制限なく保存できます" }
     }
   },
   "share": {
@@ -688,19 +718,19 @@
       "galleryPermissionDenied": "フォトライブラリへのアクセス許可が必要です",
       "uploadImageFailed": "画像のアップロードに失敗しました"
     },
-    "notFound": "Project not found",
-    "progress": "Progress",
-    "members": "Members",
-    "nudgeMe": "Nudge Me",
+    "notFound": "プロジェクトが見つかりません",
+    "progress": "進捗",
+    "members": "メンバー",
+    "nudgeMe": "リマインド",
     "tabs": {
-      "tasks": "Tasks",
-      "timeline": "Timeline",
-      "gallery": "Gallery"
+      "tasks": "タスク",
+      "timeline": "タイムライン",
+      "gallery": "ギャラリー"
     },
     "deadline": {
-      "overdue": "Overdue",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left"
+      "overdue": "期限超過",
+      "daysLeft_one": "残り{{count}}日",
+      "daysLeft_other": "残り{{count}}日"
     },
     "quickAdd": {
       "title": "Quick Add",
@@ -741,8 +771,8 @@
       "pastDate": "未来の日時を選択してください。"
     },
     "adding": "Adding...",
-    "swipeHint": "Swipe left on a task for more options",
-    "relatedContent": "Related Content",
+    "swipeHint": "タスクを左にスワイプするとその他の操作が表示されます",
+    "relatedContent": "関連コンテンツ",
     "created": "Created {{relative}}",
     "empty": {
       "activityTitle": "No Activity Yet",
@@ -782,18 +812,18 @@
       "permissionUpdated": "権限を更新しました",
       "updatePermissionFailed": "権限の更新に失敗しました。もう一度お試しください。"
     },
-    "title": "Project Members",
-    "currentMembers": "Current Members",
-    "addMember": "Add Member",
-    "canView": "Can View",
-    "canEdit": "Can Edit",
-    "permissionLabel": "Permission:",
-    "adding": "Adding...",
-    "dismiss": "Dismiss",
+    "title": "プロジェクトメンバー",
+    "currentMembers": "現在のメンバー",
+    "addMember": "メンバーを追加",
+    "canView": "閲覧のみ",
+    "canEdit": "編集可能",
+    "permissionLabel": "権限：",
+    "adding": "追加中...",
+    "dismiss": "閉じる",
     "removeMember": {
-      "title": "Remove Member",
-      "message": "Are you sure you want to remove {{email}} from this project?",
-      "action": "Remove"
+      "title": "メンバーを削除",
+      "message": "{{email}}をこのプロジェクトから削除しますか？",
+      "action": "削除"
     }
   },
   "categories": {
@@ -873,9 +903,18 @@
       "body_other": "未読の保存が{{count}}件あります。"
     },
     "entityReminder": {
-      "bookmark": { "title": "ブックマークのリマインダー", "body": "読む時間です: {{title}}" },
-      "note": { "title": "ノートのリマインダー", "body": "ノートを確認: {{title}}" },
-      "todo": { "title": "タスクのリマインダー", "body": "忘れずに: {{title}}" }
+      "bookmark": {
+        "title": "ブックマークのリマインダー",
+        "body": "読む時間です: {{title}}"
+      },
+      "note": {
+        "title": "ノートのリマインダー",
+        "body": "ノートを確認: {{title}}"
+      },
+      "todo": {
+        "title": "タスクのリマインダー",
+        "body": "忘れずに: {{title}}"
+      }
     }
   },
   "reminders": {
@@ -883,7 +922,12 @@
     "enabled": "リマインダーON",
     "disabled": "リマインダーOFF",
     "presetsLabel": "この期間後に通知",
-    "presets": { "1d": "1日", "3d": "3日", "7d": "1週間", "30d": "1か月" },
+    "presets": {
+      "1d": "1日",
+      "3d": "3日",
+      "7d": "1週間",
+      "30d": "1か月"
+    },
     "custom": "カスタム日時",
     "addCustom": "リマインダーを追加"
   },
@@ -915,15 +959,15 @@
     "following": "Following"
   },
   "projectCard": {
-    "overdue": "Overdue",
-    "dueToday": "Due Today",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
-    "weeksLeft_one": "{{count}} week left",
-    "weeksLeft_other": "{{count}} weeks left",
-    "monthsLeft_one": "{{count}} month left",
-    "monthsLeft_other": "{{count}} months left",
-    "tasksDone": "{{completed}}/{{total}} tasks done"
+    "overdue": "期限超過",
+    "dueToday": "本日締切",
+    "daysLeft_one": "残り{{count}}日",
+    "daysLeft_other": "残り{{count}}日",
+    "weeksLeft_one": "残り{{count}}週間",
+    "weeksLeft_other": "残り{{count}}週間",
+    "monthsLeft_one": "残り{{count}}か月",
+    "monthsLeft_other": "残り{{count}}か月",
+    "tasksDone": "{{total}}件中{{completed}}件完了"
   },
   "entityTypes": {
     "bookmark": "Bookmark",

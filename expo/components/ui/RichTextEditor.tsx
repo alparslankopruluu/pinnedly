@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Bold, Italic, List, Link as LinkIcon, Strikethrough } from '@/components/icons/lucide';
 import { NOTE_EDITOR_TEXT_STYLE, NOTE_MARKDOWN_STYLE } from '@/utils/markdownEditor';
+import { useTranslation } from 'react-i18next';
 
 interface RichTextEditorProps {
   value: string;
@@ -66,6 +67,7 @@ export function RichTextEditor({
   autoFocus = false,
   editable = true,
 }: RichTextEditorProps) {
+  const { t } = useTranslation();
   const [text, setText] = useState(value);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [activeStyles, setActiveStyles] = useState<Set<string>>(new Set());
@@ -261,6 +263,9 @@ export function RichTextEditor({
               pressed && styles.toolPressed,
             ]}
             onPress={() => applyStyle('bold')}
+            accessibilityRole="togglebutton"
+            accessibilityLabel={t('accessibility.formatBold')}
+            accessibilityState={{ checked: activeStyles.has('bold') }}
           >
             <Bold size={18} color={activeStyles.has('bold') ? '#EF4444' : '#6B7280'} />
           </Pressable>
@@ -271,6 +276,9 @@ export function RichTextEditor({
               pressed && styles.toolPressed,
             ]}
             onPress={() => applyStyle('italic')}
+            accessibilityRole="togglebutton"
+            accessibilityLabel={t('accessibility.formatItalic')}
+            accessibilityState={{ checked: activeStyles.has('italic') }}
           >
             <Italic size={18} color={activeStyles.has('italic') ? '#EF4444' : '#6B7280'} />
           </Pressable>
@@ -281,18 +289,25 @@ export function RichTextEditor({
               pressed && styles.toolPressed,
             ]}
             onPress={() => applyStyle('strikethrough')}
+            accessibilityRole="togglebutton"
+            accessibilityLabel={t('accessibility.formatStrikethrough')}
+            accessibilityState={{ checked: activeStyles.has('strikethrough') }}
           >
             <Strikethrough size={18} color={activeStyles.has('strikethrough') ? '#EF4444' : '#6B7280'} />
           </Pressable>
           <Pressable
             style={({ pressed }) => [styles.toolButton, pressed && styles.toolPressed]}
             onPress={() => applyStyle('list')}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.formatList')}
           >
             <List size={18} color="#6B7280" />
           </Pressable>
           <Pressable
             style={({ pressed }) => [styles.toolButton, pressed && styles.toolPressed]}
             onPress={() => applyStyle('link')}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.insertLink')}
           >
             <LinkIcon size={18} color="#6B7280" />
           </Pressable>

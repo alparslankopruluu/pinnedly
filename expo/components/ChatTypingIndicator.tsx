@@ -9,12 +9,18 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { Sparkles } from '@/components/icons/lucide';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
-function TypingDot({ delay }: { delay: number }) {
+function TypingDot({ delay, reduceMotion }: { delay: number; reduceMotion: boolean }) {
   const opacity = useSharedValue(0.35);
   const translateY = useSharedValue(0);
 
   useEffect(() => {
+    if (reduceMotion) {
+      opacity.value = 1;
+      translateY.value = 0;
+      return;
+    }
     opacity.value = withDelay(
       delay,
       withRepeat(
@@ -35,7 +41,7 @@ function TypingDot({ delay }: { delay: number }) {
         -1
       )
     );
-  }, [delay, opacity, translateY]);
+  }, [delay, opacity, translateY, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -50,16 +56,23 @@ interface ChatTypingIndicatorProps {
 }
 
 export function ChatTypingIndicator({ label }: ChatTypingIndicatorProps) {
+  const reduceMotion = useReducedMotion();
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={label}
+      accessibilityLiveRegion="polite"
+    >
       <View style={styles.bubble}>
         <Sparkles size={14} color="#EF4444" />
         <View style={styles.content}>
           {label ? <Text style={styles.label}>{label}</Text> : null}
           <View style={styles.dots}>
-            <TypingDot delay={0} />
-            <TypingDot delay={140} />
-            <TypingDot delay={280} />
+            <TypingDot delay={0} reduceMotion={reduceMotion} />
+            <TypingDot delay={140} reduceMotion={reduceMotion} />
+            <TypingDot delay={280} reduceMotion={reduceMotion} />
           </View>
         </View>
       </View>

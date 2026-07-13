@@ -48,6 +48,19 @@ function TodoRow({
         pressed && styles.todoRowPressed,
       ]}
       onPress={() => onPress(todo.id)}
+      accessibilityRole="button"
+      accessibilityLabel={`${todo.title}. ${t(`todos.filters.${todo.priority}`)}${todo.completed ? `. ${t('common.done')}` : ''}`}
+      accessibilityHint={t('accessibility.openTodo')}
+      accessibilityActions={[
+        { name: 'activate', label: t('accessibility.openTodo') },
+        { name: 'toggle', label: t('accessibility.toggleTodo') },
+        { name: 'delete', label: t('common.delete') },
+      ]}
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === 'activate') onPress(todo.id);
+        if (event.nativeEvent.actionName === 'toggle') onToggle(todo.id);
+        if (event.nativeEvent.actionName === 'delete') onDelete(todo.id);
+      }}
     >
       {/* Checkbox */}
       <Pressable

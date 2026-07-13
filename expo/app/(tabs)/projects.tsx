@@ -26,6 +26,9 @@ import { isOverdue } from '@/utils/date';
 import { dedupeProjectsById } from '@/utils/projects';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
@@ -38,6 +41,9 @@ export default function ProjectsScreen() {
   const insets = useSafeAreaInsets();
   const { readableWidth, isTabletOrLarger } = useResponsiveLayout();
   const contentWidth = typeof readableWidth === 'number' ? readableWidth : undefined;
+  const { can, showPaywall } = useSubscriptionAccess();
+  const { handleAccessError } = useSubscriptionGate();
+  const reduceMotion = useReducedMotion();
 
   // Inline task creation state
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
@@ -77,6 +83,10 @@ export default function ProjectsScreen() {
   ];
 
   const openAddTaskModal = (projectId: string, status: 'todo' | 'in-progress' | 'done') => {
+    if (!can('projectTaskCreate').allowed) {
+      showPaywall();
+      return;
+    }
     setNewTaskProjectId(projectId);
     setNewTaskStatus(status);
     setNewTaskTitle('');
@@ -98,10 +108,11 @@ export default function ProjectsScreen() {
       setShowAddTaskModal(false);
       setNewTaskTitle('');
       setNewTaskProjectId(null);
-    } catch {
+    } catch (error) {
+      if (handleAccessError(error)) return;
       showAppAlert(t('common.error'), t('projects.addTask.createFailed'), undefined, { variant: 'error' });
     }
-  }, [newTaskTitle, newTaskProjectId, newTaskStatus, addTask, t]);
+  }, [newTaskTitle, newTaskProjectId, newTaskStatus, addTask, handleAccessError, t]);
 
   const handleKanbanStatusUpdate = useCallback(
     async (taskId: string, status: Task['status']) => {
@@ -128,6 +139,8 @@ export default function ProjectsScreen() {
             pressed && styles.togglePressed
           ]}
           onPress={() => setViewMode('list')}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: viewMode === 'list' }}
         >
           <List size={20} color={viewMode === 'list' ? '#EF4444' : '#6B7280'} />
           <Text style={[styles.toggleText, viewMode === 'list' && styles.activeToggleText]}>
@@ -140,7 +153,15 @@ export default function ProjectsScreen() {
             viewMode === 'kanban' && styles.activeToggle,
             pressed && styles.togglePressed
           ]}
-          onPress={() => setViewMode('kanban')}
+          onPress={() => {
+            if (!can('kanban').allowed) {
+              showPaywall();
+              return;
+            }
+            setViewMode('kanban');
+          }}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: viewMode === 'kanban' }}
         >
           <Grid3X3 size={20} color={viewMode === 'kanban' ? '#EF4444' : '#6B7280'} />
           <Text style={[styles.toggleText, viewMode === 'kanban' && styles.activeToggleText]}>
@@ -213,7 +234,7 @@ export default function ProjectsScreen() {
       <Modal
         visible={showAddTaskModal}
         transparent
-        animationType="fade"
+        animationType={reduceMotion ? 'none' : 'fade'}
         onRequestClose={() => setShowAddTaskModal(false)}
       >
         <KeyboardAvoidingView
@@ -223,11 +244,13 @@ export default function ProjectsScreen() {
           <Pressable
             style={styles.modalBackdrop}
             onPress={() => setShowAddTaskModal(false)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.close')}
           />
-          <View style={[styles.modalContent, isTabletOrLarger && styles.modalContentWide]}>
+          <View style={[styles.modalContent, isTabletOrLarger && styles.modalContentWide]} accessibilityViewIsModal>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('projects.addTask.title')}</Text>
-              <Pressable onPress={() => setShowAddTaskModal(false)}>
+              <Pressable onPress={() => setShowAddTaskModal(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
                 <X size={24} color="#6B7280" />
               </Pressable>
             </View>
@@ -243,6 +266,8 @@ export default function ProjectsScreen() {
                     newTaskStatus === status && styles.statusOptionActive
                   ]}
                   onPress={() => setNewTaskStatus(status)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: newTaskStatus === status }}
                 >
                   <Text style={[
                     styles.statusOptionText,
@@ -265,6 +290,9 @@ export default function ProjectsScreen() {
                     newTaskProjectId === project.id && styles.projectOptionActive
                   ]}
                   onPress={() => setNewTaskProjectId(project.id)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={project.title}
+                  accessibilityState={{ checked: newTaskProjectId === project.id }}
                 >
                   <Text style={[
                     styles.projectOptionText,
@@ -285,12 +313,14 @@ export default function ProjectsScreen() {
               placeholderTextColor="#9CA3AF"
               autoFocus
               onSubmitEditing={handleCreateTask}
+              accessibilityLabel={t('projects.addTask.taskTitle')}
             />
 
             <View style={styles.modalActions}>
               <Pressable
                 style={styles.modalCancelButton}
                 onPress={() => setShowAddTaskModal(false)}
+                accessibilityRole="button"
               >
                 <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
               </Pressable>

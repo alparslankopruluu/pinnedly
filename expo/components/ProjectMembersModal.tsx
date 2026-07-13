@@ -14,6 +14,8 @@ import { X, Users, Plus, Trash2, UserCheck, UserX } from '@/components/icons/luc
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/store/useProjectStore';
 import { ProjectCollaborator, User } from '@/types';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface ProjectMemberWithUser extends ProjectCollaborator {
   user?: User;
@@ -34,9 +36,11 @@ export function ProjectMembersModal({
   projectTitle 
 }: ProjectMembersModalProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const [newUserEmail, setNewUserEmail] = useState<string>('');
   const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const { ensure } = useSubscriptionGate();
 
   const {
     projectMembers,
@@ -67,6 +71,7 @@ export function ProjectMembersModal({
   }, [newUserEmail, searchUsers, clearSearchResults]);
 
   const handleAddMember = async () => {
+    if (!ensure('memberManagement')) return;
     if (!newUserEmail.trim()) {
       showAppAlert(t('common.error'), t('projectMembers.alerts.enterEmail'), undefined, { variant: 'error' });
       return;
@@ -109,6 +114,7 @@ export function ProjectMembersModal({
   };
 
   const handleUpdatePermission = async (memberId: string, permission: 'view' | 'edit') => {
+    if (!ensure('memberManagement')) return;
     if (!permission.trim()) return;
     if (permission.length > 10) return;
     const sanitizedPermission = permission.trim() as 'view' | 'edit';
@@ -191,7 +197,10 @@ export function ProjectMembersModal({
         <Text style={styles.sectionTitle}>{t('projectMembers.currentMembers')}</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setShowAddForm(!showAddForm)}
+          onPress={() => {
+            if (!ensure('memberManagement')) return;
+            setShowAddForm(!showAddForm);
+          }}
         >
           <Plus size={20} color="#007AFF" />
           <Text style={styles.addButtonText}>{t('projectMembers.addMember')}</Text>
@@ -287,11 +296,11 @@ export function ProjectMembersModal({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType={reduceMotion ? 'none' : 'slide'}
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']} accessibilityViewIsModal>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Users size={24} color="#007AFF" />
@@ -300,7 +309,7 @@ export function ProjectMembersModal({
               <Text style={styles.subtitle}>{projectTitle}</Text>
             </View>
           </View>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel={t('common.close')}>
             <X size={24} color="#666" />
           </TouchableOpacity>
         </View>

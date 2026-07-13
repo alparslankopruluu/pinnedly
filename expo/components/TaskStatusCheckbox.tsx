@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Check, Minus } from '@/components/icons/lucide';
 import { Task } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface TaskStatusCheckboxProps {
   status: Task['status'];
@@ -16,7 +17,14 @@ export function TaskStatusCheckbox({
   size = 18,
   style,
 }: TaskStatusCheckboxProps) {
+  const { t } = useTranslation();
   const iconSize = Math.max(10, size - 6);
+  const statusLabel =
+    status === 'done'
+      ? t('projectDetail.kanban.done')
+      : status === 'in-progress'
+        ? t('projectDetail.kanban.inProgress')
+        : t('projectDetail.kanban.todo');
 
   return (
     <TouchableOpacity
@@ -29,6 +37,10 @@ export function TaskStatusCheckbox({
       ]}
       onPress={onPress}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      accessibilityRole="checkbox"
+      accessibilityLabel={statusLabel}
+      accessibilityHint={t('accessibility.changeTaskStatus')}
+      accessibilityState={{ checked: status === 'done' ? true : status === 'in-progress' ? 'mixed' : false }}
     >
       {status === 'in-progress' && <Minus size={iconSize} color="#FFFFFF" strokeWidth={3} />}
       {status === 'done' && <Check size={iconSize} color="#FFFFFF" strokeWidth={3} />}

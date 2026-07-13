@@ -12,7 +12,11 @@ export type SubscriptionAction =
   | 'subscribe_started'
   | 'subscribe_completed'
   | 'subscribe_failed'
-  | 'subscribe_cancelled';
+  | 'subscribe_cancelled'
+  | 'feature_blocked'
+  | 'restore_started'
+  | 'restore_completed'
+  | 'restore_failed';
 
 const SCREEN_MAP: Record<string, string> = {
   '(auth)/welcome': 'Welcome',

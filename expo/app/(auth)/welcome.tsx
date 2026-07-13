@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, FileText, Bookmark, FolderOpen, Users } from '@/components/icons/lucide';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 export default function Welcome() {
   const { t } = useTranslation();
@@ -13,6 +14,9 @@ export default function Welcome() {
   const [currentScreen, setCurrentScreen] = useState<number>(0);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(true);
   const opacity = useRef(new Animated.Value(1)).current;
+  const reduceMotion = useReducedMotion();
+  const { fontScale } = useWindowDimensions();
+  const usesLargeText = fontScale >= 1.5;
 
   const onboardingScreens = useMemo(
     () => [
@@ -60,6 +64,10 @@ export default function Welcome() {
 
   const handleNext = () => {
     if (currentScreen < onboardingScreens.length - 1) {
+      if (reduceMotion) {
+        setCurrentScreen((current) => current + 1);
+        return;
+      }
       Animated.timing(opacity, {
         toValue: 0,
         duration: 200,
@@ -83,7 +91,12 @@ export default function Welcome() {
 
   const renderDots = () => {
     return (
-      <View style={styles.dotsContainer}>
+      <View
+        style={styles.dotsContainer}
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityValue={{ min: 1, max: onboardingScreens.length, now: currentScreen + 1 }}
+      >
         {onboardingScreens.map((screen, index) => (
           <View
             key={screen.id}
@@ -104,38 +117,55 @@ export default function Welcome() {
     const screen = onboardingScreens[currentScreen];
     
     return (
-      <Animated.View style={[styles.onboardingContainer, { opacity }]}>
-        <View style={styles.onboardingContent}>
-          <View style={[styles.iconContainer, { backgroundColor: `${screen.color}15` }]}>
+      <Animated.ScrollView
+        style={[styles.onboardingContainer, { opacity }]}
+        contentContainerStyle={styles.onboardingScrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.onboardingContent, usesLargeText && styles.onboardingContentLarge]}>
+          <View
+            style={[
+              styles.iconContainer,
+              usesLargeText && styles.iconContainerLarge,
+              { backgroundColor: `${screen.color}15` },
+            ]}
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+          >
             {screen.icon}
           </View>
           
-          <Text style={styles.onboardingTitle}>{screen.title}</Text>
-          <Text style={styles.onboardingSubtitle}>{screen.subtitle}</Text>
+          <Text style={styles.onboardingTitle} maxFontSizeMultiplier={1.5}>{screen.title}</Text>
+          <Text style={styles.onboardingSubtitle} maxFontSizeMultiplier={1.75}>{screen.subtitle}</Text>
           <Text style={styles.onboardingDescription}>{screen.description}</Text>
         </View>
         
         {renderDots()}
         
-        <View style={styles.onboardingButtons}>
-          <Pressable onPress={handleSkip} style={styles.skipButton}>
+        <View style={[styles.onboardingButtons, usesLargeText && styles.onboardingButtonsLarge]}>
+          <Pressable onPress={handleSkip} style={styles.skipButton} accessibilityRole="button">
             <Text style={styles.skipText}>{t('common.skip')}</Text>
           </Pressable>
           
-          <Pressable onPress={handleNext} style={[styles.nextButton, { backgroundColor: screen.color }]}>
-            <Text style={styles.nextText}>
+          <Pressable
+            onPress={handleNext}
+            style={[styles.nextButton, { backgroundColor: screen.color }]}
+            accessibilityRole="button"
+            accessibilityLabel={currentScreen === onboardingScreens.length - 1 ? t('common.getStarted') : t('common.next')}
+          >
+            <Text style={styles.nextText} maxFontSizeMultiplier={1.5}>
               {currentScreen === onboardingScreens.length - 1 ? t('common.getStarted') : t('common.next')}
             </Text>
             <ChevronRight size={20} color="white" />
           </Pressable>
         </View>
-      </Animated.View>
+      </Animated.ScrollView>
     );
   };
 
   const renderAuthScreen = () => {
     return (
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Bookmark size={40} color="#4F46E5" />
@@ -164,7 +194,7 @@ export default function Welcome() {
         <Text style={styles.footerText}>
           {t('auth.termsFooter')}
         </Text>
-      </View>
+      </ScrollView>
     );
   };
 
@@ -201,13 +231,21 @@ const styles = StyleSheet.create({
   },
   onboardingContainer: {
     flex: 1,
+  },
+  onboardingScrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 24,
+    paddingVertical: 20,
   },
   onboardingContent: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 100,
+    paddingVertical: 24,
+  },
+  onboardingContentLarge: {
+    justifyContent: 'flex-start',
+    paddingTop: 8,
   },
   iconContainer: {
     width: 160,
@@ -216,6 +254,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 40,
+  },
+  iconContainerLarge: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    marginBottom: 20,
   },
   onboardingTitle: {
     fontSize: 28,
@@ -256,6 +300,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 20,
   },
+  onboardingButtonsLarge: {
+    flexDirection: 'column-reverse',
+    alignItems: 'stretch',
+    gap: 8,
+  },
   skipButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -272,6 +321,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 12,
     gap: 8,
+    justifyContent: 'center',
+    minHeight: 44,
   },
   nextText: {
     fontSize: 16,
@@ -279,9 +330,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
+    paddingVertical: 24,
   },
   header: {
     alignItems: 'center',

@@ -5,6 +5,7 @@ import { ProgressRing } from './ui/ProgressRing';
 import { formatRelativeTime, isOverdue, isDueToday } from '@/utils/date';
 import { Edit3 } from '@/components/icons/lucide';
 import { useTranslation } from 'react-i18next';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface ProjectCardProps {
   project: Project;
@@ -14,12 +15,17 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const completedTasks = project.tasks.filter((task) => task.status === 'done').length;
   const totalTasks = project.tasks.length;
   const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
   const scaleAnim = new Animated.Value(1);
 
   const handleEditPress = () => {
+    if (reduceMotion) {
+      onEdit?.();
+      return;
+    }
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.95,
@@ -70,7 +76,13 @@ export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${project.title}, ${t('projectCard.tasksDone', { completed: completedTasks, total: totalTasks })}`}
+      accessibilityHint={t('accessibility.openProject')}
+    >
       {project.coverImage && (
         <Image
           source={{ uri: project.coverImage }}
@@ -98,6 +110,8 @@ export function ProjectCard({ project, onPress, onEdit }: ProjectCardProps) {
                   style={styles.editButton}
                   onPress={handleEditPress}
                   hitSlop={styles.editButtonHitSlop}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('accessibility.editProject', { title: project.title })}
                 >
                   <Edit3 size={16} color="#6366F1" />
                 </TouchableOpacity>
@@ -155,9 +169,9 @@ const styles = StyleSheet.create({
     // Container for animated transform
   },
   editButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#EEF2FF',
     justifyContent: 'center',
     alignItems: 'center',

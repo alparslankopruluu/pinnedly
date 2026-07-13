@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import { Platform } from 'react-native';
 import { trackAccountEvent } from '@/lib/analytics';
 import { recordError, logCrashlytics } from '@/lib/crashlytics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { callAuthenticatedFunction } from '@/services/functionsApi';
+import { logOutRevenueCat } from '@/lib/revenuecat';
+import { signOutFromAuth } from '@/lib/auth';
+import { exportUserData } from '@/services/dataExport';
 
 export interface SettingsState {
   // Appearance
@@ -17,9 +22,6 @@ export interface SettingsState {
     apple: boolean;
     google: boolean;
   };
-  
-  // Subscription
-  currentPlan: 'free' | 'premium' | 'premium+';
   
   // Privacy
   dataExportInProgress: boolean;
@@ -48,7 +50,6 @@ const defaultSettings = {
     apple: true, // Mock as connected
     google: false, // Mock as not connected
   },
-  currentPlan: 'free' as const,
   dataExportInProgress: false,
 };
 
@@ -97,41 +98,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ dataExportInProgress: true });
     
     try {
-      // Simulate export process
-      await new Promise(resolve => {
-        if (resolve) {
-          setTimeout(resolve, 2000);
-        }
-      });
-      
-      // In a real app, you would:
-      // 1. Fetch all user data from Supabase
-      // 2. Format it as JSON
-      // 3. Create a downloadable file or send via email
-      
-      const mockData = {
-        bookmarks: [],
-        projects: [],
-        notes: [],
-        exportedAt: new Date().toISOString(),
-      };
-      
-      console.log('Data exported:', mockData);
-      
-      // For web, you could create a download link
-      if (Platform.OS === 'web') {
-        const dataStr = JSON.stringify(mockData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `pinnedly-export-${Date.now()}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
+      await exportUserData();
       
     } catch (error) {
       console.error('Export failed:', error);
@@ -170,11 +137,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       logCrashlytics('Account deletion initiated');
       await trackAccountEvent('account_deleted');
 
-      await new Promise(resolve => {
-        if (resolve) {
-          setTimeout(resolve, 3000);
-        }
-      });
+      await callAuthenticatedFunction<{ ok: boolean }>('deleteAccount');
+      await logOutRevenueCat();
+      await AsyncStorage.removeItem('draft:settings');
+      await signOutFromAuth();
     } catch (error) {
       console.error('Account deletion failed:', error);
       recordError(error instanceof Error ? error : new Error('Account deletion failed'), 'account:delete');
@@ -184,10 +150,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   loadSettings: async () => {
     try {
-      // In a real app, you would load from AsyncStorage or Supabase
-      console.log('Loading settings from storage');
-      // Mock loading settings
-      set({ ...defaultSettings });
+      const stored = await AsyncStorage.getItem('draft:settings');
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as Partial<typeof defaultSettings>;
+      set({
+        ...defaultSettings,
+        ...parsed,
+        linkedAccounts: {
+          ...defaultSettings.linkedAccounts,
+          ...parsed.linkedAccounts,
+        },
+        dataExportInProgress: false,
+      });
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -200,8 +174,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         fontSize, 
         pushNotifications, 
         emailNotifications, 
-        linkedAccounts, 
-        currentPlan 
+        linkedAccounts
       } = get();
       
       const settings = {
@@ -210,11 +183,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         pushNotifications,
         emailNotifications,
         linkedAccounts,
-        currentPlan,
       };
-      
-      // In a real app, you would save to AsyncStorage or Supabase
-      console.log('Saving settings:', settings);
+      await AsyncStorage.setItem('draft:settings', JSON.stringify(settings));
     } catch (error) {
       console.error('Failed to save settings:', error);
     }

@@ -12,6 +12,7 @@ import {
   Info,
   TriangleAlert,
 } from '@/components/icons/lucide';
+import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 export type DialogVariant = 'default' | 'success' | 'error' | 'info' | 'warning';
 export type DialogButtonStyle = 'default' | 'cancel' | 'destructive';
@@ -63,6 +64,7 @@ export function AppDialog({
 }: AppDialogProps) {
   const { icon: Icon, color, background } = VARIANT_CONFIG[variant];
   const useStackedButtons = buttons.length > 2;
+  const reduceMotion = useReducedMotion();
 
   const handlePress = (button: DialogButton) => {
     onDismiss();
@@ -70,9 +72,9 @@ export function AppDialog({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+    <Modal visible={visible} transparent animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={onDismiss}>
       <Pressable style={styles.overlay} onPress={onDismiss}>
-        <Pressable style={styles.card} onPress={(event) => event.stopPropagation()}>
+        <Pressable style={styles.card} onPress={(event) => event.stopPropagation()} accessibilityViewIsModal accessibilityRole="alert">
           <View style={[styles.iconWrap, { backgroundColor: background }]}>
             <Icon size={28} color={color} strokeWidth={2.2} />
           </View>
@@ -94,6 +96,7 @@ export function AppDialog({
                     pressed && styles.buttonPressed,
                   ]}
                   onPress={() => handlePress(button)}
+                  accessibilityRole="button"
                 >
                   <Text style={[styles.buttonText, buttonStyles.text]} numberOfLines={1}>
                     {button.text}

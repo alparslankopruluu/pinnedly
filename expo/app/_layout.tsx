@@ -18,6 +18,10 @@ import { initializeCrashlytics, recordError } from "@/lib/crashlytics";
 import { ShareIntentHandler, ShareIntentProviderBoundary } from "@/components/ShareIntentHandler";
 import { ClipboardUrlBanner } from "@/components/ClipboardUrlBanner";
 import { loadSavedLanguage } from "@/lib/i18n";
+import { SubscriptionProvider } from "@/providers/SubscriptionProvider";
+import { configureAccessibilityDefaults } from "@/lib/accessibility";
+
+configureAccessibilityDefaults();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -136,7 +140,8 @@ export default function RootLayout() {
           <GestureHandlerRootView style={styles.container}>
             <AuthProvider>
               <PremiumProvider>
-                <OnboardingProvider>
+                <SubscriptionProvider>
+                  <OnboardingProvider>
                   <SharingProvider>
                     <OfflineProvider>
                       <DialogProvider>
@@ -146,7 +151,8 @@ export default function RootLayout() {
                       </DialogProvider>
                     </OfflineProvider>
                   </SharingProvider>
-                </OnboardingProvider>
+                  </OnboardingProvider>
+                </SubscriptionProvider>
               </PremiumProvider>
             </AuthProvider>
           </GestureHandlerRootView>
