@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "app": {
+    "bundle_id": "app.techtactoe.draft",
+    "udid": "DE168D35-A658-4555-BA73-6EC0E83B236E",
+    "output_dir": "/Users/fmss/Desktop/draft ss/localized-ui-test"
+  },
+  "steps": [
+    { "action": "wait", "duration_ms": 2500 },
+    { "action": "tap", "x": 200, "y": 290 },
+    { "action": "wait", "duration_ms": 300 },
+    { "action": "tap", "x": 200, "y": 478 },
+    { "action": "wait", "duration_ms": 500 },
+    { "action": "tap", "x": 48, "y": 801 },
+    { "action": "wait", "duration_ms": 400 },
+    { "action": "tap", "x": 105, "y": 835 },
+    { "action": "wait", "duration_ms": 1000 },
+    { "action": "screenshot", "name": "01-bookmarks" },
+    { "action": "tap", "x": 235, "y": 835 },
+    { "action": "wait", "duration_ms": 700 },
+    { "action": "tap", "x": 200, "y": 505 },
+    { "action": "wait", "duration_ms": 700 },
+    { "action": "screenshot", "name": "02-notes" },
+    { "action": "tap", "x": 22, "y": 58 },
+    { "action": "wait", "duration_ms": 500 },
+    { "action": "tap", "x": 170, "y": 835 },
+    { "action": "wait", "duration_ms": 800 },
+    { "action": "tap", "x": 315, "y": 82 },
+    { "action": "wait", "duration_ms": 800 },
+    { "action": "screenshot", "name": "05-kanban" },
+    { "action": "tap", "x": 95, "y": 245 },
+    { "action": "wait", "duration_ms": 900 },
+    { "action": "screenshot", "name": "04-projects" },
+    { "action": "tap", "x": 230, "y": 267 },
+    { "action": "wait", "duration_ms": 700 },
+    { "action": "tap", "x": 310, "y": 240 },
+    { "action": "wait", "duration_ms": 700 },
+    { "action": "screenshot", "name": "03-collaboration" }
+  ]
+}
