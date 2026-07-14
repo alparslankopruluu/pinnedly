@@ -51,7 +51,6 @@ import {
 } from '@/services/bookmarkDigest';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
 import { useAuth } from '@/store/useAuthStore';
-import { usePremium } from '@/providers/PremiumProvider';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/lib/legal';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { showAppAlert } from '@/providers/DialogProvider';
@@ -59,7 +58,6 @@ import { showAppAlert } from '@/providers/DialogProvider';
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { isPremium, presentPaywall, presentCustomerCenter } = usePremium();
   const {
     theme,
     fontSize,
@@ -75,7 +73,7 @@ export default function SettingsScreen() {
     deleteAccount,
     loadSettings
   } = useSettingsStore();
-  const { snapshot, can, showPaywall } = useSubscriptionAccess();
+  const { snapshot, can, showPaywall, presentCustomerCenter } = useSubscriptionAccess();
   const { bookmarks } = useBookmarkStore();
 
   const [showThemeSelector, setShowThemeSelector] = useState<boolean>(false);

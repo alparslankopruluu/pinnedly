@@ -37,6 +37,7 @@ interface SubscriptionContextValue {
   can: (feature: FeatureKey | 'create', context?: AccessContext) => AccessDecision;
   requireFeature: (feature: FeatureKey | 'create', context?: AccessContext) => AccessDecision;
   showPaywall: () => void;
+  presentCustomerCenter: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
@@ -150,6 +151,11 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       can,
       requireFeature: can,
       showPaywall: () => setPaywallVisible(true),
+      presentCustomerCenter: async () => {
+        if (Platform.OS !== 'ios') return;
+        const { default: RevenueCatUI } = await import('react-native-purchases-ui');
+        await RevenueCatUI.presentCustomerCenter();
+      },
     }),
     [can, refresh, snapshot]
   );
