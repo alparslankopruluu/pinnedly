@@ -17,12 +17,6 @@ export interface SettingsState {
   pushNotifications: boolean;
   emailNotifications: boolean;
   
-  // Account
-  linkedAccounts: {
-    apple: boolean;
-    google: boolean;
-  };
-  
   // Privacy
   dataExportInProgress: boolean;
   
@@ -31,7 +25,6 @@ export interface SettingsState {
   updateFontSize: (size: number) => void;
   updatePushNotifications: (enabled: boolean) => void;
   updateEmailNotifications: (enabled: boolean) => void;
-  updateLinkedAccount: (provider: 'apple' | 'google', connected: boolean) => void;
   exportData: () => Promise<void>;
   importData: (data: any) => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -46,10 +39,6 @@ const defaultSettings = {
   fontSize: 1.0,
   pushNotifications: true,
   emailNotifications: true,
-  linkedAccounts: {
-    apple: true, // Mock as connected
-    google: false, // Mock as not connected
-  },
   dataExportInProgress: false,
 };
 
@@ -82,16 +71,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     
     // In a real app, you would update server-side notification preferences
     console.log('Email notifications:', emailNotifications ? 'enabled' : 'disabled');
-  },
-
-  updateLinkedAccount: (provider, connected) => {
-    set((state) => ({
-      linkedAccounts: {
-        ...state.linkedAccounts,
-        [provider]: connected,
-      },
-    }));
-    get().saveSettings();
   },
 
   exportData: async () => {
@@ -156,10 +135,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       set({
         ...defaultSettings,
         ...parsed,
-        linkedAccounts: {
-          ...defaultSettings.linkedAccounts,
-          ...parsed.linkedAccounts,
-        },
         dataExportInProgress: false,
       });
     } catch (error) {
@@ -173,8 +148,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         theme, 
         fontSize, 
         pushNotifications, 
-        emailNotifications, 
-        linkedAccounts
+        emailNotifications
       } = get();
       
       const settings = {
@@ -182,7 +156,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         fontSize,
         pushNotifications,
         emailNotifications,
-        linkedAccounts,
       };
       await AsyncStorage.setItem('draft:settings', JSON.stringify(settings));
     } catch (error) {

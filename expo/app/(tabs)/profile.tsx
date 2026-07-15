@@ -9,16 +9,21 @@ import {
   Crown,
   Sparkles,
   Pencil,
+  Minus,
+  Plus,
 } from '@/components/icons/lucide';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/store/useAuthStore';
 import { PremiumModal } from '@/components/PremiumModal';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { preferences, bookmarks, projects, notes } = useAppStore();
+  const { preferences, bookmarks, projects, notes, updatePreferences } = useAppStore();
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const insets = useSafeAreaInsets();
   const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
   const reduceMotion = useReducedMotion();
@@ -54,6 +59,14 @@ export default function ProfileScreen() {
     t('profile.defaultName');
   const handleLabel = user?.handle ? `@${user.handle}` : user?.email || t('profile.tagline');
   const avatarInitial = displayName.charAt(0).toUpperCase();
+  const dailyGoal = preferences.dailyGoal || 3;
+  const weeklyGoal = preferences.weeklyGoal || 20;
+
+  const changeGoal = (kind: 'dailyGoal' | 'weeklyGoal', delta: number) => {
+    const current = kind === 'dailyGoal' ? dailyGoal : weeklyGoal;
+    const max = kind === 'dailyGoal' ? 50 : 200;
+    updatePreferences({ [kind]: Math.min(max, Math.max(1, current + delta)) });
+  };
 
   const stats = [
     { id: 'bookmarks', label: t('profile.stats.bookmarks'), value: bookmarks.length },
@@ -106,12 +119,54 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.goals')}</Text>
           <View style={styles.goalCard}>
-            <Text style={styles.goalTitle}>{t('profile.dailyGoal')}</Text>
-            <Text style={styles.goalValue}>{t('profile.bookmarksGoal', { count: preferences.dailyGoal || 3 })}</Text>
+            <View style={styles.goalTextContent}>
+              <Text style={styles.goalTitle}>{t('profile.dailyGoal')}</Text>
+              <Text style={styles.goalValue}>{t('profile.bookmarksGoal', { count: dailyGoal })}</Text>
+            </View>
+            <View style={styles.goalStepper}>
+              <Pressable
+                style={({ pressed }) => [styles.goalButton, pressed && styles.goalButtonPressed]}
+                onPress={() => changeGoal('dailyGoal', -1)}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.decreaseGoal', { goal: t('profile.dailyGoal') })}
+              >
+                <Minus size={18} color={colors.textSecondary} />
+              </Pressable>
+              <Text style={styles.goalCount}>{dailyGoal}</Text>
+              <Pressable
+                style={({ pressed }) => [styles.goalButton, pressed && styles.goalButtonPressed]}
+                onPress={() => changeGoal('dailyGoal', 1)}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.increaseGoal', { goal: t('profile.dailyGoal') })}
+              >
+                <Plus size={18} color={colors.textSecondary} />
+              </Pressable>
+            </View>
           </View>
           <View style={styles.goalCard}>
-            <Text style={styles.goalTitle}>{t('profile.weeklyGoal')}</Text>
-            <Text style={styles.goalValue}>{t('profile.bookmarksGoal', { count: preferences.weeklyGoal || 20 })}</Text>
+            <View style={styles.goalTextContent}>
+              <Text style={styles.goalTitle}>{t('profile.weeklyGoal')}</Text>
+              <Text style={styles.goalValue}>{t('profile.bookmarksGoal', { count: weeklyGoal })}</Text>
+            </View>
+            <View style={styles.goalStepper}>
+              <Pressable
+                style={({ pressed }) => [styles.goalButton, pressed && styles.goalButtonPressed]}
+                onPress={() => changeGoal('weeklyGoal', -1)}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.decreaseGoal', { goal: t('profile.weeklyGoal') })}
+              >
+                <Minus size={18} color={colors.textSecondary} />
+              </Pressable>
+              <Text style={styles.goalCount}>{weeklyGoal}</Text>
+              <Pressable
+                style={({ pressed }) => [styles.goalButton, pressed && styles.goalButtonPressed]}
+                onPress={() => changeGoal('weeklyGoal', 1)}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.increaseGoal', { goal: t('profile.weeklyGoal') })}
+              >
+                <Plus size={18} color={colors.textSecondary} />
+              </Pressable>
+            </View>
           </View>
         </View>
         
@@ -155,10 +210,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -170,11 +225,11 @@ const styles = StyleSheet.create({
   profileSection: {
     alignItems: 'center',
     paddingVertical: 24,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     marginHorizontal: 16,
     marginBottom: 24,
     borderRadius: 16,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -196,23 +251,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatarInitial: {
-    fontSize: 28,
+    fontSize: font(28),
     fontWeight: '700',
     color: '#B91C1C',
   },
   profileName: {
-    fontSize: 20,
+    fontSize: font(20),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 4,
   },
   profileEmail: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
   },
   profileBio: {
-    fontSize: 13,
-    color: '#9CA3AF',
+    fontSize: font(13),
+    color: colors.textMuted,
     textAlign: 'center',
     marginTop: 8,
     paddingHorizontal: 24,
@@ -234,7 +289,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   editButtonText: {
-    fontSize: 13,
+    fontSize: font(13),
     fontWeight: '600',
     color: '#EF4444',
   },
@@ -245,9 +300,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     paddingHorizontal: 20,
     marginBottom: 16,
   },
@@ -258,52 +313,83 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '48%',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     margin: '1%',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: font(24),
     fontWeight: '700',
     color: '#EF4444',
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   goalCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
   goalTitle: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '500',
-    color: '#111827',
+    color: colors.text,
   },
   goalValue: {
-    fontSize: 16,
+    fontSize: font(13),
     fontWeight: '600',
     color: '#EF4444',
+  },
+  goalTextContent: {
+    flex: 1,
+    marginRight: 12,
+  },
+  goalStepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 12,
+    padding: 4,
+  },
+  goalButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  goalButtonPressed: {
+    opacity: 0.65,
+  },
+  goalCount: {
+    minWidth: 38,
+    textAlign: 'center',
+    fontSize: font(16),
+    fontWeight: '700',
+    color: colors.text,
   },
   premiumCTA: {
     marginHorizontal: 16,
@@ -342,13 +428,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   premiumTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 4,
   },
   premiumSubtitle: {
-    fontSize: 14,
+    fontSize: font(14),
     color: 'rgba(255, 255, 255, 0.8)',
   },
   premiumButtonPressed: {

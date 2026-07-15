@@ -206,13 +206,6 @@ export type EntityInvite = {
   createdAt: number;
 };
 
-export type OnboardingStep = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-};
-
 export type BookmarkList = {
   id: ID;
   name: string;
@@ -232,12 +225,6 @@ export type ListFollower = {
   listId: ID;
   userId: ID;
   createdAt: number;
-};
-
-export type OnboardingState = {
-  isCompleted: boolean;
-  currentStep: number;
-  hasSeenWelcome: boolean;
 };
 
 // Todo type for standalone task tracking

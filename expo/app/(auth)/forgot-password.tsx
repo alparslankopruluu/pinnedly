@@ -93,6 +93,7 @@ export default function ForgotPassword() {
               value={email}
               onChangeText={setEmail}
               placeholder={t('auth.placeholders.email')}
+              placeholderTextColor="#9CA3AF"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -180,6 +181,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#ffffff',
+    color: '#111827',
   },
   resetButton: {
     backgroundColor: '#4f46e5',

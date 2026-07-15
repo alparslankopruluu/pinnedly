@@ -3,6 +3,13 @@ import type { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
 
 export const REVENUECAT_ENTITLEMENT_ID = 'draft Pro';
 const IOS_API_KEY = 'appl_mufLmalexVaMTSzKtrZgxIfRLtf';
+const ANDROID_API_KEY = 'goog_ilBpMexUSBwpdqwnVDxoJYjOqth';
+
+function platformApiKey(): string | null {
+  if (Platform.OS === 'ios') return IOS_API_KEY;
+  if (Platform.OS === 'android') return ANDROID_API_KEY;
+  return null;
+}
 
 async function sdk() {
   return (await import('react-native-purchases')).default;
@@ -13,14 +20,15 @@ export function hasPremiumEntitlement(customerInfo: CustomerInfo): boolean {
 }
 
 export async function initializeRevenueCat(appUserId?: string | null): Promise<CustomerInfo | null> {
-  if (Platform.OS !== 'ios' || !appUserId) return null;
+  const apiKey = platformApiKey();
+  if (!apiKey || !appUserId) return null;
 
   const Purchases = await sdk();
   const isConfigured = await Purchases.isConfigured();
   if (!isConfigured) {
     // Configure once with the final Firebase ID. Configuring anonymously and
     // immediately calling logIn causes an unnecessary attribute sync on launch.
-    Purchases.configure({ apiKey: IOS_API_KEY, appUserID: appUserId });
+    Purchases.configure({ apiKey, appUserID: appUserId });
   } else if ((await Purchases.getAppUserID()) !== appUserId) {
     await Purchases.logIn(appUserId);
   }
@@ -29,7 +37,7 @@ export async function initializeRevenueCat(appUserId?: string | null): Promise<C
 }
 
 export async function getPremiumPackages(): Promise<PurchasesPackage[]> {
-  if (Platform.OS !== 'ios') return [];
+  if (!platformApiKey()) return [];
   const Purchases = await sdk();
   const offerings = await Purchases.getOfferings();
   return offerings.current?.availablePackages ?? [];
@@ -49,14 +57,14 @@ export async function restorePremiumPurchases(): Promise<CustomerInfo> {
 export async function addRevenueCatCustomerInfoListener(
   listener: (customerInfo: CustomerInfo) => void
 ): Promise<() => void> {
-  if (Platform.OS !== 'ios') return () => undefined;
+  if (!platformApiKey()) return () => undefined;
   const Purchases = await sdk();
   Purchases.addCustomerInfoUpdateListener(listener);
   return () => Purchases.removeCustomerInfoUpdateListener(listener);
 }
 
 export async function logOutRevenueCat(): Promise<void> {
-  if (Platform.OS !== 'ios') return;
+  if (!platformApiKey()) return;
   const Purchases = await sdk();
   if (await Purchases.isConfigured()) await Purchases.logOut();
 }

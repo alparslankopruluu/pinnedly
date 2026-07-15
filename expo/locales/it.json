@@ -159,53 +159,23 @@
     "signUpWithGoogle": "Registrati con Google"
   },
   "welcome": {
-    "subtitle": "Il tuo spazio di lavoro offline per note, segnalibri e progetti",
+    "subtitle": "Il tuo spazio per salvare, pianificare e far crescere le idee",
     "loading": "Caricamento...",
     "screens": {
       "captureEverything": {
-        "title": "Cattura tutto",
-        "subtitle": "Salva segnalibri, note e idee in un unico posto",
-        "description": "Non perdere mai più contenuti importanti. Il nostro approccio offline garantisce che i tuoi dati siano sempre disponibili."
+        "title": "Salva ora. Ritrova quando serve.",
+        "subtitle": "Tieni insieme link, screenshot e idee",
+        "description": "Raccogli ciò che ti è utile prima che vada perso e ritrovalo facilmente al momento giusto."
       },
       "organizeProjects": {
-        "title": "Organizza i progetti",
-        "subtitle": "Gestisci le attività con potenti board Kanban",
-        "description": "Monitora i progressi, imposta scadenze e collabora con i membri del team su qualsiasi progetto."
+        "title": "Trasforma le idee in progressi",
+        "subtitle": "Note, attività, progetti, scadenze e Kanban",
+        "description": "Pianifica il prossimo passo, segui l'avanzamento e collega ogni dettaglio in uno spazio ordinato."
       },
-      "richNoteTaking": {
-        "title": "Note avanzate",
-        "subtitle": "Scrivi in Markdown con anteprima live",
-        "description": "Crea note belle con formattazione, link e organizza i tuoi pensieri senza sforzo."
-      },
-      "shareCollaborate": {
-        "title": "Condividi e collabora",
-        "subtitle": "Lavora insieme senza interruzioni",
-        "description": "Condividi il tuo lavoro con altri, ricevi feedback e create cose straordinarie insieme."
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "Salta",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "Salva ciò che conta, non dimenticare più.",
-        "body": "Draft ti aiuta ad aggiungere segnalibri, creare note e gestire progetti con facilità per tenere tutto sotto controllo.",
-        "cta": "Inizia"
-      },
-      "saveBookmarks": {
-        "headline": "Salva segnalibri da qualsiasi luogo.",
-        "body": "Incolla un URL, aggiungi screenshot e monitora quanto spesso li rivisiti.",
-        "cta": "Avanti"
-      },
-      "projectsMoveForward": {
-        "headline": "Guarda i tuoi progetti avanzare.",
-        "body": "Crea progetti, aggiungi attività e osserva i tuoi progressi crescere.",
-        "cta": "Avanti"
-      },
-      "shareCollaborate": {
-        "headline": "Condividi e collabora.",
-        "body": "Segui gli amici, condividi segnalibri e lavorate insieme ai progetti.",
-        "cta": "Inizia"
+      "thinkAndShare": {
+        "title": "Pensa meglio, insieme",
+        "subtitle": "Supporto AI quando serve, condivisione privata quando vuoi",
+        "description": "Sviluppa e riassumi idee con l'AI, poi condividi solo i contenuti scelti con le persone che decidi tu."
       }
     }
   },
@@ -304,6 +274,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "Scelte della community",
+      "description": "Scopri elenchi pubblici utili e segui quelli che vuoi conservare"
+    },
     "aiChat": {
       "title": "Assistente workspace",
       "description": "Chiedi delle tue note, progetti, segnalibri e attività"
@@ -425,6 +399,8 @@
     "dailyGoal": "Obiettivo giornaliero",
     "weeklyGoal": "Obiettivo settimanale",
     "bookmarksGoal": "{{count}} segnalibri",
+    "decreaseGoal": "Riduci {{goal}}",
+    "increaseGoal": "Aumenta {{goal}}",
     "upgradePremium": "Passa a Premium",
     "upgradeSubtitle": "Sblocca potenti funzioni di collaborazione"
   },

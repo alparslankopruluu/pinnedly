@@ -5,9 +5,11 @@ import { TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTabBarBottomInset, getTabBarHeight } from '@/utils/layout';
+import { useAppAppearance } from '@/hooks/useAppAppearance';
 
 export default function TabLayout() {
   const { t } = useTranslation();
+  const { colors, font } = useAppAppearance();
   const insets = useSafeAreaInsets();
   const tabBarBottomInset = getTabBarBottomInset(insets.bottom);
   const tabBarHeight = getTabBarHeight(insets.bottom);
@@ -15,24 +17,24 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#EF4444',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#F9FAFB',
+          backgroundColor: colors.background,
           borderBottomWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
         },
         headerTitleStyle: {
-          fontSize: 28,
+          fontSize: font(28),
           fontWeight: '700',
-          color: '#111827',
+          color: colors.text,
         },
         tabBarStyle: {
-          backgroundColor: 'white',
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderTopColor: '#F3F4F6',
+          borderTopColor: colors.border,
           paddingBottom: tabBarBottomInset,
           paddingTop: 4,
           height: tabBarHeight,
@@ -41,7 +43,7 @@ export default function TabLayout() {
           paddingVertical: 2,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: font(11),
           fontWeight: '500',
           marginTop: 2,
           marginBottom: 2,
@@ -60,7 +62,7 @@ export default function TabLayout() {
               accessibilityRole="button"
               accessibilityLabel={t('navigation.settings')}
             >
-              <Settings size={24} color="#6B7280" />
+              <Settings size={24} color={colors.textSecondary} />
             </TouchableOpacity>
           ),
         }}

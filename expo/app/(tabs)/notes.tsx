@@ -11,9 +11,12 @@ import { Note, Visibility } from '@/types';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { getCategoryDef } from '@/constants/contentCategories';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 export default function NotesScreen() {
   const { t } = useTranslation();
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const { notes } = useNoteStore();
   const insets = useSafeAreaInsets();
 
@@ -126,10 +129,10 @@ export default function NotesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   listContainer: {
     padding: 16,
@@ -138,12 +141,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   noteCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderLeftWidth: 4,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -172,41 +175,41 @@ const styles = StyleSheet.create({
   visibilityBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
     gap: 4,
   },
   visibilityLabel: {
-    fontSize: 10,
+    fontSize: font(10),
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textSecondary,
   },
   noteDate: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: font(12),
+    color: colors.textMuted,
   },
   noteTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 8,
   },
   notePreview: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
+    fontSize: font(14),
+    color: colors.textSecondary,
+    lineHeight: font(20),
     marginBottom: 8,
   },
   linksContainer: {
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.border,
   },
   linksText: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: font(12),
+    color: colors.textMuted,
     fontWeight: '500',
   },
 });

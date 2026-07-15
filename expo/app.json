@@ -5,13 +5,16 @@
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
-    "scheme": "draft",
+    "scheme": [
+      "draft",
+      "rc-6e2bf6b9ec"
+    ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F04444"
     },
     "ios": {
       "supportsTablet": true,
@@ -26,9 +29,10 @@
       "usesAppleSignIn": true
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F04444"
       },
       "package": "app.techtactoe.draft",
       "googleServicesFile": "./google-services.json",
@@ -38,8 +42,7 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.SCHEDULE_EXACT_ALARM",
-        "android.permission.REQUEST_INSTALL_PACKAGES"
+        "android.permission.SCHEDULE_EXACT_ALARM"
       ]
     },
     "web": {
@@ -48,8 +51,8 @@
       "output": "static",
       "name": "Draft",
       "shortName": "Draft",
-      "backgroundColor": "#ffffff",
-      "themeColor": "#EF4444"
+      "backgroundColor": "#F04444",
+      "themeColor": "#F04444"
     },
     "plugins": [
       [
@@ -68,7 +71,7 @@
       [
         "expo-notifications",
         {
-          "color": "#ffffff",
+          "color": "#F04444",
           "defaultChannel": "default",
           "enableBackgroundRemoteNotifications": false
         }

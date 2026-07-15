@@ -11,12 +11,15 @@ import { BookmarkCard } from '@/components/BookmarkCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Bookmark, BookmarkSource } from '@/types';
 import { isUnreadBookmark } from '@/utils/bookmark';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 type SortOption = 'recent' | 'most-opened' | 'oldest-unread';
 type FilterOption = 'all' | 'inbox' | 'never-opened' | 'frequently' | 'tagged' | BookmarkSource;
 
 export default function BookmarksScreen() {
   const { t } = useTranslation();
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
   const { bookmarks, loading, error } = useBookmarkStore();
   const insets = useSafeAreaInsets();
@@ -212,10 +215,10 @@ export default function BookmarksScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   sortContainer: {
     flexDirection: 'row',
@@ -225,23 +228,23 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   sortLabel: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border,
   },
   sortButtonText: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
     marginRight: 4,
   },
   emptyContainer: {
@@ -253,6 +256,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#EF4444',
-    fontSize: 16,
+    fontSize: font(16),
   },
 });

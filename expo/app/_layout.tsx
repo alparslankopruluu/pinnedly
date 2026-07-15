@@ -2,6 +2,8 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -19,6 +21,8 @@ import { ClipboardUrlBanner } from "@/components/ClipboardUrlBanner";
 import { loadSavedLanguage } from "@/lib/i18n";
 import { SubscriptionProvider } from "@/providers/SubscriptionProvider";
 import { configureAccessibilityDefaults } from "@/lib/accessibility";
+import { useSettingsStore } from "@/store/useSettingsStore";
+import { useAppAppearance } from "@/hooks/useAppAppearance";
 
 configureAccessibilityDefaults();
 
@@ -40,7 +44,7 @@ function WebHydrationGate({ children }: { children: React.ReactNode }) {
 
 function NavigationGuard() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isCompleted: onboardingCompleted, isLoading: onboardingLoading } = useOnboarding();
+  const { isLoading: onboardingLoading } = useOnboarding();
   const segments = useSegments();
   const router = useRouter();
 
@@ -48,35 +52,47 @@ function NavigationGuard() {
     if (authLoading || onboardingLoading) return;
 
     const inAuthGroup = segments[0] === "(auth)";
-    const onOnboarding = segments[0] === "onboarding";
-
     if (!isAuthenticated && !inAuthGroup) {
       router.replace("/(auth)/welcome");
       return;
     }
 
     if (isAuthenticated && inAuthGroup) {
-      router.replace(onboardingCompleted ? "/(tabs)" : "/onboarding");
-      return;
+      router.replace("/(tabs)");
     }
-
-    if (isAuthenticated && !onboardingCompleted && !onOnboarding) {
-      router.replace("/onboarding");
-    }
-  }, [isAuthenticated, authLoading, onboardingLoading, onboardingCompleted, segments, router]);
+  }, [isAuthenticated, authLoading, onboardingLoading, segments, router]);
 
   return null;
 }
 
 function RootLayoutNav() {
   const { t } = useTranslation();
+  const { colors, isDark } = useAppAppearance();
+  const navigationTheme = React.useMemo(() => ({
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.primary,
+    },
+  }), [colors, isDark]);
 
   return (
-    <AnalyticsProvider>
-      <NavigationGuard />
-      <Stack screenOptions={{ headerBackTitle: t('common.back') }}>
+    <ThemeProvider value={navigationTheme}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <AnalyticsProvider>
+        <NavigationGuard />
+        <Stack screenOptions={{
+          headerBackTitle: t('common.back'),
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
+          contentStyle: { backgroundColor: colors.background },
+        }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ title: t('navigation.settings') }} />
         <Stack.Screen name="edit-profile" options={{ title: t('navigation.editProfile') }} />
@@ -92,20 +108,24 @@ function RootLayoutNav() {
         <Stack.Screen name="share-inbox" options={{ title: t('navigation.shareInbox') }} />
         <Stack.Screen name="invite/[token]" options={{ title: t('navigation.invite') }} />
         <Stack.Screen name="people-search" options={{ presentation: "modal", title: t('navigation.findPeople') }} />
-        <Stack.Screen name="discover-lists" options={{ title: t('navigation.discoverLists') }} />
+        <Stack.Screen name="discover-lists" options={{ headerShown: false }} />
         <Stack.Screen name="create-list" options={{ presentation: "modal", title: t('navigation.createList') }} />
         <Stack.Screen name="bookmark-list/[id]" options={{ title: t('navigation.bookmarkList') }} />
-      </Stack>
-    </AnalyticsProvider>
+        </Stack>
+      </AnalyticsProvider>
+    </ThemeProvider>
   );
 }
 
 export default function RootLayout() {
+  const loadSettings = useSettingsStore((state) => state.loadSettings);
+
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const initApp = async () => {
       try {
+        await loadSettings();
         await loadSavedLanguage();
         await initializeFirestore();
         await initializeAnalytics();
@@ -130,7 +150,7 @@ export default function RootLayout() {
         clearTimeout(timeoutId);
       }
     };
-  }, []);
+  }, [loadSettings]);
 
   return (
     <ErrorBoundary>

@@ -159,53 +159,23 @@
     "signUpWithGoogle": "Mit Google registrieren"
   },
   "welcome": {
-    "subtitle": "Dein Offline-First-Arbeitsbereich für Notizen, Lesezeichen und Projekte",
+    "subtitle": "Dein Ort zum Speichern, Planen und Voranbringen von Ideen",
     "loading": "Wird geladen...",
     "screens": {
       "captureEverything": {
-        "title": "Alles erfassen",
-        "subtitle": "Speichere Lesezeichen, Notizen und Ideen an einem Ort",
-        "description": "Verliere nie wieder wichtige Inhalte. Unser Offline-First-Ansatz sorgt dafür, dass deine Daten immer verfügbar sind."
+        "title": "Jetzt speichern. Später wiederfinden.",
+        "subtitle": "Links, Screenshots und Ideen an einem Ort",
+        "description": "Sammle Nützliches, bevor es verloren geht, und finde es genau dann wieder, wenn du es brauchst."
       },
       "organizeProjects": {
-        "title": "Projekte organisieren",
-        "subtitle": "Verwalte Aufgaben mit leistungsstarken Kanban-Boards",
-        "description": "Verfolge den Fortschritt, setze Fristen und arbeite mit Teammitgliedern an jedem Projekt zusammen."
+        "title": "Aus Ideen wird Fortschritt",
+        "subtitle": "Notizen, Aufgaben, Projekte, Fristen und Kanban",
+        "description": "Plane den nächsten Schritt, behalte den Fortschritt im Blick und verbinde alle Details in einem ruhigen Arbeitsbereich."
       },
-      "richNoteTaking": {
-        "title": "Umfangreiche Notizen",
-        "subtitle": "Schreibe in Markdown mit Live-Vorschau",
-        "description": "Erstelle schöne Notizen mit Formatierung und Links und organisiere deine Gedanken mühelos."
-      },
-      "shareCollaborate": {
-        "title": "Teilen & zusammenarbeiten",
-        "subtitle": "Nahtlos zusammenarbeiten",
-        "description": "Teile deine Arbeit mit anderen, erhalte Feedback und erschaffe gemeinsam Großartiges."
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "Überspringen",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "Speichere, was wichtig ist – vergiss es nie wieder.",
-        "body": "Draft hilft dir, mühelos Lesezeichen hinzuzufügen, Notizen zu erstellen und Projekte zu verwalten, damit du alles im Blick behältst.",
-        "cta": "Loslegen"
-      },
-      "saveBookmarks": {
-        "headline": "Speichere Lesezeichen von überall.",
-        "body": "Füge eine URL ein, füge Screenshots hinzu und verfolge, wie oft du sie wieder besuchst.",
-        "cta": "Weiter"
-      },
-      "projectsMoveForward": {
-        "headline": "Sieh deine Projekte vorankommen.",
-        "body": "Erstelle Projekte, füge Aufgaben hinzu und beobachte deinen Fortschritt.",
-        "cta": "Weiter"
-      },
-      "shareCollaborate": {
-        "headline": "Teilen und zusammenarbeiten.",
-        "body": "Folge Freunden, teile Lesezeichen und arbeitet gemeinsam an Projekten.",
-        "cta": "Loslegen"
+      "thinkAndShare": {
+        "title": "Gemeinsam besser denken",
+        "subtitle": "KI-Hilfe bei Bedarf, privates Teilen nach deiner Wahl",
+        "description": "Entwickle und fasse Ideen mit KI zusammen und teile nur ausgewählte Inhalte mit den Personen deiner Wahl."
       }
     }
   },
@@ -304,6 +274,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "Aus der Community",
+      "description": "Entdecke hilfreiche öffentliche Listen und folge deinen Favoriten"
+    },
     "aiChat": {
       "title": "Arbeitsbereich-Assistent",
       "description": "Frage zu deinen Notizen, Projekten, Lesezeichen und Aufgaben"
@@ -425,6 +399,8 @@
     "dailyGoal": "Tagesziel",
     "weeklyGoal": "Wochenziel",
     "bookmarksGoal": "{{count}} Lesezeichen",
+    "decreaseGoal": "{{goal}} verringern",
+    "increaseGoal": "{{goal}} erhöhen",
     "upgradePremium": "Auf Premium upgraden",
     "upgradeSubtitle": "Leistungsstarke Kollaborationsfunktionen freischalten"
   },

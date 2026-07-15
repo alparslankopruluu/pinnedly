@@ -159,53 +159,23 @@
     "signUpWithGoogle": "Googleで登録"
   },
   "welcome": {
-    "subtitle": "ノート、ブックマーク、プロジェクトのためのオフラインファーストワークスペース",
+    "subtitle": "保存、計画、アイデアの実現をひとつの場所で",
     "loading": "読み込み中...",
     "screens": {
       "captureEverything": {
-        "title": "すべてをキャプチャ",
-        "subtitle": "ブックマーク、ノート、アイデアを一か所に保存",
-        "description": "大切なコンテンツを失うことはもうありません。オフラインファーストのアプローチで、データは常に利用可能です。"
+        "title": "今すぐ保存。あとですぐ見つかる。",
+        "subtitle": "リンク、スクリーンショット、アイデアをひとまとめに",
+        "description": "役立つ情報を見失う前に集めて、必要なときにいつでも続きから始められます。"
       },
       "organizeProjects": {
-        "title": "プロジェクトを整理",
-        "subtitle": "強力なカンバンボードでタスクを管理",
-        "description": "進捗を追跡し、期限を設定し、あらゆるプロジェクトでチームメンバーと協力できます。"
+        "title": "アイデアを前進させる",
+        "subtitle": "ノート、タスク、プロジェクト、期限、カンバン",
+        "description": "次の一歩を計画し、進み具合を確認しながら、すべての情報をすっきりつなげられます。"
       },
-      "richNoteTaking": {
-        "title": "リッチなノート作成",
-        "subtitle": "ライブプレビュー付きMarkdownで執筆",
-        "description": "書式、リンクを使った美しいノートを作成し、思考を簡単に整理できます。"
-      },
-      "shareCollaborate": {
-        "title": "共有とコラボレーション",
-        "subtitle": "シームレスに共同作業",
-        "description": "作品を他の人と共有し、フィードバックを得て、一緒に素晴らしいものを作りましょう。"
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "スキップ",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "大切なものを保存し、もう忘れない。",
-        "body": "Draftは、ブックマークの追加、ノートの作成、プロジェクトの管理を簡単に行い、すべてを把握できるようにします。",
-        "cta": "始める"
-      },
-      "saveBookmarks": {
-        "headline": "どこからでもブックマークを保存。",
-        "body": "URLを貼り付け、スクリーンショットを追加し、再訪問の頻度を追跡できます。",
-        "cta": "次へ"
-      },
-      "projectsMoveForward": {
-        "headline": "プロジェクトの進捗を確認。",
-        "body": "プロジェクトを作成し、タスクを追加して、進捗の成長を見守りましょう。",
-        "cta": "次へ"
-      },
-      "shareCollaborate": {
-        "headline": "共有とコラボレーション。",
-        "body": "友達をフォローし、ブックマークを共有し、一緒にプロジェクトに取り組みましょう。",
-        "cta": "始める"
+      "thinkAndShare": {
+        "title": "一緒なら、もっと良い発想へ",
+        "subtitle": "必要なときはAI、共有したいときはプライベートに",
+        "description": "AIでアイデア出しや要約を行い、選んだ内容だけを指定した相手と共有できます。"
       }
     }
   },
@@ -304,6 +274,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "コミュニティのおすすめ",
+      "description": "役立つ公開リストを見つけて、気になるリストをフォローしましょう"
+    },
     "aiChat": {
       "title": "ワークスペースアシスタント",
       "description": "メモ、プロジェクト、ブックマーク、ToDoについて質問"
@@ -425,6 +399,8 @@
     "dailyGoal": "日次目標",
     "weeklyGoal": "週次目標",
     "bookmarksGoal": "ブックマーク {{count}}件",
+    "decreaseGoal": "{{goal}}を減らす",
+    "increaseGoal": "{{goal}}を増やす",
     "upgradePremium": "Premiumにアップグレード",
     "upgradeSubtitle": "強力なコラボレーション機能を解放"
   },

@@ -75,6 +75,7 @@ export default function SignIn() {
               value={email}
               onChangeText={setEmail}
               placeholder={t('auth.placeholders.email')}
+              placeholderTextColor="#9CA3AF"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -90,6 +91,7 @@ export default function SignIn() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder={t('auth.placeholders.password')}
+                placeholderTextColor="#9CA3AF"
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -212,6 +214,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#ffffff',
+    color: '#111827',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -248,6 +251,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
+    color: '#111827',
   },
   eyeButton: {
     paddingHorizontal: 16,

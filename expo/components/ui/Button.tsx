@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 interface ButtonProps {
   title: string;
@@ -22,6 +23,8 @@ export function Button({
   textStyle,
   accessibilityHint,
 }: ButtonProps) {
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   return (
     <TouchableOpacity
       style={[
@@ -46,7 +49,7 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   button: {
     borderRadius: 12,
     alignItems: 'center',
@@ -54,15 +57,15 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   primary: {
-    backgroundColor: '#EF4444',
+    backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceMuted,
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.border,
   },
   small: {
     paddingHorizontal: 12,
@@ -80,16 +83,16 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '600',
   },
   primaryText: {
     color: 'white',
   },
   secondaryText: {
-    color: '#374151',
+    color: colors.text,
   },
   outlineText: {
-    color: '#374151',
+    color: colors.text,
   },
 });

@@ -69,6 +69,7 @@ export default function PhoneSignIn() {
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             placeholder={t('auth.placeholders.phone')}
+            placeholderTextColor="#9CA3AF"
             keyboardType="phone-pad"
             editable={!codeSent}
             accessibilityLabel={t('auth.phoneNumber')}
@@ -83,6 +84,7 @@ export default function PhoneSignIn() {
               value={verificationCode}
               onChangeText={setVerificationCode}
               placeholder={t('auth.placeholders.verificationCode')}
+              placeholderTextColor="#9CA3AF"
               keyboardType="number-pad"
               maxLength={6}
               accessibilityLabel={t('auth.verificationCode')}
@@ -166,6 +168,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#ffffff',
+    color: '#111827',
   },
   primaryButton: {
     backgroundColor: '#4f46e5',

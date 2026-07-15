@@ -76,7 +76,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     }
 
     let clientSnapshot: EntitlementSnapshot | null = null;
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'ios' || Platform.OS === 'android') {
       try {
         const customerInfo = await initializeRevenueCat(user.id);
         if (customerInfo) {
@@ -119,7 +119,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   }, [authLoading, refresh, user?.id]);
 
   useEffect(() => {
-    if (!user?.id || Platform.OS !== 'ios') return;
+    if (!user?.id || (Platform.OS !== 'ios' && Platform.OS !== 'android')) return;
     let unsubscribe: (() => void) | undefined;
     void addRevenueCatCustomerInfoListener((customerInfo) => {
       applyCustomerInfo(customerInfo);
@@ -152,7 +152,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       requireFeature: can,
       showPaywall: () => setPaywallVisible(true),
       presentCustomerCenter: async () => {
-        if (Platform.OS !== 'ios') return;
+        if (Platform.OS !== 'ios' && Platform.OS !== 'android') return;
         const { default: RevenueCatUI } = await import('react-native-purchases-ui');
         await RevenueCatUI.presentCustomerCenter();
       },

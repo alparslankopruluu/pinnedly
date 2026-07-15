@@ -159,53 +159,23 @@
     "signUpWithGoogle": "Inscrever-se com o Google"
   },
   "welcome": {
-    "subtitle": "Seu espaço de trabalho offline para notas, favoritos e projetos",
+    "subtitle": "O seu espaço para guardar, planear e fazer avançar ideias",
     "loading": "Carregando...",
     "screens": {
       "captureEverything": {
-        "title": "Capture tudo",
-        "subtitle": "Salve favoritos, notas e ideias em um só lugar",
-        "description": "Nunca mais perca conteúdo importante. Nossa abordagem offline garante que seus dados estejam sempre disponíveis."
+        "title": "Guarde agora. Encontre depois.",
+        "subtitle": "Junte ligações, capturas de ecrã e ideias",
+        "description": "Guarde o que é útil antes que se perca e volte a encontrar tudo quando precisar."
       },
       "organizeProjects": {
-        "title": "Organize projetos",
-        "subtitle": "Gerencie tarefas com quadros Kanban poderosos",
-        "description": "Acompanhe o progresso, defina prazos e colabore com membros da equipe em qualquer projeto."
+        "title": "Transforme ideias em progresso",
+        "subtitle": "Notas, tarefas, projetos, prazos e Kanban",
+        "description": "Planeie o próximo passo, acompanhe o progresso e mantenha todos os detalhes ligados num espaço tranquilo."
       },
-      "richNoteTaking": {
-        "title": "Notas avançadas",
-        "subtitle": "Escreva em Markdown com visualização ao vivo",
-        "description": "Crie notas bonitas com formatação, links e organize seus pensamentos sem esforço."
-      },
-      "shareCollaborate": {
-        "title": "Compartilhe e colabore",
-        "subtitle": "Trabalhe em conjunto sem complicações",
-        "description": "Compartilhe seu trabalho com outros, receba feedback e construam coisas incríveis juntos."
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "Pular",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "Salve o que importa, não esqueça mais.",
-        "body": "O Draft ajuda você a adicionar favoritos, criar notas e gerenciar projetos com facilidade para manter tudo sob controle.",
-        "cta": "Começar"
-      },
-      "saveBookmarks": {
-        "headline": "Salve favoritos de qualquer lugar.",
-        "body": "Cole uma URL, adicione capturas de tela e acompanhe com que frequência você as revisita.",
-        "cta": "Próximo"
-      },
-      "projectsMoveForward": {
-        "headline": "Veja seus projetos avançarem.",
-        "body": "Crie projetos, adicione tarefas e acompanhe seu progresso crescer.",
-        "cta": "Próximo"
-      },
-      "shareCollaborate": {
-        "headline": "Compartilhe e colabore.",
-        "body": "Siga amigos, compartilhe favoritos e trabalhem em projetos juntos.",
-        "cta": "Começar"
+      "thinkAndShare": {
+        "title": "Pense melhor em conjunto",
+        "subtitle": "Ajuda da IA quando precisar, partilha privada quando quiser",
+        "description": "Crie e resuma ideias com IA e partilhe apenas o conteúdo escolhido com as pessoas que decidir."
       }
     }
   },
@@ -304,6 +274,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "Escolhas da comunidade",
+      "description": "Descubra listas públicas úteis e siga as que quiser guardar"
+    },
     "aiChat": {
       "title": "Assistente do workspace",
       "description": "Pergunte sobre suas notas, projetos, favoritos e tarefas"
@@ -425,6 +399,8 @@
     "dailyGoal": "Meta diária",
     "weeklyGoal": "Meta semanal",
     "bookmarksGoal": "{{count}} favoritos",
+    "decreaseGoal": "Diminuir {{goal}}",
+    "increaseGoal": "Aumentar {{goal}}",
     "upgradePremium": "Atualizar para Premium",
     "upgradeSubtitle": "Desbloqueie recursos poderosos de colaboração"
   },

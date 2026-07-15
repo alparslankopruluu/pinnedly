@@ -222,53 +222,23 @@
     "signUpWithGoogle": "Google ile kayıt ol"
   },
   "welcome": {
-    "subtitle": "Notlar, yer imleri ve projeler için çevrimdışı öncelikli çalışma alanınız",
+    "subtitle": "Kaydetmek, planlamak ve fikirleri ilerletmek için alanınız",
     "loading": "Yükleniyor...",
     "screens": {
       "captureEverything": {
-        "title": "Her Şeyi Kaydedin",
-        "subtitle": "Yer imlerini, notları ve fikirleri tek bir yerde saklayın",
-        "description": "Önemli içerikleri bir daha kaybetmeyin. Çevrimdışı öncelikli yaklaşımımız verilerinizin her zaman erişilebilir olmasını sağlar."
+        "title": "Şimdi kaydet. Sonra kolayca bul.",
+        "subtitle": "Bağlantıları, ekran görüntülerini ve fikirleri bir arada tut",
+        "description": "İşe yarayan içerikler kaybolmadan önce topla; ihtiyacın olduğunda kaldığın yerden devam et."
       },
       "organizeProjects": {
-        "title": "Projeleri Düzenleyin",
-        "subtitle": "Güçlü Kanban panolarıyla görevleri yönetin",
-        "description": "İlerlemeyi takip edin, son tarihler belirleyin ve herhangi bir projede ekip üyeleriyle iş birliği yapın."
+        "title": "Fikirleri ilerlemeye dönüştür",
+        "subtitle": "Notlar, görevler, projeler, son tarihler ve Kanban",
+        "description": "Sıradaki adımı planla, işlerin nasıl ilerlediğini gör ve tüm ayrıntıları sade bir çalışma alanında birleştir."
       },
-      "richNoteTaking": {
-        "title": "Zengin Not Alma",
-        "subtitle": "Canlı önizleme ile Markdown yazın",
-        "description": "Biçimlendirme ve bağlantılarla güzel notlar oluşturun, düşüncelerinizi zahmetsizce düzenleyin."
-      },
-      "shareCollaborate": {
-        "title": "Paylaşın ve İş Birliği Yapın",
-        "subtitle": "Sorunsuz birlikte çalışın",
-        "description": "Çalışmalarınızı başkalarıyla paylaşın, geri bildirim alın ve birlikte harika şeyler oluşturun."
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "Atla",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "Önemli olanı kaydedin, bir daha unutmayın.",
-        "body": "Draft, yer imleri eklemenize, notlar oluşturmanıza ve projeleri yönetmenize kolayca yardımcı olarak her şeyin üstünde kalmanızı sağlar.",
-        "cta": "Başlayın"
-      },
-      "saveBookmarks": {
-        "headline": "Yer imlerini her yerden kaydedin.",
-        "body": "Bir URL yapıştırın, ekran görüntüleri ekleyin ve ne sıklıkla tekrar ziyaret ettiğinizi takip edin.",
-        "cta": "İleri"
-      },
-      "projectsMoveForward": {
-        "headline": "Projelerinizin ilerlediğini görün.",
-        "body": "Projeler oluşturun, görevler ekleyin ve ilerlemenizin büyümesini izleyin.",
-        "cta": "İleri"
-      },
-      "shareCollaborate": {
-        "headline": "Paylaşın ve iş birliği yapın.",
-        "body": "Arkadaşlarınızı takip edin, yer imlerini paylaşın ve projeler üzerinde birlikte çalışın.",
-        "cta": "Başlayın"
+      "thinkAndShare": {
+        "title": "Birlikte daha iyi düşün",
+        "subtitle": "Gerektiğinde AI desteği, istediğinde özel paylaşım",
+        "description": "AI ile fikir üretip özet çıkar; yalnızca seçtiğin içerikleri belirlediğin kişilerle paylaş."
       }
     }
   },
@@ -376,6 +346,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "Topluluktan seçkiler",
+      "description": "Faydalı herkese açık listeleri keşfet, beğendiklerini takip et"
+    },
     "aiChat": {
       "title": "Çalışma Alanı Asistanı",
       "description": "Notlarını, projelerini, yer imlerini ve yapılacaklarını sor"
@@ -506,6 +480,8 @@
     "dailyGoal": "Günlük Hedef",
     "weeklyGoal": "Haftalık Hedef",
     "bookmarksGoal": "{{count}} yer imi",
+    "decreaseGoal": "{{goal}} değerini azalt",
+    "increaseGoal": "{{goal}} değerini artır",
     "upgradePremium": "Premium'a Yükselt",
     "upgradeSubtitle": "Güçlü iş birliği özelliklerinin kilidini açın",
     "editProfile": "Profili Düzenle"

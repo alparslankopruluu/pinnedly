@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   View, 
@@ -19,7 +19,6 @@ import {
   Info,
   ChevronRight,
   Crown,
-  Apple,
   Mail,
   Trash2,
   Shield,
@@ -54,16 +53,18 @@ import { useAuth } from '@/store/useAuthStore';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/lib/legal';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { showAppAlert } from '@/providers/DialogProvider';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const { user } = useAuth();
   const {
     theme,
     fontSize,
     pushNotifications,
     emailNotifications,
-    linkedAccounts,
     dataExportInProgress,
     updateTheme,
     updateFontSize,
@@ -165,10 +166,6 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleGoogleSignIn = () => {
-    console.log('Google Sign-In coming soon');
-  };
-
   const openExternalLink = (url: string) => {
     if (!url || !url.trim()) return;
     const sanitizedUrl = url.trim();
@@ -227,40 +224,6 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-              
-              <View style={styles.separator} />
-              
-              <View style={styles.settingItem}>
-                <View style={styles.settingIcon}>
-                  <Apple size={20} color="#6B7280" />
-                </View>
-                <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>{t('settings.appleSignIn')}</Text>
-                  <Text style={styles.settingSubtitle}>
-                    {linkedAccounts.apple ? t('common.connected') : t('common.notConnected')}
-                  </Text>
-                </View>
-                <View style={[styles.statusDot, linkedAccounts.apple && styles.statusDotActive]} />
-              </View>
-              
-              <View style={styles.separator} />
-              
-              <TouchableOpacity 
-                style={[styles.settingItem, styles.settingItemDisabled]}
-                onPress={handleGoogleSignIn}
-                disabled={true}
-              >
-                <View style={styles.settingIcon}>
-                  <Mail size={20} color="#6B7280" />
-                </View>
-                <View style={styles.settingContent}>
-                  <Text style={[styles.settingTitle, styles.settingTitleDisabled]}>{t('settings.googleSignIn.title')}</Text>
-                  <Text style={[styles.settingSubtitle, styles.settingSubtitleDisabled]}>
-                    {t('settings.googleSignIn.subtitle')}
-                  </Text>
-                </View>
-                {renderComingSoonBadge()}
               </TouchableOpacity>
             </View>
           </View>
@@ -696,10 +659,10 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -708,17 +671,17 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     paddingHorizontal: 20,
     marginBottom: 12,
   },
   settingsGroup: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     marginHorizontal: 16,
     borderRadius: 16,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -737,7 +700,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -746,20 +709,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingTitle: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '500',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 2,
   },
   settingTitleDisabled: {
-    color: '#9CA3AF',
+    color: colors.textMuted,
   },
   settingSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
   },
   settingValue: {
-    fontSize: 14,
+    fontSize: font(14),
     fontWeight: '600',
     color: '#4F46E5',
     marginLeft: 8,
@@ -769,7 +732,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.border,
     marginLeft: 72,
   },
   statusDot: {
@@ -788,7 +751,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   comingSoonText: {
-    fontSize: 12,
+    fontSize: font(12),
     fontWeight: '500',
     color: '#D97706',
   },
@@ -800,19 +763,19 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 4,
   },
   fontSizeButtonText: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textSecondary,
   },
   loadingText: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
     fontStyle: 'italic',
   },
   bottomSpacing: {
@@ -829,16 +792,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   themeModal: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 24,
     marginHorizontal: 32,
     minWidth: 280,
   },
   themeModalTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -852,16 +815,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   themeOptionSelected: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceMuted,
   },
   themeOptionContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   themeOptionText: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '500',
-    color: '#111827',
+    color: colors.text,
     marginLeft: 12,
   },
   themeOptionCheck: {
@@ -873,7 +836,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   themeOptionCheckText: {
-    fontSize: 12,
+    fontSize: font(12),
     fontWeight: '600',
     color: 'white',
   },
@@ -883,8 +846,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   themeModalCancelText: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '500',
-    color: '#6B7280',
+    color: colors.textSecondary,
   },
 });

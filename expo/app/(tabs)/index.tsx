@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle, Clock, TrendingUp, Sparkles } from '@/components/icons/lucide';
+import { CheckCircle, Clock, TrendingUp, Sparkles, Compass, ChevronRight } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { useBookmarkStore, useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
@@ -12,9 +12,12 @@ import { getScrollBottomPadding } from '@/utils/layout';
 import { getActivityRoute, getActivityTitle } from '@/utils/activities';
 import { Bookmark, Note } from '@/types';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 function HomeContent() {
   const { t } = useTranslation();
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const insets = useSafeAreaInsets();
   const { activities, loadData } = useAppStore();
   const { bookmarks } = useBookmarkStore();
@@ -101,6 +104,29 @@ function HomeContent() {
             <Text style={styles.aiDescription}>
               {t('home.aiChat.description')}
             </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Public list discovery */}
+        <TouchableOpacity
+          style={styles.discoverCard}
+          onPress={() => router.push('/discover-lists')}
+          accessibilityRole="button"
+          accessibilityLabel={t('discoverLists.title')}
+          accessibilityHint={t('home.discoverLists.description')}
+        >
+          <View style={styles.discoverIconContainer}>
+            <Compass size={26} color="#4F46E5" />
+          </View>
+          <View style={styles.discoverContent}>
+            <Text style={styles.discoverEyebrow}>{t('home.discoverLists.eyebrow')}</Text>
+            <Text style={styles.discoverTitle}>{t('discoverLists.title')}</Text>
+            <Text style={styles.discoverDescription} numberOfLines={2}>
+              {t('home.discoverLists.description')}
+            </Text>
+          </View>
+          <View style={styles.discoverArrow}>
+            <ChevronRight size={22} color="#4F46E5" />
           </View>
         </TouchableOpacity>
 
@@ -230,56 +256,13 @@ function HomeContent() {
 }
 
 export default function HomeScreen() {
-  // Temporarily commented out auth/onboarding checks to open app directly
-  // const { isAuthenticated, isLoading: authLoading } = useAuth();
-  // const [isCheckingOnboarding, setIsCheckingOnboarding] = useState<boolean>(true);
-
-  // useEffect(() => {
-  //   const checkInitialRoute = async () => {
-  //     if (authLoading) return;
-
-  //     try {
-  //       const onboardingCompleted = await AsyncStorage.getItem('onboardingCompleted');
-        
-  //       if (!onboardingCompleted) {
-  //         // First time user - show onboarding
-  //         router.replace('/onboarding');
-  //         return;
-  //       } else if (!isAuthenticated) {
-  //         // User has seen onboarding but not authenticated - go to auth
-  //         router.replace('/(auth)/welcome');
-  //         return;
-  //       }
-        
-  //       // User is authenticated and has seen onboarding - show home
-  //       setIsCheckingOnboarding(false);
-  //     } catch (error) {
-  //       console.error('Failed to check onboarding status:', error);
-  //       // Fallback to onboarding on error
-  //       router.replace('/onboarding');
-  //     }
-  //   };
-
-  //   checkInitialRoute();
-  // }, [isAuthenticated, authLoading]);
-
-  // if (authLoading || isCheckingOnboarding) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <View style={styles.loadingContainer}>
-  //         <Text style={styles.loadingText}>Loading...</Text>
-  //       </View>
-  //     </SafeAreaView>
-  //   );
-  // }
-
   return <HomeContent />;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -289,20 +272,20 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: font(20),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     paddingHorizontal: 20,
     marginBottom: 16,
   },
   continueCard: {
     width: 160,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginLeft: 20,
     marginRight: 8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -318,29 +301,29 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   continueImageText: {
-    fontSize: 24,
+    fontSize: font(24),
     fontWeight: '600',
     color: '#6B7280',
   },
   continueTitle: {
-    fontSize: 14,
+    fontSize: font(14),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 4,
   },
   continueSubtitle: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontSize: font(12),
+    color: colors.textSecondary,
   },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 20,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -359,20 +342,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskTitle: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '500',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 2,
   },
   taskProject: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
   },
   taskStatus: {
     alignItems: 'flex-end',
   },
   taskStatusText: {
-    fontSize: 12,
+    fontSize: font(12),
     fontWeight: '600',
   },
   overdue: {
@@ -399,9 +382,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   streakTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   activityRow: {
     flexDirection: 'row',
@@ -425,22 +408,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   activityTitle: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '500',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 2,
   },
   activitySubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
   },
   activityTime: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: font(12),
+    color: colors.textMuted,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: font(16),
+    color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 20,
     paddingVertical: 32,
@@ -460,13 +443,13 @@ const styles = StyleSheet.create({
   aiChatCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 20,
     marginTop: 20,
     marginBottom: 24,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -487,14 +470,70 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   aiTitle: {
-    fontSize: 18,
+    fontSize: font(18),
     fontWeight: '700',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 4,
   },
   aiDescription: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: font(14),
+    color: colors.textSecondary,
     lineHeight: 20,
+  },
+  discoverCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEF2FF',
+    borderRadius: 18,
+    padding: 18,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  discoverIconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+    shadowColor: '#312E81',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  discoverContent: {
+    flex: 1,
+  },
+  discoverEyebrow: {
+    color: '#4F46E5',
+    fontSize: font(11),
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 3,
+  },
+  discoverTitle: {
+    color: '#1E1B4B',
+    fontSize: font(18),
+    fontWeight: '700',
+    marginBottom: 3,
+  },
+  discoverDescription: {
+    color: '#6366F1',
+    fontSize: font(13),
+    lineHeight: 18,
+  },
+  discoverArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
   },
 });

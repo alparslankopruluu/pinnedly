@@ -222,53 +222,23 @@
     "signUpWithGoogle": "Sign up with Google"
   },
   "welcome": {
-    "subtitle": "Your offline-first workspace for notes, bookmarks, and projects",
+    "subtitle": "Your space to save, plan, and move ideas forward",
     "loading": "Loading...",
     "screens": {
       "captureEverything": {
-        "title": "Capture Everything",
-        "subtitle": "Save bookmarks, notes, and ideas in one place",
-        "description": "Never lose important content again. Our offline-first approach ensures your data is always available."
+        "title": "Save it now. Find it later.",
+        "subtitle": "Keep links, screenshots, and ideas together",
+        "description": "Collect useful things before they disappear, then return to them whenever you need them."
       },
       "organizeProjects": {
-        "title": "Organize Projects",
-        "subtitle": "Manage tasks with powerful Kanban boards",
-        "description": "Track progress, set deadlines, and collaborate with team members on any project."
+        "title": "Turn ideas into progress",
+        "subtitle": "Notes, tasks, projects, deadlines, and Kanban",
+        "description": "Plan the next step, see what is moving, and keep every detail connected in one calm workspace."
       },
-      "richNoteTaking": {
-        "title": "Rich Note Taking",
-        "subtitle": "Write in Markdown with live preview",
-        "description": "Create beautiful notes with formatting, links, and organize your thoughts effortlessly."
-      },
-      "shareCollaborate": {
-        "title": "Share & Collaborate",
-        "subtitle": "Work together seamlessly",
-        "description": "Share your work with others, get feedback, and build amazing things together."
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "Skip",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "Save what matters, don't forget again.",
-        "body": "Draft helps you effortlessly add bookmarks, create notes, and manage projects to stay on top of everything.",
-        "cta": "Get Started"
-      },
-      "saveBookmarks": {
-        "headline": "Save bookmarks from anywhere.",
-        "body": "Paste a URL, add screenshots, and track how often you revisit it.",
-        "cta": "Next"
-      },
-      "projectsMoveForward": {
-        "headline": "See your projects move forward.",
-        "body": "Create projects, add tasks, and watch your progress grow.",
-        "cta": "Next"
-      },
-      "shareCollaborate": {
-        "headline": "Share and collaborate.",
-        "body": "Follow friends, share bookmarks, and work on projects together.",
-        "cta": "Get Started"
+      "thinkAndShare": {
+        "title": "Think better, together",
+        "subtitle": "AI support when you need it, private sharing when you choose",
+        "description": "Brainstorm and summarize with AI, then share only selected content with the people you choose."
       }
     }
   },
@@ -376,6 +346,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "Community picks",
+      "description": "Explore useful public lists and follow the ones worth keeping"
+    },
     "aiChat": {
       "title": "Workspace Assistant",
       "description": "Ask about your notes, projects, bookmarks, and todos"
@@ -506,6 +480,8 @@
     "dailyGoal": "Daily Goal",
     "weeklyGoal": "Weekly Goal",
     "bookmarksGoal": "{{count}} bookmarks",
+    "decreaseGoal": "Decrease {{goal}}",
+    "increaseGoal": "Increase {{goal}}",
     "upgradePremium": "Upgrade to Premium",
     "upgradeSubtitle": "Unlock powerful collaboration features",
     "editProfile": "Edit profile"

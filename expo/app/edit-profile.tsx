@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -17,16 +17,18 @@ import { X } from '@/components/icons/lucide';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
+import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 
 const HANDLE_PATTERN = /^[a-z0-9_]{3,30}$/;
 
 export default function EditProfileScreen() {
   const { t } = useTranslation();
   const { user, updateProfile, checkHandleAvailability } = useAuth();
+  const { colors, font } = useAppAppearance();
+  const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const [displayName, setDisplayName] = useState('');
   const [handle, setHandle] = useState('');
   const [bio, setBio] = useState('');
-  const [avatar, setAvatar] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -34,7 +36,6 @@ export default function EditProfileScreen() {
     setDisplayName(user.displayName || '');
     setHandle(user.handle || '');
     setBio(user.bio || '');
-    setAvatar(user.avatar || '');
   }, [user]);
 
   const handleSave = async () => {
@@ -68,7 +69,6 @@ export default function EditProfileScreen() {
         displayName: trimmedName,
         handle: normalizedHandle,
         bio: bio.trim(),
-        avatar: avatar.trim(),
       });
       showAppAlert(t('common.success'), t('editProfile.alerts.saved'), undefined, { variant: 'success' });
       router.back();
@@ -120,6 +120,7 @@ export default function EditProfileScreen() {
             value={displayName}
             onChangeText={setDisplayName}
             placeholder={t('editProfile.displayNamePlaceholder')}
+            placeholderTextColor={colors.textMuted}
             autoCapitalize="words"
           />
 
@@ -131,6 +132,7 @@ export default function EditProfileScreen() {
               value={handle}
               onChangeText={(text) => setHandle(text.replace(/^@/, '').toLowerCase())}
               placeholder={t('editProfile.handlePlaceholder')}
+              placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -143,19 +145,9 @@ export default function EditProfileScreen() {
             value={bio}
             onChangeText={setBio}
             placeholder={t('editProfile.bioPlaceholder')}
+            placeholderTextColor={colors.textMuted}
             multiline
             maxLength={160}
-          />
-
-          <Text style={styles.label}>{t('editProfile.avatarUrl')}</Text>
-          <TextInput
-            style={styles.input}
-            value={avatar}
-            onChangeText={setAvatar}
-            placeholder={t('editProfile.avatarPlaceholder')}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
           />
 
           <Text style={styles.label}>{t('editProfile.email')}</Text>
@@ -174,10 +166,10 @@ export default function EditProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, font: (size: number) => number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   flex: {
     flex: 1,
@@ -186,7 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -196,30 +188,30 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   label: {
-    fontSize: 14,
+    fontSize: font(14),
     fontWeight: '600',
-    color: '#374151',
+    color: colors.textSecondary,
     marginBottom: 8,
     marginTop: 4,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#111827',
+    fontSize: font(16),
+    color: colors.text,
   },
   handleRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   handlePrefix: {
-    fontSize: 16,
+    fontSize: font(16),
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textSecondary,
     marginRight: 4,
     marginBottom: 0,
   },
@@ -227,8 +219,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   hint: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: font(12),
+    color: colors.textMuted,
     marginTop: 6,
     marginBottom: 8,
   },
@@ -237,15 +229,15 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   readOnlyValue: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: font(15),
+    color: colors.textSecondary,
     paddingVertical: 12,
   },
   footer: {
     padding: 20,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
   },
 });

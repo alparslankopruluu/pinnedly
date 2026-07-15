@@ -85,6 +85,7 @@ export default function SignUp() {
               value={displayName}
               onChangeText={setDisplayName}
               placeholder={t('auth.placeholders.fullName')}
+              placeholderTextColor="#9CA3AF"
               autoCapitalize="words"
               autoCorrect={false}
               accessibilityLabel={t('auth.fullName')}
@@ -98,6 +99,7 @@ export default function SignUp() {
               value={email}
               onChangeText={setEmail}
               placeholder={t('auth.placeholders.email')}
+              placeholderTextColor="#9CA3AF"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -113,6 +115,7 @@ export default function SignUp() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder={t('auth.placeholders.createPassword')}
+                placeholderTextColor="#9CA3AF"
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -142,6 +145,7 @@ export default function SignUp() {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder={t('auth.placeholders.confirmPassword')}
+                placeholderTextColor="#9CA3AF"
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -248,6 +252,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#ffffff',
+    color: '#111827',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -284,6 +289,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
+    color: '#111827',
   },
   eyeButton: {
     paddingHorizontal: 16,

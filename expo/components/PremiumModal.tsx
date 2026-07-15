@@ -54,7 +54,11 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
   const nativePaywallOpen = React.useRef(false);
 
   React.useEffect(() => {
-    if (Platform.OS !== 'ios' || !visible || nativePaywallOpen.current) return;
+    if (
+      (Platform.OS !== 'ios' && Platform.OS !== 'android') ||
+      !visible ||
+      nativePaywallOpen.current
+    ) return;
 
     nativePaywallOpen.current = true;
     const showRevenueCatPaywall = async () => {
@@ -84,7 +88,7 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
   }, [visible, onClose, onEntitlementChanged, t]);
 
   React.useEffect(() => {
-    if (!visible || Platform.OS !== 'ios') return;
+    if (!visible || (Platform.OS !== 'ios' && Platform.OS !== 'android')) return;
     setLoadError(null);
     getPremiumPackages()
       .then(setPackages)

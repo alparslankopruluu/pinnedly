@@ -24,6 +24,7 @@ import {
   query as firestoreQuery,
   serverTimestamp,
   setDoc,
+  updateDoc,
   timestampToMillis,
   where,
 } from '@/lib/firestore';
@@ -34,6 +35,61 @@ class AuthRepository {
   private phoneConfirmation: {
     confirm: (code: string) => Promise<{ user: FirebaseUserLike } | null>;
   } | null = null;
+
+  private handleBase(email?: string | null): string {
+    const base = (email?.split('@')[0] || 'user')
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, '')
+      .slice(0, 24);
+    return base.length >= 3 ? base : `user${base}`.slice(0, 24);
+  }
+
+  private async isHandleAvailable(handle: string, excludeUserId?: string): Promise<boolean> {
+    const snapshot = await getDocs(
+      firestoreQuery(
+        collection(getDb(), COLLECTIONS.users),
+        where('handle', '==', handle),
+        limit(1)
+      )
+    );
+    return snapshot.empty || snapshot.docs[0].id === excludeUserId;
+  }
+
+  private async generateAvailableHandle(email?: string | null): Promise<string> {
+    const base = this.handleBase(email);
+    if (await this.isHandleAvailable(base)) return base;
+
+    for (let suffix = 2; suffix <= 999; suffix += 1) {
+      const candidate = `${base.slice(0, 30 - String(suffix).length)}${suffix}`;
+      if (await this.isHandleAvailable(candidate)) return candidate;
+    }
+    return `${base.slice(0, 24)}${Date.now().toString().slice(-6)}`;
+  }
+
+  private async migrateLegacyGeneratedHandle(
+    userId: string,
+    email: string | null | undefined,
+    data: DocumentData
+  ): Promise<DocumentData> {
+    const base = this.handleBase(email);
+    const current = typeof data.handle === 'string' ? data.handle : '';
+    const legacyPattern = new RegExp(`^${base}[a-z0-9]{2}(?:[a-z0-9]{2})?$`);
+    if (!legacyPattern.test(current)) return data;
+
+    try {
+      if (!(await this.isHandleAvailable(base, userId))) return data;
+      await updateDoc(doc(getDb(), COLLECTIONS.users, userId), {
+        handle: base,
+        updatedAt: serverTimestamp(),
+      });
+      return { ...data, handle: base };
+    } catch (error) {
+      // A profile migration must never block authentication. The user can still
+      // choose a cleaner handle from Edit Profile if rules/network are unavailable.
+      console.warn('Could not migrate legacy generated handle:', error);
+      return data;
+    }
+  }
 
   async initialize(): Promise<void> {
     configureAuthProviders();
@@ -61,13 +117,15 @@ class AuthRepository {
     const userDoc = await getDoc(docRef);
 
     if (userDoc.exists()) {
-      return this.mapUserDoc(firebaseUser.uid, userDoc.data(), firebaseUser.email);
+      const data = await this.migrateLegacyGeneratedHandle(
+        firebaseUser.uid,
+        firebaseUser.email,
+        userDoc.data()
+      );
+      return this.mapUserDoc(firebaseUser.uid, data, firebaseUser.email);
     }
 
-    const handle = (firebaseUser.email?.split('@')[0] || 'user')
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '')
-      .slice(0, 20) + Math.random().toString(36).slice(2, 6);
+    const handle = await this.generateAvailableHandle(firebaseUser.email);
 
     const profile = {
       handle,
@@ -110,7 +168,7 @@ class AuthRepository {
 
   async signUp(email: string, password: string, displayName: string): Promise<User> {
     const credential = await createEmailUser(email, password);
-    const handle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+    const handle = await this.generateAvailableHandle(email);
 
     await setDoc(doc(getDb(), COLLECTIONS.users, credential.user.uid), {
       handle,
@@ -161,7 +219,7 @@ class AuthRepository {
     const displayName = result.displayName || result.user.email?.split('@')[0] || 'User';
 
     await setDoc(doc(getDb(), COLLECTIONS.users, result.user.uid), {
-      handle: (result.user.email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '') + Math.random().toString(36).slice(2, 4),
+      handle: await this.generateAvailableHandle(result.user.email),
       displayName,
       email: result.user.email || '',
       avatar: null,
@@ -202,17 +260,7 @@ class AuthRepository {
   async checkHandleAvailability(handle: string): Promise<boolean> {
     const normalized = handle.toLowerCase();
     if (this.currentUser?.handle === normalized) return true;
-
-    const snapshot = await getDocs(
-      firestoreQuery(
-        collection(getDb(), COLLECTIONS.users),
-        where('handle', '==', normalized),
-        limit(1)
-      )
-    );
-
-    if (snapshot.empty) return true;
-    return snapshot.docs[0].id === this.currentUser?.id;
+    return this.isHandleAvailable(normalized, this.currentUser?.id);
   }
 
   async searchUsers(query: string): Promise<User[]> {

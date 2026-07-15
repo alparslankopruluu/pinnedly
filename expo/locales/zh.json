@@ -159,53 +159,23 @@
     "signUpWithGoogle": "使用 Google 注册"
   },
   "welcome": {
-    "subtitle": "您的离线优先工作空间，用于笔记、书签和项目",
+    "subtitle": "在一个空间里保存、规划并推进灵感",
     "loading": "加载中...",
     "screens": {
       "captureEverything": {
-        "title": "捕获一切",
-        "subtitle": "在一个地方保存书签、笔记和想法",
-        "description": "再也不会丢失重要内容。我们的离线优先方案确保您的数据始终可用。"
+        "title": "现在保存，以后轻松找到",
+        "subtitle": "把链接、截图和灵感放在一起",
+        "description": "在有用内容消失前及时收藏，需要时随时回来继续查看。"
       },
       "organizeProjects": {
-        "title": "组织项目",
-        "subtitle": "使用强大的看板管理任务",
-        "description": "跟踪进度、设置截止日期，并与团队成员在任何项目上协作。"
+        "title": "让灵感变成进展",
+        "subtitle": "笔记、任务、项目、截止日期与看板",
+        "description": "规划下一步、查看进度，并在简洁的工作空间中串联每个细节。"
       },
-      "richNoteTaking": {
-        "title": "丰富的笔记功能",
-        "subtitle": "使用 Markdown 编写并实时预览",
-        "description": "创建格式精美、带链接的笔记，轻松整理您的想法。"
-      },
-      "shareCollaborate": {
-        "title": "分享与协作",
-        "subtitle": "无缝协作",
-        "description": "与他人分享您的工作，获取反馈，一起创造精彩成果。"
-      }
-    }
-  },
-  "onboarding": {
-    "skip": "跳过",
-    "screens": {
-      "saveWhatMatters": {
-        "headline": "保存重要内容，不再遗忘。",
-        "body": "Draft 帮助您轻松添加书签、创建笔记和管理项目，让您掌控一切。",
-        "cta": "开始使用"
-      },
-      "saveBookmarks": {
-        "headline": "随时随地保存书签。",
-        "body": "粘贴 URL、添加截图，并跟踪您再次访问的频率。",
-        "cta": "下一步"
-      },
-      "projectsMoveForward": {
-        "headline": "见证项目不断前进。",
-        "body": "创建项目、添加任务，看着您的进度不断增长。",
-        "cta": "下一步"
-      },
-      "shareCollaborate": {
-        "headline": "分享与协作。",
-        "body": "关注好友、分享书签，一起完成项目。",
-        "cta": "开始使用"
+      "thinkAndShare": {
+        "title": "一起思考，更进一步",
+        "subtitle": "需要时使用 AI，想分享时保持私密",
+        "description": "用 AI 激发灵感并生成摘要，再把选定内容分享给您指定的人。"
       }
     }
   },
@@ -304,6 +274,10 @@
     }
   },
   "home": {
+    "discoverLists": {
+      "eyebrow": "社区精选",
+      "description": "发现实用的公开列表，关注值得收藏的内容"
+    },
     "aiChat": {
       "title": "工作区助手",
       "description": "询问你的笔记、项目、书签和待办"
@@ -425,6 +399,8 @@
     "dailyGoal": "每日目标",
     "weeklyGoal": "每周目标",
     "bookmarksGoal": "{{count}} 个书签",
+    "decreaseGoal": "减少{{goal}}",
+    "increaseGoal": "增加{{goal}}",
     "upgradePremium": "升级到 Premium",
     "upgradeSubtitle": "解锁强大的协作功能"
   },
