@@ -94,6 +94,8 @@
     "signIn": "サインイン",
     "signUp": "サインアップ",
     "createAccount": "アカウント作成",
+    "continueAsGuest": "アカウントなしで続ける",
+    "guest": { "signInRequired": "続けるにはサインインしてください", "featureRequiresAccount": "この機能はデータの保存または共有を行うため、アカウントが必要です。", "profileTitle": "ゲストとして閲覧中です", "profileDescription": "Draftは自由にお試しいただけます。作業の保存、AI、共同編集、端末間同期を使うにはサインインしてください。" },
     "phoneSignIn": "電話番号でサインイン",
     "resetPassword": "パスワードをリセット",
     "checkYourEmail": "メールを確認してください",
@@ -534,6 +536,11 @@
       "description": "「{{query}}」に一致するユーザーが見つかりません"
     }
   },
+  "tagSuggestions": {
+    "ai": "AI", "work": "仕事", "technology": "テクノロジー", "mobile": "モバイル", "games": "ゲーム",
+    "art": "アート", "socialMedia": "SNS", "home": "暮らし", "school": "学校", "study": "勉強",
+    "music": "音楽", "video": "動画", "personal": "個人", "research": "リサーチ", "travel": "旅行"
+  },
   "addBookmark": {
     "title": "ブックマークを追加",
     "urlPlaceholder": "ここにURLを貼り付け...",
@@ -652,7 +659,37 @@
     "openedCount": "{{count}}回開封",
     "whySaved": "保存した理由",
     "tapToAddNote": "タップしてメモを追加...",
-    "archive": "アーカイブ"
+    "archive": "アーカイブ",
+    "updateFailed": "ブックマークを更新できませんでした。",
+    "tags": {
+      "title": "タグ",
+      "placeholder": "タグを追加",
+      "empty": "タグはまだありません。追加するとすぐに見つけられます。",
+      "suggestions": "必要なものをいくつでも選ぶか、自分のタグを追加できます。"
+    },
+    "attachments": {
+      "title": "リンクとメディア",
+      "empty": "リンク、画像、動画をこのブックマークに追加できます。",
+      "add": "追加",
+      "urlPlaceholder": "URLを貼り付け",
+      "titlePlaceholder": "タイトル（任意）",
+      "invalidUrl": "有効なURLを入力してください。",
+      "chooseImage": "画像を選択",
+      "changeImage": "画像を変更",
+      "chooseImageFirst": "先に画像を選択してください。",
+      "imageHint": "写真ライブラリから画像を選択してください。",
+      "uploading": "アップロード中...",
+      "uploadFailed": "画像をアップロードできませんでした。",
+      "permissionTitle": "写真へのアクセスが必要です",
+      "permissionMessage": "このブックマークに画像を追加するには、写真へのアクセスを許可してください。",
+      "types": { "link": "リンク", "image": "画像", "video": "動画" }
+    },
+    "lists": {
+      "title": "リスト",
+      "empty": "リストはまだ作成されていません。",
+      "create": "リストを作成",
+      "updateFailed": "リストを更新できませんでした。"
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "ノートのタイトル",

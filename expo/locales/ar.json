@@ -94,6 +94,8 @@
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
     "createAccount": "إنشاء حساب",
+    "continueAsGuest": "المتابعة من دون حساب",
+    "guest": { "signInRequired": "سجّل الدخول للمتابعة", "featureRequiresAccount": "تتطلب هذه الميزة حساباً لأنها تحفظ البيانات أو تشاركها.", "profileTitle": "أنت تتصفح كضيف", "profileDescription": "استكشف Draft بحرية. سجّل الدخول لحفظ أعمالك واستخدام الذكاء الاصطناعي والتعاون والمزامنة بين الأجهزة." },
     "phoneSignIn": "تسجيل الدخول بالهاتف",
     "resetPassword": "إعادة تعيين كلمة المرور",
     "checkYourEmail": "تحقق من بريدك الإلكتروني",
@@ -534,6 +536,11 @@
       "description": "لم يتم العثور على مستخدمين لـ \"{{query}}\""
     }
   },
+  "tagSuggestions": {
+    "ai": "الذكاء الاصطناعي", "work": "العمل", "technology": "التقنية", "mobile": "الجوال", "games": "الألعاب",
+    "art": "الفن", "socialMedia": "التواصل الاجتماعي", "home": "المنزل", "school": "المدرسة", "study": "الدراسة",
+    "music": "الموسيقى", "video": "الفيديو", "personal": "شخصي", "research": "البحث", "travel": "السفر"
+  },
   "addBookmark": {
     "title": "إضافة إشارة مرجعية",
     "urlPlaceholder": "الصق الرابط هنا...",
@@ -652,7 +659,37 @@
     "openedCount": "Opened {{count}}×",
     "whySaved": "Why I saved this",
     "tapToAddNote": "Tap to add a note...",
-    "archive": "Archive"
+    "archive": "الأرشيف",
+    "updateFailed": "تعذر تحديث الإشارة المرجعية.",
+    "tags": {
+      "title": "الوسوم",
+      "placeholder": "إضافة وسم",
+      "empty": "لا توجد وسوم بعد. أضف وسوماً للعثور عليها بسرعة.",
+      "suggestions": "اختر ما تحتاج إليه من الوسوم أو أضف وسماً خاصاً بك."
+    },
+    "attachments": {
+      "title": "الروابط والوسائط",
+      "empty": "أضف رابطاً أو صورة أو فيديو إلى هذه الإشارة.",
+      "add": "إضافة",
+      "urlPlaceholder": "الصق الرابط",
+      "titlePlaceholder": "العنوان (اختياري)",
+      "invalidUrl": "أدخل رابطاً صالحاً.",
+      "chooseImage": "اختيار صورة",
+      "changeImage": "تغيير الصورة",
+      "chooseImageFirst": "اختر صورة أولاً.",
+      "imageHint": "اختر صورة من مكتبة الصور.",
+      "uploading": "جارٍ الرفع...",
+      "uploadFailed": "تعذر رفع الصورة.",
+      "permissionTitle": "يلزم الوصول إلى الصور",
+      "permissionMessage": "اسمح بالوصول إلى الصور لإضافة صورة إلى هذه الإشارة.",
+      "types": { "link": "رابط", "image": "صورة", "video": "فيديو" }
+    },
+    "lists": {
+      "title": "القوائم",
+      "empty": "لم تنشئ أي قائمة بعد.",
+      "create": "إنشاء قائمة",
+      "updateFailed": "تعذر تحديث القائمة."
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "عنوان الملاحظة",

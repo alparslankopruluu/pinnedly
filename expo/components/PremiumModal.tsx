@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
+  ActivityIndicator,
   Alert,
   Platform,
   Linking,
@@ -16,10 +17,13 @@ import { useTranslation } from 'react-i18next';
 import { trackSubscriptionEvent } from '@/lib/analytics';
 import { logCrashlytics } from '@/lib/crashlytics';
 import type { PurchasesPackage } from 'react-native-purchases';
+import type { CustomerInfo } from 'react-native-purchases';
 import {
   getPremiumPackages,
+  getRevenueCatCustomerInfo,
   hasPremiumEntitlement,
   isPurchaseCancelled,
+  presentRevenueCatPaywall,
   purchasePremiumPackage,
   restorePremiumPurchases,
 } from '@/lib/revenuecat';
@@ -29,7 +33,7 @@ import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 interface PremiumModalProps {
   visible: boolean;
   onClose: () => void;
-  onEntitlementChanged?: () => Promise<unknown>;
+  onEntitlementChanged?: (customerInfo?: CustomerInfo) => Promise<unknown> | unknown;
 }
 
 interface SubscriptionPlan {
@@ -63,11 +67,15 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     nativePaywallOpen.current = true;
     const showRevenueCatPaywall = async () => {
       try {
-        const { default: RevenueCatUI, PAYWALL_RESULT } = await import('react-native-purchases-ui');
-        const result = await RevenueCatUI.presentPaywall();
+        const { PAYWALL_RESULT } = await import('react-native-purchases-ui');
+        const result = await presentRevenueCatPaywall();
 
         if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
-          await onEntitlementChanged?.();
+          const customerInfo = await getRevenueCatCustomerInfo();
+          if (!hasPremiumEntitlement(customerInfo)) {
+            throw new Error('Premium entitlement was not granted after purchase');
+          }
+          await onEntitlementChanged?.(customerInfo);
           await trackSubscriptionEvent('subscribe_completed', { source: 'revenuecat_paywall' });
         } else if (result === PAYWALL_RESULT.CANCELLED) {
           await trackSubscriptionEvent('subscribe_cancelled', { source: 'revenuecat_paywall' });
@@ -88,7 +96,7 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
   }, [visible, onClose, onEntitlementChanged, t]);
 
   React.useEffect(() => {
-    if (!visible || (Platform.OS !== 'ios' && Platform.OS !== 'android')) return;
+    if (!visible || Platform.OS === 'ios' || Platform.OS === 'android') return;
     setLoadError(null);
     getPremiumPackages()
       .then(setPackages)
@@ -214,7 +222,7 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
       if (!hasPremiumEntitlement(customerInfo)) {
         throw new Error('Premium entitlement was not granted after purchase');
       }
-      await onEntitlementChanged?.();
+      await onEntitlementChanged?.(customerInfo);
       await trackSubscriptionEvent('subscribe_completed', { plan_id: selectedPlan });
       logCrashlytics(`Subscription completed: ${selectedPlan}`);
       onClose();
@@ -236,7 +244,7 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     try {
       const customerInfo = await restorePremiumPurchases();
       const isPremium = hasPremiumEntitlement(customerInfo);
-      await onEntitlementChanged?.();
+      await onEntitlementChanged?.(customerInfo);
       await trackSubscriptionEvent('restore_completed', { result: isPremium ? 'premium' : 'empty' });
       Alert.alert(
         t(isPremium ? 'premium.restoreSuccessTitle' : 'premium.restoreEmptyTitle'),
@@ -293,9 +301,21 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     </TouchableOpacity>
   );
 
-  // iOS uses the remotely configured and published RevenueCat paywall.
-  // Keep the custom modal below as the non-iOS fallback.
-  if (Platform.OS === 'ios') return null;
+  // Native platforms use the remotely configured RevenueCat paywall. Keep
+  // the custom modal below only as a web fallback.
+  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    if (!visible) return null;
+    return (
+      <View
+        style={styles.nativeLoadingOverlay}
+        accessibilityRole="progressbar"
+        accessibilityLabel={t('common.loading')}
+      >
+        <ActivityIndicator size="large" color="#6366F1" />
+        <Text style={styles.nativeLoadingText}>{t('common.loading')}</Text>
+      </View>
+    );
+  }
 
   return (
     <Modal
@@ -389,6 +409,20 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
 }
 
 const styles = StyleSheet.create({
+  nativeLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    elevation: 9999,
+    backgroundColor: 'rgba(15, 23, 42, 0.28)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nativeLoadingText: {
+    marginTop: 12,
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',

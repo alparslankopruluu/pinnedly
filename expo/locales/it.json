@@ -94,6 +94,8 @@
     "signIn": "Accedi",
     "signUp": "Registrati",
     "createAccount": "Crea account",
+    "continueAsGuest": "Continua senza account",
+    "guest": { "signInRequired": "Accedi per continuare", "featureRequiresAccount": "Questa funzione salva o condivide dati e richiede un account.", "profileTitle": "Stai esplorando come ospite", "profileDescription": "Esplora liberamente Draft. Accedi per salvare il lavoro, usare l’IA, collaborare e sincronizzare i dispositivi." },
     "phoneSignIn": "Accesso con telefono",
     "resetPassword": "Reimposta password",
     "checkYourEmail": "Controlla la tua email",
@@ -534,6 +536,11 @@
       "description": "Nessun utente trovato per \"{{query}}\""
     }
   },
+  "tagSuggestions": {
+    "ai": "IA", "work": "Lavoro", "technology": "Tecnologia", "mobile": "Mobile", "games": "Giochi",
+    "art": "Arte", "socialMedia": "Social media", "home": "Casa", "school": "Scuola", "study": "Studio",
+    "music": "Musica", "video": "Video", "personal": "Personale", "research": "Ricerca", "travel": "Viaggi"
+  },
   "addBookmark": {
     "title": "Aggiungi segnalibro",
     "urlPlaceholder": "Incolla l'URL qui...",
@@ -652,7 +659,37 @@
     "openedCount": "Aperto {{count}}×",
     "whySaved": "Perché l'ho salvato",
     "tapToAddNote": "Tocca per aggiungere una nota...",
-    "archive": "Archivia"
+    "archive": "Archivia",
+    "updateFailed": "Impossibile aggiornare il segnalibro.",
+    "tags": {
+      "title": "Tag",
+      "placeholder": "Aggiungi tag",
+      "empty": "Nessun tag. Aggiungili per ritrovare più facilmente il segnalibro.",
+      "suggestions": "Scegline quanti vuoi oppure aggiungi un tag personalizzato."
+    },
+    "attachments": {
+      "title": "Link e contenuti multimediali",
+      "empty": "Aggiungi un link, un'immagine o un video.",
+      "add": "Aggiungi",
+      "urlPlaceholder": "Incolla un URL",
+      "titlePlaceholder": "Titolo (facoltativo)",
+      "invalidUrl": "Inserisci un URL valido.",
+      "chooseImage": "Scegli immagine",
+      "changeImage": "Cambia immagine",
+      "chooseImageFirst": "Scegli prima un'immagine.",
+      "imageHint": "Scegli un'immagine dalla libreria foto.",
+      "uploading": "Caricamento...",
+      "uploadFailed": "Impossibile caricare l'immagine.",
+      "permissionTitle": "Accesso alle foto necessario",
+      "permissionMessage": "Consenti l'accesso alle foto per aggiungere un'immagine a questo segnalibro.",
+      "types": { "link": "Link", "image": "Immagine", "video": "Video" }
+    },
+    "lists": {
+      "title": "Elenchi",
+      "empty": "Non hai ancora creato un elenco.",
+      "create": "Crea un elenco",
+      "updateFailed": "Impossibile aggiornare l'elenco."
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "Titolo nota",

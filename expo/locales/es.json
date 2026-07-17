@@ -94,6 +94,8 @@
     "signIn": "Iniciar sesión",
     "signUp": "Registrarse",
     "createAccount": "Crear cuenta",
+    "continueAsGuest": "Continuar sin una cuenta",
+    "guest": { "signInRequired": "Inicia sesión para continuar", "featureRequiresAccount": "Esta función guarda o comparte datos y requiere una cuenta.", "profileTitle": "Estás explorando como invitado", "profileDescription": "Explora Draft libremente. Inicia sesión para guardar tu trabajo, usar la IA, colaborar y sincronizar tus dispositivos." },
     "phoneSignIn": "Inicio con teléfono",
     "resetPassword": "Restablecer contraseña",
     "checkYourEmail": "Revisa tu correo",
@@ -534,6 +536,11 @@
       "description": "No se encontraron usuarios para \"{{query}}\""
     }
   },
+  "tagSuggestions": {
+    "ai": "IA", "work": "Trabajo", "technology": "Tecnología", "mobile": "Móvil", "games": "Juegos",
+    "art": "Arte", "socialMedia": "Redes sociales", "home": "Hogar", "school": "Escuela", "study": "Estudio",
+    "music": "Música", "video": "Vídeo", "personal": "Personal", "research": "Investigación", "travel": "Viajes"
+  },
   "addBookmark": {
     "title": "Añadir marcador",
     "urlPlaceholder": "Pega la URL aquí...",
@@ -652,7 +659,37 @@
     "openedCount": "Abierto {{count}}×",
     "whySaved": "Por qué guardé esto",
     "tapToAddNote": "Toca para añadir una nota...",
-    "archive": "Archivar"
+    "archive": "Archivar",
+    "updateFailed": "No se pudo actualizar el marcador.",
+    "tags": {
+      "title": "Etiquetas",
+      "placeholder": "Añadir etiqueta",
+      "empty": "Aún no hay etiquetas. Añádelas para encontrarlo más rápido.",
+      "suggestions": "Elige todas las que necesites o añade tu propia etiqueta."
+    },
+    "attachments": {
+      "title": "Enlaces y contenido multimedia",
+      "empty": "Añade un enlace, una imagen o un vídeo a este marcador.",
+      "add": "Añadir",
+      "urlPlaceholder": "Pega una URL",
+      "titlePlaceholder": "Título (opcional)",
+      "invalidUrl": "Introduce una URL válida.",
+      "chooseImage": "Elegir imagen",
+      "changeImage": "Cambiar imagen",
+      "chooseImageFirst": "Elige primero una imagen.",
+      "imageHint": "Elige una imagen de tu fototeca.",
+      "uploading": "Subiendo...",
+      "uploadFailed": "No se pudo subir la imagen.",
+      "permissionTitle": "Se necesita acceso a las fotos",
+      "permissionMessage": "Permite el acceso a las fotos para añadir una imagen a este marcador.",
+      "types": { "link": "Enlace", "image": "Imagen", "video": "Vídeo" }
+    },
+    "lists": {
+      "title": "Listas",
+      "empty": "Todavía no has creado ninguna lista.",
+      "create": "Crear una lista",
+      "updateFailed": "No se pudo actualizar la lista."
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "Título de la nota",

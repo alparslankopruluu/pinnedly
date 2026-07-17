@@ -1,14 +1,15 @@
 import { User, ID } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   configureAuthProviders,
   createEmailUser,
   getCurrentFirebaseUser,
   onFirebaseAuthStateChanged,
   sendPasswordReset,
-  sendPhoneVerificationCode,
   signInWithAppleProvider,
   signInWithEmail,
   signInWithGoogleProvider,
+  signInAnonymouslyProvider,
   signOutFromAuth,
   type FirebaseUserLike,
 } from '@/lib/auth';
@@ -32,9 +33,19 @@ import { shareApi } from '@/services/shareApi';
 
 class AuthRepository {
   private currentUser: User | null = null;
-  private phoneConfirmation: {
-    confirm: (code: string) => Promise<{ user: FirebaseUserLike } | null>;
-  } | null = null;
+  private guestMode = false;
+  private readonly profileLoads = new Map<string, Promise<User>>();
+
+  private static readonly GUEST_MODE_KEY = 'draft:guest-mode';
+
+  private async setGuestMode(enabled: boolean): Promise<void> {
+    this.guestMode = enabled;
+    if (enabled) {
+      await AsyncStorage.setItem(AuthRepository.GUEST_MODE_KEY, 'true');
+    } else {
+      await AsyncStorage.removeItem(AuthRepository.GUEST_MODE_KEY);
+    }
+  }
 
   private handleBase(email?: string | null): string {
     const base = (email?.split('@')[0] || 'user')
@@ -94,25 +105,72 @@ class AuthRepository {
   async initialize(): Promise<void> {
     configureAuthProviders();
 
+    this.guestMode = (await AsyncStorage.getItem(AuthRepository.GUEST_MODE_KEY)) === 'true';
+
     const firebaseUser = getCurrentFirebaseUser();
-    if (firebaseUser) {
+    if (firebaseUser?.isAnonymous) {
+      await this.setGuestMode(true);
+      this.currentUser = null;
+    } else if (firebaseUser) {
+      await this.setGuestMode(false);
       this.currentUser = await this.loadOrCreateProfile(firebaseUser);
     }
   }
 
-  onAuthStateChanged(listener: (user: User | null) => void): () => void {
+  onAuthStateChanged(listener: (user: User | null, isGuest: boolean) => void): () => void {
     return onFirebaseAuthStateChanged(async (firebaseUser) => {
       if (!firebaseUser) {
         this.currentUser = null;
-        listener(null);
+        listener(null, this.guestMode);
         return;
       }
+      if (firebaseUser.isAnonymous) {
+        await this.setGuestMode(true);
+        this.currentUser = null;
+        listener(null, true);
+        return;
+      }
+      await this.setGuestMode(false);
       this.currentUser = await this.loadOrCreateProfile(firebaseUser);
-      listener(this.currentUser);
+      listener(this.currentUser, false);
     });
   }
 
+  async continueAsGuest(): Promise<void> {
+    this.currentUser = null;
+    await this.setGuestMode(true);
+
+    const current = getCurrentFirebaseUser();
+    if (current?.isAnonymous) return;
+    if (current) await signOutFromAuth();
+
+    try {
+      await signInAnonymouslyProvider();
+    } catch (error) {
+      // Public content remains available without Firebase Auth. Keeping a local
+      // guest session also makes the app usable while offline or while the
+      // Anonymous provider is being enabled in Firebase Console.
+      console.warn('Firebase anonymous sign-in unavailable; using local guest mode:', error);
+    }
+  }
+
   private async loadOrCreateProfile(firebaseUser: FirebaseUserLike): Promise<User> {
+    const activeLoad = this.profileLoads.get(firebaseUser.uid);
+    if (activeLoad) return activeLoad;
+
+    const profileLoad = this.loadOrCreateProfileOnce(firebaseUser);
+    this.profileLoads.set(firebaseUser.uid, profileLoad);
+
+    try {
+      return await profileLoad;
+    } finally {
+      if (this.profileLoads.get(firebaseUser.uid) === profileLoad) {
+        this.profileLoads.delete(firebaseUser.uid);
+      }
+    }
+  }
+
+  private async loadOrCreateProfileOnce(firebaseUser: FirebaseUserLike): Promise<User> {
     const docRef = doc(getDb(), COLLECTIONS.users, firebaseUser.uid);
     const userDoc = await getDoc(docRef);
 
@@ -161,12 +219,14 @@ class AuthRepository {
   }
 
   async signIn(email: string, password: string): Promise<User> {
+    await this.setGuestMode(false);
     const credential = await signInWithEmail(email, password);
     this.currentUser = await this.loadOrCreateProfile(credential.user);
     return this.currentUser;
   }
 
   async signUp(email: string, password: string, displayName: string): Promise<User> {
+    await this.setGuestMode(false);
     const credential = await createEmailUser(email, password);
     const handle = await this.generateAvailableHandle(email);
 
@@ -188,27 +248,14 @@ class AuthRepository {
   }
 
   async signInWithGoogle(): Promise<User> {
+    await this.setGuestMode(false);
     const result = await signInWithGoogleProvider();
     this.currentUser = await this.loadOrCreateProfile(result.user);
     return this.currentUser;
   }
 
-  async sendPhoneVerification(phoneNumber: string): Promise<void> {
-    this.phoneConfirmation = await sendPhoneVerificationCode(phoneNumber);
-  }
-
-  async confirmPhoneCode(code: string): Promise<User> {
-    if (!this.phoneConfirmation) {
-      throw new Error('No phone verification in progress. Send code first.');
-    }
-    const credential = await this.phoneConfirmation.confirm(code);
-    if (!credential?.user) throw new Error('Phone verification failed');
-    this.currentUser = await this.loadOrCreateProfile(credential.user);
-    this.phoneConfirmation = null;
-    return this.currentUser;
-  }
-
   async signInWithApple(): Promise<User> {
+    await this.setGuestMode(false);
     const result = await signInWithAppleProvider();
 
     if (!result.additionalUserInfo?.isNewUser) {
@@ -237,8 +284,8 @@ class AuthRepository {
 
   async signOut(): Promise<void> {
     await signOutFromAuth();
+    await this.setGuestMode(false);
     this.currentUser = null;
-    this.phoneConfirmation = null;
   }
 
   getCurrentUser(): User | null {

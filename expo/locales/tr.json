@@ -157,6 +157,8 @@
     "signIn": "Giriş Yap",
     "signUp": "Kayıt Ol",
     "createAccount": "Hesap Oluştur",
+    "continueAsGuest": "Giriş yapmadan devam et",
+    "guest": { "signInRequired": "Devam etmek için giriş yapın", "featureRequiresAccount": "Bu özellik veri kaydettiği veya paylaştığı için hesap gerektirir.", "profileTitle": "Misafir olarak göz atıyorsunuz", "profileDescription": "Draft’ı özgürce keşfedin. Çalışmalarınızı kaydetmek, AI kullanmak, paylaşmak ve cihazlar arasında eşitlemek için giriş yapın." },
     "phoneSignIn": "Telefonla Giriş",
     "resetPassword": "Şifreyi Sıfırla",
     "checkYourEmail": "E-postanızı Kontrol Edin",
@@ -671,6 +673,11 @@
       "description": "\"{{query}}\" için kullanıcı bulunamadı"
     }
   },
+  "tagSuggestions": {
+    "ai": "Yapay Zekâ", "work": "İş", "technology": "Teknoloji", "mobile": "Mobil", "games": "Oyun",
+    "art": "Sanat", "socialMedia": "Sosyal Medya", "home": "Ev İşleri", "school": "Okul", "study": "Ders",
+    "music": "Müzik", "video": "Video", "personal": "Kişisel", "research": "Araştırma", "travel": "Seyahat"
+  },
   "addBookmark": {
     "title": "Yer İmi Ekle",
     "labels": {
@@ -795,7 +802,37 @@
     "deleteMessage": "Bu işlem geri alınamaz.",
     "notePlaceholder": "Gelecekteki kendiniz için bir not ekleyin...",
     "saveNote": "Notu kaydet",
-    "openLink": "Bağlantıyı aç"
+    "openLink": "Bağlantıyı aç",
+    "updateFailed": "Yer imi güncellenemedi.",
+    "tags": {
+      "title": "Etiketler",
+      "placeholder": "Etiket ekle",
+      "empty": "Henüz etiket yok. Daha kolay bulmak için etiket ekleyin.",
+      "suggestions": "İstediğiniz kadarını seçin veya kendi etiketinizi ekleyin."
+    },
+    "attachments": {
+      "title": "Bağlantılar ve medya",
+      "empty": "Bu yer imine bağlantı, görsel veya video ekleyin.",
+      "add": "Ekle",
+      "urlPlaceholder": "URL yapıştırın",
+      "titlePlaceholder": "Başlık (isteğe bağlı)",
+      "invalidUrl": "Geçerli bir URL girin.",
+      "chooseImage": "Görsel seç",
+      "changeImage": "Görseli değiştir",
+      "chooseImageFirst": "Önce bir görsel seçin.",
+      "imageHint": "Fotoğraf arşivinizden bir görsel seçin.",
+      "uploading": "Yükleniyor...",
+      "uploadFailed": "Görsel yüklenemedi.",
+      "permissionTitle": "Fotoğraf izni gerekli",
+      "permissionMessage": "Bu yer imine görsel eklemek için fotoğraf erişimine izin verin.",
+      "types": { "link": "Bağlantı", "image": "Görsel", "video": "Video" }
+    },
+    "lists": {
+      "title": "Listeler",
+      "empty": "Henüz bir liste oluşturmadınız.",
+      "create": "Liste oluştur",
+      "updateFailed": "Liste üyeliği güncellenemedi."
+    }
   },
   "noteDetail": {
     "notFound": "Not bulunamadı",

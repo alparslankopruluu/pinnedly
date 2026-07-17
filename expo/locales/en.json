@@ -157,6 +157,8 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "createAccount": "Create Account",
+    "continueAsGuest": "Continue without an account",
+    "guest": { "signInRequired": "Sign in to continue", "featureRequiresAccount": "This feature saves or shares data and requires an account.", "profileTitle": "You’re browsing as a guest", "profileDescription": "Explore Draft freely. Sign in to save your work, use AI, collaborate, and sync across devices." },
     "phoneSignIn": "Phone Sign In",
     "resetPassword": "Reset Password",
     "checkYourEmail": "Check Your Email",
@@ -671,6 +673,11 @@
       "description": "No users found for \"{{query}}\""
     }
   },
+  "tagSuggestions": {
+    "ai": "AI", "work": "Work", "technology": "Technology", "mobile": "Mobile", "games": "Games",
+    "art": "Art", "socialMedia": "Social Media", "home": "Home", "school": "School", "study": "Study",
+    "music": "Music", "video": "Video", "personal": "Personal", "research": "Research", "travel": "Travel"
+  },
   "addBookmark": {
     "title": "Add Bookmark",
     "labels": {
@@ -795,7 +802,37 @@
     "deleteMessage": "This cannot be undone.",
     "notePlaceholder": "Add a note for your future self...",
     "saveNote": "Save note",
-    "openLink": "Open link"
+    "openLink": "Open link",
+    "updateFailed": "The bookmark could not be updated.",
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Add a tag",
+      "empty": "No tags yet. Add tags to find this bookmark faster.",
+      "suggestions": "Choose as many as you need, or add your own tag."
+    },
+    "attachments": {
+      "title": "Links and media",
+      "empty": "Add a useful link, image, or video to this bookmark.",
+      "add": "Add",
+      "urlPlaceholder": "Paste a URL",
+      "titlePlaceholder": "Title (optional)",
+      "invalidUrl": "Enter a valid URL.",
+      "chooseImage": "Choose image",
+      "changeImage": "Change image",
+      "chooseImageFirst": "Choose an image first.",
+      "imageHint": "Choose an image from your photo library.",
+      "uploading": "Uploading...",
+      "uploadFailed": "The image could not be uploaded.",
+      "permissionTitle": "Photo access needed",
+      "permissionMessage": "Allow photo access to add an image to this bookmark.",
+      "types": { "link": "Link", "image": "Image", "video": "Video" }
+    },
+    "lists": {
+      "title": "Lists",
+      "empty": "You have not created a list yet.",
+      "create": "Create a list",
+      "updateFailed": "List membership could not be updated."
+    }
   },
   "noteDetail": {
     "notFound": "Note not found",

@@ -19,6 +19,7 @@ const ALLOWED_CREATE_FIELDS: Record<LimitedResource, readonly string[]> = {
     'url', 'title', 'description', 'imagePreview', 'screenshotUri', 'notes', 'tags', 'tagNames',
     'personalNote', 'status', 'reminderAt', 'readAt', 'openCount', 'lastOpenedAt', 'source',
     'visibility', 'category', 'reminderSchedule', 'sharedWith', 'editors',
+    'attachments',
   ],
   notes: [
     'title', 'markdown', 'coverImage', 'links', 'visibility', 'category', 'reminderSchedule',
@@ -70,8 +71,13 @@ async function requireAuth(req: { headers: { authorization?: string } }): Promis
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) throw new ApiError(401, 'AUTH_REQUIRED', 'Authentication required');
   try {
-    return (await admin.auth().verifyIdToken(auth.slice(7))).uid;
-  } catch {
+    const decoded = await admin.auth().verifyIdToken(auth.slice(7));
+    if (decoded.firebase?.sign_in_provider === 'anonymous') {
+      throw new ApiError(403, 'SIGN_IN_REQUIRED', 'A registered account is required');
+    }
+    return decoded.uid;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
     throw new ApiError(401, 'AUTH_REQUIRED', 'Authentication required');
   }
 }

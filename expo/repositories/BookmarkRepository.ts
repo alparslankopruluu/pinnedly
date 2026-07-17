@@ -85,6 +85,7 @@ export class BookmarkRepository {
       status: bookmark.status || 'inbox',
       tagNames: bookmark.tagNames ?? [],
       personalNote: bookmark.personalNote ?? null,
+      attachments: bookmark.attachments ?? [],
       reminderAt: bookmark.reminderAt ?? null,
       readAt: bookmark.readAt ?? null,
       openCount: 0,
@@ -113,6 +114,7 @@ export class BookmarkRepository {
     if (updates.status !== undefined) payload.status = updates.status;
     if (updates.tagNames !== undefined) payload.tagNames = updates.tagNames;
     if (updates.personalNote !== undefined) payload.personalNote = updates.personalNote;
+    if (updates.attachments !== undefined) payload.attachments = updates.attachments;
     if (updates.openCount !== undefined) payload.openCount = updates.openCount;
     if (updates.reminderAt !== undefined) payload.reminderAt = updates.reminderAt ?? null;
     if (updates.readAt !== undefined) payload.readAt = updates.readAt ?? null;
@@ -166,6 +168,9 @@ export class BookmarkRepository {
       tags: tagNamesToTags(tagNames),
       tagNames,
       personalNote: data.personalNote as string | undefined,
+      attachments: Array.isArray(data.attachments)
+        ? data.attachments as Bookmark['attachments']
+        : [],
       status: (data.status as Bookmark['status']) || 'inbox',
       reminderAt: data.reminderAt as number | undefined,
       readAt: data.readAt as number | undefined,

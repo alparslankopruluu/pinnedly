@@ -54,12 +54,14 @@ import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/lib/legal';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { colors, font } = useAppAppearance();
   const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const { user } = useAuth();
+  const { requireAccount } = useAuthGate();
   const {
     theme,
     fontSize,
@@ -100,6 +102,7 @@ export default function SettingsScreen() {
   };
 
   const cycleDigestFrequency = async () => {
+    if (!requireAccount()) return;
     if (!can('bookmarkDigest').allowed) {
       showPaywall();
       return;
@@ -126,6 +129,7 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = async () => {
+    if (!requireAccount()) return;
     const access = can('dataExport');
     if (!access.allowed) {
       showPaywall();
@@ -144,6 +148,7 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteAccount = () => {
+    if (!requireAccount()) return;
     showAppAlert(
       t('settings.deleteAccount.title'),
       t('settings.deleteAccount.subtitle'),
@@ -270,7 +275,7 @@ export default function SettingsScreen() {
             <View style={styles.settingsGroup}>
               <TouchableOpacity 
                 style={styles.settingItem}
-                onPress={snapshot.plan === 'free' ? showPaywall : undefined}
+                onPress={snapshot.plan === 'free' ? () => requireAccount() && showPaywall() : undefined}
               >
                 <View style={styles.settingIcon}>
                   <Crown size={20} color="#6366F1" />
@@ -288,7 +293,7 @@ export default function SettingsScreen() {
               
               <TouchableOpacity
                 style={styles.settingItem}
-                onPress={() => presentCustomerCenter()}
+                onPress={() => requireAccount() && presentCustomerCenter()}
               >
                 <View style={styles.settingIcon}>
                   <Shield size={20} color="#6B7280" />

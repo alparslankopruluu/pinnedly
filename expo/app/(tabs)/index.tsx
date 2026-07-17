@@ -13,6 +13,8 @@ import { getActivityRoute, getActivityTitle } from '@/utils/activities';
 import { Bookmark, Note } from '@/types';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
+import { useAuthGate } from '@/hooks/useAuthGate';
+import { useAuth } from '@/store/useAuthStore';
 
 function HomeContent() {
   const { t } = useTranslation();
@@ -24,10 +26,14 @@ function HomeContent() {
   const { notes } = useNoteStore();
   const { projects } = useProjectStore();
   const { can, showPaywall } = useSubscriptionAccess();
+  const { requireAccount } = useAuthGate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated, loadData]);
 
   const getContinueItems = (): (Bookmark | Note)[] => {
     const neverOpenedBookmarks = bookmarks
@@ -55,6 +61,8 @@ function HomeContent() {
   };
 
   const getStreak = () => {
+    if (!isAuthenticated) return 0;
+
     // Simple streak calculation based on recent activity
     const today = new Date();
     const yesterday = new Date(today);
@@ -79,7 +87,7 @@ function HomeContent() {
   const continueItems = getContinueItems();
   const dueAndOverdueTasks = getDueAndOverdueTasks();
   const streak = getStreak();
-  const recentActivities = activities.slice(0, 3);
+  const recentActivities = isAuthenticated ? activities.slice(0, 3) : [];
 
   return (
     <View style={styles.container}>
@@ -88,6 +96,7 @@ function HomeContent() {
         <TouchableOpacity
           style={styles.aiChatCard}
           onPress={() => {
+            if (!requireAccount()) return;
             if (!can('ai').allowed) {
               showPaywall();
               return;
@@ -378,13 +387,13 @@ const createStyles = (colors: AppColors, font: (size: number) => number) => Styl
   streakBadge: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#EF4444',
+    color: '#B91C1C',
     marginBottom: 4,
   },
   streakTitle: {
     fontSize: font(18),
     fontWeight: '600',
-    color: colors.text,
+    color: '#7F1D1D',
   },
   activityRow: {
     flexDirection: 'row',

@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
+import { router } from 'expo-router';
 import type { CustomerInfo } from 'react-native-purchases';
 import { PremiumModal } from '@/components/PremiumModal';
 import { useAuth } from '@/store/useAuthStore';
@@ -8,6 +9,7 @@ import {
   hasPremiumEntitlement,
   initializeRevenueCat,
   REVENUECAT_ENTITLEMENT_ID,
+  warmRevenueCatPaywall,
 } from '@/lib/revenuecat';
 import { recordError } from '@/lib/crashlytics';
 import { callAuthenticatedFunction } from '@/services/functionsApi';
@@ -61,17 +63,37 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const { user, isLoading: authLoading } = useAuth();
   const [snapshot, setSnapshot] = useState<EntitlementSnapshot>(INITIAL_SNAPSHOT);
   const [paywallVisible, setPaywallVisible] = useState(false);
+  const refreshSequence = useRef(0);
 
   const applyCustomerInfo = useCallback((customerInfo: CustomerInfo) => {
-    setSnapshot((previous) => ({
-      ...snapshotFromCustomerInfo(customerInfo),
-      aiUsed: previous.aiUsed,
-    }));
+    const clientSnapshot = snapshotFromCustomerInfo(customerInfo);
+    setSnapshot((previous) => ({ ...clientSnapshot, aiUsed: previous.aiUsed }));
+    return clientSnapshot;
+  }, []);
+
+  const mergeVerifiedSnapshot = useCallback((
+    serverSnapshot: EntitlementSnapshot,
+    clientSnapshot: EntitlementSnapshot | null
+  ): EntitlementSnapshot => {
+    // A completed store purchase is reflected by the native RevenueCat SDK
+    // before it can appear in the REST API. Never let that short propagation
+    // window downgrade an active local entitlement back to Free.
+    if (clientSnapshot?.plan === 'premium' && serverSnapshot.plan === 'free') {
+      return {
+        ...clientSnapshot,
+        aiUsed: serverSnapshot.aiUsed,
+        aiLimit: 100,
+      };
+    }
+    return serverSnapshot;
   }, []);
 
   const refresh = useCallback(async (): Promise<EntitlementSnapshot> => {
+    const requestSequence = ++refreshSequence.current;
     if (!user?.id) {
-      setSnapshot({ ...INITIAL_SNAPSHOT, status: 'free' });
+      if (requestSequence === refreshSequence.current) {
+        setSnapshot({ ...INITIAL_SNAPSHOT, status: 'free' });
+      }
       return { ...INITIAL_SNAPSHOT, status: 'free' };
     }
 
@@ -81,7 +103,15 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         const customerInfo = await initializeRevenueCat(user.id);
         if (customerInfo) {
           clientSnapshot = snapshotFromCustomerInfo(customerInfo);
-          setSnapshot((previous) => ({ ...clientSnapshot!, aiUsed: previous.aiUsed }));
+          if (requestSequence === refreshSequence.current) {
+            setSnapshot((previous) => ({ ...clientSnapshot!, aiUsed: previous.aiUsed }));
+          }
+          // Do this in the background while the app is already loading. It
+          // makes the later Upgrade action feel immediate without blocking
+          // access to the rest of the app if RevenueCat is temporarily slow.
+          void warmRevenueCatPaywall().catch((error) => {
+            recordError(error instanceof Error ? error : new Error(String(error)), 'revenuecat:prewarm-paywall');
+          });
         }
       } catch (error) {
         recordError(error instanceof Error ? error : new Error(String(error)), 'revenuecat:refresh');
@@ -100,14 +130,27 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         aiUsed: server.aiUsed ?? 0,
         aiLimit: server.aiLimit ?? (server.active ? 100 : 3),
       };
-      setSnapshot(next);
-      return next;
+      const merged = mergeVerifiedSnapshot(next, clientSnapshot);
+      if (requestSequence === refreshSequence.current) setSnapshot(merged);
+      return merged;
     } catch (error) {
       if (clientSnapshot) return clientSnapshot;
-      setSnapshot((previous) => ({ ...previous, status: previous.verifiedAt ? previous.status : 'error' }));
+      if (requestSequence === refreshSequence.current) {
+        setSnapshot((previous) => ({ ...previous, status: previous.verifiedAt ? previous.status : 'error' }));
+      }
       throw error;
     }
-  }, [user?.id]);
+  }, [mergeVerifiedSnapshot, user?.id]);
+
+  const handleEntitlementChanged = useCallback((customerInfo?: CustomerInfo) => {
+    // Invalidate entitlement checks that started before this store event.
+    refreshSequence.current += 1;
+    if (customerInfo) applyCustomerInfo(customerInfo);
+
+    // UI unlock is intentionally not blocked by the REST verification call.
+    // RevenueCat webhooks/REST can trail the device purchase by a few seconds.
+    void refresh().catch(() => undefined);
+  }, [applyCustomerInfo, refresh]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -150,14 +193,24 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       refresh,
       can,
       requireFeature: can,
-      showPaywall: () => setPaywallVisible(true),
+      showPaywall: () => {
+        if (!user?.id) {
+          router.push('/(auth)/sign-in');
+          return;
+        }
+        setPaywallVisible(true);
+      },
       presentCustomerCenter: async () => {
+        if (!user?.id) {
+          router.push('/(auth)/sign-in');
+          return;
+        }
         if (Platform.OS !== 'ios' && Platform.OS !== 'android') return;
         const { default: RevenueCatUI } = await import('react-native-purchases-ui');
         await RevenueCatUI.presentCustomerCenter();
       },
     }),
-    [can, refresh, snapshot]
+    [can, refresh, snapshot, user?.id]
   );
 
   return (
@@ -166,7 +219,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       <PremiumModal
         visible={paywallVisible}
         onClose={() => setPaywallVisible(false)}
-        onEntitlementChanged={refresh}
+        onEntitlementChanged={handleEntitlementChanged}
       />
     </SubscriptionContext.Provider>
   );

@@ -74,8 +74,12 @@ async function requireAuth(req: RequestLike): Promise<string> {
 
   try {
     const decoded = await admin.auth().verifyIdToken(authHeader.slice(7));
+    if (decoded.firebase?.sign_in_provider === 'anonymous') {
+      throw new HttpError(403, 'A registered account is required', 'SIGN_IN_REQUIRED');
+    }
     return decoded.uid;
-  } catch {
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
     throw new HttpError(401, 'Invalid authorization token', 'AUTH_REQUIRED');
   }
 }

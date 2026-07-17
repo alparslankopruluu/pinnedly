@@ -22,7 +22,7 @@ const OWL_MASCOT = require('@/assets/brand/owl-mascot-transparent.png');
 
 export default function Welcome() {
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isGuest, isLoading: authLoading, continueAsGuest } = useAuth();
   const {
     hasSeenWelcome,
     isLoading: onboardingLoading,
@@ -65,10 +65,20 @@ export default function Welcome() {
   );
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
+    if (!authLoading && (isAuthenticated || isGuest)) {
       router.replace('/(tabs)');
     }
-  }, [authLoading, isAuthenticated]);
+  }, [authLoading, isAuthenticated, isGuest]);
+
+  const handleContinueAsGuest = async () => {
+    try {
+      await markWelcomeSeen('skipped');
+      await continueAsGuest();
+      router.replace('/(tabs)');
+    } catch {
+      // Auth store keeps the screen usable and exposes a retry through this button.
+    }
+  };
 
   const finishWelcome = async (method: 'completed' | 'skipped') => {
     try {
@@ -209,6 +219,12 @@ export default function Welcome() {
           onPress={() => router.push('/(auth)/sign-up')}
           variant="outline"
           style={styles.secondaryButton}
+        />
+        <Button
+          title={t('auth.continueAsGuest')}
+          onPress={() => void handleContinueAsGuest()}
+          variant="outline"
+          style={styles.guestButton}
         />
       </View>
 
@@ -418,6 +434,9 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     borderColor: '#CBD5E1',
+  },
+  guestButton: {
+    marginTop: 4,
   },
   footerText: {
     fontSize: 12,

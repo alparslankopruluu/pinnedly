@@ -52,7 +52,6 @@ export { default as Monitor } from 'lucide-react-native/dist/esm/icons/monitor.j
 export { default as Moon } from 'lucide-react-native/dist/esm/icons/moon.js';
 export { default as MoreHorizontal } from 'lucide-react-native/dist/esm/icons/ellipsis.js';
 export { default as Pencil } from 'lucide-react-native/dist/esm/icons/pencil.js';
-export { default as Phone } from 'lucide-react-native/dist/esm/icons/phone.js';
 export { default as Plane } from 'lucide-react-native/dist/esm/icons/plane.js';
 export { default as Plus } from 'lucide-react-native/dist/esm/icons/plus.js';
 export { default as RefreshCw } from 'lucide-react-native/dist/esm/icons/refresh-cw.js';

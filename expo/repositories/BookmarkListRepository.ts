@@ -215,6 +215,7 @@ class BookmarkListRepository {
       sharedWith: (data.sharedWith as string[]) || [],
       ownerId: data.ownerId,
       followerCount: data.followerCount ?? 0,
+      bookmarkIds: (data.bookmarkIds as string[]) || [],
       bookmarks: [],
       createdAt: timestampToMillis(data.createdAt),
       updatedAt: timestampToMillis(data.updatedAt),

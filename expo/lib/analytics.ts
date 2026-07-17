@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 declare const require: <T = unknown>(moduleName: string) => T;
 
-export type AuthMethod = 'email' | 'google' | 'apple' | 'phone';
+export type AuthMethod = 'email' | 'google' | 'apple';
 
 export type ContentType = 'bookmark' | 'note' | 'project' | 'todo' | 'list' | 'profile';
 
@@ -22,7 +22,6 @@ const SCREEN_MAP: Record<string, string> = {
   '(auth)/welcome': 'Welcome',
   '(auth)/sign-in': 'Sign In',
   '(auth)/sign-up': 'Sign Up',
-  '(auth)/phone-sign-in': 'Phone Sign In',
   '(auth)/forgot-password': 'Forgot Password',
   onboarding: 'Onboarding',
   '(tabs)': 'Home',
@@ -125,7 +124,7 @@ export async function trackButtonPress(
 }
 
 export async function trackAuthEvent(
-  event: 'login' | 'sign_up' | 'logout' | 'password_reset' | 'phone_code_sent' | 'auth_failed',
+  event: 'login' | 'sign_up' | 'logout' | 'password_reset' | 'auth_failed',
   method?: AuthMethod,
   extra?: Record<string, string>
 ): Promise<void> {
@@ -138,7 +137,7 @@ export async function trackAuthEvent(
       await analytics.logSignUp(instance as never, { method });
       return;
     }
-    const customEvent = event as 'logout' | 'password_reset' | 'phone_code_sent' | 'auth_failed';
+    const customEvent = event as 'logout' | 'password_reset' | 'auth_failed';
     await analytics.logEvent(instance as never, customEvent, {
       ...(method ? { method } : {}),
       ...extra,

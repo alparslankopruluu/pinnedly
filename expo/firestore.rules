@@ -5,6 +5,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isRegisteredUser() {
+      return isSignedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
     function isOwner(ownerId) {
       return isSignedIn() && request.auth.uid == ownerId;
     }
@@ -56,7 +61,7 @@ service cloud.firestore {
     }
 
     function validEntityCreate() {
-      return isSignedIn()
+      return isRegisteredUser()
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.get('sharedWith', []) == []
         && request.resource.data.get('editors', []) == [];
@@ -93,19 +98,19 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn()
+      allow read: if isRegisteredUser();
+      allow create: if isRegisteredUser() && request.auth.uid == userId;
+      allow update: if isRegisteredUser()
         && request.auth.uid == userId
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['displayName', 'avatar', 'bio', 'updatedAt']);
-      allow delete: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isRegisteredUser() && request.auth.uid == userId;
     }
 
     match /notes/{noteId} {
       allow read: if canReadEntity();
       allow create, delete: if false;
-      allow update: if canEditEntity()
+      allow update: if isRegisteredUser() && canEditEntity()
         && accessFieldsAreUnchanged()
         && premiumVisibilityIsValid()
         && premiumReminderIsValid();
@@ -114,7 +119,7 @@ service cloud.firestore {
     match /bookmarks/{bookmarkId} {
       allow read: if canReadEntity();
       allow create, delete: if false;
-      allow update: if canEditEntity()
+      allow update: if isRegisteredUser() && canEditEntity()
         && accessFieldsAreUnchanged()
         && premiumVisibilityIsValid()
         && premiumReminderIsValid();
@@ -123,14 +128,14 @@ service cloud.firestore {
     match /projects/{projectId} {
       allow read: if canReadEntity();
       allow create, delete: if false;
-      allow update: if canEditEntity()
+      allow update: if isRegisteredUser() && canEditEntity()
         && accessFieldsAreUnchanged()
         && premiumVisibilityIsValid()
         && premiumGalleryIsValid();
 
       match /tasks/{taskId} {
         allow read: if canAccessProject(projectId);
-        allow update: if canEditProject(projectId);
+        allow update: if isRegisteredUser() && canEditProject(projectId);
         allow create, delete: if false;
       }
     }
@@ -138,7 +143,7 @@ service cloud.firestore {
     match /todos/{todoId} {
       allow read: if canReadEntity();
       allow create, delete: if false;
-      allow update: if canEditEntity()
+      allow update: if isRegisteredUser() && canEditEntity()
         && accessFieldsAreUnchanged()
         && premiumReminderIsValid();
     }
@@ -146,24 +151,24 @@ service cloud.firestore {
     match /bookmarkLists/{listId} {
       allow read: if canReadList();
       allow create, delete: if false;
-      allow update: if canEditEntity()
+      allow update: if isRegisteredUser() && canEditEntity()
         && accessFieldsAreUnchanged()
         && premiumVisibilityIsValid();
     }
 
     match /listFollowers/{followerId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow read: if isRegisteredUser();
+      allow create: if isRegisteredUser() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isRegisteredUser() && resource.data.userId == request.auth.uid;
     }
 
     match /projectMembers/{memberId} {
-      allow read: if isSignedIn() && canAccessProject(resource.data.projectId);
+      allow read: if isRegisteredUser() && canAccessProject(resource.data.projectId);
       allow create, update, delete: if false;
     }
 
     match /shares/{shareId} {
-      allow read: if isSignedIn()
+      allow read: if isRegisteredUser()
         && (resource.data.toUserId == request.auth.uid || resource.data.createdBy == request.auth.uid);
       allow create, update, delete: if false;
     }
@@ -177,12 +182,12 @@ service cloud.firestore {
     }
 
     match /subscriptionEntitlements/{userId} {
-      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isRegisteredUser() && request.auth.uid == userId;
       allow create, update, delete: if false;
     }
 
     match /subscriptionUsage/{userId} {
-      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isRegisteredUser() && request.auth.uid == userId;
       allow create, update, delete: if false;
     }
 

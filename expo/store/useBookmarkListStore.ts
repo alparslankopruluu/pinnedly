@@ -5,30 +5,35 @@ import { BookmarkList, ID, Visibility } from '@/types';
 import { bookmarkListRepository } from '@/repositories/BookmarkListRepository';
 import { bookmarkRepository } from '@/repositories/BookmarkRepository';
 import { Bookmark } from '@/types';
+import { useAuth } from '@/store/useAuthStore';
 
 export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => {
   const queryClient = useQueryClient();
+  const { isAuthenticated, isGuest } = useAuth();
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const myListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'my'],
     queryFn: () => bookmarkListRepository.getMyLists(),
+    enabled: isAuthenticated,
   });
 
   const publicListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'public'],
     queryFn: () => bookmarkListRepository.getPublicLists(),
+    enabled: isAuthenticated || isGuest,
   });
 
   const followedListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'followed'],
     queryFn: () => bookmarkListRepository.getFollowedLists(),
+    enabled: isAuthenticated,
   });
 
   const searchResultsQuery = useQuery({
     queryKey: ['bookmark-lists', 'search', searchQuery],
     queryFn: () => bookmarkListRepository.searchPublicLists(searchQuery),
-    enabled: searchQuery.trim().length > 0,
+    enabled: (isAuthenticated || isGuest) && searchQuery.trim().length > 0,
   });
 
   // Mutations
@@ -69,6 +74,22 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     },
   });
 
+  const addBookmarkMutation = useMutation({
+    mutationFn: ({ listId, bookmarkId }: { listId: ID; bookmarkId: ID }) =>
+      bookmarkListRepository.addBookmarkToList(listId, bookmarkId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'my'] });
+    },
+  });
+
+  const removeBookmarkMutation = useMutation({
+    mutationFn: ({ listId, bookmarkId }: { listId: ID; bookmarkId: ID }) =>
+      bookmarkListRepository.removeBookmarkFromList(listId, bookmarkId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'my'] });
+    },
+  });
+
   // Actions
   const createList = useCallback(async (name: string, description?: string, visibility: Visibility = 'private'): Promise<BookmarkList> => {
     return createListMutation.mutateAsync({ name, description, visibility });
@@ -89,6 +110,14 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   const unfollowList = useCallback(async (listId: ID): Promise<void> => {
     return unfollowListMutation.mutateAsync(listId);
   }, [unfollowListMutation]);
+
+  const addBookmarkToList = useCallback(async (listId: ID, bookmarkId: ID): Promise<void> => {
+    return addBookmarkMutation.mutateAsync({ listId, bookmarkId });
+  }, [addBookmarkMutation]);
+
+  const removeBookmarkFromList = useCallback(async (listId: ID, bookmarkId: ID): Promise<void> => {
+    return removeBookmarkMutation.mutateAsync({ listId, bookmarkId });
+  }, [removeBookmarkMutation]);
 
   const getListById = useCallback(async (id: ID): Promise<BookmarkList | null> => {
     return bookmarkListRepository.getListById(id);
@@ -130,6 +159,7 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     isDeleting: deleteListMutation.isPending,
     isFollowing: followListMutation.isPending,
     isUnfollowing: unfollowListMutation.isPending,
+    isUpdatingMembership: addBookmarkMutation.isPending || removeBookmarkMutation.isPending,
 
     // Actions
     createList,
@@ -137,6 +167,8 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     deleteList,
     followList,
     unfollowList,
+    addBookmarkToList,
+    removeBookmarkFromList,
     getListById,
     getBookmarksByListId,
     isFollowingList,
@@ -161,11 +193,15 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     deleteListMutation.isPending,
     followListMutation.isPending,
     unfollowListMutation.isPending,
+    addBookmarkMutation.isPending,
+    removeBookmarkMutation.isPending,
     createList,
     updateList,
     deleteList,
     followList,
     unfollowList,
+    addBookmarkToList,
+    removeBookmarkFromList,
     getListById,
     getBookmarksByListId,
     isFollowingList,

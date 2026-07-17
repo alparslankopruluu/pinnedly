@@ -5,6 +5,9 @@ export const REVENUECAT_ENTITLEMENT_ID = 'draft Pro';
 const IOS_API_KEY = 'appl_mufLmalexVaMTSzKtrZgxIfRLtf';
 const ANDROID_API_KEY = 'goog_ilBpMexUSBwpdqwnVDxoJYjOqth';
 
+let offeringsPromise: Promise<PurchasesPackage[]> | null = null;
+let paywallUiPromise: Promise<typeof import('react-native-purchases-ui')> | null = null;
+
 function platformApiKey(): string | null {
   if (Platform.OS === 'ios') return IOS_API_KEY;
   if (Platform.OS === 'android') return ANDROID_API_KEY;
@@ -38,9 +41,51 @@ export async function initializeRevenueCat(appUserId?: string | null): Promise<C
 
 export async function getPremiumPackages(): Promise<PurchasesPackage[]> {
   if (!platformApiKey()) return [];
+  if (!offeringsPromise) {
+    offeringsPromise = (async () => {
+      const Purchases = await sdk();
+      const offerings = await Purchases.getOfferings();
+      return offerings.current?.availablePackages ?? [];
+    })().catch((error) => {
+      offeringsPromise = null;
+      throw error;
+    });
+  }
+  return offeringsPromise;
+}
+
+export async function getRevenueCatCustomerInfo(): Promise<CustomerInfo> {
   const Purchases = await sdk();
-  const offerings = await Purchases.getOfferings();
-  return offerings.current?.availablePackages ?? [];
+  return Purchases.getCustomerInfo();
+}
+
+function revenueCatPaywallUi() {
+  if (!paywallUiPromise) {
+    paywallUiPromise = import('react-native-purchases-ui').catch((error) => {
+      paywallUiPromise = null;
+      throw error;
+    });
+  }
+  return paywallUiPromise;
+}
+
+export async function presentRevenueCatPaywall() {
+  const { default: RevenueCatUI } = await revenueCatPaywallUi();
+  return RevenueCatUI.presentPaywall();
+}
+
+/**
+ * Fetch native paywall code and the current offering before the user taps
+ * Upgrade. RevenueCat caches both calls, so the actual paywall presentation
+ * does not have to wait for a cold module load and catalog request.
+ */
+export async function warmRevenueCatPaywall(): Promise<void> {
+  if (!platformApiKey()) return;
+
+  await Promise.all([
+    getPremiumPackages(),
+    revenueCatPaywallUi(),
+  ]);
 }
 
 export async function purchasePremiumPackage(aPackage: PurchasesPackage): Promise<CustomerInfo> {

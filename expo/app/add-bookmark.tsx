@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   View, 
@@ -24,6 +24,11 @@ import { useTrackFormOpen } from '@/hooks/useTrackFormOpen';
 import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { ContentCategoryId, DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import {
+  BOOKMARK_TAG_SUGGESTIONS,
+  getBookmarkTagTranslationKey,
+  normalizeBookmarkTag,
+} from '@/constants/bookmarkTags';
 
 export default function AddBookmarkScreen() {
   useTrackFormOpen('bookmark');
@@ -40,7 +45,11 @@ export default function AddBookmarkScreen() {
   const [newTag, setNewTag] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const suggestedTags = [...new Set(bookmarks.flatMap((b) => b.tagNames))].slice(0, 12);
+  const tagOptions = useMemo(() => {
+    const generalTags = BOOKMARK_TAG_SUGGESTIONS.map((suggestion) => suggestion.value);
+    const recentTags = bookmarks.flatMap((bookmark) => bookmark.tagNames).map(normalizeBookmarkTag);
+    return [...new Set([...generalTags, ...recentTags, ...selectedTags])].slice(0, 24);
+  }, [bookmarks, selectedTags]);
   const [screenshotUri, setScreenshotUri] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -107,7 +116,7 @@ export default function AddBookmarkScreen() {
   };
 
   const toggleTag = (tagName: string) => {
-    const normalized = tagName.trim().toLowerCase();
+    const normalized = normalizeBookmarkTag(tagName);
     setSelectedTags((prev) =>
       prev.includes(normalized)
         ? prev.filter((name) => name !== normalized)
@@ -116,7 +125,7 @@ export default function AddBookmarkScreen() {
   };
 
   const handleAddTag = () => {
-    const normalized = newTag.trim().toLowerCase();
+    const normalized = normalizeBookmarkTag(newTag);
     if (normalized && !selectedTags.includes(normalized)) {
       setSelectedTags((prev) => [...prev, normalized]);
     }
@@ -273,7 +282,10 @@ export default function AddBookmarkScreen() {
             <View style={styles.section}>
               <Text style={styles.label}>{t('addBookmark.labels.tags')}</Text>
               <View style={styles.tagsContainer}>
-                {suggestedTags.map((tagName) => (
+                {tagOptions.map((tagName) => {
+                  const translationKey = getBookmarkTagTranslationKey(tagName);
+                  const label = translationKey ? t(translationKey) : tagName;
+                  return (
                   <TouchableOpacity
                     key={tagName}
                     style={[
@@ -282,7 +294,7 @@ export default function AddBookmarkScreen() {
                     ]}
                     onPress={() => toggleTag(tagName)}
                     accessibilityRole="checkbox"
-                    accessibilityLabel={tagName}
+                    accessibilityLabel={label}
                     accessibilityState={{ checked: selectedTags.includes(tagName) }}
                   >
                     <Text
@@ -291,13 +303,14 @@ export default function AddBookmarkScreen() {
                         selectedTags.includes(tagName) && styles.selectedTagText,
                       ]}
                     >
-                      {tagName}
+                      {label}
                     </Text>
                     {selectedTags.includes(tagName) && (
                       <X size={14} color="white" style={styles.tagRemove} />
                     )}
                   </TouchableOpacity>
-                ))}
+                  );
+                })}
               </View>
               
               {/* Add New Tag */}

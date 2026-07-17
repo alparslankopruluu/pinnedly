@@ -57,6 +57,10 @@ export const aiWorkspaceChat = onRequest(
     let uid: string | undefined;
     try {
       const decoded = await admin.auth().verifyIdToken(authHeader.slice(7));
+      if (decoded.firebase?.sign_in_provider === 'anonymous') {
+        sendError(res, 403, 'SIGN_IN_REQUIRED', 'A registered account is required', requestId);
+        return;
+      }
       uid = decoded.uid;
     } catch {
       sendError(res, 401, 'AUTH_REQUIRED', 'Invalid authorization token', requestId);

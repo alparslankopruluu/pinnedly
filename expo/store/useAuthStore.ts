@@ -32,6 +32,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
+    isGuest: false,
     isLoading: true,
   });
 
@@ -41,7 +42,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     const init = async () => {
       try {
         await authRepository.initialize();
-        unsubscribe = authRepository.onAuthStateChanged(async (user) => {
+        unsubscribe = authRepository.onAuthStateChanged(async (user, isGuest) => {
           if (!user) {
             await setAnalyticsUserId(null);
             await setCrashlyticsUser(null);
@@ -49,6 +50,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
           setAuthState({
             user,
             isAuthenticated: !!user,
+            isGuest,
             isLoading: false,
           });
         });
@@ -58,6 +60,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         setAuthState({
           user: null,
           isAuthenticated: false,
+          isGuest: false,
           isLoading: false,
         });
       }
@@ -75,7 +78,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     try {
       const user = await authRepository.signIn(email, password);
       await handleAuthSuccess(user, 'email');
-      setAuthState({ user, isAuthenticated: true, isLoading: false });
+      setAuthState({ user, isAuthenticated: true, isGuest: false, isLoading: false });
     } catch (error) {
       handleAuthFailure('email', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -88,7 +91,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     try {
       const user = await authRepository.signUp(email, password, displayName);
       await handleAuthSuccess(user, 'email', true);
-      setAuthState({ user, isAuthenticated: true, isLoading: false });
+      setAuthState({ user, isAuthenticated: true, isGuest: false, isLoading: false });
     } catch (error) {
       handleAuthFailure('email', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -101,32 +104,9 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     try {
       const user = await authRepository.signInWithGoogle();
       await handleAuthSuccess(user, 'google');
-      setAuthState({ user, isAuthenticated: true, isLoading: false });
+      setAuthState({ user, isAuthenticated: true, isGuest: false, isLoading: false });
     } catch (error) {
       handleAuthFailure('google', error);
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-      throw error;
-    }
-  }, []);
-
-  const sendPhoneVerification = useCallback(async (phoneNumber: string): Promise<void> => {
-    try {
-      await authRepository.sendPhoneVerification(phoneNumber);
-      await trackAuthEvent('phone_code_sent', 'phone');
-    } catch (error) {
-      handleAuthFailure('phone', error);
-      throw error;
-    }
-  }, []);
-
-  const confirmPhoneCode = useCallback(async (code: string): Promise<void> => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
-    try {
-      const user = await authRepository.confirmPhoneCode(code);
-      await handleAuthSuccess(user, 'phone');
-      setAuthState({ user, isAuthenticated: true, isLoading: false });
-    } catch (error) {
-      handleAuthFailure('phone', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
     }
@@ -142,6 +122,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       setAuthState({
         user: null,
         isAuthenticated: false,
+        isGuest: false,
         isLoading: false,
       });
     } catch (error) {
@@ -177,7 +158,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     try {
       const user = await authRepository.signInWithApple();
       await handleAuthSuccess(user, 'apple');
-      setAuthState({ user, isAuthenticated: true, isLoading: false });
+      setAuthState({ user, isAuthenticated: true, isGuest: false, isLoading: false });
     } catch (error) {
       handleAuthFailure('apple', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -199,14 +180,25 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
+  const continueAsGuest = useCallback(async (): Promise<void> => {
+    setAuthState((prev) => ({ ...prev, isLoading: true }));
+    try {
+      await authRepository.continueAsGuest();
+      await setAnalyticsUserId(null);
+      await setCrashlyticsUser(null);
+      setAuthState({ user: null, isAuthenticated: false, isGuest: true, isLoading: false });
+    } catch (error) {
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  }, []);
+
   return useMemo(() => ({
     ...authState,
     signIn,
     signUp,
     signOut,
     signInWithGoogle,
-    sendPhoneVerification,
-    confirmPhoneCode,
     updateProfile,
     checkHandleAvailability,
     searchUsers,
@@ -214,5 +206,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     signInWithApple,
     searchUsersByEmail,
     resetPassword,
-  }), [authState, signIn, signUp, signOut, signInWithGoogle, sendPhoneVerification, confirmPhoneCode, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail, resetPassword]);
+    continueAsGuest,
+  }), [authState, signIn, signUp, signOut, signInWithGoogle, updateProfile, checkHandleAvailability, searchUsers, getUserById, signInWithApple, searchUsersByEmail, resetPassword, continueAsGuest]);
 });

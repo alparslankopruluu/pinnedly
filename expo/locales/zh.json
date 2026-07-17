@@ -94,6 +94,8 @@
     "signIn": "登录",
     "signUp": "注册",
     "createAccount": "创建账户",
+    "continueAsGuest": "不登录继续",
+    "guest": { "signInRequired": "请登录后继续", "featureRequiresAccount": "此功能会保存或共享数据，因此需要账户。", "profileTitle": "您正在以访客身份浏览", "profileDescription": "您可以自由探索 Draft。登录后即可保存内容、使用 AI、协作并在设备间同步。" },
     "phoneSignIn": "手机号登录",
     "resetPassword": "重置密码",
     "checkYourEmail": "请查收邮件",
@@ -534,6 +536,11 @@
       "description": "未找到与「{{query}}」匹配的用户"
     }
   },
+  "tagSuggestions": {
+    "ai": "AI", "work": "工作", "technology": "科技", "mobile": "移动", "games": "游戏",
+    "art": "艺术", "socialMedia": "社交媒体", "home": "家庭", "school": "学校", "study": "学习",
+    "music": "音乐", "video": "视频", "personal": "个人", "research": "研究", "travel": "旅行"
+  },
   "addBookmark": {
     "title": "添加书签",
     "urlPlaceholder": "在此粘贴 URL...",
@@ -652,7 +659,37 @@
     "openedCount": "已打开 {{count}} 次",
     "whySaved": "保存原因",
     "tapToAddNote": "点击添加备注...",
-    "archive": "归档"
+    "archive": "归档",
+    "updateFailed": "无法更新书签。",
+    "tags": {
+      "title": "标签",
+      "placeholder": "添加标签",
+      "empty": "还没有标签。添加标签后可以更快找到此书签。",
+      "suggestions": "可选择多个标签，也可以添加自定义标签。"
+    },
+    "attachments": {
+      "title": "链接与媒体",
+      "empty": "为此书签添加链接、图片或视频。",
+      "add": "添加",
+      "urlPlaceholder": "粘贴网址",
+      "titlePlaceholder": "标题（可选）",
+      "invalidUrl": "请输入有效的网址。",
+      "chooseImage": "选择图片",
+      "changeImage": "更换图片",
+      "chooseImageFirst": "请先选择一张图片。",
+      "imageHint": "从照片图库中选择图片。",
+      "uploading": "正在上传...",
+      "uploadFailed": "图片上传失败。",
+      "permissionTitle": "需要照片访问权限",
+      "permissionMessage": "允许访问照片以向此书签添加图片。",
+      "types": { "link": "链接", "image": "图片", "video": "视频" }
+    },
+    "lists": {
+      "title": "列表",
+      "empty": "你还没有创建列表。",
+      "create": "创建列表",
+      "updateFailed": "无法更新列表归属。"
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "笔记标题",
