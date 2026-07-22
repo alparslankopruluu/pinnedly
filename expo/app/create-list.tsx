@@ -152,8 +152,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f1f5f9',
   },
   cancelButton: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
+    minWidth: 96,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderColor: '#cbd5e1',
+    backgroundColor: '#ffffff',
   },
   title: {
     fontSize: 18,

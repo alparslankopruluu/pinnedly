@@ -108,11 +108,23 @@ export async function fetchRevenueCatEntitlement(uid: string): Promise<ServerEnt
     aiLimit: active ? PREMIUM_AI_LIMIT : FREE_AI_LIMIT,
   };
 
+  // Firestore rejects `undefined`. A free subscriber has no entitlement or
+  // product identifier, so only persist those optional values when present.
+  const entitlementRecord: Record<string, unknown> = {
+    plan: result.plan,
+    status: result.status,
+    active: result.active,
+    verifiedAt: result.verifiedAt,
+    aiUsed: result.aiUsed,
+    aiLimit: result.aiLimit,
+    expiresAtServer: expiresAt ? admin.firestore.Timestamp.fromMillis(expiresAt) : null,
+  };
+  if (result.entitlementId) entitlementRecord.entitlementId = result.entitlementId;
+  if (result.productId) entitlementRecord.productId = result.productId;
+  if (result.expiresAt) entitlementRecord.expiresAt = result.expiresAt;
+
   await admin.firestore().collection('subscriptionEntitlements').doc(uid).set(
-    {
-      ...result,
-      expiresAtServer: expiresAt ? admin.firestore.Timestamp.fromMillis(expiresAt) : null,
-    },
+    entitlementRecord,
     { merge: true }
   );
   return result;
@@ -191,6 +203,7 @@ async function requireFirebaseUser(req: { headers: { authorization?: string } })
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) throw new Error('AUTH_REQUIRED');
   const decoded = await admin.auth().verifyIdToken(authHeader.slice(7));
+  if (decoded.firebase?.sign_in_provider === 'anonymous') throw new Error('SIGN_IN_REQUIRED');
   return decoded.uid;
 }
 
@@ -209,10 +222,16 @@ export const syncEntitlement = onRequest(
       const uid = await requireFirebaseUser(req);
       res.status(200).json(await getAuthoritativeEntitlement(uid, true));
     } catch (error) {
-      const authError = error instanceof Error && error.message === 'AUTH_REQUIRED';
-      res.status(authError ? 401 : 503).json({
-        code: authError ? 'AUTH_REQUIRED' : 'ENTITLEMENT_UNAVAILABLE',
-        error: authError ? 'Authentication required' : 'Subscription status could not be verified',
+      const errorCode = error instanceof Error ? error.message : '';
+      const authError = errorCode === 'AUTH_REQUIRED';
+      const signInRequired = errorCode === 'SIGN_IN_REQUIRED';
+      res.status(authError ? 401 : signInRequired ? 403 : 503).json({
+        code: signInRequired ? 'SIGN_IN_REQUIRED' : authError ? 'AUTH_REQUIRED' : 'ENTITLEMENT_UNAVAILABLE',
+        error: signInRequired
+          ? 'A registered account is required'
+          : authError
+            ? 'Authentication required'
+            : 'Subscription status could not be verified',
       });
     }
   }

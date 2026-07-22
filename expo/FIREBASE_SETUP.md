@@ -33,7 +33,7 @@ Firebase Console → Authentication → Sign-in method:
 
 - **Email/Password** — Enable
 - **Google** — Enable, add support email
-- **Phone** — Enable (Blaze plan required for production SMS)
+- **Anonymous** — Enable (used only for the read-only guest session; rules and Functions reject guest writes)
 
 ### Google Sign-In extras
 
@@ -45,7 +45,7 @@ Firebase Console → Authentication → Sign-in method:
 - Email/Password
 - Google
 - Apple (iOS)
-- Phone (`app/(auth)/phone-sign-in.tsx`)
+- Anonymous (read-only guest mode)
 
 ### Android SHA fingerprints (debug)
 

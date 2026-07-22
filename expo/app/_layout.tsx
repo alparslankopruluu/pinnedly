@@ -43,7 +43,7 @@ function WebHydrationGate({ children }: { children: React.ReactNode }) {
 }
 
 function NavigationGuard() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isGuest, isLoading: authLoading } = useAuth();
   const { isLoading: onboardingLoading } = useOnboarding();
   const segments = useSegments();
   const router = useRouter();
@@ -52,15 +52,39 @@ function NavigationGuard() {
     if (authLoading || onboardingLoading) return;
 
     const inAuthGroup = segments[0] === "(auth)";
-    if (!isAuthenticated && !inAuthGroup) {
+    const authScreen = segments[1];
+    const hasSession = isAuthenticated || isGuest;
+    const accountRequiredRoutes = new Set([
+      'add-bookmark',
+      'add-project',
+      'add-note',
+      'add-todo',
+      'ai-chat',
+      'edit-profile',
+      'share-inbox',
+      'people-search',
+      'create-list',
+    ]);
+
+    if (!hasSession && !inAuthGroup) {
       router.replace("/(auth)/welcome");
       return;
     }
 
     if (isAuthenticated && inAuthGroup) {
       router.replace("/(tabs)");
+      return;
     }
-  }, [isAuthenticated, authLoading, onboardingLoading, segments, router]);
+
+    if (isGuest && inAuthGroup && authScreen === 'welcome') {
+      router.replace("/(tabs)");
+      return;
+    }
+
+    if (isGuest && accountRequiredRoutes.has(segments[0] ?? '')) {
+      router.replace('/(auth)/sign-in');
+    }
+  }, [isAuthenticated, isGuest, authLoading, onboardingLoading, segments, router]);
 
   return null;
 }

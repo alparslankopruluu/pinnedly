@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTabBarBottomInset, getTabBarHeight } from '@/utils/layout';
 import { useAppAppearance } from '@/hooks/useAppAppearance';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 export default function TabLayout() {
   const { t } = useTranslation();
   const { colors, font } = useAppAppearance();
+  const { requireAccount } = useAuthGate();
   const insets = useSafeAreaInsets();
   const tabBarBottomInset = getTabBarBottomInset(insets.bottom);
   const tabBarHeight = getTabBarHeight(insets.bottom);
@@ -74,7 +76,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Bookmark size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
-              onPress={() => router.push('/add-bookmark')}
+              onPress={() => requireAccount() && router.push('/add-bookmark')}
               style={styles.headerButton}
               accessibilityRole="button"
               accessibilityLabel={t('quickAdd.addBookmark')}
@@ -91,7 +93,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <FolderOpen size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
-              onPress={() => router.push('/add-project')}
+              onPress={() => requireAccount() && router.push('/add-project')}
               style={styles.headerButton}
               accessibilityRole="button"
               accessibilityLabel={t('quickAdd.addProject')}
@@ -108,7 +110,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
           headerRight: () => (
             <TouchableOpacity 
-              onPress={() => router.push('/add-note')}
+              onPress={() => requireAccount() && router.push('/add-note')}
               style={styles.headerButton}
               accessibilityRole="button"
               accessibilityLabel={t('quickAdd.addNote')}

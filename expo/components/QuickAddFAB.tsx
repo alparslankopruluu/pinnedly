@@ -7,12 +7,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trackButtonPress } from '@/lib/analytics';
 import { getFabBottomOffset } from '@/utils/layout';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 export function QuickAddFAB() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [isVisible, setIsVisible] = useState(false);
   const reduceMotion = useReducedMotion();
+  const { requireAccount } = useAuthGate();
 
   const options = useMemo(
     () => [
@@ -22,7 +24,7 @@ export function QuickAddFAB() {
         onPress: () => {
           trackButtonPress('home', 'fab_add_bookmark');
           setIsVisible(false);
-          router.push('/add-bookmark');
+          if (requireAccount()) router.push('/add-bookmark');
         },
       },
       {
@@ -31,7 +33,7 @@ export function QuickAddFAB() {
         onPress: () => {
           trackButtonPress('home', 'fab_add_project');
           setIsVisible(false);
-          router.push('/add-project');
+          if (requireAccount()) router.push('/add-project');
         },
       },
       {
@@ -40,11 +42,11 @@ export function QuickAddFAB() {
         onPress: () => {
           trackButtonPress('home', 'fab_add_note');
           setIsVisible(false);
-          router.push('/add-note');
+          if (requireAccount()) router.push('/add-note');
         },
       },
     ],
-    [t]
+    [requireAccount, t]
   );
 
   return (

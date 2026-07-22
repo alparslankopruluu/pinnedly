@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getFooterBottomPadding } from '@/utils/layout';
+import { StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface ScreenFooterProps {
   children: React.ReactNode;
@@ -9,24 +8,23 @@ interface ScreenFooterProps {
 }
 
 export function ScreenFooter({ children, style }: ScreenFooterProps) {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View
+    <SafeAreaView
+      edges={['bottom']}
       style={[
         styles.footer,
-        { paddingBottom: getFooterBottomPadding(insets.bottom) },
         style,
       ]}
     >
       {children}
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   footer: {
     paddingTop: 20,
+    paddingBottom: 20,
     paddingHorizontal: 20,
     backgroundColor: 'white',
     borderTopWidth: 1,

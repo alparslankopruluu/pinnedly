@@ -14,6 +14,14 @@ export type CommentNote = {
   createdAt: number;
 };
 
+export type BookmarkAttachment = {
+  id: ID;
+  type: 'link' | 'image' | 'video';
+  url: string;
+  title?: string;
+  storagePath?: string;
+};
+
 export type BookmarkSource =
   | 'twitter'
   | 'instagram'
@@ -45,6 +53,7 @@ export type Bookmark = {
   tags: Tag[];
   tagNames: string[];
   personalNote?: string;
+  attachments?: BookmarkAttachment[];
   status: BookmarkStatus;
   reminderAt?: number;
   readAt?: number;
@@ -130,6 +139,7 @@ export type User = {
 export type AuthState = {
   user: User | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
   isLoading: boolean;
 };
 
@@ -215,6 +225,7 @@ export type BookmarkList = {
   sharedWith?: ID[];
   ownerId: ID;
   followerCount: number;
+  bookmarkIds: ID[];
   bookmarks: Bookmark[];
   createdAt: number;
   updatedAt: number;

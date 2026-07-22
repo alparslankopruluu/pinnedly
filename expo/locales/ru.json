@@ -94,6 +94,8 @@
     "signIn": "Войти",
     "signUp": "Регистрация",
     "createAccount": "Создать аккаунт",
+    "continueAsGuest": "Продолжить без аккаунта",
+    "guest": { "signInRequired": "Войдите, чтобы продолжить", "featureRequiresAccount": "Эта функция сохраняет или передаёт данные, поэтому требуется аккаунт.", "profileTitle": "Вы просматриваете Draft как гость", "profileDescription": "Знакомьтесь с Draft свободно. Войдите, чтобы сохранять работу, использовать ИИ, сотрудничать и синхронизировать устройства." },
     "phoneSignIn": "Вход по телефону",
     "resetPassword": "Сброс пароля",
     "checkYourEmail": "Проверьте почту",
@@ -534,6 +536,11 @@
       "description": "Пользователи не найдены по запросу «{{query}}»"
     }
   },
+  "tagSuggestions": {
+    "ai": "ИИ", "work": "Работа", "technology": "Технологии", "mobile": "Мобильное", "games": "Игры",
+    "art": "Искусство", "socialMedia": "Соцсети", "home": "Дом", "school": "Школа", "study": "Учёба",
+    "music": "Музыка", "video": "Видео", "personal": "Личное", "research": "Исследования", "travel": "Путешествия"
+  },
   "addBookmark": {
     "title": "Добавить закладку",
     "urlPlaceholder": "Вставьте URL сюда...",
@@ -652,7 +659,37 @@
     "openedCount": "Opened {{count}}×",
     "whySaved": "Why I saved this",
     "tapToAddNote": "Tap to add a note...",
-    "archive": "Archive"
+    "archive": "В архив",
+    "updateFailed": "Не удалось обновить закладку.",
+    "tags": {
+      "title": "Теги",
+      "placeholder": "Добавить тег",
+      "empty": "Тегов пока нет. Добавьте их, чтобы быстрее находить закладку.",
+      "suggestions": "Выберите нужные теги или добавьте свой."
+    },
+    "attachments": {
+      "title": "Ссылки и медиа",
+      "empty": "Добавьте к закладке ссылку, изображение или видео.",
+      "add": "Добавить",
+      "urlPlaceholder": "Вставьте URL",
+      "titlePlaceholder": "Название (необязательно)",
+      "invalidUrl": "Введите корректный URL.",
+      "chooseImage": "Выбрать изображение",
+      "changeImage": "Заменить изображение",
+      "chooseImageFirst": "Сначала выберите изображение.",
+      "imageHint": "Выберите изображение из медиатеки.",
+      "uploading": "Загрузка...",
+      "uploadFailed": "Не удалось загрузить изображение.",
+      "permissionTitle": "Нужен доступ к фотографиям",
+      "permissionMessage": "Разрешите доступ к фотографиям, чтобы добавить изображение к закладке.",
+      "types": { "link": "Ссылка", "image": "Изображение", "video": "Видео" }
+    },
+    "lists": {
+      "title": "Списки",
+      "empty": "Вы пока не создали ни одного списка.",
+      "create": "Создать список",
+      "updateFailed": "Не удалось обновить список."
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "Название заметки",

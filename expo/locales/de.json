@@ -94,6 +94,8 @@
     "signIn": "Anmelden",
     "signUp": "Registrieren",
     "createAccount": "Konto erstellen",
+    "continueAsGuest": "Ohne Konto fortfahren",
+    "guest": { "signInRequired": "Zum Fortfahren anmelden", "featureRequiresAccount": "Diese Funktion speichert oder teilt Daten und erfordert ein Konto.", "profileTitle": "Du nutzt Draft als Gast", "profileDescription": "Entdecke Draft frei. Melde dich an, um deine Arbeit zu speichern, KI zu nutzen, zusammenzuarbeiten und Geräte zu synchronisieren." },
     "phoneSignIn": "Anmeldung per Telefon",
     "resetPassword": "Passwort zurücksetzen",
     "checkYourEmail": "E-Mail prüfen",
@@ -534,6 +536,11 @@
       "description": "Keine Benutzer gefunden für „{{query}}“"
     }
   },
+  "tagSuggestions": {
+    "ai": "KI", "work": "Arbeit", "technology": "Technologie", "mobile": "Mobil", "games": "Spiele",
+    "art": "Kunst", "socialMedia": "Soziale Medien", "home": "Zuhause", "school": "Schule", "study": "Lernen",
+    "music": "Musik", "video": "Video", "personal": "Persönlich", "research": "Recherche", "travel": "Reisen"
+  },
   "addBookmark": {
     "title": "Lesezeichen hinzufügen",
     "urlPlaceholder": "URL hier einfügen...",
@@ -652,7 +659,37 @@
     "openedCount": "{{count}}× geöffnet",
     "whySaved": "Warum ich das gespeichert habe",
     "tapToAddNote": "Tippen, um eine Notiz hinzuzufügen...",
-    "archive": "Archivieren"
+    "archive": "Archivieren",
+    "updateFailed": "Das Lesezeichen konnte nicht aktualisiert werden.",
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Tag hinzufügen",
+      "empty": "Noch keine Tags. Mit Tags findest du dieses Lesezeichen schneller.",
+      "suggestions": "Wähle beliebig viele aus oder füge einen eigenen Tag hinzu."
+    },
+    "attachments": {
+      "title": "Links und Medien",
+      "empty": "Füge einen Link, ein Bild oder ein Video hinzu.",
+      "add": "Hinzufügen",
+      "urlPlaceholder": "URL einfügen",
+      "titlePlaceholder": "Titel (optional)",
+      "invalidUrl": "Gib eine gültige URL ein.",
+      "chooseImage": "Bild auswählen",
+      "changeImage": "Bild ändern",
+      "chooseImageFirst": "Wähle zuerst ein Bild aus.",
+      "imageHint": "Wähle ein Bild aus deiner Fotomediathek.",
+      "uploading": "Wird hochgeladen...",
+      "uploadFailed": "Das Bild konnte nicht hochgeladen werden.",
+      "permissionTitle": "Fotozugriff erforderlich",
+      "permissionMessage": "Erlaube den Fotozugriff, um diesem Lesezeichen ein Bild hinzuzufügen.",
+      "types": { "link": "Link", "image": "Bild", "video": "Video" }
+    },
+    "lists": {
+      "title": "Listen",
+      "empty": "Du hast noch keine Liste erstellt.",
+      "create": "Liste erstellen",
+      "updateFailed": "Die Listenzuordnung konnte nicht aktualisiert werden."
+    }
   },
   "noteDetail": {
     "titlePlaceholder": "Notiztitel",

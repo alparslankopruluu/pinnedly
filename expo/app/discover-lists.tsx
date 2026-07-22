@@ -7,9 +7,11 @@ import { Search, Users, Heart, ArrowLeft, Plus } from '@/components/icons/lucide
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { BookmarkList } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 export default function PublicListsScreen() {
   const { t } = useTranslation();
+  const { requireAccount } = useAuthGate();
   const {
     publicLists,
     searchResults,
@@ -45,6 +47,7 @@ export default function PublicListsScreen() {
   };
 
   const handleFollowToggle = async (list: BookmarkList) => {
+    if (!requireAccount()) return;
     try {
       const isCurrentlyFollowing = isFollowingList(list.id);
       if (isCurrentlyFollowing) {
@@ -104,7 +107,7 @@ export default function PublicListsScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>{t('discoverLists.title')}</Text>
         <TouchableOpacity
-          onPress={() => router.push('/create-list' as any)}
+          onPress={() => requireAccount() && router.push('/create-list' as any)}
           style={styles.createButton}
         >
           <Plus size={24} color="#4f46e5" />
@@ -151,7 +154,7 @@ export default function PublicListsScreen() {
             {!searchQuery.trim() && (
               <Button
                 title={t('discoverLists.createList')}
-                onPress={() => router.push('/create-list' as any)}
+                onPress={() => requireAccount() && router.push('/create-list' as any)}
                 style={styles.createListButton}
               />
             )}

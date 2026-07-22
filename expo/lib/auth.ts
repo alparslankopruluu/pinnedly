@@ -6,6 +6,7 @@ declare const require: <T = unknown>(moduleName: string) => T;
 
 export type FirebaseUserLike = {
   uid: string;
+  isAnonymous?: boolean;
   email?: string | null;
   displayName?: string | null;
   photoURL?: string | null;
@@ -17,10 +18,6 @@ type AuthResultLike = {
   additionalUserInfo?: {
     isNewUser?: boolean;
   } | null;
-};
-
-type PhoneConfirmationLike = {
-  confirm: (code: string) => Promise<AuthResultLike | null>;
 };
 
 function nativeAuth() {
@@ -116,6 +113,14 @@ export async function createEmailUser(email: string, password: string): Promise<
   ) as Promise<AuthResultLike>;
 }
 
+export async function signInAnonymouslyProvider(): Promise<AuthResultLike> {
+  if (Platform.OS === 'web') {
+    return webAuth().signInAnonymously(getAuthInstance() as never) as Promise<AuthResultLike>;
+  }
+
+  return nativeAuth().signInAnonymously(getAuthInstance() as never) as Promise<AuthResultLike>;
+}
+
 export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
   if (Platform.OS === 'web') {
     const auth = webAuth();
@@ -136,17 +141,6 @@ export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
   const auth = nativeAuth();
   const credential = auth.GoogleAuthProvider.credential(idToken);
   return auth.signInWithCredential(getAuthInstance() as never, credential) as Promise<AuthResultLike>;
-}
-
-export async function sendPhoneVerificationCode(phoneNumber: string): Promise<PhoneConfirmationLike> {
-  if (Platform.OS === 'web') {
-    throw new Error('Phone sign-in is not available on web yet');
-  }
-
-  return nativeAuth().signInWithPhoneNumber(
-    getAuthInstance() as never,
-    phoneNumber
-  ) as Promise<PhoneConfirmationLike>;
 }
 
 export async function signInWithAppleProvider(): Promise<AuthResultLike & { displayName?: string }> {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Draft",
     "slug": "draft",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -17,19 +17,20 @@
       "backgroundColor": "#F04444"
     },
     "ios": {
+      "buildNumber": "3",
       "supportsTablet": true,
       "bundleIdentifier": "app.techtactoe.draft",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "CFBundleDisplayName": "Draft",
-        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to select images for your bookmarks, notes, and projects",
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
       },
       "usesAppleSignIn": true
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 6,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F04444"
@@ -64,7 +65,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "Draft accesses your photos so you can add images to bookmarks, notes, and projects."
         }
       ],
       "expo-apple-authentication",
@@ -88,6 +89,7 @@
               "RNFBApp",
               "RNFBAuth",
               "RNFBFirestore",
+              "RNFBStorage",
               "RNFBAnalytics",
               "RNFBCrashlytics"
             ]

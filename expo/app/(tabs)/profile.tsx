@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Animated, Pressable, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,18 +14,19 @@ import {
 } from '@/components/icons/lucide';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/store/useAuthStore';
-import { PremiumModal } from '@/components/PremiumModal';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
+import { Button } from '@/components/ui/Button';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const { preferences, bookmarks, projects, notes, updatePreferences } = useAppStore();
   const { colors, font } = useAppAppearance();
   const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const insets = useSafeAreaInsets();
-  const [showPremiumModal, setShowPremiumModal] = useState<boolean>(false);
+  const { isPremium, snapshot, showPaywall } = useSubscriptionAccess();
   const reduceMotion = useReducedMotion();
   
   const pulseAnim = useMemo(() => new Animated.Value(1), []);
@@ -74,6 +75,28 @@ export default function ProfileScreen() {
     { id: 'notes', label: t('profile.stats.notes'), value: notes.length },
     { id: 'opens', label: t('profile.stats.totalOpens'), value: bookmarks.reduce((sum, b) => sum + b.openCount, 0) },
   ];
+
+  if (isGuest) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.guestContainer}>
+          <View style={styles.guestAvatar}>
+            <Text style={styles.guestAvatarText}>D</Text>
+          </View>
+          <Text style={styles.guestTitle}>{t('auth.guest.profileTitle')}</Text>
+          <Text style={styles.guestDescription}>{t('auth.guest.profileDescription')}</Text>
+          <View style={styles.guestActions}>
+            <Button title={t('auth.signIn')} onPress={() => router.push('/(auth)/sign-in')} />
+            <Button
+              title={t('auth.createAccount')}
+              onPress={() => router.push('/(auth)/sign-up')}
+              variant="outline"
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -171,16 +194,14 @@ export default function ProfileScreen() {
         </View>
         
         {/* Premium CTA Section */}
-        <View style={styles.section}>
+        {!isPremium && snapshot.status !== 'loading' ? <View style={styles.section}>
           <Animated.View style={[styles.premiumCTA, { transform: [{ scale: pulseAnim }] }]}>
             <Pressable
               style={({ pressed }) => [
                 styles.premiumButton,
                 pressed && styles.premiumButtonPressed
               ]}
-              onPress={() => {
-                setShowPremiumModal(true);
-              }}
+              onPress={showPaywall}
             >
               <View style={styles.premiumContent}>
                 <View style={styles.premiumLeft}>
@@ -197,15 +218,10 @@ export default function ProfileScreen() {
               </View>
             </Pressable>
           </Animated.View>
-        </View>
+        </View> : null}
       </ScrollView>
       </View>
       
-      {/* Premium Modal */}
-      <PremiumModal
-        visible={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
     </View>
   );
 }
@@ -214,6 +230,43 @@ const createStyles = (colors: AppColors, font: (size: number) => number) => Styl
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  guestContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+  },
+  guestAvatar: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEE2E2',
+    marginBottom: 20,
+  },
+  guestAvatarText: {
+    color: '#B91C1C',
+    fontSize: font(40),
+    fontWeight: '800',
+  },
+  guestTitle: {
+    color: colors.text,
+    fontSize: font(24),
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  guestDescription: {
+    color: colors.textSecondary,
+    fontSize: font(16),
+    lineHeight: font(24),
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 28,
+  },
+  guestActions: {
+    gap: 12,
   },
   safeArea: {
     flex: 1,

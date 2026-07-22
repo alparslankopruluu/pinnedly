@@ -7,12 +7,12 @@ import { useAuth } from '@/store/useAuthStore';
 import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Eye, EyeOff, Phone } from '@/components/icons/lucide';
+import { ArrowLeft, Eye, EyeOff } from '@/components/icons/lucide';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 
 export default function SignIn() {
   const { t } = useTranslation();
-  const { signIn, signInWithApple, signInWithGoogle, isLoading } = useAuth();
+  const { signIn, signInWithApple, signInWithGoogle, continueAsGuest, isLoading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -49,6 +49,15 @@ export default function SignIn() {
       router.replace('/(tabs)');
     } catch (error) {
       showAppAlert(t('auth.errors.googleSignInFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
+    }
+  };
+
+  const handleContinueAsGuest = async () => {
+    try {
+      await continueAsGuest();
+      router.replace('/(tabs)');
+    } catch {
+      showAppAlert(t('common.error'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
     }
   };
 
@@ -138,17 +147,13 @@ export default function SignIn() {
           onGooglePress={handleGoogleSignIn}
         />
 
-        <TouchableOpacity
-          style={styles.phoneLink}
-          onPress={() => {
-            trackButtonPress('sign_in', 'phone_sign_in_link');
-            router.push('./phone-sign-in');
-          }}
-          accessibilityRole="button"
-        >
-          <Phone size={18} color="#4f46e5" />
-          <Text style={styles.phoneLinkText}>{t('auth.signInWithPhone')}</Text>
-        </TouchableOpacity>
+        <Button
+          title={t('auth.continueAsGuest')}
+          onPress={handleContinueAsGuest}
+          disabled={isLoading}
+          variant="outline"
+          style={styles.guestButton}
+        />
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
@@ -274,6 +279,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 24,
   },
+  guestButton: {
+    marginTop: 20,
+  },
   dividerLine: {
     flex: 1,
     height: 1,
@@ -292,18 +300,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   footerLink: {
-    color: '#4f46e5',
-    fontWeight: '500' as const,
-  },
-  phoneLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  phoneLinkText: {
-    fontSize: 14,
     color: '#4f46e5',
     fontWeight: '500' as const,
   },

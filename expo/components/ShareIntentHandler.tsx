@@ -69,7 +69,10 @@ function NativeShareIntentRuntime({
 
       if (!isAuthenticated) {
         setIsSaving(false);
-        showAppAlert(t('shareIntent.signInRequired'), t('shareIntent.signInToSaveLinks'));
+        showAppAlert(t('shareIntent.signInRequired'), t('shareIntent.signInToSaveLinks'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('auth.signIn'), onPress: () => router.push('/(auth)/sign-in') },
+        ], { variant: 'info' });
         resetShareIntent();
         isProcessing.current = false;
         return;
