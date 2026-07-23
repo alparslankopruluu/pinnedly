@@ -37,9 +37,6 @@ yarn-error.*
 google-services.json
 GoogleService-Info.plist
 
-# Android release signing (never commit)
-credentials.json
-release.keystore
 *.jks
 
 # typescript
