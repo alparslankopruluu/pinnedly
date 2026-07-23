@@ -1,4 +1,4 @@
-import { User, ID } from '@/types';
+import { User, ID, Note } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   configureAuthProviders,
@@ -30,6 +30,7 @@ import {
   where,
 } from '@/lib/firestore';
 import { shareApi } from '@/services/shareApi';
+import { noteRepository } from '@/repositories/NoteRepository';
 
 class AuthRepository {
   private currentUser: User | null = null;
@@ -218,9 +219,44 @@ class AuthRepository {
     };
   }
 
+  private async captureGuestNotesSnapshot(): Promise<Note[]> {
+    if (getCurrentFirebaseUser()?.isAnonymous !== true) return [];
+    try {
+      return await noteRepository.getNotes();
+    } catch (error) {
+      console.warn('Could not read guest notes before sign-in:', error);
+      return [];
+    }
+  }
+
+  private async migrateGuestNotesIfNeeded(
+    previousUid: string | null,
+    guestNotes: Note[],
+    newUid: string
+  ): Promise<void> {
+    if (!previousUid || !guestNotes.length || newUid === previousUid) return;
+    for (const note of guestNotes) {
+      try {
+        await noteRepository.createNote({
+          title: note.title,
+          markdown: note.markdown,
+          visibility: note.visibility,
+          category: note.category,
+          reminderSchedule: note.reminderSchedule,
+          links: note.links,
+        });
+      } catch (error) {
+        console.warn(`Could not migrate guest note "${note.title}":`, error);
+      }
+    }
+  }
+
   async signIn(email: string, password: string): Promise<User> {
     await this.setGuestMode(false);
+    const previousUid = getCurrentFirebaseUser()?.uid ?? null;
+    const guestNotes = await this.captureGuestNotesSnapshot();
     const credential = await signInWithEmail(email, password);
+    await this.migrateGuestNotesIfNeeded(previousUid, guestNotes, credential.user.uid);
     this.currentUser = await this.loadOrCreateProfile(credential.user);
     return this.currentUser;
   }
@@ -249,14 +285,20 @@ class AuthRepository {
 
   async signInWithGoogle(): Promise<User> {
     await this.setGuestMode(false);
+    const previousUid = getCurrentFirebaseUser()?.uid ?? null;
+    const guestNotes = await this.captureGuestNotesSnapshot();
     const result = await signInWithGoogleProvider();
+    await this.migrateGuestNotesIfNeeded(previousUid, guestNotes, result.user.uid);
     this.currentUser = await this.loadOrCreateProfile(result.user);
     return this.currentUser;
   }
 
   async signInWithApple(): Promise<User> {
     await this.setGuestMode(false);
+    const previousUid = getCurrentFirebaseUser()?.uid ?? null;
+    const guestNotes = await this.captureGuestNotesSnapshot();
     const result = await signInWithAppleProvider();
+    await this.migrateGuestNotesIfNeeded(previousUid, guestNotes, result.user.uid);
 
     if (!result.additionalUserInfo?.isNewUser) {
       this.currentUser = await this.loadOrCreateProfile(result.user);

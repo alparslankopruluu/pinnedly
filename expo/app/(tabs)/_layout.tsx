@@ -109,8 +109,8 @@ export default function TabLayout() {
           title: t('tabs.notes'),
           tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
           headerRight: () => (
-            <TouchableOpacity 
-              onPress={() => requireAccount() && router.push('/add-note')}
+            <TouchableOpacity
+              onPress={() => router.push('/add-note')}
               style={styles.headerButton}
               accessibilityRole="button"
               accessibilityLabel={t('quickAdd.addNote')}

@@ -30,6 +30,7 @@ import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
 import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { noteRepository } from '@/repositories/NoteRepository';
 import { useAuth } from '@/store/useAuthStore';
+import { getCurrentFirebaseUser } from '@/lib/auth';
 
 export default function NoteDetailScreen() {
   const { t } = useTranslation();
@@ -37,6 +38,7 @@ export default function NoteDetailScreen() {
   const noteId = Array.isArray(id) ? id[0] : id;
   useTrackContentOpen('note', noteId);
   const { user } = useAuth();
+  const currentUid = user?.id ?? getCurrentFirebaseUser()?.uid ?? null;
   const { notes, loading, updateNote, deleteNote } = useNoteStore();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>('');
@@ -212,7 +214,7 @@ export default function NoteDetailScreen() {
                   <TouchableOpacity onPress={() => setShowShareModal(true)} style={styles.headerButton}>
                     <Share2 size={20} color="#6B7280" />
                   </TouchableOpacity>
-                  {user?.id === note.userId ? (
+                  {currentUid === note.userId ? (
                     <TouchableOpacity onPress={handleDelete} style={styles.headerButton}>
                       <Trash2 size={20} color="#EF4444" />
                     </TouchableOpacity>

@@ -42,7 +42,7 @@ export function QuickAddFAB() {
         onPress: () => {
           trackButtonPress('home', 'fab_add_note');
           setIsVisible(false);
-          if (requireAccount()) router.push('/add-note');
+          router.push('/add-note');
         },
       },
     ],

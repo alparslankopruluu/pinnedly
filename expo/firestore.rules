@@ -110,7 +110,7 @@ service cloud.firestore {
     match /notes/{noteId} {
       allow read: if canReadEntity();
       allow create, delete: if false;
-      allow update: if isRegisteredUser() && canEditEntity()
+      allow update: if isSignedIn() && canEditEntity()
         && accessFieldsAreUnchanged()
         && premiumVisibilityIsValid()
         && premiumReminderIsValid();

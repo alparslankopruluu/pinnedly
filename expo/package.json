@@ -11,6 +11,7 @@
     "lint": "expo lint",
     "prebuild": "expo prebuild --clean",
     "android": "expo run:android",
+    "android:all": "expo run:android --device ELI_NX9 && expo run:android --device M2101K7BI",
     "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
     "test:subscription": "node --test --experimental-strip-types tests/subscription-access.test.mjs",

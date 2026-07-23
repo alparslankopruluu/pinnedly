@@ -33,15 +33,18 @@ function withAndroidReleaseSigning(config) {
       throw new Error('Could not locate signingConfigs block in android/app/build.gradle');
     }
 
-    contents =
-      contents.slice(0, signingClose) +
-      `\n${RELEASE_SIGNING_BLOCK}\n${MARKER}\n` +
-      contents.slice(signingClose);
-
+    // Must run before inserting RELEASE_SIGNING_BLOCK below: that block also starts
+    // with "release {", and once both exist this regex's lazy match would anchor on
+    // the wrong one and flip the debug build type's signing config instead.
     contents = contents.replace(
       /release\s*\{[\s\S]*?signingConfig signingConfigs\.debug/,
       (match) => match.replace('signingConfig signingConfigs.debug', 'signingConfig signingConfigs.release')
     );
+
+    contents =
+      contents.slice(0, signingClose) +
+      `\n${RELEASE_SIGNING_BLOCK}\n${MARKER}\n` +
+      contents.slice(signingClose);
 
     config.modResults.contents = contents;
     return config;

@@ -57,7 +57,6 @@ function NavigationGuard() {
     const accountRequiredRoutes = new Set([
       'add-bookmark',
       'add-project',
-      'add-note',
       'add-todo',
       'ai-chat',
       'edit-profile',

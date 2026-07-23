@@ -6,6 +6,7 @@ import { bookmarkRepository } from '@/repositories/BookmarkRepository';
 import { noteRepository } from '@/repositories/NoteRepository';
 import { notificationService } from '@/utils/notifications';
 import { useAuth } from '@/store/useAuthStore';
+import { getCurrentFirebaseUser } from '@/lib/auth';
 import { Project, Bookmark, Note } from '@/types';
 import { dedupeProjectsById } from '@/utils/projects';
 import { recordActivity } from '@/utils/activities';
@@ -393,14 +394,19 @@ export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() =>
 });
 
 export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isGuest } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const syncStatus = useSyncStatus();
 
+  const hasNoteAccess = isAuthenticated || isGuest;
+  const ownerId = isAuthenticated
+    ? (user?.id ?? null)
+    : (isGuest ? (getCurrentFirebaseUser()?.uid ?? null) : null);
+
   const loadNotes = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!hasNoteAccess) {
       setNotes([]);
       setLoading(false);
       return;
@@ -417,7 +423,7 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [hasNoteAccess]);
 
   const createNote = useCallback(async (
     noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'links'> & {
@@ -479,21 +485,21 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.id) {
+    if (!hasNoteAccess || !ownerId) {
       setNotes([]);
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    const unsubscribe = noteRepository.subscribeToNotes(user.id, (notesData) => {
+    const unsubscribe = noteRepository.subscribeToNotes(ownerId, (notesData) => {
       setNotes(notesData);
       setLoading(false);
       setError(null);
     });
 
     return unsubscribe;
-  }, [isAuthenticated, user?.id]);
+  }, [hasNoteAccess, ownerId]);
 
   return useMemo(() => ({
     notes,

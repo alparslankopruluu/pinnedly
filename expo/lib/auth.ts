@@ -56,6 +56,17 @@ export function getCurrentFirebaseUser(): FirebaseUserLike | null {
   return ((getAuthInstance() as { currentUser?: FirebaseUserLike | null }).currentUser ?? null);
 }
 
+function getRawCurrentUser(): unknown {
+  return (getAuthInstance() as { currentUser?: unknown }).currentUser ?? null;
+}
+
+function isCredentialConflict(error: unknown): boolean {
+  const code = (error as { code?: string } | undefined)?.code;
+  return code === 'auth/credential-already-in-use'
+    || code === 'auth/email-already-in-use'
+    || code === 'auth/account-exists-with-different-credential';
+}
+
 export function getCurrentUserId(): string | null {
   return getCurrentFirebaseUser()?.uid ?? null;
 }
@@ -98,15 +109,39 @@ export async function signInWithEmail(email: string, password: string): Promise<
 }
 
 export async function createEmailUser(email: string, password: string): Promise<AuthResultLike> {
+  const wasAnonymous = getCurrentFirebaseUser()?.isAnonymous === true;
+
   if (Platform.OS === 'web') {
-    return webAuth().createUserWithEmailAndPassword(
+    const auth = webAuth();
+    if (wasAnonymous) {
+      try {
+        return await auth.linkWithCredential(
+          getRawCurrentUser() as never,
+          auth.EmailAuthProvider.credential(email, password)
+        ) as AuthResultLike;
+      } catch (error) {
+        if (!isCredentialConflict(error)) throw error;
+      }
+    }
+    return auth.createUserWithEmailAndPassword(
       getAuthInstance() as never,
       email,
       password
     ) as Promise<AuthResultLike>;
   }
 
-  return nativeAuth().createUserWithEmailAndPassword(
+  const auth = nativeAuth();
+  if (wasAnonymous) {
+    try {
+      return await auth.linkWithCredential(
+        getRawCurrentUser() as never,
+        auth.EmailAuthProvider.credential(email, password)
+      ) as AuthResultLike;
+    } catch (error) {
+      if (!isCredentialConflict(error)) throw error;
+    }
+  }
+  return auth.createUserWithEmailAndPassword(
     getAuthInstance() as never,
     email,
     password
@@ -122,9 +157,22 @@ export async function signInAnonymouslyProvider(): Promise<AuthResultLike> {
 }
 
 export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
+  const wasAnonymous = getCurrentFirebaseUser()?.isAnonymous === true;
+
   if (Platform.OS === 'web') {
     const auth = webAuth();
     const provider = new auth.GoogleAuthProvider();
+    if (wasAnonymous) {
+      try {
+        const result = await auth.linkWithPopup(getRawCurrentUser() as never, provider);
+        return {
+          user: result.user as FirebaseUserLike,
+          additionalUserInfo: auth.getAdditionalUserInfo(result) ?? null,
+        };
+      } catch (error) {
+        if (!isCredentialConflict(error)) throw error;
+      }
+    }
     const result = await auth.signInWithPopup(getAuthInstance() as never, provider);
     return {
       user: result.user as FirebaseUserLike,
@@ -140,6 +188,13 @@ export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
 
   const auth = nativeAuth();
   const credential = auth.GoogleAuthProvider.credential(idToken);
+  if (wasAnonymous) {
+    try {
+      return await auth.linkWithCredential(getRawCurrentUser() as never, credential) as AuthResultLike;
+    } catch (error) {
+      if (!isCredentialConflict(error)) throw error;
+    }
+  }
   return auth.signInWithCredential(getAuthInstance() as never, credential) as Promise<AuthResultLike>;
 }
 
@@ -162,7 +217,18 @@ export async function signInWithAppleProvider(): Promise<AuthResultLike & { disp
 
   const auth = nativeAuth();
   const appleCredential = auth.AppleAuthProvider.credential(credential.identityToken);
-  const result = await auth.signInWithCredential(getAuthInstance() as never, appleCredential);
+  const wasAnonymous = getCurrentFirebaseUser()?.isAnonymous === true;
+  let result: AuthResultLike;
+  if (wasAnonymous) {
+    try {
+      result = await auth.linkWithCredential(getRawCurrentUser() as never, appleCredential) as AuthResultLike;
+    } catch (error) {
+      if (!isCredentialConflict(error)) throw error;
+      result = await auth.signInWithCredential(getAuthInstance() as never, appleCredential);
+    }
+  } else {
+    result = await auth.signInWithCredential(getAuthInstance() as never, appleCredential);
+  }
   const displayName = credential.fullName
     ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
     : undefined;

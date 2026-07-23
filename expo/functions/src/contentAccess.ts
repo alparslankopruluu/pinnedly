@@ -67,15 +67,14 @@ function normalizeValue(key: string, value: unknown): unknown {
   return value;
 }
 
-async function requireAuth(req: { headers: { authorization?: string } }): Promise<string> {
+async function requireAuth(
+  req: { headers: { authorization?: string } }
+): Promise<{ uid: string; isAnonymous: boolean }> {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) throw new ApiError(401, 'AUTH_REQUIRED', 'Authentication required');
   try {
     const decoded = await admin.auth().verifyIdToken(auth.slice(7));
-    if (decoded.firebase?.sign_in_provider === 'anonymous') {
-      throw new ApiError(403, 'SIGN_IN_REQUIRED', 'A registered account is required');
-    }
-    return decoded.uid;
+    return { uid: decoded.uid, isAnonymous: decoded.firebase?.sign_in_provider === 'anonymous' };
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError(401, 'AUTH_REQUIRED', 'Authentication required');
@@ -261,7 +260,7 @@ export const mutateContent = onRequest(
       return;
     }
     try {
-      const uid = await requireAuth(req);
+      const { uid, isAnonymous } = await requireAuth(req);
       const body = bodyRecord(req.body);
       const action = requiredString(body, 'action') as MutationAction;
       const id = requiredString(body, 'id');
@@ -271,9 +270,13 @@ export const mutateContent = onRequest(
 
       if (action === 'create' || action === 'delete') {
         const resource = resourceFromBody(body);
+        if (isAnonymous && resource !== 'notes') {
+          throw new ApiError(403, 'SIGN_IN_REQUIRED', 'A registered account is required');
+        }
         if (action === 'create') await createOwnedContent(uid, resource, id, input);
         else await deleteOwnedContent(uid, resource, id);
       } else if (action === 'createProjectTask' || action === 'deleteProjectTask') {
+        if (isAnonymous) throw new ApiError(403, 'SIGN_IN_REQUIRED', 'A registered account is required');
         const projectId = requiredString(body, 'projectId');
         if (action === 'createProjectTask') await createProjectTask(uid, projectId, id, input);
         else await deleteProjectTask(uid, projectId, id);
@@ -336,7 +339,7 @@ export const deleteAccount = onRequest(
       return;
     }
     try {
-      const uid = await requireAuth(req);
+      const { uid } = await requireAuth(req);
       const db = admin.firestore();
       for (const collectionName of Object.keys(FREE_LIMITS)) {
         const owned = await db.collection(collectionName).where('ownerId', '==', uid).get();

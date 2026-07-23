@@ -17,7 +17,7 @@
       "backgroundColor": "#F04444"
     },
     "ios": {
-      "buildNumber": "3",
+      "buildNumber": "4",
       "supportsTablet": true,
       "bundleIdentifier": "app.techtactoe.draft",
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -30,7 +30,7 @@
       "usesAppleSignIn": true
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 7,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F04444"
