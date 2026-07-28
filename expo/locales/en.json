@@ -320,7 +320,8 @@
     },
     "exportData": {
       "title": "Export Data",
-      "subtitle": "Download your data as JSON"
+      "subtitle": "Download your data as JSON",
+      "failed": "Data export failed. Please try again."
     },
     "importData": {
       "title": "Import Data",

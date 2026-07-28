@@ -47,6 +47,16 @@ export function showAppAlert(
 
 function inferVariant(title: string, message?: string): DialogVariant {
   const haystack = `${title} ${message ?? ''}`.toLowerCase();
+  // Failure wins over success: "başarısız" contains "başarı", so checking
+  // success first rendered failure dialogs with a green check mark.
+  const isFailure =
+    haystack.includes('başarısız') ||
+    haystack.includes('hata') ||
+    haystack.includes('error') ||
+    haystack.includes('failed');
+  if (isFailure) {
+    return 'error';
+  }
   if (
     haystack.includes('başarı') ||
     haystack.includes('success') ||
@@ -54,14 +64,6 @@ function inferVariant(title: string, message?: string): DialogVariant {
     haystack.includes('kaydedildi')
   ) {
     return 'success';
-  }
-  if (
-    haystack.includes('hata') ||
-    haystack.includes('error') ||
-    haystack.includes('failed') ||
-    haystack.includes('başarısız')
-  ) {
-    return 'error';
   }
   if (haystack.includes('bilgi') || haystack.includes('info')) {
     return 'info';

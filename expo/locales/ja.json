@@ -242,7 +242,8 @@
     },
     "exportData": {
       "title": "データをエクスポート",
-      "subtitle": "データをJSONでダウンロード"
+      "subtitle": "データをJSONでダウンロード",
+      "failed": "データのエクスポートに失敗しました。もう一度お試しください。"
     },
     "importData": {
       "title": "データをインポート",

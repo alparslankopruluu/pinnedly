@@ -61,8 +61,12 @@ export default function AddNoteScreen() {
   const [markdown, setMarkdown] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('private');
   const [category, setCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
+    // Creating a note is a Cloud Function round-trip, so without this guard
+    // repeated taps queued duplicate notes while the screen looked frozen.
+    if (isSaving) return;
     if (!title.trim()) {
       showAppAlert(t('common.error'), t('addNote.alerts.enterTitle'), undefined, { variant: 'error' });
       return;
@@ -70,6 +74,7 @@ export default function AddNoteScreen() {
     if (!ensureCreate('notes', notes.length)) return;
     if (visibility !== 'private' && !ensure('sharing')) return;
 
+    setIsSaving(true);
     try {
       await createNote({
         title: title.trim(),
@@ -85,6 +90,8 @@ export default function AddNoteScreen() {
       if (handleAccessError(err)) return;
       showAppAlert(t('common.error'), t('addNote.alerts.createFailed'), undefined, { variant: 'error' });
       return;
+    } finally {
+      setIsSaving(false);
     }
 
     router.back();
@@ -193,8 +200,9 @@ export default function AddNoteScreen() {
 
         <ScreenFooter>
           <Button
-            title={t('addNote.createNote')}
+            title={isSaving ? t('common.saving') : t('addNote.createNote')}
             onPress={handleSave}
+            disabled={isSaving}
             style={styles.saveButton}
           />
         </ScreenFooter>

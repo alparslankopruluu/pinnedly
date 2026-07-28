@@ -242,7 +242,8 @@
     },
     "exportData": {
       "title": "Exportar datos",
-      "subtitle": "Descarga tus datos en JSON"
+      "subtitle": "Descarga tus datos en JSON",
+      "failed": "No se pudieron exportar los datos. Inténtalo de nuevo."
     },
     "importData": {
       "title": "Importar datos",

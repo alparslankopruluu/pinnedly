@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { getFirebaseWebApp } from '@/lib/firebaseApp';
+import { logCrashlytics } from '@/lib/crashlytics';
 
 declare const require: <T = unknown>(moduleName: string) => T;
 
@@ -67,6 +68,44 @@ function isCredentialConflict(error: unknown): boolean {
     || code === 'auth/account-exists-with-different-credential';
 }
 
+/**
+ * True when the user simply dismissed the Apple/Google sheet. Cancelling is not
+ * a failure, so callers should stay silent rather than show an error dialog.
+ */
+export function isUserCancelledAuthError(error: unknown): boolean {
+  const code = (error as { code?: string } | undefined)?.code;
+  if (!code) return false;
+
+  if (code === 'ERR_REQUEST_CANCELED') return true;
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return true;
+
+  if (Platform.OS !== 'web') {
+    try {
+      if (code === nativeGoogle().statusCodes.SIGN_IN_CANCELLED) return true;
+    } catch {
+      // Google Sign-In native constants are unavailable; fall through.
+    }
+  }
+  return false;
+}
+
+/**
+ * When linking fails because the credential already belongs to another account,
+ * Firebase attaches a *fresh* credential for that account to the error. Apple
+ * identity tokens are single-use, so replaying the original credential fails
+ * with "auth/unknown — Duplicate credential received"; only this one works.
+ */
+function getUpdatedCredentialFromError(error: unknown): unknown | null {
+  const nativeCredential = (error as { userInfo?: { authCredential?: unknown } } | undefined)
+    ?.userInfo?.authCredential;
+  if (nativeCredential) return nativeCredential;
+
+  if (Platform.OS === 'web') {
+    return webAuth().OAuthProvider.credentialFromError(error as never) ?? null;
+  }
+  return null;
+}
+
 export function getCurrentUserId(): string | null {
   return getCurrentFirebaseUser()?.uid ?? null;
 }
@@ -121,6 +160,13 @@ export async function createEmailUser(email: string, password: string): Promise<
         ) as AuthResultLike;
       } catch (error) {
         if (!isCredentialConflict(error)) throw error;
+        // The address already has an account, so creating one would fail with
+        // the very same error. Sign into the existing account instead.
+        return await auth.signInWithEmailAndPassword(
+          getAuthInstance() as never,
+          email,
+          password
+        ) as AuthResultLike;
       }
     }
     return auth.createUserWithEmailAndPassword(
@@ -139,6 +185,13 @@ export async function createEmailUser(email: string, password: string): Promise<
       ) as AuthResultLike;
     } catch (error) {
       if (!isCredentialConflict(error)) throw error;
+      // The address already has an account, so creating one would fail with
+      // the very same error. Sign into the existing account instead.
+      return await auth.signInWithEmailAndPassword(
+        getAuthInstance() as never,
+        email,
+        password
+      ) as AuthResultLike;
     }
   }
   return auth.createUserWithEmailAndPassword(
@@ -171,6 +224,14 @@ export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
         };
       } catch (error) {
         if (!isCredentialConflict(error)) throw error;
+        const updated = getUpdatedCredentialFromError(error);
+        if (updated) {
+          const result = await auth.signInWithCredential(getAuthInstance() as never, updated as never);
+          return {
+            user: result.user as FirebaseUserLike,
+            additionalUserInfo: auth.getAdditionalUserInfo(result) ?? null,
+          };
+        }
       }
     }
     const result = await auth.signInWithPopup(getAuthInstance() as never, provider);
@@ -180,21 +241,34 @@ export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
     };
   }
 
+  // Breadcrumbs only: the iOS crash reported on this flow has no log yet, so
+  // each native step is marked to pinpoint where the next one dies.
   const { GoogleSignin } = nativeGoogle();
+  logCrashlytics('google: hasPlayServices start');
   await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  logCrashlytics('google: hasPlayServices ok, opening native sign-in');
   const signInResult = await GoogleSignin.signIn();
   const idToken = signInResult.data?.idToken;
+  logCrashlytics(`google: native sign-in returned, idToken ${idToken ? 'present' : 'missing'}`);
   if (!idToken) throw new Error('No Google ID token received');
 
   const auth = nativeAuth();
   const credential = auth.GoogleAuthProvider.credential(idToken);
   if (wasAnonymous) {
     try {
+      logCrashlytics('google: linking credential to anonymous user');
       return await auth.linkWithCredential(getRawCurrentUser() as never, credential) as AuthResultLike;
     } catch (error) {
       if (!isCredentialConflict(error)) throw error;
+      const updated = getUpdatedCredentialFromError(error);
+      logCrashlytics(`google: link conflict, updated credential ${updated ? 'present' : 'absent'}`);
+      return auth.signInWithCredential(
+        getAuthInstance() as never,
+        (updated ?? credential) as never
+      ) as Promise<AuthResultLike>;
     }
   }
+  logCrashlytics('google: signInWithCredential start');
   return auth.signInWithCredential(getAuthInstance() as never, credential) as Promise<AuthResultLike>;
 }
 
@@ -224,7 +298,11 @@ export async function signInWithAppleProvider(): Promise<AuthResultLike & { disp
       result = await auth.linkWithCredential(getRawCurrentUser() as never, appleCredential) as AuthResultLike;
     } catch (error) {
       if (!isCredentialConflict(error)) throw error;
-      result = await auth.signInWithCredential(getAuthInstance() as never, appleCredential);
+      // Never replay `appleCredential` here — the token is spent, and reusing it
+      // is what produced "Duplicate credential received" for existing accounts.
+      const updated = getUpdatedCredentialFromError(error);
+      if (!updated) throw error;
+      result = await auth.signInWithCredential(getAuthInstance() as never, updated as never);
     }
   } else {
     result = await auth.signInWithCredential(getAuthInstance() as never, appleCredential);

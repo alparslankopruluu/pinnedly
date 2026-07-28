@@ -2,7 +2,7 @@
   "expo": {
     "name": "Draft",
     "slug": "draft",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -17,7 +17,7 @@
       "backgroundColor": "#F04444"
     },
     "ios": {
-      "buildNumber": "4",
+      "buildNumber": "6",
       "supportsTablet": true,
       "bundleIdentifier": "app.techtactoe.draft",
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -30,7 +30,7 @@
       "usesAppleSignIn": true
     },
     "android": {
-      "versionCode": 7,
+      "versionCode": 9,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F04444"
@@ -84,6 +84,7 @@
         "expo-build-properties",
         {
           "ios": {
+            "buildReactNativeFromSource": true,
             "useFrameworks": "static",
             "forceStaticLinking": [
               "RNFBApp",

@@ -4,6 +4,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
+import { isUserCancelledAuthError } from '@/lib/auth';
 import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,8 +40,8 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'email_sign_up');
       await signUp(email.trim(), password, displayName.trim());
-    } catch (error) {
-      showAppAlert(t('auth.errors.signUpFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
+    } catch {
+      showAppAlert(t('auth.errors.signUpFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
     }
   };
 
@@ -49,7 +50,8 @@ export default function SignUp() {
       await trackButtonPress('sign_up', 'apple_sign_up');
       await signInWithApple();
     } catch (error) {
-      showAppAlert(t('auth.errors.appleSignUpFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
+      if (isUserCancelledAuthError(error)) return;
+      showAppAlert(t('auth.errors.appleSignUpFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
     }
   };
 
@@ -58,7 +60,8 @@ export default function SignUp() {
       await trackButtonPress('sign_up', 'google_sign_up');
       await signInWithGoogle();
     } catch (error) {
-      showAppAlert(t('auth.errors.googleSignUpFailed'), error instanceof Error ? error.message : t('auth.errors.pleaseTryAgain'));
+      if (isUserCancelledAuthError(error)) return;
+      showAppAlert(t('auth.errors.googleSignUpFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
     }
   };
 

@@ -138,9 +138,14 @@ export default function SettingsScreen() {
     }
     try {
       await exportData();
-      console.log('Export completed successfully');
     } catch (exportError) {
       console.error('Export failed:', exportError);
+      showAppAlert(
+        t('common.error'),
+        t('settings.exportData.failed'),
+        undefined,
+        { variant: 'error' }
+      );
     }
   };
 
