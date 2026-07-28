@@ -155,11 +155,23 @@ class AuthRepository {
     }
   }
 
-  private async loadOrCreateProfile(firebaseUser: FirebaseUserLike): Promise<User> {
+  private async loadOrCreateProfile(
+    firebaseUser: FirebaseUserLike,
+    options?: { displayName?: string }
+  ): Promise<User> {
     const activeLoad = this.profileLoads.get(firebaseUser.uid);
-    if (activeLoad) return activeLoad;
+    if (activeLoad) {
+      const user = await activeLoad;
+      // If a concurrent auth-state create already finished, still apply the
+      // explicit displayName from email sign-up when the profile only has the
+      // generated handle as its name.
+      if (options?.displayName?.trim()) {
+        return this.applyDisplayNameIfNeeded(user, options.displayName.trim());
+      }
+      return user;
+    }
 
-    const profileLoad = this.loadOrCreateProfileOnce(firebaseUser);
+    const profileLoad = this.loadOrCreateProfileOnce(firebaseUser, options);
     this.profileLoads.set(firebaseUser.uid, profileLoad);
 
     try {
@@ -171,7 +183,34 @@ class AuthRepository {
     }
   }
 
-  private async loadOrCreateProfileOnce(firebaseUser: FirebaseUserLike): Promise<User> {
+  private async applyDisplayNameIfNeeded(user: User, displayName: string): Promise<User> {
+    if (!displayName || user.displayName === displayName) return user;
+    // Only overwrite placeholder names (handle / email local-part), not a
+    // name the user already set.
+    const isPlaceholder =
+      !user.displayName
+      || user.displayName === user.handle
+      || user.displayName === (user.email?.split('@')[0] ?? '');
+    if (!isPlaceholder) return user;
+
+    try {
+      await updateDoc(doc(getDb(), COLLECTIONS.users, user.id), {
+        displayName,
+        updatedAt: serverTimestamp(),
+      });
+      const updated = { ...user, displayName };
+      this.currentUser = updated;
+      return updated;
+    } catch (error) {
+      console.warn('Could not apply sign-up display name:', error);
+      return user;
+    }
+  }
+
+  private async loadOrCreateProfileOnce(
+    firebaseUser: FirebaseUserLike,
+    options?: { displayName?: string }
+  ): Promise<User> {
     const docRef = doc(getDb(), COLLECTIONS.users, firebaseUser.uid);
     const userDoc = await getDoc(docRef);
 
@@ -181,14 +220,22 @@ class AuthRepository {
         firebaseUser.email,
         userDoc.data()
       );
-      return this.mapUserDoc(firebaseUser.uid, data, firebaseUser.email);
+      const mapped = this.mapUserDoc(firebaseUser.uid, data, firebaseUser.email);
+      if (options?.displayName?.trim()) {
+        return this.applyDisplayNameIfNeeded(mapped, options.displayName.trim());
+      }
+      return mapped;
     }
 
     const handle = await this.generateAvailableHandle(firebaseUser.email);
+    const displayName =
+      options?.displayName?.trim()
+      || firebaseUser.displayName
+      || handle;
 
     const profile = {
       handle,
-      displayName: firebaseUser.displayName || handle,
+      displayName,
       email: firebaseUser.email || '',
       avatar: firebaseUser.photoURL || null,
       bio: null,
@@ -199,7 +246,25 @@ class AuthRepository {
       updatedAt: serverTimestamp(),
     };
 
-    await setDoc(docRef, profile);
+    try {
+      await setDoc(docRef, profile);
+    } catch (error) {
+      // Auth state listener often creates the profile first; a second create
+      // is rejected as an update that may not include only allowed fields.
+      const code = (error as { code?: string } | undefined)?.code ?? '';
+      if (code.includes('permission-denied') || code.includes('already-exists')) {
+        const raced = await getDoc(docRef);
+        if (raced.exists()) {
+          const mapped = this.mapUserDoc(firebaseUser.uid, raced.data()!, firebaseUser.email);
+          if (options?.displayName?.trim()) {
+            return this.applyDisplayNameIfNeeded(mapped, options.displayName.trim());
+          }
+          return mapped;
+        }
+      }
+      throw error;
+    }
+
     const created = await getDoc(docRef);
     return this.mapUserDoc(firebaseUser.uid, created.data()!, firebaseUser.email);
   }
@@ -263,23 +328,15 @@ class AuthRepository {
 
   async signUp(email: string, password: string, displayName: string): Promise<User> {
     await this.setGuestMode(false);
+    const previousUid = getCurrentFirebaseUser()?.uid ?? null;
+    const guestNotes = await this.captureGuestNotesSnapshot();
     const credential = await createEmailUser(email, password);
-    const handle = await this.generateAvailableHandle(email);
-
-    await setDoc(doc(getDb(), COLLECTIONS.users, credential.user.uid), {
-      handle,
-      displayName,
-      email,
-      avatar: null,
-      bio: null,
-      isVerified: false,
-      followerCount: 0,
-      followingCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+    await this.migrateGuestNotesIfNeeded(previousUid, guestNotes, credential.user.uid);
+    // Single profile path — a separate setDoc here raced with onAuthStateChanged
+    // and failed as a forbidden update (handle/email not writable on update).
+    this.currentUser = await this.loadOrCreateProfile(credential.user, {
+      displayName: displayName.trim(),
     });
-
-    this.currentUser = await this.loadOrCreateProfile(credential.user);
     return this.currentUser;
   }
 
@@ -300,27 +357,16 @@ class AuthRepository {
     const result = await signInWithAppleProvider();
     await this.migrateGuestNotesIfNeeded(previousUid, guestNotes, result.user.uid);
 
-    if (!result.additionalUserInfo?.isNewUser) {
-      this.currentUser = await this.loadOrCreateProfile(result.user);
-      return this.currentUser;
-    }
+    const displayName =
+      result.displayName
+      || result.user.displayName
+      || result.user.email?.split('@')[0]
+      || undefined;
 
-    const displayName = result.displayName || result.user.email?.split('@')[0] || 'User';
-
-    await setDoc(doc(getDb(), COLLECTIONS.users, result.user.uid), {
-      handle: await this.generateAvailableHandle(result.user.email),
-      displayName,
-      email: result.user.email || '',
-      avatar: null,
-      bio: null,
-      isVerified: false,
-      followerCount: 0,
-      followingCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    this.currentUser = await this.loadOrCreateProfile(result.user);
+    this.currentUser = await this.loadOrCreateProfile(
+      result.user,
+      displayName ? { displayName } : undefined
+    );
     return this.currentUser;
   }
 

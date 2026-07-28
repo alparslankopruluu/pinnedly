@@ -1,11 +1,13 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, Platform } from 'react-native';
+import { Alert, AppState, Platform } from 'react-native';
 import { router } from 'expo-router';
 import type { CustomerInfo } from 'react-native-purchases';
 import { PremiumModal } from '@/components/PremiumModal';
 import { useAuth } from '@/store/useAuthStore';
+import i18n from '@/lib/i18n';
 import {
   addRevenueCatCustomerInfoListener,
+  getRevenueCatCustomerInfo,
   hasPremiumEntitlement,
   initializeRevenueCat,
   REVENUECAT_ENTITLEMENT_ID,
@@ -198,7 +200,33 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
           router.push('/(auth)/sign-in');
           return;
         }
-        setPaywallVisible(true);
+        // Already Premium in local state — never open the buy sheet again.
+        if (snapshot.plan === 'premium') {
+          Alert.alert(
+            i18n.t('premium.alreadyPremiumTitle'),
+            i18n.t('premium.alreadyPremiumMessage')
+          );
+          return;
+        }
+        // Store may already own the product while our snapshot still says free.
+        void (async () => {
+          try {
+            if (Platform.OS === 'ios' || Platform.OS === 'android') {
+              const info = await getRevenueCatCustomerInfo();
+              if (hasPremiumEntitlement(info)) {
+                await handleEntitlementChanged(info);
+                Alert.alert(
+                  i18n.t('premium.alreadyPremiumTitle'),
+                  i18n.t('premium.alreadyPremiumMessage')
+                );
+                return;
+              }
+            }
+          } catch {
+            // Fall through to paywall if the store check fails.
+          }
+          setPaywallVisible(true);
+        })();
       },
       presentCustomerCenter: async () => {
         if (!user?.id) {
@@ -210,7 +238,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         await RevenueCatUI.presentCustomerCenter();
       },
     }),
-    [can, refresh, snapshot, user?.id]
+    [can, handleEntitlementChanged, refresh, snapshot, user?.id]
   );
 
   return (

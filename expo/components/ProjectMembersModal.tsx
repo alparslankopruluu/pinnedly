@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/store/useProjectStore';
 import { ProjectCollaborator, User } from '@/types';
 import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 
 interface ProjectMemberWithUser extends ProjectCollaborator {
@@ -41,6 +42,7 @@ export function ProjectMembersModal({
   const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const { ensure } = useSubscriptionGate();
+  const { can } = useSubscriptionAccess();
 
   const {
     projectMembers,
@@ -55,6 +57,19 @@ export function ProjectMembersModal({
     clearError,
     clearSearchResults,
   } = useProjectStore();
+
+  /**
+   * iOS will not present a second RN Modal (AppDialog) on top of this sheet.
+   * If Premium is required: close this modal first, then show the gate dialog.
+   */
+  const ensureMemberManagement = (): boolean => {
+    if (can('memberManagement').allowed) return true;
+    onClose();
+    setTimeout(() => {
+      ensure('memberManagement');
+    }, 320);
+    return false;
+  };
 
   useEffect(() => {
     if (visible) {
@@ -71,7 +86,7 @@ export function ProjectMembersModal({
   }, [newUserEmail, searchUsers, clearSearchResults]);
 
   const handleAddMember = async () => {
-    if (!ensure('memberManagement')) return;
+    if (!ensureMemberManagement()) return;
     if (!newUserEmail.trim()) {
       showAppAlert(t('common.error'), t('projectMembers.alerts.enterEmail'), undefined, { variant: 'error' });
       return;
@@ -114,7 +129,7 @@ export function ProjectMembersModal({
   };
 
   const handleUpdatePermission = async (memberId: string, permission: 'view' | 'edit') => {
-    if (!ensure('memberManagement')) return;
+    if (!ensureMemberManagement()) return;
     if (!permission.trim()) return;
     if (permission.length > 10) return;
     const sanitizedPermission = permission.trim() as 'view' | 'edit';
@@ -198,7 +213,7 @@ export function ProjectMembersModal({
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
-            if (!ensure('memberManagement')) return;
+            if (!ensureMemberManagement()) return;
             setShowAddForm(!showAddForm);
           }}
         >

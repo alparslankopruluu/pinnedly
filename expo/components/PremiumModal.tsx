@@ -22,6 +22,7 @@ import {
   getPremiumPackages,
   getRevenueCatCustomerInfo,
   hasPremiumEntitlement,
+  isProductAlreadyPurchasedError,
   isPurchaseCancelled,
   presentRevenueCatPaywall,
   purchasePremiumPackage,
@@ -67,8 +68,38 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     nativePaywallOpen.current = true;
     const showRevenueCatPaywall = async () => {
       try {
+        // Local snapshot can lag; check store entitlement before any buy UI.
+        const existing = await getRevenueCatCustomerInfo();
+        if (hasPremiumEntitlement(existing)) {
+          await onEntitlementChanged?.(existing);
+          await trackSubscriptionEvent('subscribe_completed', {
+            source: 'already_premium',
+          });
+          Alert.alert(
+            t('premium.alreadyPremiumTitle'),
+            t('premium.alreadyPremiumMessage')
+          );
+          return;
+        }
+
         const { PAYWALL_RESULT } = await import('react-native-purchases-ui');
+        // presentPaywallIfNeeded skips the sheet when entitlement is active.
         const result = await presentRevenueCatPaywall();
+
+        if (result === PAYWALL_RESULT.NOT_PRESENTED) {
+          const customerInfo = await getRevenueCatCustomerInfo();
+          await onEntitlementChanged?.(customerInfo);
+          if (hasPremiumEntitlement(customerInfo)) {
+            await trackSubscriptionEvent('subscribe_completed', {
+              source: 'paywall_not_presented_already_premium',
+            });
+            Alert.alert(
+              t('premium.alreadyPremiumTitle'),
+              t('premium.alreadyPremiumMessage')
+            );
+          }
+          return;
+        }
 
         if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
           const customerInfo = await getRevenueCatCustomerInfo();
@@ -79,13 +110,46 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
           await trackSubscriptionEvent('subscribe_completed', { source: 'revenuecat_paywall' });
         } else if (result === PAYWALL_RESULT.CANCELLED) {
           await trackSubscriptionEvent('subscribe_cancelled', { source: 'revenuecat_paywall' });
+        } else if (result === PAYWALL_RESULT.ERROR) {
+          // Paywall may surface already-owned as ERROR; try a quiet restore.
+          const restored = await restorePremiumPurchases();
+          if (hasPremiumEntitlement(restored)) {
+            await onEntitlementChanged?.(restored);
+            await trackSubscriptionEvent('subscribe_completed', {
+              source: 'paywall_error_restored',
+            });
+            Alert.alert(
+              t('premium.alreadyPremiumTitle'),
+              t('premium.alreadyPremiumMessage')
+            );
+          }
         }
       } catch (error) {
+        if (isProductAlreadyPurchasedError(error)) {
+          try {
+            const restored = await restorePremiumPurchases();
+            await onEntitlementChanged?.(restored);
+            if (hasPremiumEntitlement(restored)) {
+              await trackSubscriptionEvent('subscribe_completed', {
+                source: 'already_owned_error',
+              });
+              Alert.alert(
+                t('premium.alreadyPremiumTitle'),
+                t('premium.alreadyPremiumMessage')
+              );
+              return;
+            }
+          } catch {
+            // fall through to generic error
+          }
+        }
         logCrashlytics(`RevenueCat paywall failed: ${String(error)}`);
-        Alert.alert(
-          t('premium.purchaseUnavailableTitle'),
-          error instanceof Error ? error.message : t('premium.purchaseUnavailableMessage')
-        );
+        if (!isPurchaseCancelled(error)) {
+          Alert.alert(
+            t('premium.purchaseUnavailableTitle'),
+            error instanceof Error ? error.message : t('premium.purchaseUnavailableMessage')
+          );
+        }
       } finally {
         nativePaywallOpen.current = false;
         onClose();
@@ -229,6 +293,27 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     } catch (error) {
       if (isPurchaseCancelled(error)) {
         await trackSubscriptionEvent('subscribe_cancelled', { plan_id: selectedPlan });
+      } else if (isProductAlreadyPurchasedError(error)) {
+        try {
+          const restored = await restorePremiumPurchases();
+          await onEntitlementChanged?.(restored);
+          if (hasPremiumEntitlement(restored)) {
+            await trackSubscriptionEvent('subscribe_completed', {
+              plan_id: selectedPlan,
+              source: 'already_owned',
+            });
+            Alert.alert(
+              t('premium.alreadyPremiumTitle'),
+              t('premium.alreadyPremiumMessage')
+            );
+            onClose();
+            return;
+          }
+        } catch {
+          // fall through
+        }
+        await trackSubscriptionEvent('subscribe_failed', { plan_id: selectedPlan });
+        Alert.alert(t('premium.purchaseFailedTitle'), t('premium.alreadyOwnedRecoverFailed'));
       } else {
         await trackSubscriptionEvent('subscribe_failed', { plan_id: selectedPlan });
         Alert.alert(t('premium.purchaseFailedTitle'), error instanceof Error ? error.message : t('premium.purchaseFailedMessage'));

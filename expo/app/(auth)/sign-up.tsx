@@ -4,7 +4,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
-import { isUserCancelledAuthError } from '@/lib/auth';
+import { authErrorMessageKey, isUserCancelledAuthError } from '@/lib/auth';
 import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -40,8 +40,15 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'email_sign_up');
       await signUp(email.trim(), password, displayName.trim());
-    } catch {
-      showAppAlert(t('auth.errors.signUpFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
+      router.replace('/(tabs)');
+    } catch (error) {
+      if (__DEV__) console.error('[auth] Email sign-up failed:', error);
+      showAppAlert(
+        t('auth.errors.signUpFailed'),
+        t(authErrorMessageKey(error)),
+        undefined,
+        { variant: 'error' }
+      );
     }
   };
 
@@ -49,9 +56,16 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'apple_sign_up');
       await signInWithApple();
+      router.replace('/(tabs)');
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
-      showAppAlert(t('auth.errors.appleSignUpFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
+      if (__DEV__) console.error('[auth] Apple sign-up failed:', error);
+      showAppAlert(
+        t('auth.errors.appleSignUpFailed'),
+        t(authErrorMessageKey(error)),
+        undefined,
+        { variant: 'error' }
+      );
     }
   };
 
@@ -59,9 +73,16 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'google_sign_up');
       await signInWithGoogle();
+      router.replace('/(tabs)');
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
-      showAppAlert(t('auth.errors.googleSignUpFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
+      if (__DEV__) console.error('[auth] Google sign-up failed:', error);
+      showAppAlert(
+        t('auth.errors.googleSignUpFailed'),
+        t(authErrorMessageKey(error)),
+        undefined,
+        { variant: 'error' }
+      );
     }
   };
 

@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  Pressable, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,21 +37,21 @@ export default function AddNoteScreen() {
         value: 'private' as Visibility,
         label: t('common.private'),
         description: t('addNote.visibilityOptions.private'),
-        icon: <Lock size={20} color="#6B7280" />,
+        icon: Lock,
         color: '#6B7280',
       },
       {
         value: 'shared' as Visibility,
         label: t('common.shared'),
         description: t('addNote.visibilityOptions.shared'),
-        icon: <Users size={20} color="#6366F1" />,
+        icon: Users,
         color: '#6366F1',
       },
       {
         value: 'public' as Visibility,
         label: t('common.public'),
         description: t('addNote.visibilityOptions.public'),
-        icon: <Globe size={20} color="#10B981" />,
+        icon: Globe,
         color: '#10B981',
       },
     ],
@@ -62,6 +62,8 @@ export default function AddNoteScreen() {
   const [visibility, setVisibility] = useState<Visibility>('private');
   const [category, setCategory] = useState<ContentCategoryId>(DEFAULT_CONTENT_CATEGORY);
   const [isSaving, setIsSaving] = useState(false);
+
+  const selectedVisibility = visibilityOptions.find((o) => o.value === visibility) ?? visibilityOptions[0];
 
   const handleSave = async () => {
     // Creating a note is a Cloud Function round-trip, so without this guard
@@ -99,24 +101,29 @@ export default function AddNoteScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Stack.Screen 
-        options={{ 
+      <Stack.Screen
+        options={{
           title: t('addNote.title'),
           headerLeft: () => (
             <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('common.close')}>
               <X size={24} color="#111827" />
             </Pressable>
           ),
-        }} 
+        }}
       />
-      
-      <KeyboardAvoidingView 
+
+      <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.content}>
-            {/* Title */}
+            {/* Title — primary identity */}
             <View style={styles.section}>
               <Text style={styles.label}>{t('addNote.noteTitle')}</Text>
               <TextInput
@@ -126,58 +133,11 @@ export default function AddNoteScreen() {
                 placeholder={t('addNote.titlePlaceholder')}
                 placeholderTextColor="#9CA3AF"
                 accessibilityLabel={t('addNote.noteTitle')}
+                returnKeyType="next"
               />
             </View>
 
-            {/* Category */}
-            <View style={styles.section}>
-              <CategoryPicker
-                label={t('categories.label')}
-                value={category}
-                onChange={setCategory}
-              />
-            </View>
-
-            {/* Visibility Selector */}
-            <View style={styles.section}>
-              <Text style={styles.label}>{t('addNote.visibility')}</Text>
-              <View style={styles.visibilityGrid}>
-                {visibilityOptions.map((option) => (
-                  <Pressable
-                    key={option.value}
-                    style={({ pressed }) => [
-                      styles.visibilityCard,
-                      visibility === option.value && styles.visibilityCardActive,
-                      { borderColor: visibility === option.value ? option.color : '#E5E7EB' },
-                      pressed && styles.visibilityCardPressed
-                    ]}
-                    onPress={() => setVisibility(option.value)}
-                    accessibilityRole="radio"
-                    accessibilityLabel={option.label}
-                    accessibilityHint={option.description}
-                    accessibilityState={{ checked: visibility === option.value }}
-                  >
-                    <View style={[
-                      styles.visibilityIconContainer,
-                      { backgroundColor: visibility === option.value ? option.color + '15' : '#F3F4F6' }
-                    ]}>
-                      {option.icon}
-                    </View>
-                    <Text style={[
-                      styles.visibilityLabel,
-                      visibility === option.value && { color: option.color, fontWeight: '600' }
-                    ]}>
-                      {option.label}
-                    </Text>
-                    <Text style={styles.visibilityDescription}>
-                      {option.description}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            {/* Content */}
+            {/* Content first — writing should not sit below bulky meta controls */}
             <View style={styles.section}>
               <Text style={styles.label}>{t('addNote.content')}</Text>
               <RichTextEditor
@@ -187,13 +147,62 @@ export default function AddNoteScreen() {
                 toolbarHint={t('addNote.toolbarHint')}
                 autoFocus={false}
               />
+              <Text style={styles.editorHint}>{t('addNote.editorHint')}</Text>
             </View>
 
-            {/* Info */}
-            <View style={styles.infoBox}>
-              <Text style={styles.infoText}>
-                {t('addNote.editorHint')}
-              </Text>
+            {/* Compact meta: category + visibility */}
+            <View style={styles.metaSection}>
+              <CategoryPicker
+                label={t('categories.label')}
+                value={category}
+                onChange={setCategory}
+              />
+
+              <View style={styles.visibilityBlock}>
+                <Text style={styles.label}>{t('addNote.visibility')}</Text>
+                <View
+                  style={styles.segment}
+                  accessibilityRole="radiogroup"
+                  accessibilityLabel={t('addNote.visibility')}
+                >
+                  {visibilityOptions.map((option) => {
+                    const selected = visibility === option.value;
+                    const Icon = option.icon;
+                    return (
+                      <Pressable
+                        key={option.value}
+                        style={({ pressed }) => [
+                          styles.segmentItem,
+                          selected && {
+                            backgroundColor: option.color + '14',
+                            borderColor: option.color,
+                          },
+                          pressed && styles.segmentItemPressed,
+                        ]}
+                        onPress={() => setVisibility(option.value)}
+                        accessibilityRole="radio"
+                        accessibilityLabel={option.label}
+                        accessibilityHint={option.description}
+                        accessibilityState={{ checked: selected }}
+                      >
+                        <Icon size={15} color={selected ? option.color : '#6B7280'} />
+                        <Text
+                          style={[
+                            styles.segmentLabel,
+                            selected && { color: option.color, fontWeight: '600' },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={[styles.visibilityCaption, { color: selectedVisibility.color }]}>
+                  {selectedVisibility.description}
+                </Text>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -222,73 +231,82 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 8,
+  },
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 18,
+  },
+  metaSection: {
+    gap: 16,
+    marginTop: 4,
+    marginBottom: 8,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: '#374151',
     marginBottom: 8,
   },
   input: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     fontSize: 16,
     color: '#111827',
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  visibilityGrid: {
-    gap: 8,
+  editorHint: {
+    marginTop: 8,
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#9CA3AF',
   },
-  visibilityCard: {
+  visibilityBlock: {
+    gap: 0,
+  },
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    padding: 3,
+    gap: 3,
+  },
+  segmentItem: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 2,
-    gap: 12,
-  },
-  visibilityCardActive: {
-    backgroundColor: '#F9FAFB',
-  },
-  visibilityCardPressed: {
-    opacity: 0.8,
-  },
-  visibilityIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    alignItems: 'center',
     justifyContent: 'center',
+    gap: 5,
+    minHeight: 40,
+    paddingHorizontal: 6,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    backgroundColor: 'transparent',
   },
-  visibilityLabel: {
-    fontSize: 15,
+  segmentItemPressed: {
+    opacity: 0.85,
+  },
+  segmentLabel: {
+    fontSize: 13,
     fontWeight: '500',
-    color: '#111827',
+    color: '#6B7280',
   },
-  visibilityDescription: {
+  visibilityCaption: {
+    marginTop: 8,
     fontSize: 12,
-    color: '#9CA3AF',
-    flex: 1,
-  },
-  infoBox: {
-    backgroundColor: '#EFF6FF',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#DBEAFE',
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#1E40AF',
-    lineHeight: 20,
+    lineHeight: 16,
+    color: '#6B7280',
   },
   saveButton: {
     width: '100%',

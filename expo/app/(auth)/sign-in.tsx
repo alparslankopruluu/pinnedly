@@ -42,7 +42,14 @@ export default function SignIn() {
       if (isUserCancelledAuthError(error)) return;
       // The raw message is provider jargon (e.g. "[auth/unknown] Duplicate
       // credential received"); it is already recorded in Crashlytics.
-      showAppAlert(t('auth.errors.appleSignInFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
+      if (__DEV__) {
+        console.error('[auth] Apple sign-in failed:', error);
+      }
+      const detail =
+        __DEV__ && error instanceof Error && error.message
+          ? error.message
+          : t('auth.errors.pleaseTryAgain');
+      showAppAlert(t('auth.errors.appleSignInFailed'), detail, undefined, { variant: 'error' });
     }
   };
 
@@ -53,7 +60,14 @@ export default function SignIn() {
       router.replace('/(tabs)');
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
-      showAppAlert(t('auth.errors.googleSignInFailed'), t('auth.errors.pleaseTryAgain'), undefined, { variant: 'error' });
+      if (__DEV__) {
+        console.error('[auth] Google sign-in failed:', error);
+      }
+      const detail =
+        __DEV__ && error instanceof Error && error.message
+          ? error.message
+          : t('auth.errors.pleaseTryAgain');
+      showAppAlert(t('auth.errors.googleSignInFailed'), detail, undefined, { variant: 'error' });
     }
   };
 

@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  Platform,
 } from 'react-native';
 import {
   AlertCircle,
@@ -72,7 +73,15 @@ export function AppDialog({
   };
 
   return (
-    <Modal visible={visible} transparent animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={onDismiss}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType={reduceMotion ? 'none' : 'fade'}
+      onRequestClose={onDismiss}
+      // Prefer stacking above other modals when the platform allows it.
+      presentationStyle={Platform.OS === 'ios' ? 'overFullScreen' : undefined}
+      statusBarTranslucent
+    >
       <Pressable style={styles.overlay} onPress={onDismiss}>
         <Pressable style={styles.card} onPress={(event) => event.stopPropagation()} accessibilityViewIsModal accessibilityRole="alert">
           <View style={[styles.iconWrap, { backgroundColor: background }]}>
@@ -98,7 +107,13 @@ export function AppDialog({
                   onPress={() => handlePress(button)}
                   accessibilityRole="button"
                 >
-                  <Text style={[styles.buttonText, buttonStyles.text]} numberOfLines={1}>
+                  <Text
+                    style={[styles.buttonText, buttonStyles.text]}
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                    allowFontScaling
+                  >
                     {button.text}
                   </Text>
                 </Pressable>
@@ -167,11 +182,14 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
+    flexShrink: 1,
     minHeight: 46,
+    minWidth: 0,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   buttonFull: {
     flex: 0,
@@ -196,8 +214,10 @@ const styles = StyleSheet.create({
     opacity: 0.88,
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
+    textAlign: 'center',
+    flexShrink: 1,
   },
   buttonPrimaryText: {
     color: '#FFFFFF',

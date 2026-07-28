@@ -42,7 +42,16 @@ function appleAuth() {
 export function configureAuthProviders(): void {
   const webClientId = Constants.expoConfig?.extra?.googleWebClientId as string | undefined;
   if (Platform.OS !== 'web' && webClientId) {
-    nativeGoogle().GoogleSignin.configure({ webClientId });
+    // webClientId = Web OAuth client (needed for Firebase idToken).
+    // iosClientId matches GoogleService-Info.plist CLIENT_ID for the draft app.
+    const iosClientId =
+      Platform.OS === 'ios'
+        ? '36179904713-cmkvd6fqe2srvg15pc87odocqh27ph6e.apps.googleusercontent.com'
+        : undefined;
+    nativeGoogle().GoogleSignin.configure({
+      webClientId,
+      ...(iosClientId ? { iosClientId } : {}),
+    });
   }
 }
 
@@ -66,6 +75,41 @@ function isCredentialConflict(error: unknown): boolean {
   return code === 'auth/credential-already-in-use'
     || code === 'auth/email-already-in-use'
     || code === 'auth/account-exists-with-different-credential';
+}
+
+/** Firebase Auth / Firestore error code from RN Firebase or web SDK shapes. */
+export function getAuthErrorCode(error: unknown): string {
+  const code = (error as { code?: string } | undefined)?.code;
+  return typeof code === 'string' ? code.replace(/^\[|\]$/g, '') : '';
+}
+
+/**
+ * Maps provider error codes to i18n keys under `auth.errors.*`.
+ * Unknown codes fall back to `pleaseTryAgain`.
+ */
+export function authErrorMessageKey(error: unknown): string {
+  const code = getAuthErrorCode(error);
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'auth.errors.emailAlreadyInUse';
+    case 'auth/invalid-email':
+      return 'auth.errors.invalidEmail';
+    case 'auth/weak-password':
+      return 'auth.errors.passwordTooShort';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+    case 'auth/user-not-found':
+    case 'auth/invalid-login-credentials':
+      return 'auth.errors.checkCredentials';
+    case 'auth/network-request-failed':
+      return 'auth.errors.networkFailed';
+    case 'auth/too-many-requests':
+      return 'auth.errors.tooManyRequests';
+    case 'firestore/permission-denied':
+      return 'auth.errors.profileSetupFailed';
+    default:
+      return 'auth.errors.pleaseTryAgain';
+  }
 }
 
 /**

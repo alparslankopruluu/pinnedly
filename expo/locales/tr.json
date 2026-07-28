@@ -203,6 +203,11 @@
       "checkCredentials": "Lütfen bilgilerinizi kontrol edip tekrar deneyin",
       "signUpFailed": "Kayıt Başarısız",
       "pleaseTryAgain": "Lütfen tekrar deneyin",
+      "emailAlreadyInUse": "Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.",
+      "invalidEmail": "Geçerli bir e-posta adresi girin",
+      "networkFailed": "Ağ hatası. Bağlantınızı kontrol edip tekrar deneyin.",
+      "tooManyRequests": "Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.",
+      "profileSetupFailed": "Hesap oluşturuldu ancak profil kaydı tamamlanamadı. Giriş yapmayı deneyin.",
       "appleSignInFailed": "Apple ile Giriş Başarısız",
       "appleSignUpFailed": "Apple ile Kayıt Başarısız",
       "googleSignInFailed": "Google ile Giriş Başarısız",
@@ -542,7 +547,7 @@
       "requestId": "İstek ID: {{requestId}}"
     }
   },
-  "subscription": { "title": "Draft Premium", "upgrade": "Premium'u İncele", "errors": { "premiumRequired": "Bu özellik Premium üyelikle kullanılabilir.", "limitReached": "Ücretsiz {{limit}} hakkınızın {{current}} tanesini kullanıyorsunuz. Daha fazlası için Premium'a geçin.", "aiQuotaExhausted": "Bu ayki yapay zekâ kullanım hakkınızı doldurdunuz.", "unavailable": "Abonelik durumunuz doğrulanamadı. Lütfen tekrar deneyin." } },
+  "subscription": { "title": "Draft Premium", "upgrade": "Premium", "errors": { "premiumRequired": "Bu özellik Premium üyelikle kullanılabilir.", "limitReached": "Ücretsiz {{limit}} hakkınızın {{current}} tanesini kullanıyorsunuz. Daha fazlası için Premium'a geçin.", "aiQuotaExhausted": "Bu ayki yapay zekâ kullanım hakkınızı doldurdunuz.", "unavailable": "Abonelik durumunuz doğrulanamadı. Lütfen tekrar deneyin." } },
   "premium": {
     "title": "Premium'a Yükselt",
     "subtitle": "Güçlü özelliklerin kilidini açın",
@@ -554,6 +559,9 @@
     "purchaseUnavailableMessage": "Planlar App Store'dan yüklenemedi. Lütfen tekrar deneyin.",
     "purchaseFailedTitle": "Satın alma başarısız",
     "purchaseFailedMessage": "Satın alma tamamlanamadı.",
+    "alreadyPremiumTitle": "Zaten Premium'sunuz",
+    "alreadyPremiumMessage": "Bu hesapta Premium zaten aktif. Tekrar satın almanıza gerek yok.",
+    "alreadyOwnedRecoverFailed": "Bu abonelik zaten sahip olunan bir ürün. Satın Alımları Geri Yükle'yi deneyin.",
     "restoreSuccessTitle": "Satın alımlar geri yüklendi",
     "restoreSuccessMessage": "Premium erişiminiz geri yüklendi.",
     "restoreEmptyTitle": "Satın alma bulunamadı",

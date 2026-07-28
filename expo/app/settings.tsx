@@ -19,7 +19,6 @@ import {
   Info,
   ChevronRight,
   Crown,
-  Mail,
   Trash2,
   LogOut,
   Shield,
@@ -67,12 +66,10 @@ export default function SettingsScreen() {
     theme,
     fontSize,
     pushNotifications,
-    emailNotifications,
     dataExportInProgress,
     updateTheme,
     updateFontSize,
     updatePushNotifications,
-    updateEmailNotifications,
     exportData,
     deleteAccount,
     loadSettings
@@ -345,24 +342,6 @@ export default function SettingsScreen() {
                   onValueChange={updatePushNotifications}
                   trackColor={{ false: '#F3F4F6', true: '#FEE2E2' }}
                   thumbColor={pushNotifications ? '#EF4444' : '#9CA3AF'}
-                />
-              </View>
-              
-              <View style={styles.separator} />
-              
-              <View style={styles.settingItem}>
-                <View style={styles.settingIcon}>
-                  <Mail size={20} color="#6B7280" />
-                </View>
-                <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>{t('settings.emailNotifications.title')}</Text>
-                  <Text style={styles.settingSubtitle}>{t('settings.emailNotifications.subtitle')}</Text>
-                </View>
-                <Switch
-                  value={emailNotifications}
-                  onValueChange={updateEmailNotifications}
-                  trackColor={{ false: '#F3F4F6', true: '#FEE2E2' }}
-                  thumbColor={emailNotifications ? '#EF4444' : '#9CA3AF'}
                 />
               </View>
               

@@ -15,7 +15,6 @@ export interface SettingsState {
   
   // Notifications
   pushNotifications: boolean;
-  emailNotifications: boolean;
   
   // Privacy
   dataExportInProgress: boolean;
@@ -24,7 +23,6 @@ export interface SettingsState {
   updateTheme: (theme: 'light' | 'dark' | 'system') => void;
   updateFontSize: (size: number) => void;
   updatePushNotifications: (enabled: boolean) => void;
-  updateEmailNotifications: (enabled: boolean) => void;
   exportData: () => Promise<void>;
   importData: (data: any) => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -38,7 +36,6 @@ const defaultSettings = {
   theme: 'system' as const,
   fontSize: 1.0,
   pushNotifications: true,
-  emailNotifications: true,
   dataExportInProgress: false,
 };
 
@@ -63,14 +60,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     if (Platform.OS !== 'web') {
       console.log('Push notifications:', pushNotifications ? 'enabled' : 'disabled');
     }
-  },
-
-  updateEmailNotifications: (emailNotifications) => {
-    set({ emailNotifications });
-    get().saveSettings();
-    
-    // In a real app, you would update server-side notification preferences
-    console.log('Email notifications:', emailNotifications ? 'enabled' : 'disabled');
   },
 
   exportData: async () => {
@@ -147,15 +136,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       const { 
         theme, 
         fontSize, 
-        pushNotifications, 
-        emailNotifications
+        pushNotifications,
       } = get();
       
       const settings = {
         theme,
         fontSize,
         pushNotifications,
-        emailNotifications,
       };
       await AsyncStorage.setItem('draft:settings', JSON.stringify(settings));
     } catch (error) {

@@ -203,6 +203,11 @@
       "checkCredentials": "Please check your credentials and try again",
       "signUpFailed": "Sign Up Failed",
       "pleaseTryAgain": "Please try again",
+      "emailAlreadyInUse": "This email is already registered. Try signing in.",
+      "invalidEmail": "Please enter a valid email address",
+      "networkFailed": "Network error. Check your connection and try again.",
+      "tooManyRequests": "Too many attempts. Please wait a moment and try again.",
+      "profileSetupFailed": "Account created but profile setup failed. Try signing in.",
       "appleSignInFailed": "Apple Sign In Failed",
       "appleSignUpFailed": "Apple Sign Up Failed",
       "googleSignInFailed": "Google Sign In Failed",
@@ -542,7 +547,7 @@
       "requestId": "Request ID: {{requestId}}"
     }
   },
-  "subscription": { "title": "Draft Premium", "upgrade": "View Premium", "errors": { "premiumRequired": "This feature is available with Premium.", "limitReached": "You are using {{current}} of {{limit}} free items. Upgrade to create more.", "aiQuotaExhausted": "You have used this month's AI allowance.", "unavailable": "Your subscription status could not be verified. Please try again." } },
+  "subscription": { "title": "Draft Premium", "upgrade": "Premium", "errors": { "premiumRequired": "This feature is available with Premium.", "limitReached": "You are using {{current}} of {{limit}} free items. Upgrade to create more.", "aiQuotaExhausted": "You have used this month's AI allowance.", "unavailable": "Your subscription status could not be verified. Please try again." } },
   "premium": {
     "title": "Upgrade to Premium",
     "subtitle": "Unlock powerful features",
@@ -554,6 +559,9 @@
     "purchaseUnavailableMessage": "Plans could not be loaded from the App Store. Please try again.",
     "purchaseFailedTitle": "Purchase failed",
     "purchaseFailedMessage": "The purchase could not be completed.",
+    "alreadyPremiumTitle": "You're already Premium",
+    "alreadyPremiumMessage": "This account already has Premium. Purchasing again is not needed.",
+    "alreadyOwnedRecoverFailed": "This subscription is already owned. Try Restore Purchases.",
     "restoreSuccessTitle": "Purchases restored",
     "restoreSuccessMessage": "Your Premium access has been restored.",
     "restoreEmptyTitle": "No purchases found",
