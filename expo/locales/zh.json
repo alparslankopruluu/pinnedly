@@ -242,7 +242,8 @@
     },
     "exportData": {
       "title": "导出数据",
-      "subtitle": "将数据下载为 JSON"
+      "subtitle": "将数据下载为 JSON",
+      "failed": "数据导出失败，请重试。"
     },
     "importData": {
       "title": "导入数据",

@@ -314,7 +314,8 @@
     },
     "exportData": {
       "title": "Verileri Dışa Aktar",
-      "subtitle": "Verilerinizi JSON olarak indirin"
+      "subtitle": "Verilerinizi JSON olarak indirin",
+      "failed": "Veriler dışa aktarılamadı. Lütfen tekrar deneyin."
     },
     "importData": {
       "title": "Verileri İçe Aktar",

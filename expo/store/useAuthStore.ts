@@ -102,7 +102,9 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const signInWithGoogle = useCallback(async (): Promise<void> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
+      logCrashlytics('google: sign-in requested from UI');
       const user = await authRepository.signInWithGoogle();
+      logCrashlytics('google: repository returned a profile');
       await handleAuthSuccess(user, 'google');
       setAuthState({ user, isAuthenticated: true, isGuest: false, isLoading: false });
     } catch (error) {
