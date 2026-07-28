@@ -117,20 +117,49 @@ export function authErrorMessageKey(error: unknown): string {
  * a failure, so callers should stay silent rather than show an error dialog.
  */
 export function isUserCancelledAuthError(error: unknown): boolean {
-  const code = (error as { code?: string } | undefined)?.code;
-  if (!code) return false;
+  const code = String((error as { code?: string | number } | undefined)?.code ?? '');
+  const message = String(
+    (error as { message?: string } | undefined)?.message ?? error ?? ''
+  ).toLowerCase();
 
-  if (code === 'ERR_REQUEST_CANCELED') return true;
+  if (code === 'ERR_REQUEST_CANCELED' || code === 'ERR_CANCELED') return true;
   if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return true;
+  // Android Google Sign-In cancel (legacy numeric code).
+  if (code === '12501') return true;
 
   if (Platform.OS !== 'web') {
     try {
-      if (code === nativeGoogle().statusCodes.SIGN_IN_CANCELLED) return true;
+      const { statusCodes } = nativeGoogle();
+      if (code && (code === String(statusCodes.SIGN_IN_CANCELLED) || code === statusCodes.SIGN_IN_CANCELLED)) {
+        return true;
+      }
     } catch {
       // Google Sign-In native constants are unavailable; fall through.
     }
   }
+
+  // Cancelled flows sometimes surface as a missing token instead of a code.
+  if (
+    message.includes('sign-in cancelled')
+    || message.includes('sign in cancelled')
+    || message.includes('no google id token')
+    || message.includes('the user canceled')
+    || message.includes('the user cancelled')
+  ) {
+    return true;
+  }
+
   return false;
+}
+
+function throwGoogleCancelled(): never {
+  const error = new Error('Sign-in cancelled') as Error & { code: string };
+  try {
+    error.code = String(nativeGoogle().statusCodes.SIGN_IN_CANCELLED);
+  } catch {
+    error.code = 'ERR_REQUEST_CANCELED';
+  }
+  throw error;
 }
 
 /**
@@ -287,14 +316,23 @@ export async function signInWithGoogleProvider(): Promise<AuthResultLike> {
 
   // Breadcrumbs only: the iOS crash reported on this flow has no log yet, so
   // each native step is marked to pinpoint where the next one dies.
-  const { GoogleSignin } = nativeGoogle();
+  const google = nativeGoogle();
+  const { GoogleSignin } = google;
   logCrashlytics('google: hasPlayServices start');
   await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
   logCrashlytics('google: hasPlayServices ok, opening native sign-in');
   const signInResult = await GoogleSignin.signIn();
-  const idToken = signInResult.data?.idToken;
+  // v13+ returns { type: 'cancelled' | 'success', data? } instead of always throwing.
+  if ((signInResult as { type?: string }).type === 'cancelled') {
+    throwGoogleCancelled();
+  }
+  const idToken =
+    (signInResult as { data?: { idToken?: string | null } }).data?.idToken
+    ?? (signInResult as { idToken?: string | null }).idToken
+    ?? null;
   logCrashlytics(`google: native sign-in returned, idToken ${idToken ? 'present' : 'missing'}`);
-  if (!idToken) throw new Error('No Google ID token received');
+  // Dismissing the account picker often yields success shape with a null token.
+  if (!idToken) throwGoogleCancelled();
 
   const auth = nativeAuth();
   const credential = auth.GoogleAuthProvider.credential(idToken);

@@ -4,7 +4,7 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
-import { isUserCancelledAuthError } from '@/lib/auth';
+import { authErrorMessageKey, isUserCancelledAuthError } from '@/lib/auth';
 import { trackButtonPress } from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -40,16 +40,16 @@ export default function SignIn() {
       router.replace('/(tabs)');
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
-      // The raw message is provider jargon (e.g. "[auth/unknown] Duplicate
-      // credential received"); it is already recorded in Crashlytics.
+      // Provider jargon is recorded in Crashlytics; UI stays localized.
       if (__DEV__) {
         console.error('[auth] Apple sign-in failed:', error);
       }
-      const detail =
-        __DEV__ && error instanceof Error && error.message
-          ? error.message
-          : t('auth.errors.pleaseTryAgain');
-      showAppAlert(t('auth.errors.appleSignInFailed'), detail, undefined, { variant: 'error' });
+      showAppAlert(
+        t('auth.errors.appleSignInFailed'),
+        t(authErrorMessageKey(error)),
+        undefined,
+        { variant: 'error' }
+      );
     }
   };
 
@@ -63,11 +63,12 @@ export default function SignIn() {
       if (__DEV__) {
         console.error('[auth] Google sign-in failed:', error);
       }
-      const detail =
-        __DEV__ && error instanceof Error && error.message
-          ? error.message
-          : t('auth.errors.pleaseTryAgain');
-      showAppAlert(t('auth.errors.googleSignInFailed'), detail, undefined, { variant: 'error' });
+      showAppAlert(
+        t('auth.errors.googleSignInFailed'),
+        t(authErrorMessageKey(error)),
+        undefined,
+        { variant: 'error' }
+      );
     }
   };
 
@@ -313,6 +314,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
+    marginTop: 16,
   },
   footerText: {
     fontSize: 14,

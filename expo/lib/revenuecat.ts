@@ -70,14 +70,103 @@ function revenueCatPaywallUi() {
 }
 
 /**
- * Only presents the paywall when the user does not already hold Premium.
- * Returns `NOT_PRESENTED` when entitlement is already active (no buy sheet).
+ * Presents the RevenueCat paywall sheet.
+ * Callers should skip this when the user is already Premium.
+ *
+ * Prefer plain `presentPaywall` over `presentPaywallIfNeeded`: the latter can
+ * hang on iOS Simulator without ever resolving when StoreKit is flaky, while
+ * entitlement is already gated in `showPaywall` / PremiumModal.
  */
 export async function presentRevenueCatPaywall() {
   const { default: RevenueCatUI } = await revenueCatPaywallUi();
-  return RevenueCatUI.presentPaywallIfNeeded({
-    requiredEntitlementIdentifier: REVENUECAT_ENTITLEMENT_ID,
-  });
+  // Ensure offerings are warm so the sheet does not sit forever on a spinner.
+  await getPremiumPackages();
+  return RevenueCatUI.presentPaywall({ displayCloseButton: true });
+}
+
+export type NativePaywallOutcome =
+  | 'already_premium'
+  | 'purchased'
+  | 'restored'
+  | 'cancelled'
+  | 'error';
+
+/**
+ * Full native paywall flow for iOS/Android. Does not mount any RN Modal —
+ * presents RevenueCatUI directly so it is not blocked by AppDialog / sheets.
+ */
+export async function openNativePaywall(options?: {
+  onEntitlementChanged?: (customerInfo: CustomerInfo) => Promise<unknown> | unknown;
+}): Promise<NativePaywallOutcome> {
+  if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
+    return 'error';
+  }
+
+  const existing = await getRevenueCatCustomerInfo();
+  if (hasPremiumEntitlement(existing)) {
+    await options?.onEntitlementChanged?.(existing);
+    return 'already_premium';
+  }
+
+  const { default: RevenueCatUI, PAYWALL_RESULT } = await revenueCatPaywallUi();
+  await getPremiumPackages();
+
+  let result: string;
+  try {
+    result = await RevenueCatUI.presentPaywall({ displayCloseButton: true });
+  } catch (error) {
+    if (isProductAlreadyPurchasedError(error)) {
+      const restored = await restorePremiumPurchases();
+      if (hasPremiumEntitlement(restored)) {
+        await options?.onEntitlementChanged?.(restored);
+        return 'already_premium';
+      }
+    }
+    throw error;
+  }
+
+  if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
+    const customerInfo = await getRevenueCatCustomerInfo();
+    if (hasPremiumEntitlement(customerInfo)) {
+      await options?.onEntitlementChanged?.(customerInfo);
+      return result === PAYWALL_RESULT.RESTORED ? 'restored' : 'purchased';
+    }
+    // Purchase reported success but entitlement missing — try restore once.
+    const restored = await restorePremiumPurchases();
+    if (hasPremiumEntitlement(restored)) {
+      await options?.onEntitlementChanged?.(restored);
+      return 'restored';
+    }
+    return 'error';
+  }
+
+  if (result === PAYWALL_RESULT.CANCELLED || result === PAYWALL_RESULT.NOT_PRESENTED) {
+    // NOT_PRESENTED without premium usually means no current offering/paywall.
+    if (result === PAYWALL_RESULT.NOT_PRESENTED) {
+      const again = await getRevenueCatCustomerInfo();
+      if (hasPremiumEntitlement(again)) {
+        await options?.onEntitlementChanged?.(again);
+        return 'already_premium';
+      }
+      return 'error';
+    }
+    return 'cancelled';
+  }
+
+  if (result === PAYWALL_RESULT.ERROR) {
+    try {
+      const restored = await restorePremiumPurchases();
+      if (hasPremiumEntitlement(restored)) {
+        await options?.onEntitlementChanged?.(restored);
+        return 'already_premium';
+      }
+    } catch {
+      // fall through
+    }
+    return 'error';
+  }
+
+  return 'error';
 }
 
 /**

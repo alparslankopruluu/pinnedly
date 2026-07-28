@@ -10,10 +10,11 @@ import {
   getRevenueCatCustomerInfo,
   hasPremiumEntitlement,
   initializeRevenueCat,
+  openNativePaywall,
   REVENUECAT_ENTITLEMENT_ID,
   warmRevenueCatPaywall,
 } from '@/lib/revenuecat';
-import { recordError } from '@/lib/crashlytics';
+import { logCrashlytics, recordError } from '@/lib/crashlytics';
 import { callAuthenticatedFunction } from '@/services/functionsApi';
 import {
   AccessContext,
@@ -208,24 +209,43 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
           );
           return;
         }
-        // Store may already own the product while our snapshot still says free.
+
+        // Native: present RevenueCat UI directly (no RN PremiumModal).
+        // Web: fall back to the in-app PremiumModal sheet.
+        if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
+          setPaywallVisible(true);
+          return;
+        }
+
         void (async () => {
           try {
-            if (Platform.OS === 'ios' || Platform.OS === 'android') {
-              const info = await getRevenueCatCustomerInfo();
-              if (hasPremiumEntitlement(info)) {
-                await handleEntitlementChanged(info);
-                Alert.alert(
-                  i18n.t('premium.alreadyPremiumTitle'),
-                  i18n.t('premium.alreadyPremiumMessage')
-                );
-                return;
-              }
+            const outcome = await openNativePaywall({
+              onEntitlementChanged: handleEntitlementChanged,
+            });
+            if (outcome === 'already_premium') {
+              Alert.alert(
+                i18n.t('premium.alreadyPremiumTitle'),
+                i18n.t('premium.alreadyPremiumMessage')
+              );
+              return;
             }
-          } catch {
-            // Fall through to paywall if the store check fails.
+            if (outcome === 'error') {
+              Alert.alert(
+                i18n.t('premium.purchaseUnavailableTitle'),
+                i18n.t('premium.purchaseUnavailableMessage')
+              );
+            }
+          } catch (error) {
+            logCrashlytics(`openNativePaywall failed: ${String(error)}`);
+            recordError(
+              error instanceof Error ? error : new Error(String(error)),
+              'revenuecat:open-native-paywall'
+            );
+            Alert.alert(
+              i18n.t('premium.purchaseUnavailableTitle'),
+              i18n.t('premium.purchaseUnavailableMessage')
+            );
           }
-          setPaywallVisible(true);
         })();
       },
       presentCustomerCenter: async () => {

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
-  ActivityIndicator,
   Alert,
   Platform,
   Linking,
@@ -66,8 +65,17 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     ) return;
 
     nativePaywallOpen.current = true;
+    let cancelled = false;
+
     const showRevenueCatPaywall = async () => {
       try {
+        // Wait a frame so any previous sheet (members modal, alerts) fully
+        // dismisses — presenting RC paywall under another RN overlay freezes iOS.
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => setTimeout(resolve, 280));
+        });
+        if (cancelled) return;
+
         // Local snapshot can lag; check store entitlement before any buy UI.
         const existing = await getRevenueCatCustomerInfo();
         if (hasPremiumEntitlement(existing)) {
@@ -83,8 +91,8 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
         }
 
         const { PAYWALL_RESULT } = await import('react-native-purchases-ui');
-        // presentPaywallIfNeeded skips the sheet when entitlement is active.
         const result = await presentRevenueCatPaywall();
+        if (cancelled) return;
 
         if (result === PAYWALL_RESULT.NOT_PRESENTED) {
           const customerInfo = await getRevenueCatCustomerInfo();
@@ -96,6 +104,12 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
             Alert.alert(
               t('premium.alreadyPremiumTitle'),
               t('premium.alreadyPremiumMessage')
+            );
+          } else {
+            // Offering/paywall missing — surface a recoverable message.
+            Alert.alert(
+              t('premium.purchaseUnavailableTitle'),
+              t('premium.purchaseUnavailableMessage')
             );
           }
           return;
@@ -122,6 +136,11 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
               t('premium.alreadyPremiumTitle'),
               t('premium.alreadyPremiumMessage')
             );
+          } else {
+            Alert.alert(
+              t('premium.purchaseUnavailableTitle'),
+              t('premium.purchaseUnavailableMessage')
+            );
           }
         }
       } catch (error) {
@@ -147,16 +166,19 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
         if (!isPurchaseCancelled(error)) {
           Alert.alert(
             t('premium.purchaseUnavailableTitle'),
-            error instanceof Error ? error.message : t('premium.purchaseUnavailableMessage')
+            t('premium.purchaseUnavailableMessage')
           );
         }
       } finally {
         nativePaywallOpen.current = false;
-        onClose();
+        if (!cancelled) onClose();
       }
     };
 
-    showRevenueCatPaywall();
+    void showRevenueCatPaywall();
+    return () => {
+      cancelled = true;
+    };
   }, [visible, onClose, onEntitlementChanged, t]);
 
   React.useEffect(() => {
@@ -386,20 +408,11 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
     </TouchableOpacity>
   );
 
-  // Native platforms use the remotely configured RevenueCat paywall. Keep
-  // the custom modal below only as a web fallback.
+  // Native platforms present the RevenueCat paywall via a side effect above.
+  // Do not mount a full-screen RN overlay — it blocks the native paywall sheet
+  // on iOS (stuck "Yükleniyor…") and never unblocks if presentPaywall hangs.
   if (Platform.OS === 'ios' || Platform.OS === 'android') {
-    if (!visible) return null;
-    return (
-      <View
-        style={styles.nativeLoadingOverlay}
-        accessibilityRole="progressbar"
-        accessibilityLabel={t('common.loading')}
-      >
-        <ActivityIndicator size="large" color="#6366F1" />
-        <Text style={styles.nativeLoadingText}>{t('common.loading')}</Text>
-      </View>
-    );
+    return null;
   }
 
   return (
@@ -494,20 +507,6 @@ export function PremiumModal({ visible, onClose, onEntitlementChanged }: Premium
 }
 
 const styles = StyleSheet.create({
-  nativeLoadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 9999,
-    elevation: 9999,
-    backgroundColor: 'rgba(15, 23, 42, 0.28)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nativeLoadingText: {
-    marginTop: 12,
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',

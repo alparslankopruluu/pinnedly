@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Modal,
   View,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  InteractionManager,
 } from 'react-native';
 import {
   AlertCircle,
@@ -66,10 +67,25 @@ export function AppDialog({
   const { icon: Icon, color, background } = VARIANT_CONFIG[variant];
   const useStackedButtons = buttons.length > 2;
   const reduceMotion = useReducedMotion();
+  // Defer action handlers until after this Modal finishes dismissing — critical
+  // on iOS when the next step presents another native sheet (RevenueCat paywall).
+  const pendingActionRef = useRef<(() => void) | null>(null);
+
+  const flushPendingAction = () => {
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (!action) return;
+    InteractionManager.runAfterInteractions(() => {
+      const delayMs = Platform.OS === 'ios' ? 400 : 150;
+      setTimeout(action, delayMs);
+    });
+  };
 
   const handlePress = (button: DialogButton) => {
+    pendingActionRef.current = button.onPress ?? null;
     onDismiss();
-    button.onPress?.();
+    // onDismiss only flips visible=false; run after the modal has left the tree.
+    flushPendingAction();
   };
 
   return (
