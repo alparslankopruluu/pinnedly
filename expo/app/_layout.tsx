@@ -128,11 +128,11 @@ function RootLayoutNav() {
         <Stack.Screen name="project/[id]" />
         <Stack.Screen name="note/[id]" />
         <Stack.Screen name="profile/[id]" options={{ title: t('navigation.profile') }} />
-        <Stack.Screen name="share-inbox" options={{ title: t('navigation.shareInbox') }} />
+        <Stack.Screen name="share-inbox" options={{ title: t('shareInbox.title') }} />
         <Stack.Screen name="invite/[token]" options={{ title: t('navigation.invite') }} />
-        <Stack.Screen name="people-search" options={{ presentation: "modal", title: t('navigation.findPeople') }} />
+        <Stack.Screen name="people-search" options={{ presentation: "modal", headerShown: false }} />
         <Stack.Screen name="discover-lists" options={{ headerShown: false }} />
-        <Stack.Screen name="create-list" options={{ presentation: "modal", title: t('navigation.createList') }} />
+        <Stack.Screen name="create-list" options={{ presentation: "modal", headerShown: false }} />
         <Stack.Screen name="bookmark-list/[id]" options={{ title: t('navigation.bookmarkList') }} />
         </Stack>
       </AnalyticsProvider>

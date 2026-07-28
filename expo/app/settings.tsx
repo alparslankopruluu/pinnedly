@@ -21,6 +21,7 @@ import {
   Crown,
   Mail,
   Trash2,
+  LogOut,
   Shield,
   ExternalLink,
   Smartphone,
@@ -60,7 +61,7 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const { colors, font } = useAppAppearance();
   const styles = useMemo(() => createStyles(colors, font), [colors, font]);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { requireAccount } = useAuthGate();
   const {
     theme,
@@ -76,7 +77,7 @@ export default function SettingsScreen() {
     deleteAccount,
     loadSettings
   } = useSettingsStore();
-  const { snapshot, can, showPaywall, presentCustomerCenter } = useSubscriptionAccess();
+  const { snapshot, can, showPaywall } = useSubscriptionAccess();
   const { bookmarks } = useBookmarkStore();
 
   const [showThemeSelector, setShowThemeSelector] = useState<boolean>(false);
@@ -145,6 +146,24 @@ export default function SettingsScreen() {
 
   const handleImportData = () => {
     console.log('Import data feature coming soon');
+  };
+
+  const handleSignOut = () => {
+    showAppAlert(
+      t('settings.signOut.title'),
+      t('settings.signOut.confirmMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('settings.signOut.title'),
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/(auth)/welcome');
+          },
+        },
+      ]
+    );
   };
 
   const handleDeleteAccount = () => {
@@ -230,6 +249,19 @@ export default function SettingsScreen() {
                 </View>
                 <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={handleSignOut}
+              >
+                <View style={styles.settingIcon}>
+                  <LogOut size={20} color="#6B7280" />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>{t('settings.signOut.title')}</Text>
+                  <Text style={styles.settingSubtitle}>{t('settings.signOut.subtitle')}</Text>
+                </View>
+                <ChevronRight size={20} color="#9CA3AF" />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -287,24 +319,6 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 {snapshot.plan === 'free' && <ChevronRight size={20} color="#9CA3AF" />}
-              </TouchableOpacity>
-              
-              <View style={styles.separator} />
-              
-              <TouchableOpacity
-                style={styles.settingItem}
-                onPress={() => requireAccount() && presentCustomerCenter()}
-              >
-                <View style={styles.settingIcon}>
-                  <Shield size={20} color="#6B7280" />
-                </View>
-                <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>{t('settings.billingHistory.title')}</Text>
-                  <Text style={styles.settingSubtitle}>
-                    {t('settings.billingHistory.subtitle')}
-                  </Text>
-                </View>
-                <ChevronRight size={20} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
           </View>

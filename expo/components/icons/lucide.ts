@@ -45,6 +45,7 @@ export { default as Link2 } from 'lucide-react-native/dist/esm/icons/link-2.js';
 export { default as List } from 'lucide-react-native/dist/esm/icons/list.js';
 export { default as ListTodo } from 'lucide-react-native/dist/esm/icons/list-todo.js';
 export { default as Lock } from 'lucide-react-native/dist/esm/icons/lock.js';
+export { default as LogOut } from 'lucide-react-native/dist/esm/icons/log-out.js';
 export { default as Mail } from 'lucide-react-native/dist/esm/icons/mail.js';
 export { default as Mic } from 'lucide-react-native/dist/esm/icons/mic.js';
 export { default as Minus } from 'lucide-react-native/dist/esm/icons/minus.js';

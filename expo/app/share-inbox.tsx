@@ -8,10 +8,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft,
   Bookmark,
   ChevronRight,
   FileText,
@@ -124,15 +123,15 @@ export default function ShareInbox() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#1e293b" />
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('shareInbox.title')}</Text>
-        <TouchableOpacity onPress={() => router.push('/people-search')} style={styles.searchButton}>
-          <Search size={24} color="#1e293b" />
-        </TouchableOpacity>
-      </View>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity onPress={() => router.push('/people-search')} style={styles.searchButton}>
+              <Search size={22} color="#1e293b" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <View style={styles.content}>
         {shares.length === 0 && !isLoading ? (
@@ -161,23 +160,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  backButton: {
-    padding: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: '#1e293b',
   },
   searchButton: {
     padding: 4,
