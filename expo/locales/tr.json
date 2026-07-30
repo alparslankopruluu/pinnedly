@@ -105,6 +105,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "Bildirimler",
+    "emptyStateTitle": "Henüz bildirim yok",
+    "emptyStateSubtitle": "Projeye eklendiğinizde veya içerik paylaşıldığında burada görünecektir.",
+    "markAllRead": "Tümünü okundu işaretle",
     "taskReminder": {
       "title": "Görev Hatırlatıcısı",
       "body": "Unutmayın: {{taskTitle}}"

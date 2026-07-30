@@ -11,6 +11,7 @@ export { default as Briefcase } from 'lucide-react-native/dist/esm/icons/briefca
 export { default as Calendar } from 'lucide-react-native/dist/esm/icons/calendar.js';
 export { default as Camera } from 'lucide-react-native/dist/esm/icons/camera.js';
 export { default as Check } from 'lucide-react-native/dist/esm/icons/check.js';
+export { default as CheckCheck } from 'lucide-react-native/dist/esm/icons/check-check.js';
 export { default as CheckCircle } from 'lucide-react-native/dist/esm/icons/circle-check-big.js';
 export { default as CheckCircle2 } from 'lucide-react-native/dist/esm/icons/circle-check.js';
 export { default as ChevronDown } from 'lucide-react-native/dist/esm/icons/chevron-down.js';

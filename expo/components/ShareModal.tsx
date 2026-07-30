@@ -77,9 +77,17 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
     }
   };
 
+  const triggerPaywall = () => {
+    onClose();
+    const delayMs = Platform.OS === 'ios' ? 400 : 150;
+    setTimeout(() => {
+      showPaywall();
+    }, delayMs);
+  };
+
   const handleShare = async () => {
     if (!can('sharing').allowed) {
-      showPaywall();
+      triggerPaywall();
       return;
     }
     if (!email.trim()) {
@@ -106,7 +114,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
 
   const handleUpdatePermission = async (shareId: ID, newPermission: SharePermission) => {
     if (!can('memberManagement').allowed) {
-      showPaywall();
+      triggerPaywall();
       return;
     }
     try {
@@ -133,7 +141,7 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
 
   const handleCreateInviteLink = async () => {
     if (!can('sharing').allowed) {
-      showPaywall();
+      triggerPaywall();
       return;
     }
     setIsCreatingLink(true);

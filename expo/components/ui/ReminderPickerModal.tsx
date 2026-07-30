@@ -8,6 +8,7 @@ import {
   Pressable,
   Switch,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { X, Bell } from '@/components/icons/lucide';
 import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
@@ -72,7 +73,11 @@ export function ReminderPickerModal({
 
   const addCustomDate = () => {
     if (!isPremium) {
-      showPaywall();
+      onClose();
+      const delayMs = Platform.OS === 'ios' ? 400 : 150;
+      setTimeout(() => {
+        showPaywall();
+      }, delayMs);
       return;
     }
     const ts = customPickerDate.getTime();

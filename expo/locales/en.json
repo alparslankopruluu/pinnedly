@@ -105,6 +105,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "Notifications",
+    "emptyStateTitle": "No notifications yet",
+    "emptyStateSubtitle": "When you are added to a project or items are shared, they will appear here.",
+    "markAllRead": "Mark all as read",
     "taskReminder": {
       "title": "Task Reminder",
       "body": "Don't forget: {{taskTitle}}"

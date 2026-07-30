@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { 
+  Bell,
   ChevronRight,
   Crown,
   Sparkles,
@@ -14,6 +15,7 @@ import {
 } from '@/components/icons/lucide';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/store/useAuthStore';
+import { useNotifications } from '@/store/useNotificationStore';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
 import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
@@ -27,6 +29,7 @@ export default function ProfileScreen() {
   const styles = useMemo(() => createStyles(colors, font), [colors, font]);
   const insets = useSafeAreaInsets();
   const { isPremium, snapshot, showPaywall } = useSubscriptionAccess();
+  const { unreadCount } = useNotifications();
   const reduceMotion = useReducedMotion();
   
   const pulseAnim = useMemo(() => new Animated.Value(1), []);
@@ -104,6 +107,20 @@ export default function ProfileScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}>
         {/* Profile Section */}
         <View style={styles.profileSection}>
+          <Pressable
+            style={styles.bellHeaderButton}
+            onPress={() => router.push('/notifications' as never)}
+            accessibilityLabel="Notifications"
+          >
+            <Bell size={22} color={colors.text} />
+            {unreadCount > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </Pressable>
           {user?.avatar ? (
             <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
           ) : (
@@ -281,12 +298,32 @@ const createStyles = (colors: AppColors, font: (size: number) => number) => Styl
     backgroundColor: colors.surface,
     marginHorizontal: 16,
     marginBottom: 24,
-    borderRadius: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    borderRadius: 20,
+    position: 'relative',
+  },
+  bellHeaderButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 8,
+    zIndex: 10,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: colors.primary,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  bellBadgeText: {
+    color: '#FFFFFF',
+    fontSize: font(10),
+    fontWeight: '700',
   },
   avatar: {
     width: 80,

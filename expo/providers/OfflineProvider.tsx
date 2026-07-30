@@ -6,6 +6,7 @@ import { BookmarkListProvider } from '@/store/useBookmarkListStore';
 import { notificationService } from '@/utils/notifications';
 import { router } from 'expo-router';
 import { BookmarkDigestSync } from '@/components/BookmarkDigestSync';
+import { useAuth } from '@/store/useAuthStore';
 
 // Create a query client for React Query
 const queryClient = new QueryClient({
@@ -27,6 +28,14 @@ interface OfflineProviderProps {
 }
 
 export function OfflineProvider({ children }: OfflineProviderProps) {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user?.id) {
+      void notificationService.registerUserPushToken(user.id);
+    }
+  }, [user?.id]);
+
   useEffect(() => {
     // Initialize notifications
     notificationService.initialize();
@@ -66,6 +75,9 @@ export function OfflineProvider({ children }: OfflineProviderProps) {
               break;
             case 'note':
               router.push(`/note/${data.entityId}` as never);
+              break;
+            case 'list':
+              router.push(`/bookmark-list/${data.entityId}` as never);
               break;
             case 'bookmark':
               if (data.entityId === 'inbox') {

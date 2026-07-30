@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 import { randomBytes, createHash } from 'crypto';
 import { onRequest } from 'firebase-functions/v2/https';
 import { getAuthoritativeEntitlement, revenueCatApiKey } from './subscription';
+import { createUserNotificationAndPush } from './notifications';
 
 type EntityType = 'note' | 'bookmark' | 'project' | 'list';
 type SharePermission = 'view' | 'edit';
@@ -388,6 +389,15 @@ async function grantEntityAccess(
   if (entityType === 'list') {
     await syncListBookmarkAccess(entityId, targetUserId, permission);
   }
+
+  // Trigger notification & push asynchronously (non-blocking)
+  void createUserNotificationAndPush({
+    targetUserId,
+    actorId,
+    entityType,
+    entityId,
+    permission,
+  }).catch((err) => console.error('Failed to dispatch user notification:', err));
 
   return shareRef.id;
 }

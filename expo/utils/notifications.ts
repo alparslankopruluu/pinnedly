@@ -84,15 +84,10 @@ export class NotificationService {
       }
 
       const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
-      if (!projectId) {
-        if (__DEV__) {
-          console.debug('Skipping push token registration: EAS project ID not configured.');
-        }
-        return;
+      if (projectId) {
+        this.expoPushToken = (await notificationModule.getExpoPushTokenAsync({ projectId })).data;
+        console.log('Expo push token:', this.expoPushToken);
       }
-
-      this.expoPushToken = (await notificationModule.getExpoPushTokenAsync({ projectId })).data;
-      console.log('Expo push token:', this.expoPushToken);
 
       if (Platform.OS === 'android') {
         await notificationModule.setNotificationChannelAsync('default', {
@@ -104,6 +99,58 @@ export class NotificationService {
       }
     } catch (error) {
       console.error('Error initializing notifications:', error);
+    }
+  }
+
+  async registerUserPushToken(uid: string): Promise<void> {
+    if (!uid || !platformCapabilities.supportsPushNotifications) return;
+    try {
+      const notificationModule = notifications();
+      const { status: existingStatus } = await notificationModule.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await notificationModule.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') return;
+
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+      let token: string | null = null;
+      if (projectId) {
+        token = (await notificationModule.getExpoPushTokenAsync({ projectId })).data;
+      } else {
+        const deviceToken = await notificationModule.getDevicePushTokenAsync().catch(() => null);
+        if (deviceToken?.data) {
+          token = String(deviceToken.data);
+        }
+      }
+
+      if (!token) return;
+      this.expoPushToken = token;
+
+      if (Platform.OS === 'web') {
+        const { getFirestore, doc, updateDoc, arrayUnion } = await import('firebase/firestore');
+        const { getFirebaseWebApp } = await import('@/lib/firebaseApp');
+        const db = getFirestore(getFirebaseWebApp() as never);
+        await updateDoc(doc(db, 'users', uid), {
+          expoPushTokens: arrayUnion(token),
+          updatedAt: Date.now(),
+        }).catch(() => undefined);
+      } else {
+        const firestore = (await import('@react-native-firebase/firestore')).default;
+        await firestore()
+          .collection('users')
+          .doc(uid)
+          .update({
+            expoPushTokens: firestore.FieldValue.arrayUnion(token),
+            updatedAt: firestore.FieldValue.serverTimestamp(),
+          })
+          .catch(() => undefined);
+      }
+    } catch (error) {
+      console.error('Failed to register push token for user:', error);
     }
   }
 
