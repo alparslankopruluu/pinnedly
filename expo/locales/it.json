@@ -903,6 +903,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "Notifiche",
+    "emptyStateTitle": "Nessuna notifica",
+    "emptyStateSubtitle": "Quando verrai aggiunto a un progetto o verranno condivisi contenuti, appariranno qui.",
+    "markAllRead": "Segna tutti come letti",
     "taskReminder": {
       "title": "Promemoria attività",
       "body": "Non dimenticare: {{taskTitle}}"

@@ -903,6 +903,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "Notificaciones",
+    "emptyStateTitle": "No hay notificaciones",
+    "emptyStateSubtitle": "Cuando te añadan a un proyecto o compartan contenido, aparecerán aquí.",
+    "markAllRead": "Marcar todo como leído",
     "taskReminder": {
       "title": "Recordatorio de tarea",
       "body": "No olvides: {{taskTitle}}"

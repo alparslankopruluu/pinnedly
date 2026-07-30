@@ -905,6 +905,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "Уведомления",
+    "emptyStateTitle": "Уведомлений пока нет",
+    "emptyStateSubtitle": "Когда вас добавят в проект или поделитесь материалом, уведомления появятся здесь.",
+    "markAllRead": "Отметить все как прочитанные",
     "taskReminder": {
       "title": "Task Reminder",
       "body": "Don't forget: {{taskTitle}}"

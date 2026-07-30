@@ -903,6 +903,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "通知",
+    "emptyStateTitle": "通知はまだありません",
+    "emptyStateSubtitle": "プロジェクトに追加されたりコンテンツが共有されると、ここに表示されます。",
+    "markAllRead": "すべて既読にする",
     "taskReminder": {
       "title": "タスクリマインダー",
       "body": "忘れずに: {{taskTitle}}"

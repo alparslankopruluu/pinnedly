@@ -903,6 +903,10 @@
     "other": "网页"
   },
   "notifications": {
+    "screenTitle": "通知",
+    "emptyStateTitle": "暂无通知",
+    "emptyStateSubtitle": "当您被添加到项目或有共享内容时，通知将显示在这里。",
+    "markAllRead": "全部标记为已读",
     "taskReminder": {
       "title": "任务提醒",
       "body": "别忘了：{{taskTitle}}"

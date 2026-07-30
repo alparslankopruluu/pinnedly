@@ -903,6 +903,10 @@
     "other": "Web"
   },
   "notifications": {
+    "screenTitle": "الإشعارات",
+    "emptyStateTitle": "لا توجد إشعارات حتى الآن",
+    "emptyStateSubtitle": "عند إضافتك إلى مشروع أو مشاركة محتوى معك، ستظهر الإشعارات هنا.",
+    "markAllRead": "تحديد الكل كقروء",
     "taskReminder": {
       "title": "Task Reminder",
       "body": "Don't forget: {{taskTitle}}"
