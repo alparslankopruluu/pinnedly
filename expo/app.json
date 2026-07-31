@@ -17,6 +17,7 @@
       "backgroundColor": "#F04444"
     },
     "ios": {
+      "appleTeamId": "UYDAF6RY67",
       "buildNumber": "7",
       "supportsTablet": true,
       "bundleIdentifier": "app.techtactoe.draft",

@@ -47,7 +47,15 @@ GoogleService-Info.plist
 fastlane/README.md
 fastlane/report.xml
 
-ios/
+# iOS native project is committed for Xcode Cloud. Keep only generated,
+# machine-specific, and dependency artifacts out of version control.
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/.xcode.env.local
+ios/**/*.xcuserdata/
+ios/**/*.xcuserstate
+!ios/Draft/GoogleService-Info.plist
 android/
 core
 node_modules
