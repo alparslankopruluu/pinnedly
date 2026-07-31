@@ -43,6 +43,10 @@ GoogleService-Info.plist
 *.tsbuildinfo
 .vercel
 
+# Fastlane generated reports
+fastlane/README.md
+fastlane/report.xml
+
 ios/
 android/
 core

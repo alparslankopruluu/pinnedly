@@ -1,0 +1,90 @@
+require "json"
+
+opt_out_usage
+
+ROOT_PATH = File.expand_path("..", __dir__)
+APP_IDENTIFIER = "app.techtactoe.draft"
+APP_VERSION = "1.0.5"
+LOCALES = %w[ar-SA de-DE en-US es-ES it ja pt-PT ru tr zh-Hans].freeze
+APP_INFO_PATH = File.join(ROOT_PATH, "metadata", "app-info")
+VERSION_METADATA_PATH = File.join(ROOT_PATH, "metadata", "version", "1.0")
+
+def localized_values(directory, field, required: true)
+  LOCALES.each_with_object({}) do |locale, values|
+    path = File.join(directory, "#{locale}.json")
+    data = JSON.parse(File.read(path))
+    value = data[field]
+
+    if required && (value.nil? || value.to_s.strip.empty?)
+      UI.user_error!("Missing #{field} in #{path}")
+    end
+
+    values[locale] = value unless value.nil? || value.to_s.strip.empty?
+  end
+end
+
+def required_environment(name)
+  value = ENV[name]
+  UI.user_error!("Set #{name} before running this lane") if value.nil? || value.strip.empty?
+  value
+end
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Validate localized App Store metadata without contacting Apple"
+  lane :metadata_validate do
+    sh("node", File.join(ROOT_PATH, "scripts", "validate-appstore-metadata.mjs"))
+  end
+
+  desc "Read the editable App Store version without making changes"
+  lane :metadata_preflight do
+    metadata_validate
+    sh("node", File.join(ROOT_PATH, "scripts", "appstore-connect-metadata.mjs"), "preflight")
+  end
+
+  desc "Upload only localized metadata for iOS 1.0.5 and verify it remotely"
+  lane :metadata_upload do
+    metadata_preflight
+
+    api_key = app_store_connect_api_key(
+      key_id: required_environment("ASC_KEY_ID"),
+      issuer_id: required_environment("ASC_ISSUER_ID"),
+      key_filepath: File.expand_path(required_environment("ASC_KEY_PATH")),
+      duration: 1200,
+      in_house: false
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      app_version: APP_VERSION,
+      platform: "ios",
+      languages: LOCALES,
+      name: localized_values(APP_INFO_PATH, "name"),
+      subtitle: localized_values(APP_INFO_PATH, "subtitle"),
+      privacy_url: localized_values(APP_INFO_PATH, "privacyPolicyUrl"),
+      description: localized_values(VERSION_METADATA_PATH, "description"),
+      keywords: localized_values(VERSION_METADATA_PATH, "keywords"),
+      promotional_text: localized_values(VERSION_METADATA_PATH, "promotionalText"),
+      release_notes: localized_values(VERSION_METADATA_PATH, "releaseNotes"),
+      support_url: localized_values(VERSION_METADATA_PATH, "supportUrl"),
+      marketing_url: localized_values(VERSION_METADATA_PATH, "marketingUrl", required: false),
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_app_version_update: false,
+      submit_for_review: false,
+      force: true,
+      run_precheck_before_submit: false,
+      precheck_include_in_app_purchases: false
+    )
+
+    sh("node", File.join(ROOT_PATH, "scripts", "appstore-connect-metadata.mjs"), "verify")
+  end
+
+  desc "Verify iOS 1.0.5 metadata currently stored in App Store Connect"
+  lane :metadata_verify do
+    metadata_validate
+    sh("node", File.join(ROOT_PATH, "scripts", "appstore-connect-metadata.mjs"), "verify")
+  end
+end

@@ -15,6 +15,10 @@
     "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
     "test:subscription": "node --test --experimental-strip-types tests/subscription-access.test.mjs",
+    "store:metadata:validate": "node scripts/validate-appstore-metadata.mjs",
+    "store:metadata:preflight": "node scripts/appstore-connect-metadata.mjs preflight",
+    "store:metadata:upload": "bundle exec fastlane ios metadata_upload",
+    "store:metadata:verify": "node scripts/appstore-connect-metadata.mjs verify",
     "postinstall": "node scripts/patch-html-entities.js && node scripts/patch-expo-keep-awake.js"
   },
   "dependencies": {

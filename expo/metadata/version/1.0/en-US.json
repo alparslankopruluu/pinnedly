@@ -1,7 +1,8 @@
 {
   "description": "Draft brings bookmarks, notes, tasks, and projects into one focused workspace.\n\nSAVE WHAT YOU WANT TO RETURN TO\nPaste links, add screenshots, and keep useful resources easy to find later.\n\nWRITE AND PLAN\nCapture ideas in notes, turn them into actionable tasks, and stay on top of everyday to-dos.\n\nMOVE PROJECTS FORWARD\nCreate projects, set deadlines, organize tasks, follow progress, and use Kanban when you need a clear view of the work.\n\nTHINK WITH AI\nUse the built-in AI assistant to brainstorm, summarize, and work through your next step.\n\nSHARE WHEN IT HELPS\nInvite specific people to view or edit selected bookmarks, notes, and projects.\n\nDraft keeps the things that matter together, so you can focus on what comes next.\n\nTerms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
-  "keywords": "draft,notes,bookmarks,todo,tasks,projects,collaboration,ai assistant,organizer,save links,pinnedly",
+  "keywords": "todo,kanban,save links,organizer,collaboration,ai assistant,second brain,reminders,checklist",
   "marketingUrl": "https://draft-notes.ai.studio/",
-  "promotionalText": "Save what matters. Manage bookmarks, take notes, track projects, and chat with AI.",
+  "promotionalText": "Save links, shape ideas, and finish tasks in one focused workspace. Plan projects, collaborate, and use AI whenever you need a clearer next step.",
+  "releaseNotes": "Stay in sync and work more smoothly:\n• Get real-time notifications when you’re added to a project or someone shares content with you. Open shared items directly and mark notifications as read individually or all at once.\n• Improved sign-in and account linking, note saving, and Premium purchase and restore flows.\n• General interface, stability, and performance improvements.",
   "supportUrl": "https://draft-notes.ai.studio/"
 }
