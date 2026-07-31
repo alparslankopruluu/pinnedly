@@ -105,6 +105,7 @@
         }
       ],
       "./plugins/withAndroidReleaseSigning.js",
+      "./plugins/withFmtXcode26Fix.js",
       "expo-localization",
       [
         "expo-share-intent",
