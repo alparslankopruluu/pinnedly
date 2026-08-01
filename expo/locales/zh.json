@@ -163,6 +163,18 @@
   "welcome": {
     "subtitle": "在一个空间里保存、规划并推进灵感",
     "loading": "加载中...",
+    "onboarding": {
+      "skipHint": "跳过此介绍并继续使用Draft",
+      "swipeHint": "横向滑动或使用按钮在步骤之间切换",
+      "cards": {
+        "quickNote": "快速笔记",
+        "saveLink": "保存链接",
+        "planTask": "规划任务",
+        "project": "项目空间",
+        "aiSummary": "AI摘要",
+        "collaborate": "协同工作"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "现在保存，以后轻松找到",

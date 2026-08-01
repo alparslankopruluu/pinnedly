@@ -235,6 +235,18 @@
   "welcome": {
     "subtitle": "Kaydetmek, planlamak ve fikirleri ilerletmek için alanınız",
     "loading": "Yükleniyor...",
+    "onboarding": {
+      "skipHint": "Bu tanıtımı atlayıp Draft’a devam et",
+      "swipeHint": "Adımlar arasında geçmek için yatay kaydırın veya düğmeyi kullanın",
+      "cards": {
+        "quickNote": "Hızlı not",
+        "saveLink": "Bağlantı kaydet",
+        "planTask": "Görev planla",
+        "project": "Proje",
+        "aiSummary": "AI özeti",
+        "collaborate": "Ortak çalış"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "Şimdi kaydet. Sonra kolayca bul.",

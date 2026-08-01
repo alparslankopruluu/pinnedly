@@ -163,6 +163,18 @@
   "welcome": {
     "subtitle": "保存、計画、アイデアの実現をひとつの場所で",
     "loading": "読み込み中...",
+    "onboarding": {
+      "skipHint": "この紹介をスキップしてDraftへ進みます",
+      "swipeHint": "横にスワイプするかボタンを使って手順を移動します",
+      "cards": {
+        "quickNote": "クイックメモ",
+        "saveLink": "リンクを保存",
+        "planTask": "タスクを計画",
+        "project": "プロジェクト",
+        "aiSummary": "AI要約",
+        "collaborate": "共同作業"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "今すぐ保存。あとですぐ見つかる。",

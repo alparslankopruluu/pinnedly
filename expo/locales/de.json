@@ -163,6 +163,18 @@
   "welcome": {
     "subtitle": "Dein Ort zum Speichern, Planen und Voranbringen von Ideen",
     "loading": "Wird geladen...",
+    "onboarding": {
+      "skipHint": "Diese Einführung überspringen und mit Draft fortfahren",
+      "swipeHint": "Horizontal wischen oder die Schaltfläche verwenden, um zwischen den Schritten zu wechseln",
+      "cards": {
+        "quickNote": "Schnelle Notiz",
+        "saveLink": "Link speichern",
+        "planTask": "Aufgabe planen",
+        "project": "Projekt",
+        "aiSummary": "KI-Zusammenfassung",
+        "collaborate": "Teamwork"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "Jetzt speichern. Später wiederfinden.",

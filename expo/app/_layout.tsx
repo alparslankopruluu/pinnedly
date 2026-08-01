@@ -12,6 +12,7 @@ import { OfflineProvider } from "@/providers/OfflineProvider";
 import { DialogProvider } from "@/providers/DialogProvider";
 import { AuthProvider, useAuth } from "@/store/useAuthStore";
 import { OnboardingProvider, useOnboarding } from "@/store/useOnboardingStore";
+import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { SharingProvider } from "@/store/useSharingStore";
 import { initializeFirestore } from "@/lib/firestore";
 import { initializeAnalytics } from "@/lib/analytics";
@@ -135,6 +136,7 @@ function RootLayoutNav() {
         <Stack.Screen name="create-list" options={{ presentation: "modal", headerShown: false }} />
         <Stack.Screen name="bookmark-list/[id]" options={{ title: t('navigation.bookmarkList') }} />
         </Stack>
+        <OnboardingGate />
       </AnalyticsProvider>
     </ThemeProvider>
   );

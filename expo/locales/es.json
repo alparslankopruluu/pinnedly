@@ -163,6 +163,18 @@
   "welcome": {
     "subtitle": "Tu espacio para guardar, planificar y hacer avanzar tus ideas",
     "loading": "Cargando...",
+    "onboarding": {
+      "skipHint": "Omitir esta introducción y continuar a Draft",
+      "swipeHint": "Desliza horizontalmente o utiliza el botón para cambiar de paso",
+      "cards": {
+        "quickNote": "Nota rápida",
+        "saveLink": "Guardar enlace",
+        "planTask": "Planificar tarea",
+        "project": "Proyecto",
+        "aiSummary": "Resumen con IA",
+        "collaborate": "Colaborar"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "Guárdalo ahora. Encuéntralo después.",

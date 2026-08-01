@@ -163,6 +163,18 @@
   "welcome": {
     "subtitle": "Il tuo spazio per salvare, pianificare e far crescere le idee",
     "loading": "Caricamento...",
+    "onboarding": {
+      "skipHint": "Salta questa introduzione e continua su Draft",
+      "swipeHint": "Scorri in orizzontale o usa il pulsante per passare da un passaggio all’altro",
+      "cards": {
+        "quickNote": "Nota rapida",
+        "saveLink": "Salva link",
+        "planTask": "Pianifica attività",
+        "project": "Progetto",
+        "aiSummary": "Riepilogo IA",
+        "collaborate": "Collabora"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "Salva ora. Ritrova quando serve.",

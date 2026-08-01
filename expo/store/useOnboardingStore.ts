@@ -1,35 +1,40 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { trackOnboardingEvent } from '@/lib/analytics';
+import {
+  CURRENT_ONBOARDING_VERSION,
+  INITIAL_ONBOARDING_STATE,
+  normalizeStoredOnboardingState,
+  shouldShowCurrentOnboarding,
+  type StoredOnboardingState,
+} from '@/lib/onboardingState';
 
 const ONBOARDING_KEY = 'pinnedly_onboarding';
 
-type StoredOnboardingState = {
-  hasSeenWelcome: boolean;
-  // Kept when reading/writing so existing installations migrate without a reset.
-  isCompleted?: boolean;
-  currentStep?: number;
-};
-
-const INITIAL_STATE: StoredOnboardingState = {
-  hasSeenWelcome: false,
+type CompletionDetails = {
+  step: number;
+  screenId: string;
+  navigationMethod: 'swipe' | 'button';
 };
 
 export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
-  const [state, setState] = useState<StoredOnboardingState>(INITIAL_STATE);
+  const [state, setState] = useState<StoredOnboardingState>(INITIAL_ONBOARDING_STATE);
   const [isLoading, setIsLoading] = useState(true);
+  const stateRef = useRef(state);
+  const completionPromiseRef = useRef<Promise<void> | null>(null);
+
+  const updateState = useCallback((nextState: StoredOnboardingState) => {
+    stateRef.current = nextState;
+    setState(nextState);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
       try {
         const stored = await AsyncStorage.getItem(ONBOARDING_KEY);
         if (stored) {
-          const parsed = JSON.parse(stored) as Partial<StoredOnboardingState>;
-          setState({
-            ...parsed,
-            hasSeenWelcome: parsed.hasSeenWelcome === true,
-          });
+          updateState(normalizeStoredOnboardingState(JSON.parse(stored)));
         }
       } catch (error) {
         console.error('Failed to load onboarding state:', error);
@@ -39,34 +44,66 @@ export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
     };
 
     void load();
-  }, []);
+  }, [updateState]);
 
   const persist = useCallback(async (nextState: StoredOnboardingState) => {
-    setState(nextState);
     await AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(nextState));
-  }, []);
+    updateState(nextState);
+  }, [updateState]);
 
-  const markWelcomeSeen = useCallback(async (method: 'completed' | 'skipped' = 'completed') => {
-    const nextState = {
-      ...state,
-      hasSeenWelcome: true,
-    };
-
-    try {
-      await persist(nextState);
-      await trackOnboardingEvent(
-        method === 'skipped' ? 'onboarding_skipped' : 'onboarding_completed',
-        { step: method === 'skipped' ? 0 : 2 }
-      );
-    } catch (error) {
-      console.error('Failed to save welcome state:', error);
-      throw error;
+  const completeOnboarding = useCallback((
+    method: 'completed' | 'skipped' = 'completed',
+    details: CompletionDetails = { step: 2, screenId: 'think-share', navigationMethod: 'button' }
+  ): Promise<void> => {
+    if (!shouldShowCurrentOnboarding(stateRef.current)) {
+      return Promise.resolve();
     }
-  }, [persist, state]);
+    if (completionPromiseRef.current) {
+      return completionPromiseRef.current;
+    }
+
+    const completion = (async () => {
+      const nextState: StoredOnboardingState = {
+        ...stateRef.current,
+        hasSeenWelcome: true,
+        completedExperienceVersion: CURRENT_ONBOARDING_VERSION,
+        isCompleted: true,
+        currentStep: details.step,
+      };
+
+      try {
+        await persist(nextState);
+        await trackOnboardingEvent(
+          method === 'skipped' ? 'onboarding_skipped' : 'onboarding_completed',
+          {
+            step: details.step,
+            screen_id: details.screenId,
+            navigation_method: details.navigationMethod,
+            onboarding_version: CURRENT_ONBOARDING_VERSION,
+          }
+        );
+      } catch (error) {
+        console.error('Failed to save welcome state:', error);
+        throw error;
+      }
+    })();
+
+    completionPromiseRef.current = completion;
+    void completion.then(
+      () => { completionPromiseRef.current = null; },
+      () => { completionPromiseRef.current = null; }
+    );
+    return completion;
+  }, [persist]);
+
+  const markWelcomeSeen = useCallback(
+    (method: 'completed' | 'skipped' = 'completed') => completeOnboarding(method),
+    [completeOnboarding]
+  );
 
   const resetOnboarding = useCallback(async () => {
     try {
-      await persist(INITIAL_STATE);
+      await persist(INITIAL_ONBOARDING_STATE);
     } catch (error) {
       console.error('Failed to reset onboarding state:', error);
       throw error;
@@ -75,8 +112,11 @@ export const [OnboardingProvider, useOnboarding] = createContextHook(() => {
 
   return useMemo(() => ({
     hasSeenWelcome: state.hasSeenWelcome,
+    completedExperienceVersion: state.completedExperienceVersion,
+    shouldShowOnboarding: shouldShowCurrentOnboarding(state),
     isLoading,
+    completeOnboarding,
     markWelcomeSeen,
     resetOnboarding,
-  }), [isLoading, markWelcomeSeen, resetOnboarding, state.hasSeenWelcome]);
+  }), [completeOnboarding, isLoading, markWelcomeSeen, resetOnboarding, state]);
 });

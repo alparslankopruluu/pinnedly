@@ -235,6 +235,18 @@
   "welcome": {
     "subtitle": "Your space to save, plan, and move ideas forward",
     "loading": "Loading...",
+    "onboarding": {
+      "skipHint": "Skip this introduction and continue to Draft",
+      "swipeHint": "Swipe horizontally or use the button to move between steps",
+      "cards": {
+        "quickNote": "Quick note",
+        "saveLink": "Save a link",
+        "planTask": "Plan a task",
+        "project": "Project",
+        "aiSummary": "AI summary",
+        "collaborate": "Collaborate"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "Save it now. Find it later.",

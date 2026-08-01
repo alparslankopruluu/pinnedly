@@ -163,6 +163,18 @@
   "welcome": {
     "subtitle": "مساحتك للحفظ والتخطيط وتحويل الأفكار إلى إنجاز",
     "loading": "جارٍ التحميل...",
+    "onboarding": {
+      "skipHint": "تخطي هذه المقدمة والمتابعة إلى Draft",
+      "swipeHint": "اسحب أفقيًا أو استخدم الزر للتنقل بين الخطوات",
+      "cards": {
+        "quickNote": "ملاحظة سريعة",
+        "saveLink": "حفظ رابط",
+        "planTask": "تخطيط مهمة",
+        "project": "مشروع",
+        "aiSummary": "ملخص AI",
+        "collaborate": "تعاون"
+      }
+    },
     "screens": {
       "captureEverything": {
         "title": "احفظه الآن واعثر عليه لاحقًا",
