@@ -208,6 +208,11 @@
       "title": "个人资料",
       "subtitle": "管理您的个人资料信息"
     },
+    "signOut": {
+      "title": "退出登录",
+      "subtitle": "退出您的账户",
+      "confirmMessage": "确定要退出登录吗？"
+    },
     "appleSignIn": "Apple 登录",
     "googleSignIn": {
       "title": "Google 登录",
@@ -266,8 +271,7 @@
       "subtitle": "永久删除您的账户"
     },
     "version": {
-      "title": "版本",
-      "value": "1.0.0"
+      "title": "版本"
     },
     "termsOfService": {
       "title": "服务条款",

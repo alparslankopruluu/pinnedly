@@ -208,6 +208,11 @@
       "title": "Профиль",
       "subtitle": "Управление информацией профиля"
     },
+    "signOut": {
+      "title": "Выйти",
+      "subtitle": "Выйти из аккаунта",
+      "confirmMessage": "Вы уверены, что хотите выйти?"
+    },
     "appleSignIn": "Вход через Apple",
     "googleSignIn": {
       "title": "Вход через Google",
@@ -266,8 +271,7 @@
       "subtitle": "Безвозвратно удалить аккаунт"
     },
     "version": {
-      "title": "Версия",
-      "value": "1.0.0"
+      "title": "Версия"
     },
     "termsOfService": {
       "title": "Условия обслуживания",

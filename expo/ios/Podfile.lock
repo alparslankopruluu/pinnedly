@@ -1798,8 +1798,16 @@ PODS:
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
   - hermes-engine (0.81.5):
-    - hermes-engine/Pre-built (= 0.81.5)
-  - hermes-engine/Pre-built (0.81.5)
+    - hermes-engine/cdp (= 0.81.5)
+    - hermes-engine/Hermes (= 0.81.5)
+    - hermes-engine/inspector (= 0.81.5)
+    - hermes-engine/inspector_chrome (= 0.81.5)
+    - hermes-engine/Public (= 0.81.5)
+  - hermes-engine/cdp (0.81.5)
+  - hermes-engine/Hermes (0.81.5)
+  - hermes-engine/inspector (0.81.5)
+  - hermes-engine/inspector_chrome (0.81.5)
+  - hermes-engine/Public (0.81.5)
   - leveldb-library (1.22.6)
   - libavif/core (1.0.0)
   - libavif/libdav1d (1.0.0):
@@ -5320,7 +5328,7 @@ SPEC CHECKSUMS:
   gRPC-Core: 860978b7db482de8b4f5e10677216309b5ff6330
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  hermes-engine: 9f4dfe93326146a1c99eb535b1cb0b857a3cd172
+  hermes-engine: 84850eba570360277c734f6f7063072670e1b05e
   leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
   libavif: 5f8e715bea24debec477006f21ef9e95432e254d
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
@@ -5422,6 +5430,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: cc4a6600d61e4e9276e860d4d68eebb834a050ba
 
-PODFILE CHECKSUM: 1806e55a745eb11f470969dd50d35cbdaa37b538
+PODFILE CHECKSUM: 4be018db6c512f3f118144df54d5de983a02151d
 
-COCOAPODS: 1.17.0
+COCOAPODS: 1.16.2

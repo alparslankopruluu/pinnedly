@@ -208,6 +208,11 @@
       "title": "الملف الشخصي",
       "subtitle": "إدارة معلومات ملفك الشخصي"
     },
+    "signOut": {
+      "title": "تسجيل الخروج",
+      "subtitle": "تسجيل الخروج من حسابك",
+      "confirmMessage": "هل أنت متأكد من رغبتك في تسجيل الخروج؟"
+    },
     "appleSignIn": "تسجيل الدخول عبر Apple",
     "googleSignIn": {
       "title": "تسجيل الدخول عبر Google",
@@ -266,8 +271,7 @@
       "subtitle": "حذف حسابك نهائيًا"
     },
     "version": {
-      "title": "الإصدار",
-      "value": "1.0.0"
+      "title": "الإصدار"
     },
     "termsOfService": {
       "title": "شروط الخدمة",

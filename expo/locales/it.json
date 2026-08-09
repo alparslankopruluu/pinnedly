@@ -208,6 +208,11 @@
       "title": "Profilo",
       "subtitle": "Gestisci le informazioni del profilo"
     },
+    "signOut": {
+      "title": "Esci",
+      "subtitle": "Esci dal tuo account",
+      "confirmMessage": "Vuoi davvero uscire?"
+    },
     "appleSignIn": "Accesso con Apple",
     "googleSignIn": {
       "title": "Accesso con Google",
@@ -266,8 +271,7 @@
       "subtitle": "Elimina definitivamente il tuo account"
     },
     "version": {
-      "title": "Versione",
-      "value": "1.0.0"
+      "title": "Versione"
     },
     "termsOfService": {
       "title": "Termini di servizio",

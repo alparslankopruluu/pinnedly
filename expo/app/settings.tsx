@@ -11,6 +11,7 @@ import {
   Linking
 } from 'react-native';
 import { router, Stack } from 'expo-router';
+import Constants from 'expo-constants';
 import { 
   User, 
   Bell, 
@@ -60,7 +61,7 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const { colors, font } = useAppAppearance();
   const styles = useMemo(() => createStyles(colors, font), [colors, font]);
-  const { user, signOut } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const { requireAccount } = useAuthGate();
   const {
     theme,
@@ -81,6 +82,7 @@ export default function SettingsScreen() {
   const [showLanguageSelector, setShowLanguageSelector] = useState<boolean>(false);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(getCurrentLanguage());
   const [digestFrequency, setDigestFrequencyState] = useState<DigestFrequency>('off');
+  const appVersion = Constants.expoConfig?.version ?? '—';
 
   useEffect(() => {
     loadSettings();
@@ -231,6 +233,7 @@ export default function SettingsScreen() {
       <View style={styles.container}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {/* Account Section */}
+          {isAuthenticated && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('settings.sections.account')}</Text>
             <View style={styles.settingsGroup}>
@@ -266,6 +269,7 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          )}
 
           {/* Collaboration Section */}
           <View style={styles.section}>
@@ -468,21 +472,24 @@ export default function SettingsScreen() {
                 {renderComingSoonBadge()}
               </TouchableOpacity>
               
-              <View style={styles.separator} />
-              
-              <TouchableOpacity 
-                style={styles.settingItem}
-                onPress={handleDeleteAccount}
-              >
-                <View style={styles.settingIcon}>
-                  <Trash2 size={20} color="#EF4444" />
-                </View>
-                <View style={styles.settingContent}>
-                  <Text style={styles.settingTitle}>{t('settings.deleteAccount.title')}</Text>
-                  <Text style={styles.settingSubtitle}>{t('settings.deleteAccount.subtitle')}</Text>
-                </View>
-                <ChevronRight size={20} color="#EF4444" />
-              </TouchableOpacity>
+              {isAuthenticated && (
+                <>
+                  <View style={styles.separator} />
+                  <TouchableOpacity
+                    style={styles.settingItem}
+                    onPress={handleDeleteAccount}
+                  >
+                    <View style={styles.settingIcon}>
+                      <Trash2 size={20} color="#EF4444" />
+                    </View>
+                    <View style={styles.settingContent}>
+                      <Text style={styles.settingTitle}>{t('settings.deleteAccount.title')}</Text>
+                      <Text style={styles.settingSubtitle}>{t('settings.deleteAccount.subtitle')}</Text>
+                    </View>
+                    <ChevronRight size={20} color="#EF4444" />
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           </View>
 
@@ -496,7 +503,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.settingContent}>
                   <Text style={styles.settingTitle}>{t('settings.version.title')}</Text>
-                  <Text style={styles.settingSubtitle}>{t('settings.version.value')}</Text>
+                  <Text style={styles.settingSubtitle}>{appVersion}</Text>
                 </View>
               </View>
               

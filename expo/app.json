@@ -2,7 +2,7 @@
   "expo": {
     "name": "Draft",
     "slug": "draft",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -18,7 +18,7 @@
     },
     "ios": {
       "appleTeamId": "UYDAF6RY67",
-      "buildNumber": "7",
+      "buildNumber": "11",
       "supportsTablet": true,
       "bundleIdentifier": "app.techtactoe.draft",
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -31,7 +31,7 @@
       "usesAppleSignIn": true
     },
     "android": {
-      "versionCode": 10,
+      "versionCode": 14,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F04444"

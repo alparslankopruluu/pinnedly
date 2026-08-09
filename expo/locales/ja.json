@@ -208,6 +208,11 @@
       "title": "プロフィール",
       "subtitle": "プロフィール情報を管理"
     },
+    "signOut": {
+      "title": "ログアウト",
+      "subtitle": "アカウントからログアウトします",
+      "confirmMessage": "ログアウトしてもよろしいですか？"
+    },
     "appleSignIn": "Appleでサインイン",
     "googleSignIn": {
       "title": "Googleでサインイン",
@@ -266,8 +271,7 @@
       "subtitle": "アカウントを完全に削除"
     },
     "version": {
-      "title": "バージョン",
-      "value": "1.0.0"
+      "title": "バージョン"
     },
     "termsOfService": {
       "title": "利用規約",

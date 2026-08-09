@@ -281,6 +281,11 @@
       "title": "Profil",
       "subtitle": "Profil bilgilerinizi yönetin"
     },
+    "signOut": {
+      "title": "Çıkış Yap",
+      "subtitle": "Hesabınızdan çıkış yapın",
+      "confirmMessage": "Çıkış yapmak istediğinizden emin misiniz?"
+    },
     "shareInbox": {
       "title": "Paylaşım Gelen Kutusu",
       "subtitle": "Sizinle paylaşılan içerikler"
@@ -347,8 +352,7 @@
       "subtitle": "Hesabınızı kalıcı olarak silin"
     },
     "version": {
-      "title": "Sürüm",
-      "value": "1.0.0"
+      "title": "Sürüm"
     },
     "termsOfService": {
       "title": "Hizmet Şartları",

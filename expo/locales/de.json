@@ -208,6 +208,11 @@
       "title": "Profil",
       "subtitle": "Verwalte deine Profilinformationen"
     },
+    "signOut": {
+      "title": "Abmelden",
+      "subtitle": "Von deinem Konto abmelden",
+      "confirmMessage": "Möchtest du dich wirklich abmelden?"
+    },
     "appleSignIn": "Apple-Anmeldung",
     "googleSignIn": {
       "title": "Google-Anmeldung",
@@ -266,8 +271,7 @@
       "subtitle": "Konto dauerhaft löschen"
     },
     "version": {
-      "title": "Version",
-      "value": "1.0.0"
+      "title": "Version"
     },
     "termsOfService": {
       "title": "Nutzungsbedingungen",

@@ -281,6 +281,11 @@
       "title": "Profile",
       "subtitle": "Manage your profile information"
     },
+    "signOut": {
+      "title": "Sign Out",
+      "subtitle": "Sign out of your account",
+      "confirmMessage": "Are you sure you want to sign out?"
+    },
     "shareInbox": {
       "title": "Share Inbox",
       "subtitle": "Content shared with you"
@@ -353,8 +358,7 @@
       "subtitle": "Permanently delete your account"
     },
     "version": {
-      "title": "Version",
-      "value": "1.0.0"
+      "title": "Version"
     },
     "termsOfService": {
       "title": "Terms of Service",

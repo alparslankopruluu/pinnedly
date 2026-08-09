@@ -208,6 +208,11 @@
       "title": "Perfil",
       "subtitle": "Gerencie suas informações de perfil"
     },
+    "signOut": {
+      "title": "Terminar sessão",
+      "subtitle": "Termine sessão na sua conta",
+      "confirmMessage": "Tem a certeza de que pretende terminar sessão?"
+    },
     "appleSignIn": "Entrar com Apple",
     "googleSignIn": {
       "title": "Entrar com Google",
@@ -266,8 +271,7 @@
       "subtitle": "Excluir permanentemente sua conta"
     },
     "version": {
-      "title": "Versão",
-      "value": "1.0.0"
+      "title": "Versão"
     },
     "termsOfService": {
       "title": "Termos de serviço",
