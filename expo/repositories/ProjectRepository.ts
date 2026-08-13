@@ -1,14 +1,16 @@
-import { Project, Task, User, ProjectCollaborator } from '@/types';
+import { Project, Task, User, ProjectCollaborator, ProjectActivity } from '@/types';
 import {
   COLLECTIONS,
   collection,
   type DocumentData,
   doc,
+  getCurrentUserId,
   getDb,
   getDoc,
   getDocs,
   limit,
   onQuerySnapshot,
+  orderBy,
   query as firestoreQuery,
   requireUserId,
   serverTimestamp,
@@ -31,10 +33,20 @@ export class ProjectRepository {
 
   async getProjects(): Promise<Project[]> {
     const uid = requireUserId();
-    const snapshot = await getDocs(
-      firestoreQuery(collection(getDb(), COLLECTIONS.projects), where('ownerId', '==', uid))
-    );
-    return snapshot.docs.map((snapshotDoc) => this.mapProjectSummary(snapshotDoc.id, snapshotDoc.data()));
+    const [ownedSnapshot, sharedSnapshot] = await Promise.all([
+      getDocs(firestoreQuery(collection(getDb(), COLLECTIONS.projects), where('ownerId', '==', uid))),
+      getDocs(
+        firestoreQuery(
+          collection(getDb(), COLLECTIONS.projects),
+          where('sharedWith', 'array-contains', uid)
+        )
+      ),
+    ]);
+    const projects = new Map<string, Project>();
+    [...ownedSnapshot.docs, ...sharedSnapshot.docs].forEach((snapshotDoc) => {
+      projects.set(snapshotDoc.id, this.mapProjectSummary(snapshotDoc.id, snapshotDoc.data()));
+    });
+    return [...projects.values()];
   }
 
   subscribeToProjects(
@@ -47,28 +59,83 @@ export class ProjectRepository {
       return () => undefined;
     }
 
-    const projectsQuery = firestoreQuery(
+    const ownedProjectsQuery = firestoreQuery(
       collection(getDb(), COLLECTIONS.projects),
       where('ownerId', '==', ownerId)
     );
+    const sharedProjectsQuery = firestoreQuery(
+      collection(getDb(), COLLECTIONS.projects),
+      where('sharedWith', 'array-contains', ownerId)
+    );
+    let ownedProjects: Project[] = [];
+    let sharedProjects: Project[] = [];
+
+    const publish = () => {
+      const merged = new Map<string, Project>();
+      [...ownedProjects, ...sharedProjects].forEach((project) => merged.set(project.id, project));
+      onProjects([...merged.values()]);
+    };
+    const mapSnapshot = (snapshot: { docs: Array<{ id: string; data: () => DocumentData }> }) =>
+      snapshot.docs.map((snapshotDoc) => this.mapProjectSummary(snapshotDoc.id, snapshotDoc.data()));
+    const handleError = (error: Error) => {
+      console.error('Project subscription error:', error);
+      onError?.(error);
+    };
+
+    const unsubscribeOwned = onQuerySnapshot(
+      ownedProjectsQuery,
+      (snapshot) => {
+        ownedProjects = mapSnapshot(snapshot);
+        publish();
+      },
+      handleError
+    );
+    const unsubscribeShared = onQuerySnapshot(
+      sharedProjectsQuery,
+      (snapshot) => {
+        sharedProjects = mapSnapshot(snapshot);
+        publish();
+      },
+      handleError
+    );
+
+    return () => {
+      unsubscribeOwned();
+      unsubscribeShared();
+    };
+  }
+
+  subscribeToProjectActivities(
+    projectId: string,
+    onActivities: (activities: ProjectActivity[]) => void,
+    onError?: (error: Error) => void
+  ): () => void {
+    const activitiesQuery = firestoreQuery(
+      collection(doc(getDb(), COLLECTIONS.projects, projectId), 'activities'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
 
     return onQuerySnapshot(
-      projectsQuery,
+      activitiesQuery,
       (snapshot) => {
-        try {
-          const projects = snapshot.docs.map((snapshotDoc) =>
-            this.mapProjectSummary(snapshotDoc.id, snapshotDoc.data())
-          );
-          onProjects(projects);
-        } catch (error) {
-          console.error('Project subscription mapping error:', error);
-          onError?.(error instanceof Error ? error : new Error('Failed to map projects'));
-        }
+        onActivities(snapshot.docs.map((activityDoc) => {
+          const data = activityDoc.data();
+          return {
+            id: activityDoc.id,
+            projectId,
+            type: data.type,
+            relatedEntityId: data.relatedEntityId,
+            relatedEntityType: data.relatedEntityType,
+            entityTitle: data.entityTitle ?? '',
+            fromStatus: data.fromStatus,
+            toStatus: data.toStatus,
+            timestamp: timestampToMillis(data.createdAt),
+            source: 'server',
+          } as ProjectActivity;
+        }));
       },
-      (error) => {
-        console.error('Project subscription error:', error);
-        onError?.(error);
-      }
+      (error) => onError?.(error)
     );
   }
 
@@ -164,6 +231,35 @@ export class ProjectRepository {
     return this.mapTask(updated.id, projectId, updated.data()!);
   }
 
+  // These write task-level visibility fields directly from the client: the Firestore
+  // rule for tasks (unlike notes/bookmarks/projects) has no accessFieldsAreUnchanged()
+  // restriction, so any project owner/editor can already update them via canEditProject.
+  async setTaskVisibility(taskId: string, visibility: 'shared' | 'private'): Promise<Task> {
+    const { projectId, ref } = await this.findTaskRef(taskId);
+    await updateDoc(ref, { visibility, updatedAt: serverTimestamp() });
+    const updated = await getDoc(ref);
+    return this.mapTask(updated.id, projectId, updated.data()!);
+  }
+
+  async grantTaskVisibility(taskId: string, userId: string): Promise<Task> {
+    const { projectId, ref } = await this.findTaskRef(taskId);
+    const current = await getDoc(ref);
+    const sharedWith = new Set((current.data()?.sharedWith as string[]) ?? []);
+    sharedWith.add(userId);
+    await updateDoc(ref, { sharedWith: [...sharedWith], updatedAt: serverTimestamp() });
+    const updated = await getDoc(ref);
+    return this.mapTask(updated.id, projectId, updated.data()!);
+  }
+
+  async revokeTaskVisibility(taskId: string, userId: string): Promise<Task> {
+    const { projectId, ref } = await this.findTaskRef(taskId);
+    const current = await getDoc(ref);
+    const sharedWith = ((current.data()?.sharedWith as string[]) ?? []).filter((id) => id !== userId);
+    await updateDoc(ref, { sharedWith, updatedAt: serverTimestamp() });
+    const updated = await getDoc(ref);
+    return this.mapTask(updated.id, projectId, updated.data()!);
+  }
+
   async getProjectMembers(projectId: string): Promise<ProjectCollaborator[]> {
     const snapshot = await getDocs(
       firestoreQuery(
@@ -178,7 +274,35 @@ export class ProjectRepository {
       const userDoc = await getDoc(doc(getDb(), COLLECTIONS.users, data.userId));
       members.push(this.mapMember(memberDoc.id, data, userDoc.exists() ? userDoc.data() : undefined));
     }
-    return members;
+
+    const projectDoc = await getDoc(doc(getDb(), COLLECTIONS.projects, projectId));
+    if (!projectDoc.exists()) return members;
+    const projectData = projectDoc.data();
+    return this.withOwnerMember(projectId, projectData.ownerId, projectData.createdAt, members);
+  }
+
+  private async withOwnerMember(
+    projectId: string,
+    ownerId: string,
+    ownerSince: unknown,
+    members: ProjectCollaborator[]
+  ): Promise<ProjectCollaborator[]> {
+    if (!ownerId || members.some((member) => member.userId === ownerId)) return members;
+
+    let profile: DocumentData | undefined;
+    try {
+      const userDoc = await getDoc(doc(getDb(), COLLECTIONS.users, ownerId));
+      profile = userDoc.exists() ? userDoc.data() : undefined;
+    } catch (error) {
+      console.warn(`Failed to load owner profile for project ${projectId}:`, error);
+    }
+
+    const ownerMember = this.mapMember(
+      `owner:${ownerId}`,
+      { projectId, userId: ownerId, role: 'owner', permission: 'edit', joinedAt: ownerSince },
+      profile
+    );
+    return [ownerMember, ...members];
   }
 
   async addProjectMember(projectId: string, userEmail: string, permission: 'view' | 'edit'): Promise<ProjectCollaborator> {
@@ -290,11 +414,38 @@ export class ProjectRepository {
     };
   }
 
+  // Firestore security rules aren't query filters: once a rule depends on
+  // per-document fields (visibility/sharedWith/assignedTo) for non-owners, an
+  // unconstrained collection read is rejected outright for them. The project
+  // owner's disjunct is doc-independent, so only they can safely fetch
+  // unconstrained; everyone else needs the union of rule-provable queries.
+  private async fetchVisibleTasks(projectId: string, ownerId: string): Promise<Task[]> {
+    const tasksRef = collection(doc(getDb(), COLLECTIONS.projects, projectId), 'tasks');
+    const uid = getCurrentUserId();
+
+    if (uid && uid === ownerId) {
+      const snap = await getDocs(tasksRef);
+      return snap.docs.map((taskDoc) => this.mapTask(taskDoc.id, projectId, taskDoc.data()));
+    }
+
+    const queries = [firestoreQuery(tasksRef, where('visibility', '==', 'shared'))];
+    if (uid) {
+      queries.push(firestoreQuery(tasksRef, where('sharedWith', 'array-contains', uid)));
+      queries.push(firestoreQuery(tasksRef, where('assignedTo', '==', uid)));
+    }
+
+    const snapshots = await Promise.all(queries.map((taskQuery) => getDocs(taskQuery)));
+    const tasks = new Map<string, Task>();
+    snapshots.forEach((snap) => {
+      snap.docs.forEach((taskDoc) => tasks.set(taskDoc.id, this.mapTask(taskDoc.id, projectId, taskDoc.data())));
+    });
+    return [...tasks.values()];
+  }
+
   private async mapProjectDoc(id: string, data: DocumentData): Promise<Project> {
     let tasks: Task[] = [];
     try {
-      const tasksSnap = await getDocs(collection(doc(getDb(), COLLECTIONS.projects, id), 'tasks'));
-      tasks = tasksSnap.docs.map((taskDoc) => this.mapTask(taskDoc.id, id, taskDoc.data()));
+      tasks = await this.fetchVisibleTasks(id, data.ownerId);
     } catch (error) {
       console.warn(`Failed to load tasks for project ${id}:`, error);
     }
@@ -321,6 +472,8 @@ export class ProjectRepository {
       console.warn(`Failed to load members for project ${id}:`, error);
     }
 
+    const collaborators = await this.withOwnerMember(id, data.ownerId, data.createdAt, members);
+
     return {
       id,
       title: data.title,
@@ -333,7 +486,7 @@ export class ProjectRepository {
       updatedAt: timestampToMillis(data.updatedAt),
       userId: data.ownerId,
       visibility: data.visibility,
-      collaborators: members,
+      collaborators,
     };
   }
 
@@ -346,6 +499,11 @@ export class ProjectRepository {
       notes: data.notes,
       projectId,
       category: normalizeCategory(data.category as string | undefined),
+      createdAt: data.createdAt ? timestampToMillis(data.createdAt) : undefined,
+      updatedAt: data.updatedAt ? timestampToMillis(data.updatedAt) : undefined,
+      assignedTo: (data.assignedTo as string | null | undefined) ?? null,
+      visibility: (data.visibility as Task['visibility']) || 'shared',
+      sharedWith: (data.sharedWith as string[]) ?? [],
     };
   }
 

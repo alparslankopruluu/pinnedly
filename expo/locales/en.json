@@ -374,6 +374,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "Share Inbox",
+      "description": "Quickly access content shared with you",
+      "count": "{{count}} items have been shared with you",
+      "projectsTitle": "Projects Shared With You",
+      "projectsDescription": "View incoming project shares",
+      "projectCount": "{{count}} projects have been shared with you"
+    },
     "discoverLists": {
       "eyebrow": "Community picks",
       "description": "Explore useful public lists and follow the ones worth keeping"
@@ -445,7 +453,8 @@
     "filters": {
       "onTrack": "On track",
       "atRisk": "At risk",
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "projectStatusLabel": "Project status"
     },
     "kanban": {
       "todo": "To Do",
@@ -492,7 +501,8 @@
     "deleteConfirm": {
       "title": "Delete Todo",
       "message": "Are you sure you want to delete this task?"
-    }
+    },
+    "deleteFailed": "The task could not be deleted. Please try again."
   },
   "profile": {
     "defaultName": "Draft User",
@@ -653,6 +663,7 @@
     "sendLink": "Share",
     "inviteMessage": "Shared \"{{title}}\": {{url}}",
     "addPeople": "Add People",
+    "suggestedMembers": "Project members",
     "emailOrUsername": "Email or Username",
     "sharedWith": "Shared With",
     "permission": "Permission",
@@ -682,6 +693,11 @@
   },
   "discoverLists": {
     "title": "Discover Lists",
+    "listsTitle": "Lists",
+    "tabs": { "my": "My Lists", "discover": "Discover" },
+    "noMyLists": "You don't have any lists yet",
+    "createFirstList": "Create your first list. Private lists only appear here.",
+    "savedCount": "{{count}} saved",
     "searchPlaceholder": "Search public lists...",
     "loading": "Loading...",
     "noListsFound": "No lists found",
@@ -689,6 +705,12 @@
     "tryDifferentKeywords": "Try searching with different keywords",
     "beFirstToCreate": "Be the first to create a public list!",
     "createList": "Create List"
+  },
+  "projectActivities": {
+    "project_created": "Project created: {{title}}",
+    "task_created": "Task created: {{title}}",
+    "task_status_changed": "{{title}} moved to {{status}}",
+    "note_added": "Note added to project: {{title}}"
   },
   "peopleSearch": {
     "title": "Find People",
@@ -824,6 +846,7 @@
     "openedCount": "Opened {{count}}×",
     "whySaved": "Why I saved this",
     "tapToAddNote": "Tap to add a note...",
+    "titlePlaceholder": "Enter title...",
     "archive": "Archive",
     "noUrl": "No URL",
     "noLinkToOpen": "This bookmark does not have a link to open.",
@@ -980,11 +1003,24 @@
       "loadFailed": "Failed to load list data",
       "followFailed": "Failed to update follow status",
       "deleteFailed": "Failed to delete list",
-      "sharingComingSoon": "Sharing functionality coming soon!"
+      "sharingComingSoon": "Sharing functionality coming soon!",
+      "updateFailed": "Failed to update list",
+      "addBookmarkFailed": "Failed to add bookmark to list",
+      "removeBookmarkFailed": "Failed to remove bookmark from list"
     },
     "empty": {
       "title": "No bookmarks yet",
       "description": "This list doesn't have any bookmarks yet."
+    },
+    "edit": {
+      "title": "Edit List",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "addBookmarks": {
+      "title": "Add Bookmarks",
+      "createNew": "Create a new bookmark for this list",
+      "empty": "You don't have any bookmarks yet"
     }
   },
   "userProfile": {
@@ -1015,6 +1051,7 @@
     "addMember": "Add Member",
     "canView": "Can View",
     "canEdit": "Can Edit",
+    "owner": "Owner",
     "permissionLabel": "Permission:",
     "adding": "Adding...",
     "dismiss": "Dismiss",
@@ -1032,6 +1069,15 @@
       "permissionUpdated": "Permission updated successfully",
       "updatePermissionFailed": "Failed to update permission. Please try again."
     }
+  },
+  "taskVisibility": {
+    "title": "Task Visibility",
+    "shared": "Visible to everyone",
+    "sharedDescription": "All project members can see this task",
+    "restricted": "Restricted",
+    "restrictedDescription": "Only you and the members you pick below can see this task",
+    "membersLabel": "Who can see this task",
+    "noMembers": "No other members on this project yet"
   },
   "clipboard": {
     "title": "Link in clipboard",
@@ -1063,6 +1109,7 @@
   },
   "shareIntent": {
     "saving": "Saving shared content...",
+    "preparing": "Preparing shared content...",
     "signInRequired": "Sign in required",
     "signInToSaveLinks": "Please sign in to save shared links to Draft.",
     "saved": "Saved",
@@ -1071,6 +1118,14 @@
     "view": "View",
     "couldNotSave": "Could not save",
     "unableToSave": "Unable to save shared content."
+  },
+  "shareConfirm": {
+    "title": "Save Link",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter a title",
+    "confirm": "Save",
+    "cancel": "Cancel",
+    "saveFailed": "Failed to save this link. Please try again."
   },
   "quickAdd": {
     "addBookmark": "Add Bookmark",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -25,22 +25,29 @@ function getEntityRoute(entityType: string, entityId: string): string | null {
 export default function InviteAcceptScreen() {
   const { t } = useTranslation();
   const { token } = useLocalSearchParams<{ token: string }>();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isGuest, isLoading: authLoading } = useAuth();
   const insets = useSafeAreaInsets();
   const [status, setStatus] = useState<'loading' | 'error'>('loading');
+  const acceptingTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
-
-    if (!isAuthenticated) {
-      router.replace('/(auth)/sign-in');
-      return;
-    }
 
     if (!token) {
       setStatus('error');
       return;
     }
+
+    if (!isAuthenticated || isGuest) {
+      router.replace({
+        pathname: '/(auth)/sign-in',
+        params: { redirect: `/invite/${token}` },
+      });
+      return;
+    }
+
+    if (acceptingTokenRef.current === token) return;
+    acceptingTokenRef.current = token;
 
     const accept = async () => {
       try {
@@ -52,6 +59,7 @@ export default function InviteAcceptScreen() {
           router.replace('/share-inbox');
         }
       } catch (error) {
+        acceptingTokenRef.current = null;
         setStatus('error');
         showAppAlert(
           t('common.error'),
@@ -63,7 +71,7 @@ export default function InviteAcceptScreen() {
     };
 
     void accept();
-  }, [authLoading, isAuthenticated, token, t]);
+  }, [authLoading, isAuthenticated, isGuest, token, t]);
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>

@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "分享收件箱",
+      "description": "快速访问与你共享的内容",
+      "count": "有 {{count}} 个内容与你共享",
+      "projectsTitle": "与我共享的项目",
+      "projectsDescription": "查看收到的项目共享",
+      "projectCount": "有 {{count}} 个项目与你共享"
+    },
     "discoverLists": {
       "eyebrow": "社区精选",
       "description": "发现实用的公开列表，关注值得收藏的内容"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "进展顺利",
       "atRisk": "有风险",
-      "overdue": "已逾期"
+      "overdue": "已逾期",
+      "projectStatusLabel": "项目状态"
     },
     "kanban": {
       "todo": "待办",
@@ -402,7 +411,8 @@
       "message": "确定要删除此任务吗？"
     },
     "loading": "正在加载待办...",
-    "emptyDescriptionLong": "点击 + 按钮创建您的第一个任务，保持井井有条"
+    "emptyDescriptionLong": "点击 + 按钮创建您的第一个任务，保持井井有条",
+    "deleteFailed": "无法删除任务，请重试。"
   },
   "profile": {
     "defaultName": "Draft 用户",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "发现列表",
+    "listsTitle": "列表",
+    "tabs": { "my": "我的列表", "discover": "发现" },
+    "noMyLists": "你还没有列表",
+    "createFirstList": "创建你的第一个列表。私密列表只会显示在这里。",
+    "savedCount": "已保存 {{count}} 项",
     "searchPlaceholder": "搜索公开列表...",
     "loading": "加载中...",
     "noListsFound": "未找到列表",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "请尝试使用其他关键词搜索",
     "beFirstToCreate": "成为第一个创建公开列表的人！",
     "createList": "创建列表"
+  },
+  "projectActivities": {
+    "project_created": "已创建项目：{{title}}",
+    "task_created": "已创建任务：{{title}}",
+    "task_status_changed": "{{title}} 已移至{{status}}",
+    "note_added": "已向项目添加笔记：{{title}}"
   },
   "peopleSearch": {
     "title": "查找用户",
@@ -847,6 +868,7 @@
     "addMember": "添加成员",
     "canView": "可查看",
     "canEdit": "可编辑",
+    "owner": "所有者",
     "permissionLabel": "权限：",
     "adding": "正在添加...",
     "dismiss": "关闭",

@@ -66,12 +66,12 @@ function NavigationGuard() {
       'create-list',
     ]);
 
-    if (!hasSession && !inAuthGroup) {
+    if (!hasSession && !inAuthGroup && segments[0] !== 'invite') {
       router.replace("/(auth)/welcome");
       return;
     }
 
-    if (isAuthenticated && inAuthGroup) {
+    if (isAuthenticated && inAuthGroup && authScreen === 'welcome') {
       router.replace("/(tabs)");
       return;
     }
@@ -122,6 +122,7 @@ function RootLayoutNav() {
         <Stack.Screen name="edit-profile" options={{ title: t('navigation.editProfile') }} />
         <Stack.Screen name="ai-chat" options={{ title: t('navigation.aiAssistant') }} />
         <Stack.Screen name="add-bookmark" options={{ presentation: "modal" }} />
+        <Stack.Screen name="share-confirm" options={{ presentation: "modal" }} />
         <Stack.Screen name="add-project" options={{ presentation: "modal" }} />
         <Stack.Screen name="add-note" options={{ presentation: "modal" }} />
         <Stack.Screen name="add-todo" options={{ presentation: "modal" }} />

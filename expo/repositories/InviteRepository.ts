@@ -1,5 +1,6 @@
 import { EntityInvite, SharePermission, ID } from '@/types';
 import { shareApi } from '@/services/shareApi';
+import { buildInviteWebUrl } from '@/constants/links';
 
 class InviteRepository {
   async createInvite(
@@ -19,7 +20,7 @@ class InviteRepository {
   }
 
   buildInviteUrl(token: string): string {
-    return `draft://invite/${token}`;
+    return buildInviteWebUrl(token);
   }
 }
 

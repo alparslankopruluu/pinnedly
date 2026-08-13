@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "Caixa de compartilhados",
+      "description": "Acesse rapidamente o conteúdo compartilhado com você",
+      "count": "{{count}} itens foram compartilhados com você",
+      "projectsTitle": "Projetos compartilhados com você",
+      "projectsDescription": "Veja os projetos compartilhados recebidos",
+      "projectCount": "{{count}} projetos foram compartilhados com você"
+    },
     "discoverLists": {
       "eyebrow": "Escolhas da comunidade",
       "description": "Descubra listas públicas úteis e siga as que quiser guardar"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "No prazo",
       "atRisk": "Em risco",
-      "overdue": "Atrasado"
+      "overdue": "Atrasado",
+      "projectStatusLabel": "Estado do projeto"
     },
     "kanban": {
       "todo": "A fazer",
@@ -402,7 +411,8 @@
       "message": "Tem certeza de que deseja excluir esta tarefa?"
     },
     "loading": "Carregando tarefas...",
-    "emptyDescriptionLong": "Toque no botão + para criar sua primeira tarefa e manter-se organizado"
+    "emptyDescriptionLong": "Toque no botão + para criar sua primeira tarefa e manter-se organizado",
+    "deleteFailed": "Não foi possível eliminar a tarefa. Tente novamente."
   },
   "profile": {
     "defaultName": "Usuário Draft",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "Descobrir listas",
+    "listsTitle": "Listas",
+    "tabs": { "my": "Minhas listas", "discover": "Descobrir" },
+    "noMyLists": "Você ainda não tem listas",
+    "createFirstList": "Crie sua primeira lista. Listas privadas aparecem apenas aqui.",
+    "savedCount": "{{count}} salvos",
     "searchPlaceholder": "Buscar listas públicas...",
     "loading": "Carregando...",
     "noListsFound": "Nenhuma lista encontrada",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "Tente buscar com palavras-chave diferentes",
     "beFirstToCreate": "Seja o primeiro a criar uma lista pública!",
     "createList": "Criar lista"
+  },
+  "projectActivities": {
+    "project_created": "Projeto criado: {{title}}",
+    "task_created": "Tarefa criada: {{title}}",
+    "task_status_changed": "{{title}} foi movida para {{status}}",
+    "note_added": "Nota adicionada ao projeto: {{title}}"
   },
   "peopleSearch": {
     "title": "Encontrar pessoas",
@@ -847,6 +868,7 @@
     "addMember": "Adicionar membro",
     "canView": "Pode ver",
     "canEdit": "Pode editar",
+    "owner": "Proprietário",
     "permissionLabel": "Permissão:",
     "adding": "A adicionar...",
     "dismiss": "Fechar",

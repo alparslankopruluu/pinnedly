@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "Posta condivisa",
+      "description": "Accedi rapidamente ai contenuti condivisi con te",
+      "count": "{{count}} elementi sono stati condivisi con te",
+      "projectsTitle": "Progetti condivisi con te",
+      "projectsDescription": "Visualizza i progetti condivisi in arrivo",
+      "projectCount": "{{count}} progetti sono stati condivisi con te"
+    },
     "discoverLists": {
       "eyebrow": "Scelte della community",
       "description": "Scopri elenchi pubblici utili e segui quelli che vuoi conservare"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "In linea",
       "atRisk": "A rischio",
-      "overdue": "Scaduto"
+      "overdue": "Scaduto",
+      "projectStatusLabel": "Stato del progetto"
     },
     "kanban": {
       "todo": "Da fare",
@@ -402,7 +411,8 @@
       "message": "Sei sicuro di voler eliminare questa attività?"
     },
     "loading": "Caricamento attività...",
-    "emptyDescriptionLong": "Tocca il pulsante + per creare la tua prima attività e restare organizzato"
+    "emptyDescriptionLong": "Tocca il pulsante + per creare la tua prima attività e restare organizzato",
+    "deleteFailed": "Impossibile eliminare l’attività. Riprova."
   },
   "profile": {
     "defaultName": "Utente Draft",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "Scopri elenchi",
+    "listsTitle": "Elenchi",
+    "tabs": { "my": "I miei elenchi", "discover": "Scopri" },
+    "noMyLists": "Non hai ancora elenchi",
+    "createFirstList": "Crea il tuo primo elenco. Gli elenchi privati appaiono solo qui.",
+    "savedCount": "{{count}} salvati",
     "searchPlaceholder": "Cerca elenchi pubblici...",
     "loading": "Caricamento...",
     "noListsFound": "Nessun elenco trovato",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "Prova a cercare con parole chiave diverse",
     "beFirstToCreate": "Sii il primo a creare un elenco pubblico!",
     "createList": "Crea elenco"
+  },
+  "projectActivities": {
+    "project_created": "Progetto creato: {{title}}",
+    "task_created": "Attività creata: {{title}}",
+    "task_status_changed": "{{title}} è stata spostata in {{status}}",
+    "note_added": "Nota aggiunta al progetto: {{title}}"
   },
   "peopleSearch": {
     "title": "Trova persone",
@@ -847,6 +868,7 @@
     "addMember": "Aggiungi membro",
     "canView": "Può visualizzare",
     "canEdit": "Può modificare",
+    "owner": "Proprietario",
     "permissionLabel": "Permesso:",
     "adding": "Aggiunta in corso...",
     "dismiss": "Chiudi",

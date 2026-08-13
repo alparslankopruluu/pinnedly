@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["UYDAF6RY67.app.techtactoe.draft"],
+        "components": [
+          { "/": "/invite/*", "comment": "Pinnedly project and content invitations" }
+        ]
+      }
+    ]
+  }
+}

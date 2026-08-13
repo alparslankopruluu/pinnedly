@@ -132,6 +132,10 @@ export function limit(limitValue: number): unknown {
   return firestoreModule().limit(limitValue);
 }
 
+export function orderBy(fieldPath: string, direction: 'asc' | 'desc' = 'asc'): unknown {
+  return firestoreModule().orderBy(fieldPath, direction);
+}
+
 export async function addDoc<T extends DocumentData = DocumentData>(
   reference: unknown,
   data: T

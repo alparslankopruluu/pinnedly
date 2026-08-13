@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   Bookmark,
@@ -24,22 +24,20 @@ import { EntityShare } from '@/types';
 
 export default function ShareInbox() {
   const { t } = useTranslation();
-  const { getUserShares, isLoading } = useSharing();
-  const [shares, setShares] = useState<EntityShare[]>([]);
+  const { getUserShares, receivedShares, isLoading } = useSharing();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const loadShares = useCallback(async () => {
     try {
-      const userShares = await getUserShares();
-      setShares(userShares);
+      await getUserShares();
     } catch (error) {
       console.error('Failed to load shares:', error);
     }
   }, [getUserShares]);
 
-  useEffect(() => {
-    loadShares();
-  }, [loadShares]);
+  useFocusEffect(useCallback(() => {
+    void loadShares();
+  }, [loadShares]));
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -134,14 +132,14 @@ export default function ShareInbox() {
       />
 
       <View style={styles.content}>
-        {shares.length === 0 && !isLoading ? (
+        {receivedShares.length === 0 && !isLoading ? (
           <EmptyState
             title={t('shareInbox.empty.title')}
             description={t('shareInbox.empty.description')}
           />
         ) : (
           <FlatList
-            data={shares}
+            data={receivedShares}
             renderItem={renderShareItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}

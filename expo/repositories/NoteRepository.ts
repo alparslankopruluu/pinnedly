@@ -3,14 +3,15 @@ import { DEFAULT_CONTENT_CATEGORY } from '@/constants/contentCategories';
 import {
   COLLECTIONS,
   collection,
+  type DocumentData,
   doc,
   getDb,
   getDoc,
   getDocs,
+  onQuerySnapshot,
   query,
   requireUserId,
   serverTimestamp,
-  subscribeToOwnerCollection,
   timestampToMillis,
   updateDoc,
   where,
@@ -29,20 +30,66 @@ export class NoteRepository {
     return NoteRepository.instance;
   }
 
-  subscribeToNotes(ownerId: string | null, onNotes: (notes: Note[]) => void): () => void {
-    return subscribeToOwnerCollection<Record<string, unknown>>(
-      COLLECTIONS.notes,
-      ownerId,
-      (docs) => onNotes(docs.map((d) => this.mapNote(d.id as string, d))),
+  subscribeToNotes(ownerId: string | null, onNotes: (notes: Note[]) => void, onError?: (error: Error) => void): () => void {
+    if (!ownerId) {
+      onNotes([]);
+      return () => undefined;
+    }
+
+    const ownedNotesQuery = query(collection(getDb(), COLLECTIONS.notes), where('ownerId', '==', ownerId));
+    const sharedNotesQuery = query(
+      collection(getDb(), COLLECTIONS.notes),
+      where('sharedWith', 'array-contains', ownerId)
     );
+    let ownedNotes: Note[] = [];
+    let sharedNotes: Note[] = [];
+
+    const publish = () => {
+      const merged = new Map<string, Note>();
+      [...ownedNotes, ...sharedNotes].forEach((note) => merged.set(note.id, note));
+      onNotes([...merged.values()]);
+    };
+    const mapSnapshot = (snapshot: { docs: Array<{ id: string; data: () => DocumentData }> }) =>
+      snapshot.docs.map((snapshotDoc) => this.mapNote(snapshotDoc.id, snapshotDoc.data()));
+    const handleError = (error: Error) => {
+      console.error('Note subscription error:', error);
+      onError?.(error);
+    };
+
+    const unsubscribeOwned = onQuerySnapshot(
+      ownedNotesQuery,
+      (snapshot) => {
+        ownedNotes = mapSnapshot(snapshot);
+        publish();
+      },
+      handleError
+    );
+    const unsubscribeShared = onQuerySnapshot(
+      sharedNotesQuery,
+      (snapshot) => {
+        sharedNotes = mapSnapshot(snapshot);
+        publish();
+      },
+      handleError
+    );
+
+    return () => {
+      unsubscribeOwned();
+      unsubscribeShared();
+    };
   }
 
   async getNotes(): Promise<Note[]> {
     const uid = requireUserId();
-    const snapshot = await getDocs(
-      query(collection(getDb(), COLLECTIONS.notes), where('ownerId', '==', uid))
-    );
-    return snapshot.docs.map((snapshotDoc) => this.mapNote(snapshotDoc.id, snapshotDoc.data()));
+    const [ownedSnapshot, sharedSnapshot] = await Promise.all([
+      getDocs(query(collection(getDb(), COLLECTIONS.notes), where('ownerId', '==', uid))),
+      getDocs(query(collection(getDb(), COLLECTIONS.notes), where('sharedWith', 'array-contains', uid))),
+    ]);
+    const notes = new Map<string, Note>();
+    [...ownedSnapshot.docs, ...sharedSnapshot.docs].forEach((snapshotDoc) => {
+      notes.set(snapshotDoc.id, this.mapNote(snapshotDoc.id, snapshotDoc.data()));
+    });
+    return [...notes.values()];
   }
 
   async getById(id: string): Promise<Note | null> {

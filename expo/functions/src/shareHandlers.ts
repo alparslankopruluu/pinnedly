@@ -37,6 +37,7 @@ type UserProfile = {
 
 const REGION = 'europe-west1';
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INVITE_WEB_ORIGIN = 'https://pinnedly-48c49.web.app';
 const HANDLE_PATTERN = /^[a-z0-9_]{3,30}$/;
 
 const ENTITY_COLLECTIONS: Record<EntityType, string> = {
@@ -205,6 +206,42 @@ function canManageEntity(data: admin.firestore.DocumentData, uid: string): boole
   return data.ownerId === uid || toStringArray(data.editors).includes(uid);
 }
 
+// A note linked to a project can also be managed by that project's owner/editors,
+// so a project owner can grant project members visibility into notes they didn't
+// create themselves — not just the note's own owner/editors.
+async function canManageNoteViaProject(
+  tx: admin.firestore.Transaction,
+  noteData: admin.firestore.DocumentData,
+  actorId: string
+): Promise<boolean> {
+  const links = Array.isArray(noteData.links) ? noteData.links : [];
+  const projectIds = links
+    .filter((link: unknown): link is { type: string; id: string } =>
+      !!link && typeof link === 'object' && (link as { type?: unknown }).type === 'project' &&
+      typeof (link as { id?: unknown }).id === 'string'
+    )
+    .map((link) => link.id);
+
+  const db = admin.firestore();
+  for (const projectId of projectIds) {
+    const projectSnap = await tx.get(db.collection('projects').doc(projectId));
+    if (!projectSnap.exists) continue;
+    if (canManageEntity(projectSnap.data() ?? {}, actorId)) return true;
+  }
+  return false;
+}
+
+async function canManageNote(
+  tx: admin.firestore.Transaction,
+  entityType: EntityType,
+  entityData: admin.firestore.DocumentData,
+  actorId: string
+): Promise<boolean> {
+  if (canManageEntity(entityData, actorId)) return true;
+  if (entityType === 'note') return canManageNoteViaProject(tx, entityData, actorId);
+  return false;
+}
+
 function accessUpdatesForGrant(
   entityType: EntityType,
   data: admin.firestore.DocumentData,
@@ -355,7 +392,7 @@ async function grantEntityAccess(
     if (!entitySnap.exists) throw new HttpError(404, 'Entity not found', 'ENTITY_NOT_FOUND');
 
     const entityData = entitySnap.data() ?? {};
-    if (!canManageEntity(entityData, actorId)) {
+    if (!(await canManageNote(tx, entityType, entityData, actorId))) {
       throw new HttpError(403, 'You do not have permission to share this entity', 'PERMISSION_DENIED');
     }
 
@@ -428,7 +465,7 @@ async function revokeEntityAccess(actorId: string, shareId: string): Promise<voi
     }
 
     const entityData = entitySnap.data() ?? {};
-    if (!canManageEntity(entityData, actorId)) {
+    if (!(await canManageNote(tx, entityType, entityData, actorId))) {
       throw new HttpError(403, 'You do not have permission to update this share', 'PERMISSION_DENIED');
     }
 
@@ -477,7 +514,7 @@ function inviteResponse(id: string, data: admin.firestore.DocumentData): Record<
     createdBy: data.createdBy,
     expiresAt: data.expiresAt,
     createdAt: timestampToMillis(data.createdAt),
-    inviteUrl: `draft://invite/${data.token}`,
+    inviteUrl: `${INVITE_WEB_ORIGIN}/invite/${encodeURIComponent(String(data.token))}`,
   };
 }
 
@@ -577,7 +614,7 @@ export const updateSharePermission = httpEndpoint(async (uid, body) => {
     if (!entitySnap.exists) throw new HttpError(404, 'Entity not found', 'ENTITY_NOT_FOUND');
 
     const entityData = entitySnap.data() ?? {};
-    if (!canManageEntity(entityData, uid)) {
+    if (!(await canManageNote(tx, entityType, entityData, uid))) {
       throw new HttpError(403, 'You do not have permission to update this share', 'PERMISSION_DENIED');
     }
 

@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "共有受信箱",
+      "description": "あなたと共有されたコンテンツにすばやくアクセス",
+      "count": "{{count}}件のコンテンツが共有されています",
+      "projectsTitle": "共有されたプロジェクト",
+      "projectsDescription": "受信したプロジェクト共有を表示",
+      "projectCount": "{{count}}件のプロジェクトが共有されています"
+    },
     "discoverLists": {
       "eyebrow": "コミュニティのおすすめ",
       "description": "役立つ公開リストを見つけて、気になるリストをフォローしましょう"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "順調",
       "atRisk": "リスクあり",
-      "overdue": "期限超過"
+      "overdue": "期限超過",
+      "projectStatusLabel": "プロジェクトの状態"
     },
     "kanban": {
       "todo": "未着手",
@@ -402,7 +411,8 @@
       "message": "このタスクを削除してもよろしいですか？"
     },
     "loading": "ToDoを読み込み中...",
-    "emptyDescriptionLong": "+ボタンをタップして最初のタスクを作成し、整理された状態を保ちましょう"
+    "emptyDescriptionLong": "+ボタンをタップして最初のタスクを作成し、整理された状態を保ちましょう",
+    "deleteFailed": "タスクを削除できませんでした。もう一度お試しください。"
   },
   "profile": {
     "defaultName": "Draftユーザー",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "リストを探す",
+    "listsTitle": "リスト",
+    "tabs": { "my": "マイリスト", "discover": "探す" },
+    "noMyLists": "リストはまだありません",
+    "createFirstList": "最初のリストを作成しましょう。非公開リストはここだけに表示されます。",
+    "savedCount": "{{count}}件保存",
     "searchPlaceholder": "公開リストを検索...",
     "loading": "読み込み中...",
     "noListsFound": "リストが見つかりません",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "別のキーワードで検索してみてください",
     "beFirstToCreate": "最初の公開リストを作成しましょう！",
     "createList": "リストを作成"
+  },
+  "projectActivities": {
+    "project_created": "プロジェクトを作成: {{title}}",
+    "task_created": "タスクを作成: {{title}}",
+    "task_status_changed": "{{title}}を{{status}}に移動",
+    "note_added": "プロジェクトにノートを追加: {{title}}"
   },
   "peopleSearch": {
     "title": "ユーザーを探す",
@@ -847,6 +868,7 @@
     "addMember": "メンバーを追加",
     "canView": "閲覧のみ",
     "canEdit": "編集可能",
+    "owner": "オーナー",
     "permissionLabel": "権限：",
     "adding": "追加中...",
     "dismiss": "閉じる",

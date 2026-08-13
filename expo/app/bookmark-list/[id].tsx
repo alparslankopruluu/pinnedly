@@ -2,15 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Heart, Share, Users, Edit3, Trash2 } from '@/components/icons/lucide';
+import { ArrowLeft, Heart, Share, Users, Edit3, Trash2, Plus } from '@/components/icons/lucide';
 import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { BookmarkList, Bookmark } from '@/types';
 import { BookmarkCard } from '@/components/BookmarkCard';
 
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ShareModal } from '@/components/ShareModal';
+import { EditListModal } from '@/components/EditListModal';
+import { AddBookmarkToListModal } from '@/components/AddBookmarkToListModal';
 import { useAuth } from '@/store/useAuthStore';
 
 export default function BookmarkListDetailScreen() {
@@ -31,6 +33,8 @@ export default function BookmarkListDetailScreen() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [showAddBookmarkModal, setShowAddBookmarkModal] = useState<boolean>(false);
 
   const loadListData = useCallback(async () => {
     if (!id) return;
@@ -111,6 +115,7 @@ export default function BookmarkListDetailScreen() {
   if (isLoading || !list) {
     return (
       <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
@@ -122,6 +127,7 @@ export default function BookmarkListDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <ArrowLeft size={24} color="#1e293b" />
@@ -147,7 +153,7 @@ export default function BookmarkListDetailScreen() {
           {isOwner && (
             <>
               <TouchableOpacity
-                onPress={() => console.log('Edit list functionality coming soon')}
+                onPress={() => setShowEditModal(true)}
                 style={styles.actionButton}
               >
                 <Edit3 size={20} color="#64748b" />
@@ -188,14 +194,34 @@ export default function BookmarkListDetailScreen() {
         )}
       />
 
+      {isOwner && (
+        <TouchableOpacity style={styles.fab} onPress={() => setShowAddBookmarkModal(true)}>
+          <Plus size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      )}
+
       {isOwner && list ? (
-        <ShareModal
-          visible={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          entityId={list.id}
-          entityType="list"
-          entityTitle={list.name}
-        />
+        <>
+          <ShareModal
+            visible={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            entityId={list.id}
+            entityType="list"
+            entityTitle={list.name}
+          />
+          <EditListModal
+            visible={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            list={list}
+            onUpdated={(updated) => setList(updated)}
+          />
+          <AddBookmarkToListModal
+            visible={showAddBookmarkModal}
+            onClose={() => setShowAddBookmarkModal(false)}
+            list={list}
+            onChanged={loadListData}
+          />
+        </>
       ) : null}
     </SafeAreaView>
   );
@@ -277,5 +303,21 @@ const styles = StyleSheet.create({
   bookmarksList: {
     padding: 24,
     gap: 16,
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#4F46E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

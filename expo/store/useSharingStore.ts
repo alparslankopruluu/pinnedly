@@ -1,5 +1,5 @@
 import createContextHook from '@nkzw/create-context-hook';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { EntityShare, ShareRequest, SharePermission, ID } from '@/types';
 import { sharingRepository } from '@/repositories/SharingRepository';
 import { useAuth } from './useAuthStore';
@@ -7,6 +7,7 @@ import { useAuth } from './useAuthStore';
 export const [SharingProvider, useSharing] = createContextHook(() => {
   const { user } = useAuth();
   const [shares, setShares] = useState<Record<string, EntityShare[]>>({});
+  const [receivedShares, setReceivedShares] = useState<EntityShare[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const shareEntity = useCallback(async (request: ShareRequest): Promise<EntityShare> => {
@@ -102,12 +103,16 @@ export const [SharingProvider, useSharing] = createContextHook(() => {
 
   const getUserShares = useCallback(async (): Promise<EntityShare[]> => {
     if (!user) {
+      setReceivedShares([]);
       return [];
     }
 
     setIsLoading(true);
     try {
-      return await sharingRepository.getUserShares(user.id);
+      const userShares = await sharingRepository.getUserShares(user.id);
+      const orderedShares = [...userShares].sort((a, b) => b.createdAt - a.createdAt);
+      setReceivedShares(orderedShares);
+      return orderedShares;
     } catch (error) {
       console.error('Get user shares error:', error);
       return [];
@@ -115,6 +120,14 @@ export const [SharingProvider, useSharing] = createContextHook(() => {
       setIsLoading(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setReceivedShares([]);
+      return;
+    }
+    void getUserShares();
+  }, [user, getUserShares]);
 
   const checkPermission = useCallback(async (entityId: ID, entityType: string): Promise<SharePermission | null> => {
     if (!user) {
@@ -159,6 +172,7 @@ export const [SharingProvider, useSharing] = createContextHook(() => {
 
   return useMemo(() => ({
     shares,
+    receivedShares,
     isLoading,
     shareEntity,
     getEntityShares,
@@ -170,6 +184,7 @@ export const [SharingProvider, useSharing] = createContextHook(() => {
     hasViewPermission,
   }), [
     shares,
+    receivedShares,
     isLoading,
     shareEntity,
     getEntityShares,

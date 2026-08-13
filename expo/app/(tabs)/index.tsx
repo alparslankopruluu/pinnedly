@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle, Clock, TrendingUp, Sparkles, Compass, ChevronRight } from '@/components/icons/lucide';
+import { CheckCircle, Clock, TrendingUp, Sparkles, Compass, ChevronRight, Inbox } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useAppStore } from '@/store/useAppStore';
 import { useBookmarkStore, useNoteStore, useProjectStore } from '@/providers/OfflineProvider';
@@ -15,6 +15,7 @@ import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { AppColors, useAppAppearance } from '@/hooks/useAppAppearance';
 import { useAuthGate } from '@/hooks/useAuthGate';
 import { useAuth } from '@/store/useAuthStore';
+import { useSharing } from '@/store/useSharingStore';
 
 function HomeContent() {
   const { t } = useTranslation();
@@ -27,7 +28,8 @@ function HomeContent() {
   const { projects } = useProjectStore();
   const { can, showPaywall } = useSubscriptionAccess();
   const { requireAccount } = useAuthGate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isGuest } = useAuth();
+  const { receivedShares } = useSharing();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -92,6 +94,33 @@ function HomeContent() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
+        {isAuthenticated && !isGuest && (
+          <TouchableOpacity
+            style={styles.shareInboxCard}
+            onPress={() => router.push('/share-inbox')}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.shareInbox.title')}
+          >
+            <View style={styles.shareInboxIcon}>
+              <Inbox size={24} color="#4F46E5" />
+            </View>
+            <View style={styles.shareInboxContent}>
+              <Text style={styles.shareInboxTitle}>{t('home.shareInbox.title')}</Text>
+              <Text style={styles.shareInboxDescription} numberOfLines={2}>
+                {receivedShares.length > 0
+                  ? t('home.shareInbox.count', { count: receivedShares.length })
+                  : t('home.shareInbox.description')}
+              </Text>
+            </View>
+            {receivedShares.length > 0 && (
+              <View style={styles.shareInboxBadge}>
+                <Text style={styles.shareInboxBadgeText}>{receivedShares.length}</Text>
+              </View>
+            )}
+            <ChevronRight size={22} color="#4F46E5" />
+          </TouchableOpacity>
+        )}
+
         {/* AI Chat Card */}
         <TouchableOpacity
           style={styles.aiChatCard}
@@ -276,6 +305,55 @@ const createStyles = (colors: AppColors, font: (size: number) => number) => Styl
   scrollView: {
     flex: 1,
   },
+  shareInboxCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEF2FF',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  shareInboxIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    marginRight: 12,
+  },
+  shareInboxContent: {
+    flex: 1,
+  },
+  shareInboxTitle: {
+    fontSize: font(16),
+    fontWeight: '700',
+    color: '#1E1B4B',
+    marginBottom: 3,
+  },
+  shareInboxDescription: {
+    fontSize: font(13),
+    color: '#6366F1',
+    lineHeight: 18,
+  },
+  shareInboxBadge: {
+    minWidth: 24,
+    height: 24,
+    paddingHorizontal: 7,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4F46E5',
+    marginRight: 8,
+  },
+  shareInboxBadgeText: {
+    color: '#FFFFFF',
+    fontSize: font(12),
+    fontWeight: '800',
+  },
 
   section: {
     marginBottom: 24,
@@ -456,7 +534,7 @@ const createStyles = (colors: AppColors, font: (size: number) => number) => Styl
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 20,
-    marginTop: 20,
+    marginTop: 16,
     marginBottom: 24,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },

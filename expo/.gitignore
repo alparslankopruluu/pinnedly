@@ -47,6 +47,12 @@ GoogleService-Info.plist
 fastlane/README.md
 fastlane/report.xml
 
+# asc CLI local scratch (build archives/IPAs/AABs, metadata pulls)
+.asc/
+
+# Firebase CLI local cache
+.firebase/
+
 # iOS native project is committed for Xcode Cloud. Keep only generated,
 # machine-specific, and dependency artifacts out of version control.
 ios/Pods/

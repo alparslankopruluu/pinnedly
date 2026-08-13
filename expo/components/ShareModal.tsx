@@ -18,7 +18,7 @@ import { Eye, Pencil, Trash2, X } from '@/components/icons/lucide';
 import { Button } from '@/components/ui/Button';
 import { useSharing } from '@/store/useSharingStore';
 import { useAuth } from '@/store/useAuthStore';
-import { EntityShare, SharePermission, ID } from '@/types';
+import { EntityShare, SharePermission, ID, User } from '@/types';
 import { inviteRepository } from '@/repositories/InviteRepository';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
@@ -29,9 +29,10 @@ interface ShareModalProps {
   entityId: ID;
   entityType: 'note' | 'bookmark' | 'list' | 'project';
   entityTitle: string;
+  suggestedUsers?: User[];
 }
 
-export function ShareModal({ visible, onClose, entityId, entityType, entityTitle }: ShareModalProps) {
+export function ShareModal({ visible, onClose, entityId, entityType, entityTitle, suggestedUsers }: ShareModalProps) {
   const { t } = useTranslation();
   const { shareEntity, getEntityShares, updateSharePermission, removeShare, isLoading } = useSharing();
   const { searchUsersByEmail } = useAuth();
@@ -238,7 +239,28 @@ export function ShareModal({ visible, onClose, entityId, entityType, entityTitle
           {activeTab === 'people' ? (
           <View style={styles.shareForm}>
             <Text style={styles.sectionTitle}>{t('share.addPeople')}</Text>
-            
+
+            {suggestedUsers && suggestedUsers.filter((u) => !shares.some((s) => s.userId === u.id)).length > 0 ? (
+              <View style={styles.suggestedUsersContainer}>
+                <Text style={styles.label}>{t('share.suggestedMembers')}</Text>
+                <View style={styles.suggestedUsersRow}>
+                  {suggestedUsers
+                    .filter((u) => !shares.some((s) => s.userId === u.id))
+                    .map((suggestedUser) => (
+                      <TouchableOpacity
+                        key={suggestedUser.id}
+                        style={styles.suggestedUserChip}
+                        onPress={() => selectUser(suggestedUser)}
+                      >
+                        <Text style={styles.suggestedUserChipText}>
+                          {suggestedUser.displayName || suggestedUser.handle}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                </View>
+              </View>
+            ) : null}
+
             <View style={styles.inputContainer}>
               <Text style={styles.label}>{t('share.emailOrUsername')}</Text>
               <TextInput
@@ -432,6 +454,27 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 20,
     position: 'relative',
+  },
+  suggestedUsersContainer: {
+    marginBottom: 16,
+  },
+  suggestedUsersRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  suggestedUserChip: {
+    backgroundColor: '#F0F0FF',
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  suggestedUserChipText: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    color: '#4F46E5',
   },
   label: {
     fontSize: 14,

@@ -238,6 +238,9 @@ async function createProjectTask(
     dueDate: input.dueDate ? normalizeValue('dueDate', input.dueDate) : null,
     notes: typeof input.notes === 'string' ? input.notes : null,
     category: typeof input.category === 'string' ? input.category : 'general',
+    assignedTo: null,
+    visibility: 'shared',
+    sharedWith: [],
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });

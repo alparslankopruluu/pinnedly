@@ -4,9 +4,8 @@ import { showAppAlert } from '@/providers/DialogProvider';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/store/useAuthStore';
-import { saveSharedContent } from '@/services/saveSharedBookmark';
+import { prepareSharedBookmarkDraft, setPendingSharedBookmarkDraft } from '@/services/saveSharedBookmark';
 import { ShareProcessingBanner } from '@/components/ShareProcessingBanner';
-import { getShareSuccessMessage } from '@/utils/shareSuccessMessage';
 import { platformCapabilities } from '@/utils/platform';
 
 declare const require: <T = unknown>(moduleName: string) => T;
@@ -52,7 +51,7 @@ function NativeShareIntentRuntime({
   const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntentContext();
   const { isAuthenticated } = useAuth();
   const isProcessing = useRef(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
 
   useEffect(() => {
     if (error) {
@@ -65,10 +64,10 @@ function NativeShareIntentRuntime({
 
     const processShare = async () => {
       isProcessing.current = true;
-      setIsSaving(true);
+      setIsPreparing(true);
 
       if (!isAuthenticated) {
-        setIsSaving(false);
+        setIsPreparing(false);
         showAppAlert(t('shareIntent.signInRequired'), t('shareIntent.signInToSaveLinks'), [
           { text: t('common.cancel'), style: 'cancel' },
           { text: t('auth.signIn'), onPress: () => router.push('/(auth)/sign-in') },
@@ -82,12 +81,10 @@ function NativeShareIntentRuntime({
       const sharedText = shareIntent.text || sharedUrl || '';
 
       try {
-        const bookmark = await saveSharedContent(sharedText, sharedUrl);
+        const draft = await prepareSharedBookmarkDraft(sharedText, sharedUrl);
+        setPendingSharedBookmarkDraft(draft);
         resetShareIntent();
-        showAppAlert(t('shareIntent.saved'), getShareSuccessMessage(bookmark.title, t), [
-          { text: t('common.ok'), style: 'cancel' },
-          { text: t('shareIntent.view'), onPress: () => router.push(`/bookmark/${bookmark.id}` as never) },
-        ], { variant: 'success' });
+        router.push('/share-confirm' as never);
       } catch (err) {
         showAppAlert(
           t('shareIntent.couldNotSave'),
@@ -96,12 +93,17 @@ function NativeShareIntentRuntime({
         resetShareIntent();
       } finally {
         isProcessing.current = false;
-        setIsSaving(false);
+        setIsPreparing(false);
       }
     };
 
     processShare();
   }, [hasShareIntent, shareIntent, isAuthenticated, resetShareIntent, t]);
 
-  return <ShareProcessingBanner visible={isSaving || (hasShareIntent && !!shareIntent)} />;
+  return (
+    <ShareProcessingBanner
+      visible={isPreparing || (hasShareIntent && !!shareIntent)}
+      messageKey="shareIntent.preparing"
+    />
+  );
 }

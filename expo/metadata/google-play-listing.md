@@ -7,7 +7,6 @@
 **Short description:** Save links, notes, tasks, and projects in one focused workspace.
 
 **Full description:**
-
 Draft brings bookmarks, notes, tasks, and projects into one focused workspace.
 
 SAVE WHAT YOU WANT TO RETURN TO
@@ -27,6 +26,14 @@ Invite specific people to view or edit selected bookmarks, notes, and projects.
 
 Draft keeps the things that matter together, so you can focus on what comes next.
 
+**What's new:**
+Stay in sync and work more smoothly:
+• Get real-time notifications when you’re added to a project or someone shares content with you. Open shared items directly and mark notifications as read individually or all at once.
+• Improved sign-in and account linking, note saving, and Premium purchase and restore flows.
+• General interface, stability, and performance improvements.
+
+---
+
 ## Turkish — tr-TR
 
 **App name:** Draft
@@ -34,7 +41,6 @@ Draft keeps the things that matter together, so you can focus on what comes next
 **Short description:** Bağlantıları, notları, görevleri ve projeleri tek yerde düzenleyin.
 
 **Full description:**
-
 Draft; yer imlerinizi, notlarınızı, görevlerinizi ve projelerinizi tek, odaklı bir çalışma alanında bir araya getirir.
 
 GERİ DÖNMEK İSTEDİKLERİNİZİ KAYDEDİN
@@ -54,6 +60,14 @@ Seçtiğiniz yer imlerini, notları ve projeleri görüntülemesi veya düzenlem
 
 Draft, önemli olanları bir arada tutar; siz de sıradaki işinize odaklanırsınız.
 
+**What's new:**
+Bu güncellemeyle gelişmelerden anında haberdar olun ve daha sorunsuz çalışın:
+• Bir projeye eklendiğinizde veya biri sizinle içerik paylaştığında gerçek zamanlı bildirim alın. Paylaşılan içerikleri doğrudan açın; bildirimleri tek tek veya topluca okundu olarak işaretleyin.
+• Giriş ve hesap bağlama, not kaydetme, Premium satın alma ve geri yükleme akışları iyileştirildi.
+• Genel arayüz, kararlılık ve performans iyileştirmeleri yapıldı.
+
+---
+
 ## Arabic — ar-SA
 
 **App name:** Draft
@@ -61,7 +75,6 @@ Draft, önemli olanları bir arada tutar; siz de sıradaki işinize odaklanırs�
 **Short description:** احفظ الروابط والملاحظات والمهام والمشاريع في مساحة عمل واحدة.
 
 **Full description:**
-
 يجمع Draft الإشارات المرجعية والملاحظات والمهام والمشاريع في مساحة عمل واحدة تساعدك على التركيز.
 
 احفظ ما تريد العودة إليه
@@ -81,6 +94,14 @@ Draft, önemli olanları bir arada tutar; siz de sıradaki işinize odaklanırs�
 
 يحفظ Draft ما يهمك في مكان واحد لتتمكن من التركيز على ما يلي.
 
+**What's new:**
+ابقَ على اطلاع واعمل بسلاسة أكبر مع هذا التحديث:
+• تلقَّ إشعارات فورية عند إضافتك إلى مشروع أو مشاركة محتوى معك. افتح المحتوى المشترك مباشرة وحدد الإشعارات كمقروءة فردياً أو دفعة واحدة.
+• تحسين تسجيل الدخول وربط الحسابات وحفظ الملاحظات وعمليات شراء Premium واستعادتها.
+• تحسينات عامة على الواجهة والثبات والأداء.
+
+---
+
 ## Chinese (Simplified) — zh-CN
 
 **App name:** Draft
@@ -88,7 +109,6 @@ Draft, önemli olanları bir arada tutar; siz de sıradaki işinize odaklanırs�
 **Short description:** 在一个专注的工作空间中保存链接、笔记、任务和项目。
 
 **Full description:**
-
 Draft 将书签、笔记、任务和项目汇集在一个专注的工作空间中。
 
 保存想再次找到的内容
@@ -108,6 +128,14 @@ Draft 将书签、笔记、任务和项目汇集在一个专注的工作空间�
 
 Draft 将重要内容集中在一起，让您专注于接下来要做的事。
 
+**What's new:**
+及时掌握动态，工作更顺畅：
+• 当您被添加到项目或有人与您共享内容时，实时收到通知。可从通知直接打开共享内容，并逐条或一键标记为已读。
+• 优化登录与账户关联、笔记保存以及 Premium 购买和恢复流程。
+• 改进界面、稳定性与性能。
+
+---
+
 ## German — de-DE
 
 **App name:** Draft
@@ -115,7 +143,6 @@ Draft 将重要内容集中在一起，让您专注于接下来要做的事。
 **Short description:** Links, Notizen, Aufgaben und Projekte in einem Ort organisieren.
 
 **Full description:**
-
 Draft vereint Lesezeichen, Notizen, Aufgaben und Projekte in einem klaren Arbeitsbereich.
 
 WAS SIE WIEDERFINDEN MÖCHTEN, SPEICHERN
@@ -135,6 +162,14 @@ Laden Sie ausgewählte Personen ein, Lesezeichen, Notizen und Projekte anzusehen
 
 Draft hält das Wichtige zusammen, damit Sie sich auf das Nächste konzentrieren können.
 
+**What's new:**
+Mit diesem Update bleiben Sie leichter auf dem Laufenden und arbeiten zuverlässiger:
+• Erhalten Sie Benachrichtigungen in Echtzeit, wenn Sie zu einem Projekt hinzugefügt werden oder jemand Inhalte mit Ihnen teilt. Öffnen Sie geteilte Inhalte direkt und markieren Sie Benachrichtigungen einzeln oder gesammelt als gelesen.
+• Verbesserte Anmeldung und Kontoverknüpfung, zuverlässigeres Speichern von Notizen sowie optimierte Premium-Käufe und Wiederherstellungen.
+• Allgemeine Verbesserungen an Bedienung, Stabilität und Leistung.
+
+---
+
 ## Italian — it-IT
 
 **App name:** Draft
@@ -142,7 +177,6 @@ Draft hält das Wichtige zusammen, damit Sie sich auf das Nächste konzentrieren
 **Short description:** Organizza link, note, attività e progetti in un unico spazio.
 
 **Full description:**
-
 Draft riunisce segnalibri, note, attività e progetti in un unico spazio di lavoro essenziale.
 
 SALVA CIÒ CHE VUOI RITROVARE
@@ -162,6 +196,14 @@ Invita persone specifiche a visualizzare o modificare i segnalibri, le note e i 
 
 Draft tiene insieme ciò che conta, così puoi concentrarti su quello che viene dopo.
 
+**What's new:**
+Rimani aggiornato e lavora in modo più fluido:
+• Ricevi notifiche in tempo reale quando vieni aggiunto a un progetto o qualcuno condivide contenuti con te. Apri i contenuti condivisi direttamente e contrassegna le notifiche come lette singolarmente o tutte insieme.
+• Migliorati accesso e collegamento dell’account, salvataggio delle note, acquisti e ripristini Premium.
+• Miglioramenti generali a interfaccia, stabilità e prestazioni.
+
+---
+
 ## Japanese — ja-JP
 
 **App name:** Draft
@@ -169,7 +211,6 @@ Draft tiene insieme ciò che conta, così puoi concentrarti su quello che viene 
 **Short description:** リンク、メモ、タスク、プロジェクトをひとつの場所で整理。
 
 **Full description:**
-
 Draftは、ブックマーク、メモ、タスク、プロジェクトを一つの見やすいワークスペースにまとめます。
 
 また見たいものを保存
@@ -189,6 +230,14 @@ AIと考える
 
 Draftなら、大切なものをまとめて、次に進むことへ集中できます。
 
+**What's new:**
+最新情報をすぐ確認し、よりスムーズに作業できるようになりました。
+• プロジェクトへの追加やコンテンツ共有をリアルタイムで通知します。通知から共有コンテンツを直接開き、個別またはまとめて既読にできます。
+• サインインとアカウント連携、ノート保存、Premium の購入・復元を改善しました。
+• インターフェイス、安定性、パフォーマンスを全般的に改善しました。
+
+---
+
 ## Portuguese (Portugal) — pt-PT
 
 **App name:** Draft
@@ -196,7 +245,6 @@ Draftなら、大切なものをまとめて、次に進むことへ集中でき
 **Short description:** Organize ligações, notas, tarefas e projetos num só espaço.
 
 **Full description:**
-
 O Draft reúne marcadores, notas, tarefas e projetos num único espaço de trabalho focado.
 
 GUARDE O QUE QUER VOLTAR A ENCONTRAR
@@ -216,6 +264,14 @@ Convide pessoas específicas para ver ou editar os marcadores, notas e projetos 
 
 O Draft mantém o que importa reunido, para que se possa concentrar no que vem a seguir.
 
+**What's new:**
+Mantenha-se a par de tudo e trabalhe com mais fluidez:
+• Receba notificações em tempo real quando for adicionado a um projeto ou alguém partilhar conteúdo consigo. Abra o conteúdo partilhado diretamente e marque as notificações como lidas individualmente ou de uma só vez.
+• Melhorias no início de sessão e associação de contas, ao guardar notas e nas compras e restauros Premium.
+• Melhorias gerais de interface, estabilidade e desempenho.
+
+---
+
 ## Russian — ru-RU
 
 **App name:** Draft
@@ -223,7 +279,6 @@ O Draft mantém o que importa reunido, para que se possa concentrar no que vem a
 **Short description:** Храните ссылки, заметки, задачи и проекты в одном рабочем пространстве.
 
 **Full description:**
-
 Draft объединяет закладки, заметки, задачи и проекты в одном удобном рабочем пространстве.
 
 СОХРАНЯЙТЕ ТО, К ЧЕМУ ХОТИТЕ ВЕРНУТЬСЯ
@@ -243,6 +298,14 @@ Draft объединяет закладки, заметки, задачи и п�
 
 Draft помогает держать важное вместе, чтобы вы могли сосредоточиться на следующем шаге.
 
+**What's new:**
+Будьте в курсе событий и работайте ещё удобнее:
+• Получайте уведомления в реальном времени, когда вас добавляют в проект или делятся с вами контентом. Открывайте общий контент прямо из уведомлений и отмечайте их прочитанными по одному или все сразу.
+• Улучшены вход и привязка аккаунтов, сохранение заметок, покупка и восстановление Premium.
+• Общие улучшения интерфейса, стабильности и производительности.
+
+---
+
 ## Spanish (Spain) — es-ES
 
 **App name:** Draft
@@ -250,7 +313,6 @@ Draft помогает держать важное вместе, чтобы вы
 **Short description:** Organiza enlaces, notas, tareas y proyectos en un solo espacio.
 
 **Full description:**
-
 Draft reúne marcadores, notas, tareas y proyectos en un espacio de trabajo claro y centrado.
 
 GUARDA LO QUE QUIERAS VOLVER A ENCONTRAR
@@ -269,3 +331,9 @@ COMPARTE CUANDO TE CONVENGA
 Invita a personas concretas a ver o editar los marcadores, notas y proyectos que elijas.
 
 Draft mantiene unido lo importante para que puedas concentrarte en lo que sigue.
+
+**What's new:**
+Mantente al día y trabaja con más fluidez:
+• Recibe notificaciones en tiempo real cuando te añadan a un proyecto o compartan contenido contigo. Abre el contenido compartido directamente y marca las notificaciones como leídas una a una o todas a la vez.
+• Mejoras en el inicio de sesión y la vinculación de cuentas, el guardado de notas y las compras y restauraciones Premium.
+• Mejoras generales de interfaz, estabilidad y rendimiento.

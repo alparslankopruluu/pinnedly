@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "صندوق المشاركات",
+      "description": "وصول سريع إلى المحتوى الذي تمت مشاركته معك",
+      "count": "تمت مشاركة {{count}} عناصر معك",
+      "projectsTitle": "المشاريع المشتركة معك",
+      "projectsDescription": "عرض مشاركات المشاريع الواردة",
+      "projectCount": "تمت مشاركة {{count}} مشاريع معك"
+    },
     "discoverLists": {
       "eyebrow": "اختيارات المجتمع",
       "description": "اكتشف القوائم العامة المفيدة وتابع ما يستحق الاحتفاظ به"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "على المسار",
       "atRisk": "معرض للخطر",
-      "overdue": "متأخر"
+      "overdue": "متأخر",
+      "projectStatusLabel": "حالة المشروع"
     },
     "kanban": {
       "todo": "للتنفيذ",
@@ -402,7 +411,8 @@
       "message": "هل أنت متأكد أنك تريد حذف هذه المهمة؟"
     },
     "loading": "Loading todos...",
-    "emptyDescriptionLong": "Tap the + button to create your first task and stay organized"
+    "emptyDescriptionLong": "Tap the + button to create your first task and stay organized",
+    "deleteFailed": "تعذر حذف المهمة. يرجى المحاولة مرة أخرى."
   },
   "profile": {
     "defaultName": "مستخدم Draft",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "اكتشاف القوائم",
+    "listsTitle": "القوائم",
+    "tabs": { "my": "قوائمي", "discover": "اكتشاف" },
+    "noMyLists": "ليس لديك قوائم بعد",
+    "createFirstList": "أنشئ قائمتك الأولى. تظهر القوائم الخاصة هنا فقط.",
+    "savedCount": "{{count}} محفوظ",
     "searchPlaceholder": "ابحث في القوائم العامة...",
     "loading": "جارٍ التحميل...",
     "noListsFound": "لم يتم العثور على قوائم",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "جرّب البحث بكلمات مفتاحية مختلفة",
     "beFirstToCreate": "كن أول من ينشئ قائمة عامة!",
     "createList": "إنشاء قائمة"
+  },
+  "projectActivities": {
+    "project_created": "تم إنشاء المشروع: {{title}}",
+    "task_created": "تم إنشاء المهمة: {{title}}",
+    "task_status_changed": "تم نقل {{title}} إلى {{status}}",
+    "note_added": "تمت إضافة ملاحظة إلى المشروع: {{title}}"
   },
   "peopleSearch": {
     "title": "البحث عن أشخاص",
@@ -847,6 +868,7 @@
     "addMember": "إضافة عضو",
     "canView": "يمكنه العرض",
     "canEdit": "يمكنه التعديل",
+    "owner": "المالك",
     "permissionLabel": "الصلاحية:",
     "adding": "جارٍ الإضافة...",
     "dismiss": "إغلاق",

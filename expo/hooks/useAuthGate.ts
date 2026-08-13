@@ -6,11 +6,11 @@ import { useAuth } from '@/store/useAuthStore';
 
 export function useAuthGate() {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isGuest } = useAuth();
 
   const requireAccount = useCallback(
     (message?: string): boolean => {
-      if (isAuthenticated) return true;
+      if (isAuthenticated && !isGuest) return true;
 
       showAppAlert(
         t('auth.guest.signInRequired'),
@@ -23,8 +23,8 @@ export function useAuthGate() {
       );
       return false;
     },
-    [isAuthenticated, t]
+    [isAuthenticated, isGuest, t]
   );
 
-  return { requireAccount, isAuthenticated };
+  return { requireAccount, isAuthenticated: isAuthenticated && !isGuest };
 }

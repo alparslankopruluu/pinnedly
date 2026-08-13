@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "Входящие публикации",
+      "description": "Быстрый доступ к материалам, которыми с вами поделились",
+      "count": "С вами поделились: {{count}}",
+      "projectsTitle": "Проекты, доступные вам",
+      "projectsDescription": "Просматривайте полученные проекты",
+      "projectCount": "С вами поделились проектами: {{count}}"
+    },
     "discoverLists": {
       "eyebrow": "Выбор сообщества",
       "description": "Находите полезные публичные списки и подписывайтесь на лучшие"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "В срок",
       "atRisk": "Под угрозой",
-      "overdue": "Просрочено"
+      "overdue": "Просрочено",
+      "projectStatusLabel": "Статус проекта"
     },
     "kanban": {
       "todo": "К выполнению",
@@ -402,7 +411,8 @@
       "message": "Вы уверены, что хотите удалить эту задачу?"
     },
     "loading": "Loading todos...",
-    "emptyDescriptionLong": "Tap the + button to create your first task and stay organized"
+    "emptyDescriptionLong": "Tap the + button to create your first task and stay organized",
+    "deleteFailed": "Не удалось удалить задачу. Попробуйте ещё раз."
   },
   "profile": {
     "defaultName": "Пользователь Draft",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "Обзор списков",
+    "listsTitle": "Списки",
+    "tabs": { "my": "Мои списки", "discover": "Обзор" },
+    "noMyLists": "У вас пока нет списков",
+    "createFirstList": "Создайте первый список. Личные списки отображаются только здесь.",
+    "savedCount": "Сохранено: {{count}}",
     "searchPlaceholder": "Поиск публичных списков...",
     "loading": "Загрузка...",
     "noListsFound": "Списки не найдены",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "Попробуйте другие ключевые слова",
     "beFirstToCreate": "Станьте первым, кто создаст публичный список!",
     "createList": "Создать список"
+  },
+  "projectActivities": {
+    "project_created": "Проект создан: {{title}}",
+    "task_created": "Задача создана: {{title}}",
+    "task_status_changed": "{{title}} перемещена в {{status}}",
+    "note_added": "Заметка добавлена в проект: {{title}}"
   },
   "peopleSearch": {
     "title": "Найти людей",
@@ -849,6 +870,7 @@
     "addMember": "Добавить участника",
     "canView": "Только просмотр",
     "canEdit": "Может редактировать",
+    "owner": "Владелец",
     "permissionLabel": "Доступ:",
     "adding": "Добавление...",
     "dismiss": "Закрыть",

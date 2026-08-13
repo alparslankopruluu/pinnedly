@@ -29,11 +29,13 @@ function TodoRow({
   todo,
   onToggle,
   onDelete,
+  deleting,
   onPress,
 }: {
   todo: TodoItem;
   onToggle: (id: ID) => void;
-  onDelete: (id: ID) => void;
+  onDelete: (id: ID) => Promise<void>;
+  deleting: boolean;
   onPress: (id: ID) => void;
 }) {
   const { t } = useTranslation();
@@ -126,7 +128,12 @@ function TodoRow({
 
       {/* Delete button */}
       <Pressable
-        style={({ pressed }) => [styles.deleteButton, pressed && styles.deleteButtonPressed]}
+        style={({ pressed }) => [
+          styles.deleteButton,
+          deleting && styles.deleteButtonDisabled,
+          pressed && styles.deleteButtonPressed,
+        ]}
+        disabled={deleting}
         onPress={() => {
           showAppAlert(t('todos.deleteConfirm.title'), t('todos.deleteConfirm.message'), [
             { text: t('common.cancel'), style: 'cancel' },
@@ -157,7 +164,17 @@ export default function TodosScreen() {
     setSearchQuery,
     toggleTodo,
     deleteTodo,
+    deletingTodoIds,
   } = useTodoStore();
+
+  const handleDelete = useCallback(async (id: ID) => {
+    try {
+      await deleteTodo(id);
+    } catch (error) {
+      console.error('Failed to delete todo:', error);
+      showAppAlert(t('common.error'), t('todos.deleteFailed'), undefined, { variant: 'error' });
+    }
+  }, [deleteTodo, t]);
 
   const handlePress = useCallback((id: ID) => {
     router.push(`/add-todo?id=${id}` as any);
@@ -168,11 +185,12 @@ export default function TodosScreen() {
       <TodoRow
         todo={item}
         onToggle={toggleTodo}
-        onDelete={deleteTodo}
+        onDelete={handleDelete}
+        deleting={deletingTodoIds.includes(item.id)}
         onPress={handlePress}
       />
     ),
-    [toggleTodo, deleteTodo, handlePress]
+    [toggleTodo, handleDelete, deletingTodoIds, handlePress]
   );
 
   const renderHeader = () => (
@@ -535,6 +553,9 @@ const styles = StyleSheet.create({
   },
   deleteButtonPressed: {
     backgroundColor: '#FEE2E2',
+  },
+  deleteButtonDisabled: {
+    opacity: 0.45,
   },
 
   // Empty state

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { ProjectRepository } from '@/repositories/ProjectRepository';
 import { Project, Task, User, ProjectCollaborator, ID } from '@/types';
+import { removeMemberAfterRequest } from '@/lib/projectMemberState';
 
 interface ProjectState {
   // Data
@@ -241,9 +242,9 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       });
     } catch (error) {
       console.error('Failed to assign task:', error);
-      set({ 
+      set({
         error: error instanceof Error ? error.message : 'Failed to assign task',
-        isUpdatingTask: false 
+        isUpdatingTask: false
       });
     }
   },
@@ -265,12 +266,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   addProjectMember: async (projectId: string, userEmail: string, permission: 'view' | 'edit') => {
     if (!userEmail.trim()) {
       set({ error: 'Email is required' });
-      return;
+      throw new Error('Email is required');
     }
     
     if (userEmail.length > 100) {
       set({ error: 'Email is too long' });
-      return;
+      throw new Error('Email is too long');
     }
 
     const sanitizedEmail = userEmail.trim();
@@ -284,27 +285,36 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Failed to add project member:', error);
+      const normalizedError = error instanceof Error ? error : new Error('Failed to add project member');
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to add project member',
+        error: normalizedError.message,
         isManagingMembers: false 
       });
+      throw normalizedError;
     }
   },
 
   removeProjectMember: async (projectId: string, userId: string) => {
     set({ isManagingMembers: true, error: null });
     try {
-      await projectRepository.removeProjectMember(projectId, userId);
-      set((state) => ({ 
-        projectMembers: state.projectMembers.filter((m) => m.userId !== userId),
-        isManagingMembers: false 
-      }));
-    } catch (error) {
-      console.error('Failed to remove project member:', error);
-      set({ 
-        error: error instanceof Error ? error.message : 'Failed to remove project member',
+      const projectMembers = await removeMemberAfterRequest(
+        () => get().projectMembers,
+        userId,
+        (member) => member.userId,
+        () => projectRepository.removeProjectMember(projectId, userId)
+      );
+      set({
+        projectMembers,
         isManagingMembers: false 
       });
+    } catch (error) {
+      console.error('Failed to remove project member:', error);
+      const normalizedError = error instanceof Error ? error : new Error('Failed to remove project member');
+      set({ 
+        error: normalizedError.message,
+        isManagingMembers: false 
+      });
+      throw normalizedError;
     }
   },
 
@@ -320,10 +330,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Failed to update member permission:', error);
+      const normalizedError = error instanceof Error ? error : new Error('Failed to update member permission');
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to update member permission',
+        error: normalizedError.message,
         isManagingMembers: false 
       });
+      throw normalizedError;
     }
   },
 

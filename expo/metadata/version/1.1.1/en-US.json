@@ -1,0 +1,3 @@
+{
+  "whatsNew": "This update makes project collaboration smoother: project owners now show up correctly in the member list, and owners can control who sees specific notes and tasks. We fixed a keyboard bug that could hide the task input, cleaned up a duplicate header on bookmark list screens (with working edit and add-bookmark buttons), and you can now rename a saved link's title right when you share it or anytime after. Plus a fix for an odd 'days ago' timestamp glitch."
+}

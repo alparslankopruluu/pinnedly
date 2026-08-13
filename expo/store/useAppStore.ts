@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Bookmark, Project, Note, Task, Tag, ActivityItem, Preferences, ID } from '@/types';
+import { removeActivitiesByRelatedId } from '@/lib/activityState';
 
 interface AppState {
   // Data
@@ -36,6 +37,7 @@ interface AppState {
   deleteTag: (id: ID) => void;
   
   addActivity: (activity: Omit<ActivityItem, 'id' | 'timestamp'>) => void;
+  removeActivitiesForRelatedId: (relatedId: ID) => void;
   
   updatePreferences: (updates: Partial<Preferences>) => void;
   
@@ -284,6 +286,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     
     set((state) => ({
       activities: [activity, ...state.activities.slice(0, 49)], // Keep last 50
+    }));
+    get().saveData();
+  },
+
+  removeActivitiesForRelatedId: (relatedId) => {
+    set((state) => ({
+      activities: removeActivitiesByRelatedId(state.activities, relatedId),
     }));
     get().saveData();
   },

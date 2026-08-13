@@ -6,16 +6,22 @@ import { bookmarkListRepository } from '@/repositories/BookmarkListRepository';
 import { bookmarkRepository } from '@/repositories/BookmarkRepository';
 import { Bookmark } from '@/types';
 import { useAuth } from '@/store/useAuthStore';
+import {
+  isPublicBookmarkList,
+  matchesBookmarkListSearch,
+  upsertBookmarkList,
+} from '@/lib/bookmarkListState';
 
 export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => {
   const queryClient = useQueryClient();
   const { isAuthenticated, isGuest } = useAuth();
+  const hasAccount = isAuthenticated && !isGuest;
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const myListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'my'],
     queryFn: () => bookmarkListRepository.getMyLists(),
-    enabled: isAuthenticated,
+    enabled: hasAccount,
   });
 
   const publicListsQuery = useQuery({
@@ -27,7 +33,7 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   const followedListsQuery = useQuery({
     queryKey: ['bookmark-lists', 'followed'],
     queryFn: () => bookmarkListRepository.getFollowedLists(),
-    enabled: isAuthenticated,
+    enabled: hasAccount,
   });
 
   const searchResultsQuery = useQuery({
@@ -36,12 +42,56 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
     enabled: (isAuthenticated || isGuest) && searchQuery.trim().length > 0,
   });
 
+  const getCachedList = useCallback((listId: ID): BookmarkList | undefined => {
+    const cachedQueries = queryClient.getQueriesData<BookmarkList[]>({
+      queryKey: ['bookmark-lists'],
+    });
+    for (const [, lists] of cachedQueries) {
+      const match = lists?.find((list) => list.id === listId);
+      if (match) return match;
+    }
+    return undefined;
+  }, [queryClient]);
+
+  const updateListInCaches = useCallback((listId: ID, update: (list: BookmarkList) => BookmarkList) => {
+    queryClient.setQueriesData<BookmarkList[]>(
+      { queryKey: ['bookmark-lists'] },
+      (lists) => lists?.map((list) => (list.id === listId ? update(list) : list))
+    );
+  }, [queryClient]);
+
   // Mutations
   const createListMutation = useMutation({
     mutationFn: ({ name, description, visibility }: { name: string; description?: string; visibility?: Visibility }) =>
       bookmarkListRepository.createList(name, description, visibility ?? 'private'),
-    onSuccess: () => {
+    onSuccess: (created) => {
+      queryClient.setQueryData<BookmarkList[]>(
+        ['bookmark-lists', 'my'],
+        (lists) => upsertBookmarkList(lists, created)
+      );
+
+      if (isPublicBookmarkList(created)) {
+        queryClient.setQueryData<BookmarkList[]>(
+          ['bookmark-lists', 'public'],
+          (lists) => upsertBookmarkList(lists, created)
+        );
+        queryClient.getQueriesData<BookmarkList[]>({
+          queryKey: ['bookmark-lists', 'search'],
+        }).forEach(([queryKey, lists]) => {
+          const query = String(queryKey[2] ?? '');
+          if (matchesBookmarkListSearch(created, query)) {
+            queryClient.setQueryData<BookmarkList[]>(
+              queryKey,
+              upsertBookmarkList(lists, created)
+            );
+          }
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'my'] });
+      if (isPublicBookmarkList(created)) {
+        queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'public'] });
+        queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'search'] });
+      }
     },
   });
 
@@ -62,15 +112,48 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
 
   const followListMutation = useMutation({
     mutationFn: (listId: ID) => bookmarkListRepository.followList(listId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookmark-lists'] });
+    onMutate: async (listId) => {
+      await queryClient.cancelQueries({ queryKey: ['bookmark-lists'] });
+      const previous = queryClient.getQueriesData<BookmarkList[]>({ queryKey: ['bookmark-lists'] });
+      const list = getCachedList(listId);
+      if (list) {
+        updateListInCaches(listId, (item) => ({ ...item, followerCount: item.followerCount + 1 }));
+        queryClient.setQueryData<BookmarkList[]>(['bookmark-lists', 'followed'], (lists = []) => [
+          { ...list, followerCount: list.followerCount + 1 },
+          ...lists.filter((item) => item.id !== listId),
+        ]);
+      }
+      return { previous };
+    },
+    onError: (_error, _listId, context) => {
+      context?.previous.forEach(([queryKey, data]) => queryClient.setQueryData(queryKey, data));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'followed'] });
+      queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'public'] });
     },
   });
 
   const unfollowListMutation = useMutation({
     mutationFn: (listId: ID) => bookmarkListRepository.unfollowList(listId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookmark-lists'] });
+    onMutate: async (listId) => {
+      await queryClient.cancelQueries({ queryKey: ['bookmark-lists'] });
+      const previous = queryClient.getQueriesData<BookmarkList[]>({ queryKey: ['bookmark-lists'] });
+      queryClient.setQueryData<BookmarkList[]>(['bookmark-lists', 'followed'], (lists = []) =>
+        lists.filter((list) => list.id !== listId)
+      );
+      updateListInCaches(listId, (item) => ({
+        ...item,
+        followerCount: Math.max(0, item.followerCount - 1),
+      }));
+      return { previous };
+    },
+    onError: (_error, _listId, context) => {
+      context?.previous.forEach(([queryKey, data]) => queryClient.setQueryData(queryKey, data));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'followed'] });
+      queryClient.invalidateQueries({ queryKey: ['bookmark-lists', 'public'] });
     },
   });
 
@@ -130,9 +213,8 @@ export const [BookmarkListProvider, useBookmarkLists] = createContextHook(() => 
   }, []);
 
   const isFollowingList = useCallback((listId: ID): boolean => {
-    // Check if the list is in the followed lists - temporarily return false
-    return false;
-  }, []);
+    return (followedListsQuery.data ?? []).some((list) => list.id === listId);
+  }, [followedListsQuery.data]);
 
   const searchLists = useCallback((query: string) => {
     setSearchQuery(query);

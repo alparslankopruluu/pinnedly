@@ -8,7 +8,7 @@ const root = resolve(import.meta.dirname, '..');
 const outputRoot = '/Users/fmss/Desktop/draft ss/google-play-android-v1/store-assets';
 const featureRoot = join(outputRoot, 'feature-graphics');
 const iconSource = join(root, 'assets/images/icon.png');
-const mascot = join(root, 'assets/brand/owl-mascot-transparent.png');
+const mascot = join(root, 'assets/brand/owl-mascot-transparent.webp');
 
 const locales = {
   'en-US': { text: ['Save it.', 'Find it later.'], features: 'Bookmarks · Notes · Tasks · Projects', font: 'Arial', size: 74 },

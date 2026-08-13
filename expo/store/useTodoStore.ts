@@ -1,5 +1,5 @@
 import createContextHook from '@nkzw/create-context-hook';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { todoRepository } from '@/repositories/TodoRepository';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useAuth } from '@/store/useAuthStore';
@@ -11,6 +11,13 @@ import {
   normalizeReminderSchedule,
 } from '@/services/entityReminders';
 import { recordActivity } from '@/utils/activities';
+import { useAppStore } from '@/store/useAppStore';
+import {
+  beginPendingDeletion,
+  excludePendingDeletions,
+  removeItemOptimistically,
+  restoreOptimisticallyDeletedItem,
+} from '@/lib/deletionState';
 
 export type PriorityFilter = 'all' | 'low' | 'medium' | 'high';
 export type StatusFilter = 'all' | 'active' | 'completed';
@@ -23,6 +30,8 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
   const [searchQuery, setSearchQuery] = useState('');
+  const [deletingTodoIds, setDeletingTodoIds] = useState<ID[]>([]);
+  const pendingDeletionIdsRef = useRef(new Set<ID>());
   const syncStatus = useSyncStatus();
 
   const loadTodos = useCallback(async () => {
@@ -95,9 +104,36 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
   }, [todos]);
 
   const deleteTodo = useCallback(async (id: ID) => {
-    await cancelEntityReminders('todo', id);
-    await todoRepository.deleteTodo(id);
-  }, []);
+    if (!beginPendingDeletion(pendingDeletionIdsRef.current, id)) return;
+    const optimistic = removeItemOptimistically(todos, id, (todo) => todo.id);
+    if (!optimistic.deletion) {
+      pendingDeletionIdsRef.current.delete(id);
+      return;
+    }
+
+    setDeletingTodoIds((current) => [...current, id]);
+    setTodos(optimistic.items);
+
+    try {
+      await todoRepository.deleteTodo(id);
+      useAppStore.getState().removeActivitiesForRelatedId(id);
+      try {
+        await cancelEntityReminders('todo', id);
+      } catch (reminderError) {
+        console.warn('Todo deleted but its reminder could not be cancelled:', reminderError);
+      }
+    } catch (error) {
+      setTodos((current) => restoreOptimisticallyDeletedItem(
+        current,
+        optimistic.deletion!,
+        (todo) => todo.id
+      ));
+      throw error;
+    } finally {
+      pendingDeletionIdsRef.current.delete(id);
+      setDeletingTodoIds((current) => current.filter((todoId) => todoId !== id));
+    }
+  }, [todos]);
 
   const syncTodos = useCallback(async () => {
     await todoRepository.syncTodos();
@@ -154,7 +190,11 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
 
     setLoading(true);
     const unsubscribe = todoRepository.subscribeToTodos(user.id, (todosData) => {
-      setTodos(todosData);
+      setTodos(excludePendingDeletions(
+        todosData,
+        pendingDeletionIdsRef.current,
+        (todo) => todo.id
+      ));
       setLoading(false);
       setError(null);
     });
@@ -180,6 +220,7 @@ export const [TodoStoreProvider, useTodoStore] = createContextHook(() => {
     updateTodo,
     toggleTodo,
     deleteTodo,
+    deletingTodoIds,
     syncTodos,
-  }), [filteredTodos, todos, loading, error, syncStatus, priorityFilter, statusFilter, searchQuery, counts, loadTodos, createTodo, updateTodo, toggleTodo, deleteTodo, syncTodos]);
+  }), [filteredTodos, todos, loading, error, syncStatus, priorityFilter, statusFilter, searchQuery, counts, deletingTodoIds, loadTodos, createTodo, updateTodo, toggleTodo, deleteTodo, syncTodos]);
 });

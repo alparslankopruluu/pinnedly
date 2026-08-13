@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f04444" />
+    <title>Draft daveti</title>
+    <style>
+      :root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: #f8fafc; color: #172033; }
+      main { width: min(88vw, 420px); padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 18px 60px rgba(15, 23, 42, .12); text-align: center; }
+      .mark { width: 64px; height: 64px; display: grid; place-items: center; margin: 0 auto 18px; border-radius: 20px; background: #fee2e2; color: #dc2626; font-size: 30px; font-weight: 800; }
+      h1 { margin: 0 0 10px; font-size: 28px; }
+      p { margin: 0 0 24px; color: #64748b; line-height: 1.5; }
+      a { display: block; margin-top: 12px; padding: 14px 18px; border-radius: 14px; text-decoration: none; font-weight: 700; }
+      #open { background: #f04444; color: #fff; }
+      .store { background: #eef2ff; color: #4338ca; }
+      @media (prefers-color-scheme: dark) { body { background: #0f172a; color: #f8fafc; } main { background: #1e293b; } p { color: #cbd5e1; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark">D</div>
+      <h1>Bir Draft davetin var</h1>
+      <p>Uygulama yüklüyse daveti aç; değilse mağazadan Draft'ı indir.</p>
+      <a id="open" href="#">Uygulamada Aç</a>
+      <a class="store" href="https://apps.apple.com/app/id6790115301">App Store'dan İndir</a>
+      <a class="store" href="https://play.google.com/store/apps/details?id=app.techtactoe.draft">Google Play'den İndir</a>
+    </main>
+    <script>
+      const token = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+      document.getElementById('open').href = `draft://invite/${encodeURIComponent(token)}`;
+    </script>
+  </body>
+</html>

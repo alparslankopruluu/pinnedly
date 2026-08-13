@@ -148,4 +148,12 @@ export {
 } from './shareHandlers';
 
 export { syncEntitlement, revenueCatWebhook } from './subscription';
+export {
+  onProjectCreatedActivity,
+  onProjectTaskCreatedActivity,
+  onProjectTaskStatusActivity,
+  onProjectTaskDeletedActivity,
+  onLinkedNoteCreatedActivity,
+  onLinkedNoteDeletedActivity,
+} from './projectActivities';
 export { mutateContent, deleteAccount } from './contentAccess';

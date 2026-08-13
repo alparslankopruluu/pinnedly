@@ -293,6 +293,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "Bandeja de compartidos",
+      "description": "Accede rápidamente al contenido compartido contigo",
+      "count": "Han compartido {{count}} elementos contigo",
+      "projectsTitle": "Proyectos compartidos contigo",
+      "projectsDescription": "Consulta los proyectos que recibiste",
+      "projectCount": "Han compartido {{count}} proyectos contigo"
+    },
     "discoverLists": {
       "eyebrow": "Selección de la comunidad",
       "description": "Descubre listas públicas útiles y sigue las que quieras conservar"
@@ -355,7 +363,8 @@
     "filters": {
       "onTrack": "En curso",
       "atRisk": "En riesgo",
-      "overdue": "Atrasado"
+      "overdue": "Atrasado",
+      "projectStatusLabel": "Estado del proyecto"
     },
     "kanban": {
       "todo": "Por hacer",
@@ -402,7 +411,8 @@
       "message": "¿Seguro que quieres eliminar esta tarea?"
     },
     "loading": "Cargando tareas...",
-    "emptyDescriptionLong": "Toca el botón + para crear tu primera tarea y mantenerte organizado"
+    "emptyDescriptionLong": "Toca el botón + para crear tu primera tarea y mantenerte organizado",
+    "deleteFailed": "No se pudo eliminar la tarea. Inténtalo de nuevo."
   },
   "profile": {
     "defaultName": "Usuario de Draft",
@@ -533,6 +543,11 @@
   },
   "discoverLists": {
     "title": "Descubrir listas",
+    "listsTitle": "Listas",
+    "tabs": { "my": "Mis listas", "discover": "Descubrir" },
+    "noMyLists": "Aún no tienes listas",
+    "createFirstList": "Crea tu primera lista. Las listas privadas solo aparecen aquí.",
+    "savedCount": "{{count}} guardados",
     "searchPlaceholder": "Buscar listas públicas...",
     "loading": "Cargando...",
     "noListsFound": "No se encontraron listas",
@@ -540,6 +555,12 @@
     "tryDifferentKeywords": "Prueba con otras palabras clave",
     "beFirstToCreate": "¡Sé el primero en crear una lista pública!",
     "createList": "Crear lista"
+  },
+  "projectActivities": {
+    "project_created": "Proyecto creado: {{title}}",
+    "task_created": "Tarea creada: {{title}}",
+    "task_status_changed": "{{title}} se movió a {{status}}",
+    "note_added": "Nota añadida al proyecto: {{title}}"
   },
   "peopleSearch": {
     "title": "Buscar personas",
@@ -847,6 +868,7 @@
     "addMember": "Añadir miembro",
     "canView": "Puede ver",
     "canEdit": "Puede editar",
+    "owner": "Propietario",
     "permissionLabel": "Permiso:",
     "adding": "Añadiendo...",
     "dismiss": "Cerrar",

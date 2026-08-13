@@ -34,7 +34,7 @@ export function useSubscriptionGate() {
         message,
         [
           { text: t('common.cancel'), style: 'cancel' },
-          { text: t('subscription.upgrade'), onPress: showPaywall },
+          { text: t('subscription.upgrade'), onPress: showPaywall, deferUntilDismiss: true },
         ],
         { variant: 'info' }
       );
@@ -68,7 +68,7 @@ export function useSubscriptionGate() {
         message,
         [
           { text: t('common.cancel'), style: 'cancel' },
-          { text: t('subscription.upgrade'), onPress: showPaywall },
+          { text: t('subscription.upgrade'), onPress: showPaywall, deferUntilDismiss: true },
         ],
         { variant: 'info' }
       );

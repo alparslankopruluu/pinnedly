@@ -1,0 +1,3 @@
+{
+  "whatsNew": "Görev, not ve proje üyesi silme işlemleri artık daha güvenilir. Silme işlemi sürerken bir yükleniyor göstergesi görüyorsunuz ve arka arkaya dokunmalar artık hataya yol açmıyor. Silme başarısız olursa daha net hata mesajları ekledik; uygulama genelinde küçük kararlılık iyileştirmeleri yaptık."
+}

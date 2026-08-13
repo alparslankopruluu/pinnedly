@@ -71,6 +71,8 @@ export default function BookmarkDetailScreen() {
     isUpdatingMembership,
   } = useBookmarkLists();
   const [isEditingNote, setIsEditingNote] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
   const [personalNote, setPersonalNote] = useState('');
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [tagDraft, setTagDraft] = useState('');
@@ -176,6 +178,25 @@ export default function BookmarkDetailScreen() {
     };
     await updateBookmark(bookmark.id, updates);
     setSharedBookmark((current) => current ? { ...current, ...updates } : current);
+  };
+
+  const startEditingTitle = () => {
+    setEditedTitle(bookmark.title ?? '');
+    setIsEditingTitle(true);
+  };
+
+  const handleSaveTitle = async () => {
+    try {
+      setIsSaving(true);
+      const updates = { title: editedTitle.trim() || undefined };
+      await updateBookmark(bookmark.id, updates);
+      setSharedBookmark((current) => current ? { ...current, ...updates } : current);
+      setIsEditingTitle(false);
+    } catch (error) {
+      showAppAlert(t('common.error'), error instanceof Error ? error.message : t('bookmarkDetail.updateFailed'), undefined, { variant: 'error' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSaveNote = async () => {
@@ -439,7 +460,30 @@ export default function BookmarkDetailScreen() {
           <Text style={styles.metaText}>{t('bookmarkDetail.openedCount', { count: bookmark.openCount })}</Text>
         </View>
 
-        <Text style={styles.title}>{bookmark.title || bookmark.url || t('common.untitled')}</Text>
+        {isEditingTitle ? (
+          <View style={styles.titleEditor}>
+            <TextInput
+              style={styles.titleInput}
+              value={editedTitle}
+              onChangeText={setEditedTitle}
+              placeholder={t('bookmarkDetail.titlePlaceholder')}
+              autoFocus
+            />
+            <View style={styles.editorActions}>
+              <Button title={t('common.cancel')} variant="outline" size="small" onPress={() => setIsEditingTitle(false)} />
+              <Button title={t('common.save')} size="small" onPress={handleSaveTitle} disabled={isSaving} />
+            </View>
+          </View>
+        ) : (
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>{bookmark.title || bookmark.url || t('common.untitled')}</Text>
+            {isOwner ? (
+              <TouchableOpacity onPress={startEditingTitle} style={styles.smallIconButton}>
+                <Edit3 size={17} color="#4F46E5" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        )}
 
         {bookmark.description ? (
           <Text style={styles.description}>{bookmark.description}</Text>
@@ -817,7 +861,27 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#111827',
+    flex: 1,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     marginBottom: 8,
+  },
+  titleEditor: {
+    marginBottom: 8,
+  },
+  titleInput: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   description: {
     fontSize: 16,

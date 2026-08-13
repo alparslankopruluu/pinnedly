@@ -90,6 +90,14 @@ service cloud.firestore {
         || (isSignedIn() && request.auth.uid in project.get('editors', []));
     }
 
+    function canReadTask(projectId) {
+      let project = projectData(projectId);
+      return isOwner(project.ownerId)
+        || resource.data.get('visibility', 'shared') != 'private'
+        || (isSignedIn() && request.auth.uid in resource.data.get('sharedWith', []))
+        || (isSignedIn() && request.auth.uid == resource.data.get('assignedTo', null));
+    }
+
     function canReadList() {
       return resource.data.isPublic == true
         || isPublicVisibility(resource.data.get('visibility', 'private'))
@@ -142,9 +150,14 @@ service cloud.firestore {
         && premiumGalleryIsValid();
 
       match /tasks/{taskId} {
-        allow read: if canAccessProject(projectId);
+        allow read: if canAccessProject(projectId) && canReadTask(projectId);
         allow update: if isRegisteredUser() && canEditProject(projectId);
         allow create, delete: if false;
+      }
+
+      match /activities/{activityId} {
+        allow read: if canAccessProject(projectId);
+        allow create, update, delete: if false;
       }
     }
 

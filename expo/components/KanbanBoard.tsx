@@ -7,6 +7,8 @@ import {
   Pressable,
   PanResponder,
   LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
 import { Plus } from '@/components/icons/lucide';
 import { router } from 'expo-router';
@@ -122,6 +124,8 @@ export function KanbanBoard({
   const [draggingTask, setDraggingTask] = useState<KanbanTask | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [activeColumnId, setActiveColumnId] = useState<Task['status'] | null>(null);
+  const [visibleColumnIndex, setVisibleColumnIndex] = useState(0);
+  const horizontalScrollRef = useRef<ScrollView>(null);
   const columnBounds = useRef<Partial<Record<Task['status'], ColumnBounds>>>({});
   const columnRefs = useRef<Map<Task['status'], View | null>>(new Map());
   const draggingTaskRef = useRef<KanbanTask | null>(null);
@@ -144,8 +148,10 @@ export function KanbanBoard({
       return Math.max(280, Math.min(360, Math.floor((boardWidth - 96) / 3)));
     }
     if (isTabletOrLarger) return 320;
-    return Math.max(260, Math.min(300, width - 48));
+    return Math.max(260, width - 32);
   }, [boardWidth, isDesktop, isTabletOrLarger, width]);
+  const columnStride = columnWidth + 16;
+  const isPagedMobile = !isTabletOrLarger;
 
   const getTasksByStatus = useCallback(
     (status: Task['status']) => {
@@ -174,6 +180,31 @@ export function KanbanBoard({
     });
   }, []);
 
+  const scrollToColumn = useCallback(
+    (status: Task['status']) => {
+      if (!isPagedMobile) return;
+      const index = columns.findIndex((column) => column.id === status);
+      if (index < 0) return;
+      setVisibleColumnIndex(index);
+      horizontalScrollRef.current?.scrollTo({ x: index * columnStride, animated: true });
+    },
+    [columnStride, columns, isPagedMobile]
+  );
+
+  const updateVisibleColumn = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isPagedMobile) {
+        const index = Math.max(
+          0,
+          Math.min(columns.length - 1, Math.round(event.nativeEvent.contentOffset.x / columnStride))
+        );
+        setVisibleColumnIndex(index);
+      }
+      measureColumns();
+    },
+    [columnStride, columns.length, isPagedMobile, measureColumns]
+  );
+
   const updateActiveColumn = useCallback((x: number) => {
     const next = findColumnAtX(x, columnBounds.current);
     setActiveColumnId(next);
@@ -188,6 +219,7 @@ export function KanbanBoard({
       if (targetStatus && targetStatus !== task.status) {
         try {
           await onUpdateTask(task.id, targetStatus);
+          scrollToColumn(targetStatus);
           hapticSuccess();
         } catch {
           hapticError();
@@ -197,7 +229,7 @@ export function KanbanBoard({
       setDraggingTask(null);
       setActiveColumnId(null);
     },
-    [onUpdateTask]
+    [onUpdateTask, scrollToColumn]
   );
 
   const panResponder = useRef(
@@ -233,12 +265,13 @@ export function KanbanBoard({
       const nextStatus = getNextTaskStatus(task.status);
       try {
         await onUpdateTask(task.id, nextStatus);
+        scrollToColumn(nextStatus);
         hapticSelection();
       } catch {
         hapticError();
       }
     },
-    [onUpdateTask]
+    [onUpdateTask, scrollToColumn]
   );
 
   const handleColumnLayout = (_columnId: Task['status']) => (_event: LayoutChangeEvent) => {
@@ -310,7 +343,26 @@ export function KanbanBoard({
 
   return (
     <View style={styles.wrapper}>
+      {isPagedMobile && (
+        <View style={styles.pageHeader}>
+          <View>
+            <Text style={styles.pageTitle}>{columns[visibleColumnIndex]?.title}</Text>
+            <View style={styles.pageDots}>
+              {columns.map((column, index) => (
+                <View
+                  key={column.id}
+                  style={[styles.pageDot, index === visibleColumnIndex && styles.pageDotActive]}
+                />
+              ))}
+            </View>
+          </View>
+          <Text style={styles.pageCount}>
+            {visibleColumnIndex + 1}/{columns.length}
+          </Text>
+        </View>
+      )}
       <ScrollView
+        ref={horizontalScrollRef}
         horizontal
         style={styles.kanbanContainer}
         showsHorizontalScrollIndicator={false}
@@ -321,7 +373,10 @@ export function KanbanBoard({
         ]}
         scrollEnabled={!draggingTask}
         onScrollEndDrag={measureColumns}
-        onMomentumScrollEnd={measureColumns}
+        onMomentumScrollEnd={updateVisibleColumn}
+        snapToInterval={isPagedMobile ? columnStride : undefined}
+        decelerationRate={isPagedMobile ? 'fast' : 'normal'}
+        disableIntervalMomentum={isPagedMobile}
       >
         {columns.map(renderColumn)}
       </ScrollView>
@@ -360,6 +415,38 @@ const styles = StyleSheet.create({
   },
   kanbanContent: {
     paddingHorizontal: 16,
+  },
+  pageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  pageTitle: {
+    color: '#111827',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  pageCount: {
+    color: '#6B7280',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  pageDots: {
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 6,
+  },
+  pageDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#D1D5DB',
+  },
+  pageDotActive: {
+    width: 18,
+    backgroundColor: '#EF4444',
   },
   kanbanColumn: {
     marginRight: 16,

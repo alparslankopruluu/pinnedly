@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
 import { authErrorMessageKey, isUserCancelledAuthError } from '@/lib/auth';
 import { trackButtonPress } from '@/lib/analytics';
@@ -10,9 +10,12 @@ import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Eye, EyeOff } from '@/components/icons/lucide';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+import { getSafePostAuthRoute } from '@/lib/authRedirect';
 
 export default function SignUp() {
   const { t } = useTranslation();
+  const { redirect } = useLocalSearchParams<{ redirect?: string | string[] }>();
+  const postAuthRoute = getSafePostAuthRoute(redirect);
   const { signUp, signInWithApple, signInWithGoogle, isLoading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -40,7 +43,7 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'email_sign_up');
       await signUp(email.trim(), password, displayName.trim());
-      router.replace('/(tabs)');
+      router.replace(postAuthRoute as never);
     } catch (error) {
       if (__DEV__) console.error('[auth] Email sign-up failed:', error);
       showAppAlert(
@@ -56,7 +59,7 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'apple_sign_up');
       await signInWithApple();
-      router.replace('/(tabs)');
+      router.replace(postAuthRoute as never);
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
       if (__DEV__) console.error('[auth] Apple sign-up failed:', error);
@@ -73,7 +76,7 @@ export default function SignUp() {
     try {
       await trackButtonPress('sign_up', 'google_sign_up');
       await signInWithGoogle();
-      router.replace('/(tabs)');
+      router.replace(postAuthRoute as never);
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
       if (__DEV__) console.error('[auth] Google sign-up failed:', error);
@@ -217,7 +220,7 @@ export default function SignUp() {
             {t('auth.alreadyHaveAccount')}{' '}
             <Text
               style={styles.footerLink}
-              onPress={() => router.push('./sign-in')}
+              onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { redirect: postAuthRoute } })}
             >
               {t('auth.signIn')}
             </Text>

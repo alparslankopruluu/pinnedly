@@ -29,8 +29,10 @@ import { MarkdownContent } from '@/components/ui/MarkdownContent';
 import { useTrackContentOpen } from '@/hooks/useTrackContentOpen';
 import { EntityReminderBell } from '@/components/ui/EntityReminderBell';
 import { noteRepository } from '@/repositories/NoteRepository';
+import { projectRepository } from '@/repositories/ProjectRepository';
 import { useAuth } from '@/store/useAuthStore';
 import { getCurrentFirebaseUser } from '@/lib/auth';
+import { User as UserProfile } from '@/types';
 
 export default function NoteDetailScreen() {
   const { t } = useTranslation();
@@ -46,6 +48,8 @@ export default function NoteDetailScreen() {
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [sharedNote, setSharedNote] = useState<Awaited<ReturnType<typeof noteRepository.getById>>>(null);
   const [isLoadingSharedNote, setIsLoadingSharedNote] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [projectMemberUsers, setProjectMemberUsers] = useState<UserProfile[]>([]);
 
   const storeNote = useMemo(
     () => notes.find((item) => item.id === noteId),
@@ -56,7 +60,7 @@ export default function NoteDetailScreen() {
   useEffect(() => {
     let isMounted = true;
 
-    if (!noteId || storeNote) {
+    if (!noteId || storeNote || isDeleting) {
       setSharedNote(null);
       setIsLoadingSharedNote(false);
       return () => {
@@ -81,7 +85,7 @@ export default function NoteDetailScreen() {
     return () => {
       isMounted = false;
     };
-  }, [noteId, storeNote]);
+  }, [isDeleting, noteId, storeNote]);
 
   useEffect(() => {
     if (note) {
@@ -89,6 +93,30 @@ export default function NoteDetailScreen() {
       setEditedContent(note.markdown);
     }
   }, [note]);
+
+  useEffect(() => {
+    const projectLink = note?.links.find((link) => link.type === 'project');
+    if (!projectLink) {
+      setProjectMemberUsers([]);
+      return;
+    }
+
+    let isMounted = true;
+    projectRepository
+      .getProjectMembers(projectLink.id)
+      .then((members) => {
+        if (!isMounted) return;
+        const users = members
+          .map((member) => (member as { user?: UserProfile }).user)
+          .filter((memberUser): memberUser is UserProfile => !!memberUser && memberUser.id !== currentUid);
+        setProjectMemberUsers(users);
+      })
+      .catch((error) => console.warn('Failed to load project members for note sharing:', error));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [note, currentUid]);
 
   const handleSave = async () => {
     if (!note) return;
@@ -135,9 +163,13 @@ export default function NoteDetailScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
+            if (isDeleting) return;
+            setIsDeleting(true);
+            setSharedNote(null);
+            const deletion = deleteNote(note.id);
+            router.back();
             try {
-              await deleteNote(note.id);
-              router.back();
+              await deletion;
             } catch (err) {
               console.error('Failed to delete note:', err);
               showAppAlert(t('common.error'), t('noteDetail.alerts.deleteFailed', { defaultValue: 'Failed to delete note' }), undefined, { variant: 'error' });
@@ -215,8 +247,10 @@ export default function NoteDetailScreen() {
                     <Share2 size={20} color="#6B7280" />
                   </TouchableOpacity>
                   {currentUid === note.userId ? (
-                    <TouchableOpacity onPress={handleDelete} style={styles.headerButton}>
-                      <Trash2 size={20} color="#EF4444" />
+                    <TouchableOpacity onPress={handleDelete} style={styles.headerButton} disabled={isDeleting}>
+                      {isDeleting
+                        ? <ActivityIndicator size="small" color="#EF4444" />
+                        : <Trash2 size={20} color="#EF4444" />}
                     </TouchableOpacity>
                   ) : null}
                 </>
@@ -296,6 +330,7 @@ export default function NoteDetailScreen() {
           entityType="note"
           entityId={note.id}
           entityTitle={note.title}
+          suggestedUsers={projectMemberUsers}
         />
       </SafeAreaView>
     </>

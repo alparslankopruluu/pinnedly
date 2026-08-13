@@ -2,7 +2,7 @@
   "expo": {
     "name": "Draft",
     "slug": "draft",
-    "version": "1.0.8",
+    "version": "1.1.1",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": [
@@ -18,7 +18,7 @@
     },
     "ios": {
       "appleTeamId": "UYDAF6RY67",
-      "buildNumber": "11",
+      "buildNumber": "14",
       "supportsTablet": true,
       "bundleIdentifier": "app.techtactoe.draft",
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -28,10 +28,13 @@
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
       },
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "associatedDomains": [
+        "applinks:pinnedly-48c49.web.app"
+      ]
     },
     "android": {
-      "versionCode": 14,
+      "versionCode": 16,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F04444"
@@ -45,6 +48,23 @@
         "WRITE_EXTERNAL_STORAGE",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.SCHEDULE_EXACT_ALARM"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "pinnedly-48c49.web.app",
+              "pathPrefix": "/invite/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "web": {
@@ -95,6 +115,11 @@
               "RNFBAnalytics",
               "RNFBCrashlytics"
             ]
+          },
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enablePngCrunchInReleaseBuilds": true
           }
         }
       ],
@@ -105,6 +130,7 @@
         }
       ],
       "./plugins/withAndroidReleaseSigning.js",
+      "./plugins/withAndroidPlayQuality.js",
       "./plugins/withFmtXcode26Fix.js",
       "expo-localization",
       [

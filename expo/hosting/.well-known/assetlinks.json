@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.techtactoe.draft",
+      "sha256_cert_fingerprints": [
+        "E3:7C:E3:7F:81:FB:6F:67:F7:45:4C:5E:A3:F6:1B:DC:A1:AA:C9:08:68:ED:EF:90:CE:51:E7:D8:E5:42:B6:4D",
+        "78:46:D7:1F:AB:A1:03:5A:E3:06:4C:19:69:19:E6:DD:42:03:3C:04:D2:83:E1:80:92:22:7B:87:38:6A:5F:5E"
+      ]
+    }
+  }
+]

@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 interface ShareProcessingBannerProps {
   visible: boolean;
+  messageKey?: string;
 }
 
-export function ShareProcessingBanner({ visible }: ShareProcessingBannerProps) {
+export function ShareProcessingBanner({ visible, messageKey = 'shareIntent.saving' }: ShareProcessingBannerProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
@@ -16,7 +17,7 @@ export function ShareProcessingBanner({ visible }: ShareProcessingBannerProps) {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
       <ActivityIndicator size="small" color="#EF4444" />
-      <Text style={styles.text}>{t('shareIntent.saving')}</Text>
+      <Text style={styles.text}>{t(messageKey)}</Text>
     </View>
   );
 }

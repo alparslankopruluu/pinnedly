@@ -75,6 +75,13 @@ export type Task = {
   notes?: string;
   projectId: ID;
   category?: ContentCategoryId;
+  createdAt?: number;
+  updatedAt?: number;
+  assignedTo?: ID | null;
+  // Only 'shared' (visible to all project members, the default) and 'private'
+  // (visible only to the project owner plus anyone in sharedWith) apply to tasks.
+  visibility?: Visibility;
+  sharedWith?: ID[];
 };
 
 export type Project = {
@@ -113,6 +120,25 @@ export type ActivityItem = {
   subtitle?: string;
   timestamp: number;
   relatedId?: ID;
+};
+
+export type ProjectActivityType =
+  | 'project_created'
+  | 'task_created'
+  | 'task_status_changed'
+  | 'note_added';
+
+export type ProjectActivity = {
+  id: ID;
+  projectId: ID;
+  type: ProjectActivityType;
+  relatedEntityId?: ID;
+  relatedEntityType?: 'project' | 'task' | 'note';
+  entityTitle: string;
+  fromStatus?: Task['status'];
+  toStatus?: Task['status'];
+  timestamp: number;
+  source?: 'server' | 'baseline';
 };
 
 export type Preferences = {

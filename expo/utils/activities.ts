@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { TFunction } from 'i18next';
 import { useAppStore } from '@/store/useAppStore';
-import { ActivityItem, Project } from '@/types';
+import { ActivityItem, Project, ProjectActivity, Task } from '@/types';
 
 type ActivityInput = Omit<ActivityItem, 'id' | 'timestamp'>;
 
@@ -27,6 +27,24 @@ export function getActivityTitle(
 
 export function recordActivity(activity: ActivityInput): void {
   useAppStore.getState().addActivity(activity);
+}
+
+function taskStatusLabel(status: Task['status'] | undefined, t: TFunction): string {
+  if (status === 'in-progress') return t('projects.kanban.inProgress');
+  if (status === 'done') return t('projects.kanban.done');
+  return t('projects.kanban.todo');
+}
+
+export function getProjectActivityTitle(activity: ProjectActivity, t: TFunction): string {
+  if (activity.type === 'task_status_changed') {
+    return t('projectActivities.task_status_changed', {
+      title: activity.entityTitle,
+      status: taskStatusLabel(activity.toStatus, t),
+    });
+  }
+  return t(`projectActivities.${activity.type}` as 'projectActivities.project_created', {
+    title: activity.entityTitle,
+  });
 }
 
 export function getActivityRoute(

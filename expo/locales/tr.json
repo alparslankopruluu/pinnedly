@@ -374,6 +374,14 @@
     }
   },
   "home": {
+    "shareInbox": {
+      "title": "Paylaşım Gelen Kutusu",
+      "description": "Sizinle paylaşılan içeriklere hızlıca ulaşın",
+      "count": "Sizinle paylaşılan {{count}} içerik var",
+      "projectsTitle": "Sizinle Paylaşılan Projeler",
+      "projectsDescription": "Gelen proje paylaşımlarını görüntüleyin",
+      "projectCount": "Sizinle paylaşılan {{count}} proje var"
+    },
     "discoverLists": {
       "eyebrow": "Topluluktan seçkiler",
       "description": "Faydalı herkese açık listeleri keşfet, beğendiklerini takip et"
@@ -445,7 +453,8 @@
     "filters": {
       "onTrack": "Yolunda",
       "atRisk": "Risk altında",
-      "overdue": "Gecikmiş"
+      "overdue": "Gecikmiş",
+      "projectStatusLabel": "Proje durumu"
     },
     "kanban": {
       "todo": "Yapılacak",
@@ -492,7 +501,8 @@
     "deleteConfirm": {
       "title": "Görevi Sil",
       "message": "Bu görevi silmek istediğinizden emin misiniz?"
-    }
+    },
+    "deleteFailed": "Görev silinemedi. Lütfen tekrar deneyin."
   },
   "profile": {
     "defaultName": "Draft Kullanıcısı",
@@ -653,6 +663,7 @@
     "sendLink": "Paylaş",
     "inviteMessage": "\"{{title}}\" paylaşımı: {{url}}",
     "addPeople": "Kişi Ekle",
+    "suggestedMembers": "Proje üyeleri",
     "emailOrUsername": "E-posta veya Kullanıcı Adı",
     "sharedWith": "Paylaşılan Kişiler",
     "permission": "İzin",
@@ -682,6 +693,11 @@
   },
   "discoverLists": {
     "title": "Listeleri Keşfet",
+    "listsTitle": "Listeler",
+    "tabs": { "my": "Benim Listelerim", "discover": "Keşfet" },
+    "noMyLists": "Henüz listeniz yok",
+    "createFirstList": "İlk listenizi oluşturun; özel listeleriniz yalnızca burada görünür.",
+    "savedCount": "{{count}} kayıt",
     "searchPlaceholder": "Herkese açık listeleri ara...",
     "loading": "Yükleniyor...",
     "noListsFound": "Liste bulunamadı",
@@ -689,6 +705,12 @@
     "tryDifferentKeywords": "Farklı anahtar kelimelerle aramayı deneyin",
     "beFirstToCreate": "Herkese açık liste oluşturan ilk kişi olun!",
     "createList": "Liste Oluştur"
+  },
+  "projectActivities": {
+    "project_created": "Proje oluşturuldu: {{title}}",
+    "task_created": "Görev oluşturuldu: {{title}}",
+    "task_status_changed": "{{title}} görevi {{status}} durumuna taşındı",
+    "note_added": "Projeye not eklendi: {{title}}"
   },
   "peopleSearch": {
     "title": "Kişi Bul",
@@ -824,6 +846,7 @@
     "openedCount": "{{count}} kez açıldı",
     "whySaved": "Bunu neden kaydettim",
     "tapToAddNote": "Not eklemek için dokunun...",
+    "titlePlaceholder": "Başlık girin...",
     "archive": "Arşivle",
     "noUrl": "URL Yok",
     "noLinkToOpen": "Bu yer iminin açılacak bir bağlantısı yok.",
@@ -980,11 +1003,24 @@
       "loadFailed": "Liste verileri yüklenemedi",
       "followFailed": "Takip durumu güncellenemedi",
       "deleteFailed": "Liste silinemedi",
-      "sharingComingSoon": "Paylaşım özelliği yakında geliyor!"
+      "sharingComingSoon": "Paylaşım özelliği yakında geliyor!",
+      "updateFailed": "Liste güncellenemedi",
+      "addBookmarkFailed": "Yer imi listeye eklenemedi",
+      "removeBookmarkFailed": "Yer imi listeden kaldırılamadı"
     },
     "empty": {
       "title": "Henüz yer imi yok",
       "description": "Bu listede henüz yer imi yok."
+    },
+    "edit": {
+      "title": "Listeyi Düzenle",
+      "save": "Kaydet",
+      "cancel": "Vazgeç"
+    },
+    "addBookmarks": {
+      "title": "Yer İmi Ekle",
+      "createNew": "Bu liste için yeni bir yer imi oluştur",
+      "empty": "Henüz hiç yer iminiz yok"
     }
   },
   "userProfile": {
@@ -1015,6 +1051,7 @@
     "addMember": "Üye Ekle",
     "canView": "Görüntüleyebilir",
     "canEdit": "Düzenleyebilir",
+    "owner": "Sahip",
     "permissionLabel": "İzin:",
     "adding": "Ekleniyor...",
     "dismiss": "Kapat",
@@ -1033,6 +1070,15 @@
       "updatePermissionFailed": "İzin güncellenemedi. Lütfen tekrar deneyin."
     }
   },
+  "taskVisibility": {
+    "title": "Görev Görünürlüğü",
+    "shared": "Herkese görünür",
+    "sharedDescription": "Tüm proje üyeleri bu görevi görebilir",
+    "restricted": "Kısıtlı",
+    "restrictedDescription": "Bu görevi sadece siz ve aşağıda seçtiğiniz üyeler görebilir",
+    "membersLabel": "Bu görevi kimler görebilir",
+    "noMembers": "Bu projede henüz başka üye yok"
+  },
   "categories": {
     "label": "Kategori",
     "pickCategory": "Kategori seçin",
@@ -1047,6 +1093,7 @@
   },
   "shareIntent": {
     "saving": "Paylaşılan içerik kaydediliyor...",
+    "preparing": "Paylaşılan içerik hazırlanıyor...",
     "signInRequired": "Giriş gerekli",
     "signInToSaveLinks": "Paylaşılan bağlantıları Draft'e kaydetmek için lütfen giriş yapın.",
     "saved": "Kaydedildi",
@@ -1055,6 +1102,14 @@
     "view": "Görüntüle",
     "couldNotSave": "Kaydedilemedi",
     "unableToSave": "Paylaşılan içerik kaydedilemedi."
+  },
+  "shareConfirm": {
+    "title": "Bağlantıyı Kaydet",
+    "titleLabel": "Başlık",
+    "titlePlaceholder": "Bir başlık girin",
+    "confirm": "Kaydet",
+    "cancel": "Vazgeç",
+    "saveFailed": "Bu bağlantı kaydedilemedi. Lütfen tekrar deneyin."
   },
   "quickAdd": {
     "addBookmark": "Yer İmi Ekle",

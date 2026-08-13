@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useTranslation } from 'react-i18next';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/store/useAuthStore';
 import { authErrorMessageKey, isUserCancelledAuthError } from '@/lib/auth';
 import { trackButtonPress } from '@/lib/analytics';
@@ -10,9 +10,12 @@ import { Button } from '@/components/ui/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Eye, EyeOff } from '@/components/icons/lucide';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+import { getSafePostAuthRoute } from '@/lib/authRedirect';
 
 export default function SignIn() {
   const { t } = useTranslation();
+  const { redirect } = useLocalSearchParams<{ redirect?: string | string[] }>();
+  const postAuthRoute = getSafePostAuthRoute(redirect);
   const { signIn, signInWithApple, signInWithGoogle, continueAsGuest, isLoading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -27,7 +30,7 @@ export default function SignIn() {
     try {
       await trackButtonPress('sign_in', 'email_sign_in');
       await signIn(email.trim(), password);
-      router.replace('/(tabs)');
+      router.replace(postAuthRoute as never);
     } catch {
       showAppAlert(t('auth.errors.signInFailed'), t('auth.errors.checkCredentials'), undefined, { variant: 'error' });
     }
@@ -37,7 +40,7 @@ export default function SignIn() {
     try {
       await trackButtonPress('sign_in', 'apple_sign_in');
       await signInWithApple();
-      router.replace('/(tabs)');
+      router.replace(postAuthRoute as never);
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
       // Provider jargon is recorded in Crashlytics; UI stays localized.
@@ -57,7 +60,7 @@ export default function SignIn() {
     try {
       await trackButtonPress('sign_in', 'google_sign_in');
       await signInWithGoogle();
-      router.replace('/(tabs)');
+      router.replace(postAuthRoute as never);
     } catch (error) {
       if (isUserCancelledAuthError(error)) return;
       if (__DEV__) {
@@ -180,7 +183,7 @@ export default function SignIn() {
             {t('auth.dontHaveAccount')}{' '}
             <Text
               style={styles.footerLink}
-              onPress={() => router.push('./sign-up')}
+              onPress={() => router.push({ pathname: '/(auth)/sign-up', params: { redirect: postAuthRoute } })}
             >
               {t('auth.signUp')}
             </Text>

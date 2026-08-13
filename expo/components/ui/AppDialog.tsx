@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Pressable,
   Platform,
-  InteractionManager,
 } from 'react-native';
 import {
   AlertCircle,
@@ -15,6 +14,7 @@ import {
   TriangleAlert,
 } from '@/components/icons/lucide';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
+import { runDialogButtonAction } from '@/lib/dialogActions';
 
 export type DialogVariant = 'default' | 'success' | 'error' | 'info' | 'warning';
 export type DialogButtonStyle = 'default' | 'cancel' | 'destructive';
@@ -23,6 +23,8 @@ export interface DialogButton {
   text: string;
   onPress?: () => void;
   style?: DialogButtonStyle;
+  /** Use only when the action presents another native modal (for example RevenueCat). */
+  deferUntilDismiss?: boolean;
 }
 
 export interface AppDialogProps {
@@ -67,25 +69,32 @@ export function AppDialog({
   const { icon: Icon, color, background } = VARIANT_CONFIG[variant];
   const useStackedButtons = buttons.length > 2;
   const reduceMotion = useReducedMotion();
-  // Defer action handlers until after this Modal finishes dismissing — critical
-  // on iOS when the next step presents another native sheet (RevenueCat paywall).
   const pendingActionRef = useRef<(() => void) | null>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flushPendingAction = () => {
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
     const action = pendingActionRef.current;
     pendingActionRef.current = null;
-    if (!action) return;
-    InteractionManager.runAfterInteractions(() => {
-      const delayMs = Platform.OS === 'ios' ? 400 : 150;
-      setTimeout(action, delayMs);
-    });
+    action?.();
   };
 
+  useEffect(() => () => {
+    if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+  }, []);
+
   const handlePress = (button: DialogButton) => {
-    pendingActionRef.current = button.onPress ?? null;
-    onDismiss();
-    // onDismiss only flips visible=false; run after the modal has left the tree.
-    flushPendingAction();
+    runDialogButtonAction(button, onDismiss, (action) => {
+      pendingActionRef.current = action;
+      // React Native exposes Modal.onDismiss on iOS. Other platforms get a
+      // short, bounded fallback instead of waiting indefinitely.
+      if (Platform.OS !== 'ios') {
+        fallbackTimerRef.current = setTimeout(flushPendingAction, 150);
+      }
+    });
   };
 
   return (
@@ -94,6 +103,7 @@ export function AppDialog({
       transparent
       animationType={reduceMotion ? 'none' : 'fade'}
       onRequestClose={onDismiss}
+      onDismiss={flushPendingAction}
       // Prefer stacking above other modals when the platform allows it.
       presentationStyle={Platform.OS === 'ios' ? 'overFullScreen' : undefined}
       statusBarTranslucent

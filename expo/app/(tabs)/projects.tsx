@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { List, Grid3X3, X } from '@/components/icons/lucide';
+import { List, Grid3X3, X, Inbox, ChevronRight } from '@/components/icons/lucide';
 import { router } from 'expo-router';
 import { useProjectStore } from '@/providers/OfflineProvider';
 import { FilterChips } from '@/components/ui/FilterChips';
@@ -29,6 +29,7 @@ import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
+import { useSharing } from '@/store/useSharingStore';
 
 type ViewMode = 'list' | 'kanban';
 type FilterOption = 'on-track' | 'at-risk' | 'overdue';
@@ -44,6 +45,8 @@ export default function ProjectsScreen() {
   const { can, showPaywall } = useSubscriptionAccess();
   const { handleAccessError } = useSubscriptionGate();
   const reduceMotion = useReducedMotion();
+  const { receivedShares } = useSharing();
+  const sharedProjectCount = receivedShares.filter((share) => share.entityType === 'project').length;
 
   // Inline task creation state
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
@@ -131,6 +134,30 @@ export default function ProjectsScreen() {
 
   const renderHeader = () => (
     <View>
+      <Pressable
+        style={({ pressed }) => [styles.shareInboxCard, pressed && styles.togglePressed]}
+        onPress={() => router.push('/share-inbox')}
+        accessibilityRole="button"
+        accessibilityLabel={t('home.shareInbox.title')}
+      >
+        <View style={styles.shareInboxIcon}>
+          <Inbox size={20} color="#4F46E5" />
+        </View>
+        <View style={styles.shareInboxContent}>
+          <Text style={styles.shareInboxTitle}>{t('home.shareInbox.projectsTitle')}</Text>
+          <Text style={styles.shareInboxDescription}>
+            {sharedProjectCount > 0
+              ? t('home.shareInbox.projectCount', { count: sharedProjectCount })
+              : t('home.shareInbox.projectsDescription')}
+          </Text>
+        </View>
+        {sharedProjectCount > 0 && (
+          <View style={styles.shareInboxBadge}>
+            <Text style={styles.shareInboxBadgeText}>{sharedProjectCount}</Text>
+          </View>
+        )}
+        <ChevronRight size={20} color="#4F46E5" />
+      </Pressable>
       <View style={styles.viewToggle}>
         <Pressable
           style={({ pressed }) => [
@@ -169,6 +196,9 @@ export default function ProjectsScreen() {
           </Text>
         </Pressable>
       </View>
+      <Text style={styles.projectStatusFilterLabel}>
+        {t('projects.filters.projectStatusLabel')}
+      </Text>
       <FilterChips
         chips={filterChips}
         selectedId={selectedFilter}
@@ -355,6 +385,54 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 16,
   },
+  shareInboxCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEF2FF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+    padding: 14,
+    marginHorizontal: 16,
+    marginBottom: 14,
+  },
+  shareInboxIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    marginRight: 12,
+  },
+  shareInboxContent: {
+    flex: 1,
+  },
+  shareInboxTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1E1B4B',
+    marginBottom: 2,
+  },
+  shareInboxDescription: {
+    fontSize: 12,
+    color: '#6366F1',
+  },
+  shareInboxBadge: {
+    minWidth: 24,
+    height: 24,
+    paddingHorizontal: 7,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4F46E5',
+    marginRight: 8,
+  },
+  shareInboxBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
   toggleButton: {
     flex: 1,
     flexDirection: 'row',
@@ -379,6 +457,13 @@ const styles = StyleSheet.create({
   },
   activeToggleText: {
     color: '#EF4444',
+  },
+  projectStatusFilterLabel: {
+    marginHorizontal: 20,
+    marginBottom: 8,
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
   },
   emptyContainer: {
     flexGrow: 1,

@@ -1,5 +1,5 @@
 import createContextHook from '@nkzw/create-context-hook';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { projectRepository } from '@/repositories/ProjectRepository';
 import { bookmarkRepository } from '@/repositories/BookmarkRepository';
@@ -10,6 +10,13 @@ import { getCurrentFirebaseUser } from '@/lib/auth';
 import { Project, Bookmark, Note } from '@/types';
 import { dedupeProjectsById } from '@/utils/projects';
 import { recordActivity } from '@/utils/activities';
+import { useAppStore } from '@/store/useAppStore';
+import {
+  beginPendingDeletion,
+  excludePendingDeletions,
+  removeItemOptimistically,
+  restoreOptimisticallyDeletedItem,
+} from '@/lib/deletionState';
 import {
   cancelEntityReminders,
   rescheduleEntityReminders,
@@ -158,9 +165,58 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     }
   }, []);
 
+  const setTaskVisibility = useCallback(async (taskId: string, visibility: 'shared' | 'private') => {
+    try {
+      const updatedTask = await projectRepository.setTaskVisibility(taskId, visibility);
+      setProjects((prev) =>
+        prev.map((project) => ({
+          ...project,
+          tasks: project.tasks.map((task) => (task.id === taskId ? updatedTask : task)),
+        }))
+      );
+      return updatedTask;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update task visibility';
+      throw new Error(errorMessage);
+    }
+  }, []);
+
+  const grantTaskVisibility = useCallback(async (taskId: string, userId: string) => {
+    try {
+      const updatedTask = await projectRepository.grantTaskVisibility(taskId, userId);
+      setProjects((prev) =>
+        prev.map((project) => ({
+          ...project,
+          tasks: project.tasks.map((task) => (task.id === taskId ? updatedTask : task)),
+        }))
+      );
+      return updatedTask;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to grant task visibility';
+      throw new Error(errorMessage);
+    }
+  }, []);
+
+  const revokeTaskVisibility = useCallback(async (taskId: string, userId: string) => {
+    try {
+      const updatedTask = await projectRepository.revokeTaskVisibility(taskId, userId);
+      setProjects((prev) =>
+        prev.map((project) => ({
+          ...project,
+          tasks: project.tasks.map((task) => (task.id === taskId ? updatedTask : task)),
+        }))
+      );
+      return updatedTask;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to revoke task visibility';
+      throw new Error(errorMessage);
+    }
+  }, []);
+
   const deleteTask = useCallback(async (taskId: string) => {
     try {
       await projectRepository.deleteTask(taskId);
+      useAppStore.getState().removeActivitiesForRelatedId(taskId);
       setProjects(prev => prev.map(project => ({
         ...project,
         tasks: project.tasks.filter(task => task.id !== taskId)
@@ -257,10 +313,13 @@ export const [ProjectStoreProvider, useProjectStore] = createContextHook(() => {
     addTask,
     updateTask,
     deleteTask,
+    setTaskVisibility,
+    grantTaskVisibility,
+    revokeTaskVisibility,
     syncProjects,
     scheduleTaskReminder,
     scheduleProjectNudge
-  }), [projects, loading, error, syncStatus, loadProjects, hydrateProject, hydrateProjectTasks, createProject, updateProject, deleteProject, addTask, updateTask, deleteTask, syncProjects, scheduleTaskReminder, scheduleProjectNudge]);
+  }), [projects, loading, error, syncStatus, loadProjects, hydrateProject, hydrateProjectTasks, createProject, updateProject, deleteProject, addTask, updateTask, deleteTask, setTaskVisibility, grantTaskVisibility, revokeTaskVisibility, syncProjects, scheduleTaskReminder, scheduleProjectNudge]);
 });
 
 export const [BookmarkStoreProvider, useBookmarkStore] = createContextHook(() => {
@@ -399,6 +458,7 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const syncStatus = useSyncStatus();
+  const pendingNoteDeletionIdsRef = useRef(new Set<string>());
 
   const hasNoteAccess = isAuthenticated || isGuest;
   const ownerId = isAuthenticated
@@ -474,15 +534,35 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
   }, [notes]);
 
   const deleteNote = useCallback(async (id: string) => {
+    if (!beginPendingDeletion(pendingNoteDeletionIdsRef.current, id)) return;
+    const optimistic = removeItemOptimistically(notes, id, (note) => note.id);
+    if (!optimistic.deletion) {
+      pendingNoteDeletionIdsRef.current.delete(id);
+      return;
+    }
+
+    setNotes(optimistic.items);
+
     try {
-      await cancelEntityReminders('note', id);
       await noteRepository.deleteNote(id);
-      setNotes(prev => prev.filter(n => n.id !== id));
+      useAppStore.getState().removeActivitiesForRelatedId(id);
+      try {
+        await cancelEntityReminders('note', id);
+      } catch (reminderError) {
+        console.warn('Note deleted but its reminder could not be cancelled:', reminderError);
+      }
     } catch (err) {
+      setNotes((current) => restoreOptimisticallyDeletedItem(
+        current,
+        optimistic.deletion!,
+        (note) => note.id
+      ));
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete note';
       throw new Error(errorMessage);
+    } finally {
+      pendingNoteDeletionIdsRef.current.delete(id);
     }
-  }, []);
+  }, [notes]);
 
   useEffect(() => {
     if (!hasNoteAccess || !ownerId) {
@@ -493,7 +573,11 @@ export const [NoteStoreProvider, useNoteStore] = createContextHook(() => {
 
     setLoading(true);
     const unsubscribe = noteRepository.subscribeToNotes(ownerId, (notesData) => {
-      setNotes(notesData);
+      setNotes(excludePendingDeletions(
+        notesData,
+        pendingNoteDeletionIdsRef.current,
+        (note) => note.id
+      ));
       setLoading(false);
       setError(null);
     });

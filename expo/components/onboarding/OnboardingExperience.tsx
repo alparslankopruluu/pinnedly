@@ -39,9 +39,9 @@ import { useAppAppearance } from '@/hooks/useAppAppearance';
 import { trackOnboardingEvent } from '@/lib/analytics';
 import { CURRENT_ONBOARDING_VERSION } from '@/lib/onboardingState';
 
-const CAPTURE_MASCOT = require('@/assets/onboarding/onboarding-capture.png');
-const ORGANIZE_MASCOT = require('@/assets/onboarding/onboarding-organize.png');
-const COLLABORATE_MASCOT = require('@/assets/onboarding/onboarding-collaborate.png');
+const CAPTURE_MASCOT = require('@/assets/onboarding/onboarding-capture.webp');
+const ORGANIZE_MASCOT = require('@/assets/onboarding/onboarding-organize.webp');
+const COLLABORATE_MASCOT = require('@/assets/onboarding/onboarding-collaborate.webp');
 
 const SCREEN_COUNT = 3;
 const CHIP_WIDTH = 124;

@@ -13,6 +13,9 @@ import {
   Modal,
   Platform,
   ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  findNodeHandle,
 } from 'react-native';
 import { showAppAlert } from '@/providers/DialogProvider';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,13 +39,16 @@ import {
   Trash2,
   Users,
   X,
+  Eye,
+  EyeOff,
 } from '@/components/icons/lucide';
 import { notificationService } from '@/utils/notifications';
 import { DateTimePickerField } from '@/components/ui/DateTimePickerField';
 import { ProjectMembersModal } from '@/components/ProjectMembersModal';
 import { ShareModal } from '@/components/ShareModal';
+import { TaskVisibilityModal } from '@/components/TaskVisibilityModal';
 import { TaskStatusCheckbox } from '@/components/TaskStatusCheckbox';
-import { getActivityTitle } from '@/utils/activities';
+import { getProjectActivityTitle } from '@/utils/activities';
 import { getNextTaskStatus } from '@/utils/taskStatus';
 import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
@@ -51,6 +57,9 @@ import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useSubscriptionAccess } from '@/providers/SubscriptionProvider';
 import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 import { useReducedMotion } from '@/hooks/useAccessibilityPreferences';
+import { buildProjectActivityBaseline, mergeProjectActivities } from '@/lib/projectActivityState';
+import { projectRepository } from '@/repositories/ProjectRepository';
+import type { ProjectActivity } from '@/types';
 
 type TabType = 'tasks' | 'timeline' | 'gallery';
 
@@ -60,7 +69,10 @@ interface ProjectTaskRowProps {
   onSwipe: (taskId: string | null) => void;
   onToggle: (taskId: string) => void;
   onDelete: (taskId: string) => void;
+  onManageVisibility: (taskId: string) => void;
 }
+
+const TASK_SWIPE_DISTANCE = -150;
 
 function ProjectTaskRow({
   task,
@@ -68,6 +80,7 @@ function ProjectTaskRow({
   onSwipe,
   onToggle,
   onDelete,
+  onManageVisibility,
 }: ProjectTaskRowProps) {
   const { t } = useTranslation();
   const translateX = useRef(new Animated.Value(0)).current;
@@ -79,18 +92,18 @@ function ProjectTaskRow({
         Math.abs(gestureState.dx) > 12 && Math.abs(gestureState.dy) < 12,
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dx < 0) {
-          translateX.setValue(Math.max(gestureState.dx, -80));
+          translateX.setValue(Math.max(gestureState.dx, TASK_SWIPE_DISTANCE));
         }
       },
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dx < -50) {
           if (reduceMotion) {
-            translateX.setValue(-80);
+            translateX.setValue(TASK_SWIPE_DISTANCE);
             onSwipe(task.id);
             return;
           }
           Animated.spring(translateX, {
-            toValue: -80,
+            toValue: TASK_SWIPE_DISTANCE,
             useNativeDriver: true,
           }).start();
           onSwipe(task.id);
@@ -120,6 +133,18 @@ function ProjectTaskRow({
     <View style={styles.taskItemContainer}>
       {isSwiped && (
         <View style={styles.taskActions}>
+          <TouchableOpacity
+            style={styles.visibilityAction}
+            onPress={() => onManageVisibility(task.id)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('taskVisibility.title')}: ${task.title}`}
+          >
+            {task.visibility === 'private' ? (
+              <EyeOff size={20} color="#FFFFFF" />
+            ) : (
+              <Eye size={20} color="#FFFFFF" />
+            )}
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteAction}
             onPress={() => onDelete(task.id)}
@@ -158,14 +183,6 @@ function ProjectTaskRow({
   );
 }
 
-interface ActivityItem {
-  id: string;
-  type: 'task_created' | 'task_completed' | 'note_added' | 'bookmark_linked';
-  title: string;
-  subtitle?: string;
-  timestamp: number;
-}
-
 export default function ProjectDetailScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -183,13 +200,18 @@ export default function ProjectDetailScreen() {
   const [editDescription, setEditDescription] = useState<string>('');
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showMembersModal, setShowMembersModal] = useState<boolean>(false);
+  const [visibilityTaskId, setVisibilityTaskId] = useState<string | null>(null);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [showNudgeModal, setShowNudgeModal] = useState(false);
   const [nudgeTime, setNudgeTime] = useState(() => new Date(Date.now() + 60 * 60 * 1000));
   const [isSchedulingNudge, setIsSchedulingNudge] = useState(false);
+  const [serverActivities, setServerActivities] = useState<ProjectActivity[]>([]);
   const [isHydratingProject, setIsHydratingProject] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const taskInputRef = useRef<TextInput>(null);
+  const isTaskInputFocusedRef = useRef(false);
+  const contentScrollRef = useRef<ScrollView>(null);
   const attemptedHydrationIds = useRef<Set<string>>(new Set());
   const contentWidth = typeof readableWidth === 'number' ? readableWidth : undefined;
   const { can, showPaywall } = useSubscriptionAccess();
@@ -202,7 +224,7 @@ export default function ProjectDetailScreen() {
     Math.floor((galleryAvailableWidth - galleryGap * (galleryColumns - 1)) / galleryColumns)
   );
 
-  const { bookmarks, activities } = useAppStore();
+  const { bookmarks } = useAppStore();
   const { notes } = useNoteStore();
 
   const {
@@ -219,6 +241,35 @@ export default function ProjectDetailScreen() {
   useEffect(() => {
     notificationService.initialize();
   }, []);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setIsKeyboardVisible(true);
+      if (isTaskInputFocusedRef.current) {
+        scrollTaskInputIntoView();
+      }
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const scrollTaskInputIntoView = () => {
+    setTimeout(() => {
+      const inputHandle = findNodeHandle(taskInputRef.current);
+      if (!inputHandle) return;
+      contentScrollRef.current?.scrollResponderScrollNativeHandleToKeyboard(
+        inputHandle,
+        28,
+        true
+      );
+    }, Platform.OS === 'ios' ? 250 : 120);
+  };
 
   const project = projects.find((p) => p.id === projectId);
 
@@ -247,20 +298,24 @@ export default function ProjectDetailScreen() {
     n.links.some((l) => l.type === 'project' && l.id === id)
   );
 
-  const projectActivities: ActivityItem[] = useMemo(() => {
+  useEffect(() => {
+    if (!projectId) return;
+    setServerActivities([]);
+    return projectRepository.subscribeToProjectActivities(
+      projectId,
+      setServerActivities,
+      (error) => console.warn(`Failed to subscribe to project activities ${projectId}:`, error)
+    );
+  }, [projectId]);
+
+  const projectActivities = useMemo(() => {
     if (!project) return [];
-    return activities
-      .filter((a) => a.relatedId === id || project.tasks.some((t) => t.id === a.relatedId))
-      .map((a) => ({
-        id: a.id,
-        type: a.type as any,
-        title: a.title,
-        subtitle: a.subtitle,
-        timestamp: a.timestamp,
-      }))
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 20);
-  }, [activities, project, id]);
+    return mergeProjectActivities(
+      serverActivities,
+      buildProjectActivityBaseline(project, relatedNotes),
+      50
+    );
+  }, [project, relatedNotes, serverActivities]);
 
   if ((projectsLoading || isHydratingProject) && !project) {
     return (
@@ -319,6 +374,7 @@ export default function ProjectDetailScreen() {
     const trimmedTitle = newTaskTitle.trim();
     if (!trimmedTitle) {
       taskInputRef.current?.focus();
+      scrollTaskInputIntoView();
       return;
     }
 
@@ -380,6 +436,15 @@ export default function ProjectDetailScreen() {
       console.error('Failed to update task:', error);
       showAppAlert(t('common.error'), t('projectDetail.alerts.updateTaskFailed'), undefined, { variant: 'error' });
     }
+  };
+
+  const handleManageTaskVisibility = (taskId: string) => {
+    if (!can('memberManagement').allowed) {
+      setSwipedTaskId(null);
+      showPaywall();
+      return;
+    }
+    setVisibilityTaskId(taskId);
   };
 
   const handleUploadGalleryImage = async () => {
@@ -549,7 +614,7 @@ export default function ProjectDetailScreen() {
     const date = new Date(timestamp);
     const now = new Date();
     const diffTime = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
     if (diffDays === 0) return t('projectDetail.date.today');
     if (diffDays === 1) return t('projectDetail.date.yesterday');
@@ -571,6 +636,7 @@ export default function ProjectDetailScreen() {
                   onSwipe={setSwipedTaskId}
                   onToggle={handleToggleTask}
                   onDelete={handleDeleteTask}
+                  onManageVisibility={handleManageTaskVisibility}
                 />
               ))}
 
@@ -590,6 +656,13 @@ export default function ProjectDetailScreen() {
                   value={newTaskTitle}
                   onChangeText={setNewTaskTitle}
                   onSubmitEditing={handleAddTask}
+                  onFocus={() => {
+                    isTaskInputFocusedRef.current = true;
+                    scrollTaskInputIntoView();
+                  }}
+                  onBlur={() => {
+                    isTaskInputFocusedRef.current = false;
+                  }}
                   returnKeyType="done"
                   editable={!isAddingTask}
                 />
@@ -669,10 +742,7 @@ export default function ProjectDetailScreen() {
                 <View key={activity.id} style={styles.timelineItem}>
                   <View style={styles.timelineDot} />
                   <View style={styles.timelineContent}>
-                    <Text style={styles.timelineTitle}>{getActivityTitle(activity, t)}</Text>
-                    {activity.subtitle && (
-                      <Text style={styles.timelineSubtitle}>{activity.subtitle}</Text>
-                    )}
+                    <Text style={styles.timelineTitle}>{getProjectActivityTitle(activity, t)}</Text>
                     <Text style={styles.timelineTime}>
                       {formatDate(activity.timestamp)}
                     </Text>
@@ -792,14 +862,26 @@ export default function ProjectDetailScreen() {
           </ImageBackground>
         </View>
 
-        <ScrollView
-          style={styles.content}
-          contentContainerStyle={[
-            styles.contentContainer,
-            contentWidth ? { width: contentWidth } : null,
-          ]}
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          style={styles.keyboardBody}
+          // Android already resizes via windowSoftInputMode="adjustResize"; no JS-level
+          // behavior is needed there. On iOS the header above is a normal in-flow
+          // sibling, so KeyboardAvoidingView's own layout measurement already accounts
+          // for it — an extra vertical offset here would under-pad and leave the input covered.
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={0}
         >
+          <ScrollView
+            ref={contentScrollRef}
+            style={styles.content}
+            contentContainerStyle={[
+              styles.contentContainer,
+              contentWidth ? { width: contentWidth } : null,
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          >
           {/* Project Overview Card */}
           <View style={styles.overviewCard}>
             <Text style={styles.projectTitle}>{project.title}</Text>
@@ -894,16 +976,19 @@ export default function ProjectDetailScreen() {
           </View>
 
           {/* Tab Content */}
-          {renderTabContent()}
-        </ScrollView>
+            {renderTabContent()}
+          </ScrollView>
+        </KeyboardAvoidingView>
 
         {/* Floating Action Button */}
-        <TouchableOpacity
-          style={[styles.fab, { bottom: getOverlayFabBottomOffset(insets.bottom) }]}
-          onPress={handleFabPress}
-        >
-          <Plus size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        {!isKeyboardVisible && (
+          <TouchableOpacity
+            style={[styles.fab, { bottom: getOverlayFabBottomOffset(insets.bottom) }]}
+            onPress={handleFabPress}
+          >
+            <Plus size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        )}
 
         <ShareModal
           visible={showShareModal}
@@ -1082,6 +1167,19 @@ export default function ProjectDetailScreen() {
           projectId={project.id}
           projectTitle={project.title}
         />
+
+        {(() => {
+          const visibilityTask = project.tasks.find((t) => t.id === visibilityTaskId);
+          if (!visibilityTask) return null;
+          return (
+            <TaskVisibilityModal
+              visible={!!visibilityTaskId}
+              onClose={() => setVisibilityTaskId(null)}
+              task={visibilityTask}
+              members={project.collaborators}
+            />
+          );
+        })()}
       </View>
     </>
   );
@@ -1091,6 +1189,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+  },
+  keyboardBody: {
+    flex: 1,
   },
   headerContainer: {
     height: 250,
@@ -1302,7 +1403,18 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    width: 80,
+    width: 150,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 8,
+  },
+  visibilityAction: {
+    backgroundColor: '#4F46E5',
+    borderRadius: 12,
+    width: 60,
+    height: '80%',
     justifyContent: 'center',
     alignItems: 'center',
   },

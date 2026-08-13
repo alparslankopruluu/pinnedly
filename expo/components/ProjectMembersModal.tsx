@@ -9,7 +9,6 @@ import {
   FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { showAppAlert } from '@/providers/DialogProvider';
 import { X, Users, Plus, Trash2, UserCheck, UserX } from '@/components/icons/lucide';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/store/useProjectStore';
@@ -41,6 +40,9 @@ export function ProjectMembersModal({
   const [newUserEmail, setNewUserEmail] = useState<string>('');
   const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [pendingRemoval, setPendingRemoval] = useState<{ memberId: string; email: string } | null>(null);
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ variant: 'success' | 'error'; message: string } | null>(null);
   const { ensure } = useSubscriptionGate();
   const { can } = useSubscriptionAccess();
 
@@ -74,6 +76,9 @@ export function ProjectMembersModal({
   useEffect(() => {
     if (visible) {
       loadProjectMembers(projectId);
+      setPendingRemoval(null);
+      setRemovingMemberId(null);
+      setFeedback(null);
     }
   }, [visible, projectId, loadProjectMembers]);
 
@@ -87,8 +92,9 @@ export function ProjectMembersModal({
 
   const handleAddMember = async () => {
     if (!ensureMemberManagement()) return;
+    setFeedback(null);
     if (!newUserEmail.trim()) {
-      showAppAlert(t('common.error'), t('projectMembers.alerts.enterEmail'), undefined, { variant: 'error' });
+      setFeedback({ variant: 'error', message: t('projectMembers.alerts.enterEmail') });
       return;
     }
 
@@ -98,34 +104,35 @@ export function ProjectMembersModal({
       setSelectedPermission('view');
       setShowAddForm(false);
       clearSearchResults();
-      showAppAlert(t('common.success'), t('projectMembers.alerts.memberAdded'), undefined, { variant: 'success' });
+      setFeedback({ variant: 'success', message: t('projectMembers.alerts.memberAdded') });
     } catch (error) {
       console.error('Failed to add member:', error);
-      showAppAlert(t('common.error'), t('projectMembers.alerts.addMemberFailed'), undefined, { variant: 'error' });
+      clearError();
+      setFeedback({ variant: 'error', message: t('projectMembers.alerts.addMemberFailed') });
     }
   };
 
-  const handleRemoveMember = async (memberId: string, memberEmail: string) => {
-    showAppAlert(
-      t('projectMembers.removeMember.title'),
-      t('projectMembers.removeMember.message', { email: memberEmail }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('projectMembers.removeMember.action'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeProjectMember(projectId, memberId);
-              showAppAlert(t('common.success'), t('projectMembers.alerts.memberRemoved'), undefined, { variant: 'success' });
-            } catch (error) {
-              console.error('Failed to remove member:', error);
-              showAppAlert(t('common.error'), t('projectMembers.alerts.removeMemberFailed'), undefined, { variant: 'error' });
-            }
-          },
-        },
-      ]
-    );
+  const handleRemoveMember = (memberId: string, memberEmail: string) => {
+    if (isManagingMembers || removingMemberId) return;
+    setFeedback(null);
+    setPendingRemoval({ memberId, email: memberEmail });
+  };
+
+  const confirmRemoveMember = async () => {
+    if (!pendingRemoval || removingMemberId) return;
+    const target = pendingRemoval;
+    setRemovingMemberId(target.memberId);
+    try {
+      await removeProjectMember(projectId, target.memberId);
+      setPendingRemoval(null);
+      setFeedback({ variant: 'success', message: t('projectMembers.alerts.memberRemoved') });
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+      clearError();
+      setFeedback({ variant: 'error', message: t('projectMembers.alerts.removeMemberFailed') });
+    } finally {
+      setRemovingMemberId(null);
+    }
   };
 
   const handleUpdatePermission = async (memberId: string, permission: 'view' | 'edit') => {
@@ -133,56 +140,71 @@ export function ProjectMembersModal({
     if (!permission.trim()) return;
     if (permission.length > 10) return;
     const sanitizedPermission = permission.trim() as 'view' | 'edit';
+    setFeedback(null);
     
     try {
       await updateMemberPermission(projectId, memberId, sanitizedPermission);
-      showAppAlert(t('common.success'), t('projectMembers.alerts.permissionUpdated'), undefined, { variant: 'success' });
+      setFeedback({ variant: 'success', message: t('projectMembers.alerts.permissionUpdated') });
     } catch (error) {
       console.error('Failed to update permission:', error);
-      showAppAlert(t('common.error'), t('projectMembers.alerts.updatePermissionFailed'), undefined, { variant: 'error' });
+      clearError();
+      setFeedback({ variant: 'error', message: t('projectMembers.alerts.updatePermissionFailed') });
     }
   };
 
-  const renderMember = ({ item }: { item: ProjectMemberWithUser }) => (
-    <View style={styles.memberItem}>
-      <View style={styles.memberInfo}>
-        <View style={styles.memberHeader}>
-          <Text style={styles.memberName}>{item.user?.displayName || item.user?.email || t('common.unknownUser')}</Text>
-          <View style={[styles.permissionBadge, 
-            (item.permission === 'edit' || item.role === 'editor') ? styles.editBadge : styles.viewBadge]}>
-            <Text style={[styles.permissionText,
-              (item.permission === 'edit' || item.role === 'editor') ? styles.editText : styles.viewText]}>
-              {(item.permission === 'edit' || item.role === 'editor') ? t('projectMembers.canEdit') : t('projectMembers.canView')}
-            </Text>
+  const renderMember = ({ item }: { item: ProjectMemberWithUser }) => {
+    const isOwner = item.role === 'owner';
+
+    return (
+      <View style={styles.memberItem}>
+        <View style={styles.memberInfo}>
+          <View style={styles.memberHeader}>
+            <Text style={styles.memberName}>{item.user?.displayName || item.user?.email || t('common.unknownUser')}</Text>
+            {isOwner ? (
+              <View style={[styles.permissionBadge, styles.ownerBadge]}>
+                <Text style={[styles.permissionText, styles.ownerText]}>{t('projectMembers.owner')}</Text>
+              </View>
+            ) : (
+              <View style={[styles.permissionBadge,
+                (item.permission === 'edit' || item.role === 'editor') ? styles.editBadge : styles.viewBadge]}>
+                <Text style={[styles.permissionText,
+                  (item.permission === 'edit' || item.role === 'editor') ? styles.editText : styles.viewText]}>
+                  {(item.permission === 'edit' || item.role === 'editor') ? t('projectMembers.canEdit') : t('projectMembers.canView')}
+                </Text>
+              </View>
+            )}
           </View>
+          <Text style={styles.memberEmail}>{item.user?.email}</Text>
         </View>
-        <Text style={styles.memberEmail}>{item.user?.email}</Text>
+
+        {!isOwner && (
+          <View style={styles.memberActions}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleUpdatePermission(
+                item.userId,
+                (item.permission === 'edit' || item.role === 'editor') ? 'view' : 'edit'
+              )}
+            >
+              {(item.permission === 'edit' || item.role === 'editor') ? (
+                <UserX size={20} color="#666" />
+              ) : (
+                <UserCheck size={20} color="#007AFF" />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.removeButton]}
+              onPress={() => handleRemoveMember(item.userId, item.user?.email || '')}
+              disabled={isManagingMembers || removingMemberId === item.userId}
+            >
+              <Trash2 size={20} color="#FF3B30" />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
-      
-      <View style={styles.memberActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleUpdatePermission(
-            item.userId, 
-            (item.permission === 'edit' || item.role === 'editor') ? 'view' : 'edit'
-          )}
-        >
-          {(item.permission === 'edit' || item.role === 'editor') ? (
-            <UserX size={20} color="#666" />
-          ) : (
-            <UserCheck size={20} color="#007AFF" />
-          )}
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.actionButton, styles.removeButton]}
-          onPress={() => handleRemoveMember(item.userId, item.user?.email || '')}
-        >
-          <Trash2 size={20} color="#FF3B30" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   const renderSearchResult = ({ item }: { item: User }) => (
     <TouchableOpacity
@@ -329,6 +351,17 @@ export function ProjectMembersModal({
           </TouchableOpacity>
         </View>
 
+        {feedback ? (
+          <View style={[styles.feedbackBanner, feedback.variant === 'success' ? styles.feedbackSuccess : styles.feedbackError]}>
+            <Text style={[styles.feedbackText, feedback.variant === 'success' ? styles.feedbackSuccessText : styles.feedbackErrorText]}>
+              {feedback.message}
+            </Text>
+            <TouchableOpacity onPress={() => setFeedback(null)} accessibilityRole="button" accessibilityLabel={t('projectMembers.dismiss')}>
+              <X size={18} color={feedback.variant === 'success' ? '#166534' : '#B91C1C'} />
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
         <FlatList
           data={projectMembers}
           renderItem={renderMember}
@@ -338,6 +371,42 @@ export function ProjectMembersModal({
           ListHeaderComponent={listHeader}
           showsVerticalScrollIndicator={false}
         />
+
+        {pendingRemoval ? (
+          <View style={styles.confirmationOverlay} accessibilityViewIsModal>
+            <TouchableOpacity
+              style={styles.confirmationBackdrop}
+              activeOpacity={1}
+              onPress={() => !removingMemberId && setPendingRemoval(null)}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}
+            />
+            <View style={styles.confirmationCard}>
+              <Text style={styles.confirmationTitle}>{t('projectMembers.removeMember.title')}</Text>
+              <Text style={styles.confirmationMessage}>
+                {t('projectMembers.removeMember.message', { email: pendingRemoval.email })}
+              </Text>
+              <View style={styles.confirmationActions}>
+                <TouchableOpacity
+                  style={styles.confirmationCancelButton}
+                  onPress={() => setPendingRemoval(null)}
+                  disabled={!!removingMemberId}
+                >
+                  <Text style={styles.confirmationCancelText}>{t('common.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.confirmationRemoveButton}
+                  onPress={confirmRemoveMember}
+                  disabled={!!removingMemberId}
+                >
+                  <Text style={styles.confirmationRemoveText}>
+                    {removingMemberId ? t('common.loading') : t('projectMembers.removeMember.action')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ) : null}
       </SafeAreaView>
     </Modal>
   );
@@ -402,6 +471,33 @@ const styles = StyleSheet.create({
   errorDismiss: {
     color: '#C62828',
     fontWeight: '600',
+  },
+  feedbackBanner: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  feedbackSuccess: {
+    backgroundColor: '#DCFCE7',
+  },
+  feedbackError: {
+    backgroundColor: '#FEE2E2',
+  },
+  feedbackText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  feedbackSuccessText: {
+    color: '#166534',
+  },
+  feedbackErrorText: {
+    color: '#B91C1C',
   },
   section: {
     backgroundColor: '#FFFFFF',
@@ -586,6 +682,9 @@ const styles = StyleSheet.create({
   viewBadge: {
     backgroundColor: '#F0F8FF',
   },
+  ownerBadge: {
+    backgroundColor: '#FEF3C7',
+  },
   permissionText: {
     fontSize: 12,
     fontWeight: '500',
@@ -595,6 +694,9 @@ const styles = StyleSheet.create({
   },
   viewText: {
     color: '#007AFF',
+  },
+  ownerText: {
+    color: '#B45309',
   },
   memberActions: {
     flexDirection: 'row',
@@ -607,5 +709,67 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     backgroundColor: '#FFEBEE',
+  },
+  confirmationOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    zIndex: 100,
+  },
+  confirmationBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(17, 24, 39, 0.45)',
+  },
+  confirmationCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+  },
+  confirmationTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1C1C1E',
+    textAlign: 'center',
+  },
+  confirmationMessage: {
+    marginTop: 10,
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  confirmationActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 20,
+  },
+  confirmationCancelButton: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 10,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmationCancelText: {
+    color: '#374151',
+    fontWeight: '600',
+  },
+  confirmationRemoveButton: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 10,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmationRemoveText: {
+    color: '#DC2626',
+    fontWeight: '700',
   },
 });

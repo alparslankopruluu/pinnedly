@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { useAppAppearance, type AppColors } from '@/hooks/useAppAppearance';
 import { useAuth } from '@/store/useAuthStore';
 
-const OWL_MASCOT = require('@/assets/brand/owl-mascot-transparent.png');
+const OWL_MASCOT = require('@/assets/brand/owl-mascot-transparent.webp');
 
 export default function Welcome() {
   const { t } = useTranslation();

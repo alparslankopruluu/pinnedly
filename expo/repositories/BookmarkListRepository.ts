@@ -47,10 +47,20 @@ class BookmarkListRepository {
 
   async getMyLists(): Promise<BookmarkList[]> {
     const uid = requireUserId();
-    const snapshot = await getDocs(
-      query(collection(getDb(), COLLECTIONS.bookmarkLists), where('ownerId', '==', uid))
-    );
-    return snapshot.docs.map((snapshotDoc) => this.mapList(snapshotDoc.id, snapshotDoc.data()));
+    const [ownedSnapshot, sharedSnapshot] = await Promise.all([
+      getDocs(query(collection(getDb(), COLLECTIONS.bookmarkLists), where('ownerId', '==', uid))),
+      getDocs(
+        query(
+          collection(getDb(), COLLECTIONS.bookmarkLists),
+          where('sharedWith', 'array-contains', uid)
+        )
+      ),
+    ]);
+    const lists = new Map<string, BookmarkList>();
+    [...ownedSnapshot.docs, ...sharedSnapshot.docs].forEach((snapshotDoc) => {
+      lists.set(snapshotDoc.id, this.mapList(snapshotDoc.id, snapshotDoc.data()));
+    });
+    return [...lists.values()].sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async getSharedLists(): Promise<BookmarkList[]> {

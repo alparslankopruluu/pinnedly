@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { X, Camera, Plus } from '@/components/icons/lucide';
 import { useBookmarkStore } from '@/providers/OfflineProvider';
+import { useBookmarkLists } from '@/store/useBookmarkListStore';
 import { useAuth } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { ScreenFooter } from '@/components/ui/ScreenFooter';
@@ -33,8 +34,9 @@ import {
 export default function AddBookmarkScreen() {
   useTrackFormOpen('bookmark');
   const { t } = useTranslation();
-  const { url: initialUrl } = useLocalSearchParams<{ url?: string }>();
+  const { url: initialUrl, listId } = useLocalSearchParams<{ url?: string; listId?: string }>();
   const { createBookmark, bookmarks } = useBookmarkStore();
+  const { addBookmarkToList } = useBookmarkLists();
   const { ensureCreate, handleAccessError } = useSubscriptionGate();
   const { isAuthenticated } = useAuth();
   const [url, setUrl] = useState('');
@@ -148,7 +150,7 @@ export default function AddBookmarkScreen() {
 
     try {
       setIsSaving(true);
-      await createBookmark({
+      const created = await createBookmark({
         url: url.trim() || undefined,
         title: title.trim() || undefined,
         description: description.trim() || undefined,
@@ -161,6 +163,14 @@ export default function AddBookmarkScreen() {
         status: 'inbox',
         category,
       });
+      if (listId) {
+        try {
+          await addBookmarkToList(listId, created.id);
+        } catch (listError) {
+          console.error('Failed to add bookmark to list:', listError);
+          showAppAlert(t('common.error'), t('bookmarkList.alerts.addBookmarkFailed'), undefined, { variant: 'error' });
+        }
+      }
       router.back();
     } catch (error) {
       if (handleAccessError(error)) return;
