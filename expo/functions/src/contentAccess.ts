@@ -175,6 +175,20 @@ async function deleteOwnedContent(uid: string, resource: LimitedResource, id: st
     }
     if (existing.exists) {
       await db.recursiveDelete(resourceRef);
+      // recursiveDelete only removes the project doc and its subcollections
+      // (tasks, activities). shares/projectMembers live in separate top-level
+      // collections and would otherwise be left pointing at a deleted project
+      // — e.g. still showing up as a "shared with you" entry for other users.
+      const [orphanedShares, orphanedMembers] = await Promise.all([
+        db.collection('shares').where('entityType', '==', 'project').where('entityId', '==', id).get(),
+        db.collection('projectMembers').where('projectId', '==', id).get(),
+      ]);
+      const cleanupBatch = db.batch();
+      orphanedShares.docs.forEach((shareDoc) => cleanupBatch.delete(shareDoc.ref));
+      orphanedMembers.docs.forEach((memberDoc) => cleanupBatch.delete(memberDoc.ref));
+      if (!orphanedShares.empty || !orphanedMembers.empty) {
+        await cleanupBatch.commit();
+      }
       await db.runTransaction(async (tx) => {
         const usageSnap = await tx.get(usageRef);
         const rawCurrent = usageSnap.data()?.[resource];

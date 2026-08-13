@@ -449,6 +449,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   kanbanColumn: {
+    alignSelf: 'flex-start',
     marginRight: 16,
     backgroundColor: 'white',
     borderRadius: 12,
